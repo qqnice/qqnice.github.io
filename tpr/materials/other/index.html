@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>QQ Linux 教學 - AI 考古題專區</title>
+  <title>QQ 教學分享區 - 其他教學資料</title>
   
   <style>
     body { 
@@ -96,14 +96,14 @@
       <ul>
         
         {% for page in site.pages %}
-          {% if page.url contains '/linux/other/' and page.name != 'index.html' and page.name != '404.html' %}
+          {% if page.url contains '/tpr/materials/other/' and page.name != 'index.html' and page.name != '404.html' %}
             <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
           {% endif %}
         {% endfor %}
 
 
         {% for file in site.static_files %}
-          {% if file.path contains '/linux/other/' %}
+          {% if file.path contains '/tpr/materials/other/' %}
             <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
           {% endif %}
         {% endfor %}
