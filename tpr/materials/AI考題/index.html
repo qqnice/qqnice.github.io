@@ -96,14 +96,14 @@
       <ul>
         
         {% for page in site.pages %}
-          {% if page.url contains '/qqlinux/AI考題/' and page.name != 'index.html' and page.name != '404.html' %}
+          {% if page.url contains '/tpr/materials/AI考題/' and page.name != 'index.html' and page.name != '404.html' %}
             <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
           {% endif %}
         {% endfor %}
 
 
         {% for file in site.static_files %}
-          {% if file.path contains '/qqlinux/AI考題/' %}
+          {% if file.path contains '/tpr/materials/AI考題/' %}
             <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
           {% endif %}
         {% endfor %}
