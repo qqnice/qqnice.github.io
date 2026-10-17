@@ -5,7 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QQ Linux 教學 檔案目錄</title>
+  
+  <title>QQ Linux 教學 - AI 考古題專區</title>
+  
   <style>
     body { 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -80,42 +82,32 @@
 </head>
 <body>
   <div class="container">
-    <p style="margin:0 0 8px;font-size:.9em;"><a href="../">← QQ 教學分享區首頁</a></p>
-    <h1>👨‍💻 Q 老師的 Linux 教學分享區</h1>
-    <p>歡迎來到 <strong>QQ 老師的 Linux 教學分享區</strong>！這裡是我專為探索 Linux 系統與伺服器管理所打造的互動式學習天地。</p>
-    <p>本網站的核心理念是結合 <strong>Generative AI (Google Gemini)</strong> 的強大輔助與 <strong>Canva</strong> 的視覺化互動設計，為學習者帶來更直覺、更生動的技術體驗。所有的教材、筆記與靜態網頁皆透過 GitHub Pages 進行開源分享與展示。</p>
-
-    <h2>✨ 網站特色與教學亮點</h2>
-    <ul>
-      <li>🤖 <strong>AI 賦能教學 (AI-Assisted Learning)：</strong> 教材內容運用 Gemini 協助生成與架構，並融入「AI 輔助程式開發 (Vibe Coding)」的現代思維，帶領學生體驗如何善用 AI 工具提升系統管理與指令編寫的效率。</li>
-      <li>🎨 <strong>互動式視覺體驗：</strong> 打破傳統終端機枯燥的純文字印象！透過 Canva 設計的互動式網頁與圖解，將抽象的系統架構與操作流程具象化，讓學習過程一目了然。</li>
-      <li>💻 <strong>聚焦現代主流環境：</strong> 教學內容以實務應用為導向，並以最新、最穩定的 <strong>Ubuntu 24.04 LTS</strong> 為主要實作平台，確保學生所學能與業界標準無縫接軌。</li>
-      <li>📂 <strong>直覺的目錄導覽：</strong> 網站首頁已導入動態抓取 GitHub API 的技術，提供宛如雲端硬碟般的直覺檔案列表，讓訪客能輕鬆點擊並瀏覽各個教學單元。</li>
-    </ul>
+    
+    <h1>👨‍💻 Q 老師的 Other</h1>
 
     <h2>🚀 如何使用本網站</h2>
-    <p>只需開啟 GitHub Pages 首頁，您將會看到動態生成的檔案清單：</p>
+    <p>您目前位於 <strong>Other</strong>，下方列出了本資料夾內的所有教學資源：</p>
     <ul>
-      <li>📄 <strong>點擊 <code>.html</code> 檔案：</strong> 可直接觀看結合 Canva 與 AI 內容的互動式教學網頁。</li>
-      <li>📁 <strong>點擊 資料夾：</strong> 可進入不同主題模組（例如：基礎指令、系統權限、雲端部署等）探索更多資源。</li>
+      <li>📄 <strong>點擊 <code>.html</code> 檔案：</strong> 可直接觀看該主題的互動式教學網頁。</li>
     </ul>
 
-    <h2>📂 QQ Linux 教學 檔案目錄</h2>
+    <h2>📂 AI 考題 資料夾檔案目錄</h2>
     <div class="file-list-box">
       <ul>
+        
         {% for page in site.pages %}
-          {% assign pre = page.path | slice: 0, 8 %}
-          {% if pre == 'qqlinux/' and page.name != 'index.html' and page.name != '404.html' %}
+          {% if page.url contains '/linux/other/' and page.name != 'index.html' and page.name != '404.html' %}
             <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
           {% endif %}
         {% endfor %}
 
+
         {% for file in site.static_files %}
-          {% assign pre = file.path | slice: 0, 9 %}
-          {% if pre == '/qqlinux/' %}
+          {% if file.path contains '/linux/other/' %}
             <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
           {% endif %}
         {% endfor %}
+
       </ul>
     </div>
 

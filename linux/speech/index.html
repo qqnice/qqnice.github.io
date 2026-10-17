@@ -83,10 +83,10 @@
 <body>
   <div class="container">
     
-    <h1>👨‍💻 Q 老師的 Other</h1>
+    <h1>👨‍💻 Q 老師的 AI 考古題</h1>
 
     <h2>🚀 如何使用本網站</h2>
-    <p>您目前位於 <strong>Other</strong>，下方列出了本資料夾內的所有教學資源：</p>
+    <p>您目前位於 <strong>演講Speech</strong>，下方列出了本資料夾內的所有教學資源：</p>
     <ul>
       <li>📄 <strong>點擊 <code>.html</code> 檔案：</strong> 可直接觀看該主題的互動式教學網頁。</li>
     </ul>
@@ -96,14 +96,14 @@
       <ul>
         
         {% for page in site.pages %}
-          {% if page.url contains '/qqlinux/other/' and page.name != 'index.html' and page.name != '404.html' %}
+          {% if page.url contains '/linux/speech/' and page.name != 'index.html' and page.name != '404.html' %}
             <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
           {% endif %}
         {% endfor %}
 
 
         {% for file in site.static_files %}
-          {% if file.path contains '/qqlinux/other/' %}
+          {% if file.path contains '/linux/speech/' %}
             <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
           {% endif %}
         {% endfor %}
