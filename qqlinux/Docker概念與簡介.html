@@ -1,0 +1,1173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="用互動廚房比喻與 Apache、WordPress 實例，理解 Dockerfile、Image、Container、Compose、Volume、Network 與 Port。">
+  <title>Docker 廚房｜容器世界入門</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Crect x='10' y='23' width='12' height='12' rx='2' fill='%234cc9f0'/%3E%3Crect x='26' y='23' width='12' height='12' rx='2' fill='%234cc9f0'/%3E%3Crect x='42' y='23' width='12' height='12' rx='2' fill='%23ff9f43'/%3E%3Cpath d='M9 40h46c-2 9-10 14-23 14S11 49 9 40Z' fill='%234cc9f0'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0a1728;
+      --panel: rgba(14, 31, 51, .82);
+      --panel-solid: #0e1f33;
+      --panel-2: #122943;
+      --line: rgba(151, 190, 221, .2);
+      --text: #edf7ff;
+      --muted: #9db2c4;
+      --blue: #4cc9f0;
+      --blue-2: #2188ff;
+      --orange: #ff9f43;
+      --green: #54e1a6;
+      --pink: #f778ba;
+      --yellow: #ffd166;
+      --danger: #ff7b72;
+      --shadow: 0 22px 70px rgba(0, 0, 0, .28);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 12% -5%, rgba(33, 136, 255, .18), transparent 30rem),
+        radial-gradient(circle at 90% 18%, rgba(255, 159, 67, .12), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+    .skip-link {
+      position: fixed;
+      left: 1rem;
+      top: -5rem;
+      z-index: 100;
+      padding: .7rem 1rem;
+      background: white;
+      color: #07111f;
+      border-radius: .7rem;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 17, 31, .84);
+      backdrop-filter: blur(18px);
+    }
+    .header-inner {
+      width: min(1180px, calc(100% - 2rem));
+      min-height: 68px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #06101d;
+      background: linear-gradient(135deg, var(--blue), #7ce7ff);
+      box-shadow: 0 0 30px rgba(76, 201, 240, .25);
+      font-weight: 950;
+    }
+    .header-note { color: var(--muted); font-size: .9rem; }
+    nav { display: flex; gap: .3rem; }
+    nav a {
+      color: var(--muted);
+      padding: .55rem .7rem;
+      border-radius: .7rem;
+      text-decoration: none;
+      font-size: .92rem;
+    }
+    nav a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+
+    main, footer { width: min(1180px, calc(100% - 2rem)); margin-inline: auto; }
+    section { scroll-margin-top: 90px; }
+
+    .hero {
+      min-height: calc(100vh - 68px);
+      padding: clamp(2rem, 5vw, 4.5rem) 0 3rem;
+      display: grid;
+      grid-template-columns: minmax(0, .82fr) minmax(580px, 1.4fr);
+      align-items: center;
+      gap: clamp(2rem, 4vw, 4.5rem);
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin: 0 0 1rem;
+      color: var(--blue);
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 1.8rem;
+      height: 2px;
+      background: currentColor;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 1.1rem;
+      max-width: 12ch;
+      font-size: clamp(2.8rem, 7vw, 5.8rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+    .hero h1 span { color: var(--orange); }
+    .hero-copy > p:not(.eyebrow) {
+      max-width: 38rem;
+      color: #c3d3e1;
+      font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+    }
+    .key-line {
+      margin: 1.5rem 0;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 .8rem .8rem 0;
+      background: rgba(255, 159, 67, .08);
+      color: #ffe0ba;
+      font-weight: 650;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.4rem; }
+    .primary, .secondary, .ghost-button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: .7rem 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .primary { background: var(--blue); color: #06101d; }
+    .primary:hover { background: #87e6ff; }
+    .secondary { border-color: var(--line); background: rgba(255,255,255,.04); color: var(--text); }
+    .secondary:hover { border-color: var(--blue); }
+
+    .hero-lab {
+      position: relative;
+      min-width: 0;
+      border: 1px solid rgba(76, 201, 240, .25);
+      border-radius: 28px;
+      padding: 1rem;
+      background: linear-gradient(145deg, rgba(15, 35, 57, .94), rgba(9, 22, 39, .94));
+      box-shadow: var(--shadow), inset 0 1px rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+    .hero-lab::after {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      pointer-events: none;
+      background: conic-gradient(from 220deg, transparent 0 68%, rgba(76,201,240,.08), transparent 78%);
+      animation: glow-spin 14s linear infinite;
+    }
+    .lab-topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .7rem;
+      margin-bottom: .9rem;
+    }
+    .window-dots { display: flex; gap: .35rem; }
+    .window-dots span { width: .62rem; height: .62rem; border-radius: 50%; background: #35516a; }
+    .window-dots span:nth-child(1) { background: var(--danger); }
+    .window-dots span:nth-child(2) { background: var(--yellow); }
+    .window-dots span:nth-child(3) { background: var(--green); }
+    .mode-switch {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .25rem;
+      padding: .25rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #07111f;
+    }
+    .mode-switch button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 999px;
+      padding: .35rem .75rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 750;
+    }
+    .mode-switch button.active { color: #06101d; background: var(--orange); }
+
+    .kitchen-map {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr .82fr 1.1fr;
+      grid-template-rows: auto auto;
+      gap: .75rem;
+      min-height: 410px;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background:
+        linear-gradient(rgba(76,201,240,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(76,201,240,.035) 1px, transparent 1px),
+        #091727;
+      background-size: 24px 24px;
+    }
+    .map-label {
+      position: absolute;
+      top: .65rem;
+      left: .8rem;
+      color: #607e98;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .zone {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 122px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: .85rem;
+      background: rgba(13, 31, 50, .92);
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .zone:hover, .zone.active { transform: translateY(-3px); border-color: var(--accent, var(--blue)); box-shadow: 0 12px 28px rgba(0,0,0,.22), 0 0 0 1px color-mix(in srgb, var(--accent, var(--blue)) 35%, transparent); }
+    .zone:focus-visible { outline-offset: 2px; }
+    .zone strong { display: block; margin: .25rem 0 .05rem; font-size: 1.05rem; line-height: 1.25; }
+    .zone small { color: var(--muted); line-height: 1.4; }
+    .zone-icon { font-size: 1.35rem; line-height: 1; }
+    .zone .technical { display: none; }
+    .real-mode .zone .analogy { display: none; }
+    .real-mode .zone .technical { display: inline; }
+    .zone-dockerfile { --accent: var(--orange); grid-column: 1; grid-row: 1; margin-top: 1.6rem; }
+    .zone-image { --accent: var(--pink); grid-column: 2; grid-row: 1; margin-top: 1.6rem; }
+    .zone-containers { --accent: var(--blue); grid-column: 3; grid-row: 1 / span 2; margin-top: 1.6rem; }
+    .zone-volume { --accent: var(--green); grid-column: 1; grid-row: 2; }
+    .zone-network { --accent: var(--yellow); grid-column: 2; grid-row: 2; }
+    .container-stack { display: grid; gap: .45rem; margin-top: .65rem; }
+    .mini-stall {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      padding: .58rem .65rem;
+      border-radius: .65rem;
+      background: rgba(76,201,240,.08);
+      color: #bfefff;
+      font-size: .8rem;
+    }
+    .status-dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); }
+    .flow-arrow {
+      position: absolute;
+      z-index: 3;
+      top: 32%;
+      width: 7%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      pointer-events: none;
+    }
+    .arrow-a { left: 31.5%; }
+    .arrow-b { left: 56%; background: linear-gradient(90deg, var(--pink), var(--blue)); }
+    .flow-arrow::after { content: ""; position: absolute; right: -1px; top: -4px; border-left: 7px solid currentColor; border-block: 5px solid transparent; color: inherit; }
+    .arrow-a { color: var(--pink); }
+    .arrow-b { color: var(--blue); }
+
+    .lab-caption {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: start;
+      gap: .85rem;
+      margin-top: .85rem;
+      padding: .9rem 1rem;
+      border-radius: 14px;
+      background: rgba(76,201,240,.07);
+    }
+    .lab-caption .number {
+      width: 2rem;
+      height: 2rem;
+      display: grid;
+      place-items: center;
+      border-radius: .65rem;
+      background: var(--blue);
+      color: #06101d;
+      font-weight: 900;
+    }
+    .lab-caption p { margin: 0; color: #c8d8e5; font-size: .92rem; }
+
+    .section-block { padding: clamp(4rem, 8vw, 7rem) 0; }
+    .section-heading {
+      display: grid;
+      grid-template-columns: minmax(0, .8fr) minmax(340px, 1fr);
+      gap: 2rem;
+      align-items: end;
+      margin-bottom: 2rem;
+    }
+    h2 { margin-bottom: 0; font-size: clamp(2rem, 4.5vw, 3.6rem); line-height: 1.05; letter-spacing: -.04em; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+
+    .concept-explorer {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      min-height: 510px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .concept-list { padding: 1rem; border-right: 1px solid var(--line); background: rgba(5, 15, 28, .45); }
+    .concept-list button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: .35rem;
+      border: 1px solid transparent;
+      border-radius: .85rem;
+      padding: .75rem;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+    .concept-list button:hover { background: rgba(255,255,255,.035); color: var(--text); }
+    .concept-list button.active { background: rgba(76,201,240,.11); border-color: rgba(76,201,240,.24); color: var(--text); }
+    .concept-list .icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: grid;
+      place-items: center;
+      border-radius: .75rem;
+      color: var(--concept-color, var(--blue));
+      background: color-mix(in srgb, var(--concept-color, var(--blue)) 13%, transparent);
+      font-size: 1.15rem;
+    }
+    .concept-list strong { display: block; line-height: 1.25; }
+    .concept-list small { color: #7390a8; }
+    .concept-detail { position: relative; padding: clamp(1.4rem, 4vw, 3rem); overflow: hidden; }
+    .concept-detail::before {
+      content: attr(data-symbol);
+      position: absolute;
+      right: 1.2rem;
+      top: -2rem;
+      color: rgba(255,255,255,.025);
+      font-size: 14rem;
+      font-weight: 900;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .detail-tag { display: inline-flex; padding: .28rem .65rem; border-radius: 999px; background: rgba(255,159,67,.12); color: var(--orange); font-size: .78rem; font-weight: 850; letter-spacing: .08em; }
+    .concept-detail h3 { margin: .85rem 0 .35rem; font-size: clamp(1.9rem, 4vw, 3.2rem); line-height: 1; }
+    .detail-lead { max-width: 44rem; color: #c7d9e6; font-size: 1.1rem; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; margin-top: 1.5rem; }
+    .detail-card { min-height: 136px; padding: 1.1rem; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025); }
+    .detail-card span { display: block; color: var(--muted); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .detail-card p { margin: .55rem 0 0; }
+    .misconception { grid-column: 1 / -1; border-color: rgba(255, 159, 67, .22); background: rgba(255,159,67,.055); }
+    code { color: #bfefff; font-family: "SFMono-Regular", Consolas, monospace; font-size: .9em; }
+
+    .pipeline-shell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(1rem, 3vw, 2rem);
+      background: linear-gradient(145deg, rgba(14,31,51,.86), rgba(9,23,39,.92));
+    }
+    .pipeline-controls { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.4rem; }
+    .pipeline-controls p { margin: 0; color: var(--muted); }
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: stretch;
+      gap: .65rem;
+    }
+    .pipe-step {
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #0a192b;
+      transition: .25s ease;
+    }
+    .pipe-step span { color: var(--muted); font-size: .78rem; font-weight: 750; }
+    .pipe-step strong { font-size: 1.12rem; }
+    .pipe-step code { display: block; color: var(--muted); }
+    .pipe-step.active { transform: translateY(-5px); border-color: var(--step-color, var(--blue)); box-shadow: 0 0 30px color-mix(in srgb, var(--step-color, var(--blue)) 18%, transparent); }
+    .pipe-arrow { display: grid; place-items: center; color: #4e718d; font-size: 1.4rem; }
+    .pipe-step:nth-child(1) { --step-color: var(--orange); }
+    .pipe-step:nth-child(3) { --step-color: var(--yellow); }
+    .pipe-step:nth-child(5) { --step-color: var(--pink); }
+    .pipe-step:nth-child(7) { --step-color: var(--green); }
+    .pipe-step:nth-child(9) { --step-color: var(--blue); }
+    .pipeline-status { min-height: 2.8rem; margin: 1rem 0 0; color: #c9dbe8; }
+
+    .case-grid { display: grid; grid-template-columns: .9fr 1.35fr; gap: 1rem; align-items: stretch; }
+    .case-copy, .architecture {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .case-copy { padding: clamp(1.3rem, 3vw, 2rem); }
+    .case-copy h3 { font-size: 1.6rem; margin-bottom: .6rem; }
+    .case-copy > p { color: var(--muted); }
+    .request-buttons { display: grid; gap: .65rem; margin: 1.4rem 0; }
+    .request-button {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      border: 1px solid var(--line);
+      border-radius: .85rem;
+      padding: .85rem 1rem;
+      background: rgba(255,255,255,.025);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+    .request-button:hover, .request-button.active { border-color: var(--route-color, var(--blue)); background: color-mix(in srgb, var(--route-color, var(--blue)) 9%, transparent); }
+    .request-button span:last-child { color: var(--muted); }
+    .callout { padding: .9rem 1rem; border-radius: .8rem; background: rgba(255,209,102,.08); color: #ffe6a8; font-size: .92rem; }
+    .architecture { position: relative; min-height: 510px; padding: 1.2rem; overflow: hidden; }
+    .arch-title { color: var(--muted); font-size: .78rem; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+    .arch-board { display: grid; grid-template-columns: 1fr 1fr 1.15fr; grid-template-rows: 1fr 1fr; gap: .8rem 1.8rem; align-items: center; min-height: 430px; }
+    .arch-node {
+      position: relative;
+      z-index: 2;
+      padding: .9rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #0a192b;
+      transition: .25s ease;
+    }
+    .arch-node.lit { border-color: var(--node-color, var(--blue)); box-shadow: 0 0 28px color-mix(in srgb, var(--node-color, var(--blue)) 20%, transparent); transform: scale(1.025); }
+    .arch-node strong { display: block; }
+    .arch-node small { color: var(--muted); }
+    .browser-node { --node-color: var(--yellow); grid-column: 1; grid-row: 1 / span 2; }
+    .proxy-node { --node-color: var(--orange); grid-column: 2; grid-row: 1 / span 2; }
+    .apache-node { --node-color: var(--blue); grid-column: 3; grid-row: 1; }
+    .wordpress-node { --node-color: var(--pink); grid-column: 3; grid-row: 2; }
+    .database-node { --node-color: var(--green); grid-column: 3; grid-row: 2; align-self: end; margin-bottom: -4.8rem; transform: translateY(100%); }
+    .database-node.lit { transform: translateY(100%) scale(1.025); }
+    .arch-line {
+      position: absolute;
+      z-index: 1;
+      height: 2px;
+      background: #27465f;
+      transform-origin: left center;
+    }
+    .line-browser { left: 25%; top: 50%; width: 17%; }
+    .line-apache { left: 57%; top: 37%; width: 23%; transform: rotate(-18deg); }
+    .line-wordpress { left: 57%; top: 58%; width: 23%; transform: rotate(18deg); }
+    .arch-line.active { background: linear-gradient(90deg, var(--yellow), var(--blue)); box-shadow: 0 0 12px rgba(76,201,240,.65); }
+    .route-message { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1rem; margin: 0; padding: .6rem .8rem; border-radius: .65rem; background: rgba(7,17,31,.92); color: #c8d8e5; font-size: .88rem; }
+
+    .compose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .code-window, .compose-map { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #081522; }
+    .code-header { display: flex; justify-content: space-between; padding: .75rem 1rem; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .84rem; }
+    pre { margin: 0; padding: 1.2rem; overflow: auto; color: #bfd1df; font: .88rem/1.75 "SFMono-Regular", Consolas, monospace; }
+    .yaml-key { color: var(--blue); }
+    .yaml-value { color: var(--orange); }
+    .yaml-service { color: var(--pink); font-weight: 800; }
+    .compose-map { padding: 1.2rem; background: var(--panel); }
+    .service-tabs { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .service-tabs button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .45rem .75rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .service-tabs button.active { border-color: var(--blue); color: var(--text); background: rgba(76,201,240,.09); }
+    .compose-visual { position: relative; min-height: 280px; display: grid; place-items: center; margin-top: 1rem; }
+    .network-ring { width: min(90%, 390px); aspect-ratio: 1.65; border: 2px dashed rgba(255,209,102,.28); border-radius: 50%; display: grid; place-items: center; color: var(--yellow); font-size: .8rem; }
+    .service-node { position: absolute; min-width: 120px; padding: .75rem; border: 1px solid var(--line); border-radius: 12px; background: #0b1c2f; text-align: center; transition: .2s ease; }
+    .service-node.active { border-color: var(--node-color); box-shadow: 0 0 25px color-mix(in srgb, var(--node-color) 20%, transparent); transform: scale(1.05); }
+    .service-node small { display: block; color: var(--muted); }
+    .svc-proxy { --node-color: var(--orange); top: 5%; left: 50%; transform: translateX(-50%); }
+    .svc-proxy.active { transform: translateX(-50%) scale(1.05); }
+    .svc-apache { --node-color: var(--blue); left: 5%; top: 48%; }
+    .svc-wordpress { --node-color: var(--pink); right: 5%; top: 42%; }
+    .svc-db { --node-color: var(--green); right: 18%; bottom: 0; }
+    .compose-explain { min-height: 4.8rem; margin: .6rem 0 0; padding: .8rem; border-radius: .8rem; background: rgba(255,255,255,.03); color: #c8d8e5; }
+
+    .myth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .9rem; }
+    .myth-card { min-height: 205px; padding: 1.2rem; border: 1px solid var(--line); border-radius: 17px; background: rgba(14,31,51,.72); }
+    .myth-card .myth { color: var(--danger); font-weight: 800; }
+    .myth-card .truth { color: var(--green); font-weight: 800; }
+    .myth-card p:last-child { margin-bottom: 0; color: var(--muted); }
+
+    .quiz-shell { border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(1.2rem, 4vw, 2.3rem); background: var(--panel); box-shadow: var(--shadow); }
+    .quiz-top { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+    .progress-track { flex: 1; height: .6rem; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; }
+    .progress-bar { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width .3s ease; }
+    .score { white-space: nowrap; color: var(--muted); }
+    .quiz-question { font-size: clamp(1.25rem, 3vw, 1.75rem); font-weight: 800; }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+    .quiz-option { min-height: 64px; border: 1px solid var(--line); border-radius: 13px; padding: .8rem 1rem; background: rgba(255,255,255,.025); color: var(--text); cursor: pointer; text-align: left; }
+    .quiz-option:hover:not(:disabled) { border-color: var(--blue); }
+    .quiz-option.correct { border-color: var(--green); background: rgba(84,225,166,.1); }
+    .quiz-option.wrong { border-color: var(--danger); background: rgba(255,123,114,.09); }
+    .quiz-feedback { min-height: 4rem; margin: 1rem 0 0; color: #c8d8e5; }
+    .quiz-next { margin-top: .5rem; }
+
+    footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--muted); }
+    .footer-grid { display: flex; justify-content: space-between; gap: 2rem; align-items: start; }
+    .sources { display: flex; flex-wrap: wrap; gap: .45rem .9rem; }
+    .sources a { color: #b9eefe; }
+
+    @keyframes glow-spin { to { transform: rotate(1turn); } }
+
+    @media (max-width: 980px) {
+      nav { display: none; }
+      .hero { min-height: auto; grid-template-columns: 1fr; padding-top: 3rem; }
+      .hero-copy { max-width: 700px; }
+      .hero h1 { max-width: 11ch; }
+      .section-heading { grid-template-columns: 1fr; }
+      .case-grid, .compose-grid { grid-template-columns: 1fr; }
+      .pipeline { grid-template-columns: 1fr; }
+      .pipe-arrow { transform: rotate(90deg); height: 1rem; }
+      .pipe-step { min-height: 110px; }
+      .myth-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      .header-note { display: none; }
+      .hero-lab { padding: .65rem; }
+      .lab-topbar { align-items: start; }
+      .kitchen-map { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; min-height: auto; }
+      .zone-dockerfile { grid-column: 1; grid-row: 1; }
+      .zone-image { grid-column: 2; grid-row: 1; }
+      .zone-containers { grid-column: 1 / -1; grid-row: 2; }
+      .zone-volume { grid-column: 1; grid-row: 3; }
+      .zone-network { grid-column: 2; grid-row: 3; }
+      .zone { margin-top: 1.4rem; min-height: 112px; }
+      .flow-arrow { display: none; }
+      .concept-explorer { grid-template-columns: 1fr; }
+      .concept-list { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .concept-list button { width: auto; min-width: 150px; flex: 0 0 auto; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .misconception { grid-column: 1; }
+      .arch-board { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; align-items: stretch; padding-bottom: 4rem; }
+      .browser-node { grid-column: 1 / -1; grid-row: 1; }
+      .proxy-node { grid-column: 1 / -1; grid-row: 2; }
+      .apache-node { grid-column: 1; grid-row: 3; }
+      .wordpress-node { grid-column: 2; grid-row: 3; }
+      .database-node { display: none; }
+      .arch-line { display: none; }
+      .myth-grid, .quiz-options { grid-template-columns: 1fr; }
+      .footer-grid { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      main, footer, .header-inner { width: min(100% - 1.1rem, 1180px); }
+      .mode-switch button { padding-inline: .5rem; }
+      .zone small { font-size: .75rem; }
+      .zone-icon { font-size: 1.15rem; }
+      .lab-caption { grid-template-columns: 1fr; }
+      .architecture { min-height: 570px; }
+      .arch-board { gap: .6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="Docker 廚房首頁">
+        <span class="brand-mark">D</span>
+        <span>Docker 廚房</span>
+      </a>
+      <span class="header-note">從一間廚房，看懂一個容器世界</span>
+      <nav aria-label="頁面導覽">
+        <a href="#concepts">元件地圖</a>
+        <a href="#lifecycle">生命週期</a>
+        <a href="#case">實際架構</a>
+        <a href="#quiz">理解測試</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">Docker concepts / 01</p>
+        <h1>把 Docker 想成一座<span>美食街</span></h1>
+        <p>Linux Host 是建築，Docker 管理裡面每一間獨立廚房。配方可以被複製，廚房可以隨時重開，重要食材則放在外面的倉庫。</p>
+        <div class="key-line">Dockerfile 是做法，Image 是模板，Container 是正在運作的實體，Compose 是整組服務的開店計畫。</div>
+        <div class="hero-actions">
+          <a class="primary" href="#concepts">開始點選元件</a>
+          <a class="secondary" href="#case">直接看網站實例</a>
+        </div>
+      </div>
+
+      <div class="hero-lab" id="heroLab">
+        <div class="lab-topbar">
+          <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="mode-switch" role="group" aria-label="圖解顯示模式">
+            <button type="button" class="active" data-mode="analogy" aria-pressed="true">廚房比喻</button>
+            <button type="button" data-mode="real" aria-pressed="false">Docker 真相</button>
+          </div>
+        </div>
+        <div class="kitchen-map" aria-label="Docker 廚房互動圖">
+          <span class="map-label">點選任一區域</span>
+          <button class="zone zone-dockerfile active" data-concept="dockerfile" type="button">
+            <span class="zone-icon" aria-hidden="true">≣</span>
+            <strong><span class="analogy">施工／備料說明書</span><span class="technical">Dockerfile</span></strong>
+            <small><span class="analogy">定義廚房要怎麼做</span><span class="technical">定義 Image 建置步驟</span></small>
+          </button>
+          <button class="zone zone-image" data-concept="image" type="button">
+            <span class="zone-icon" aria-hidden="true">◈</span>
+            <strong><span class="analogy">標準廚房模板</span><span class="technical">Image</span></strong>
+            <small><span class="analogy">可無限複製，但未開店</span><span class="technical">唯讀、分層的執行套件</span></small>
+          </button>
+          <button class="zone zone-containers" data-concept="container" type="button">
+            <span class="zone-icon" aria-hidden="true">▦</span>
+            <strong><span class="analogy">正在營業的廚房</span><span class="technical">Containers</span></strong>
+            <small><span class="analogy">同一模板，開出多間店</span><span class="technical">同一 Image，多個隔離程序</span></small>
+            <span class="container-stack" aria-hidden="true">
+              <span class="mini-stall">apache-a <i class="status-dot"></i></span>
+              <span class="mini-stall">apache-b <i class="status-dot"></i></span>
+            </span>
+          </button>
+          <button class="zone zone-volume" data-concept="volume" type="button">
+            <span class="zone-icon" aria-hidden="true">▤</span>
+            <strong><span class="analogy">建築外的固定倉庫</span><span class="technical">Volume</span></strong>
+            <small><span class="analogy">拆掉廚房，存貨仍在</span><span class="technical">將資料生命週期分離</span></small>
+          </button>
+          <button class="zone zone-network" data-concept="network" type="button">
+            <span class="zone-icon" aria-hidden="true">∿</span>
+            <strong><span class="analogy">內部走道與對講機</span><span class="technical">Network</span></strong>
+            <small><span class="analogy">各廚房可以相互聯絡</span><span class="technical">服務用名稱找到彼此</span></small>
+          </button>
+          <span class="flow-arrow arrow-a" aria-hidden="true"></span>
+          <span class="flow-arrow arrow-b" aria-hidden="true"></span>
+        </div>
+        <div class="lab-caption" aria-live="polite">
+          <span class="number">1</span>
+          <p id="heroCaption"><strong>Dockerfile</strong> 像施工與備料說明書：它描述要用哪個基礎環境、複製什麼檔案，以及服務啟動時要執行什麼。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="concepts">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Interactive map / 02</p>
+          <h2>每個元件，都有一個明確工作</h2>
+        </div>
+        <p>點選左側元件，對照它在廚房的角色、Docker 裡的真實任務，以及在 Apache／WordPress 案例中的具體位置。</p>
+      </div>
+
+      <div class="concept-explorer">
+        <div class="concept-list" role="tablist" aria-label="Docker 重要元件" id="conceptList"></div>
+        <article class="concept-detail" id="conceptDetail" role="tabpanel" tabindex="0" data-symbol="≣">
+          <span class="detail-tag" id="detailTag">建置階段</span>
+          <h3 id="detailTitle">Dockerfile</h3>
+          <p class="detail-lead" id="detailLead"></p>
+          <div class="detail-grid">
+            <div class="detail-card"><span>廚房比喻</span><p id="detailAnalogy"></p></div>
+            <div class="detail-card"><span>網站實例</span><p id="detailExample"></p></div>
+            <div class="detail-card misconception"><span>最常搞混</span><p id="detailMyth"></p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block" id="lifecycle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Lifecycle / 03</p>
+          <h2>從一份說明書，到一個正在服務的網站</h2>
+        </div>
+        <p>「建置」和「執行」是兩個不同階段。Dockerfile 用來產生 Image；Image 經過 <code>docker run</code> 才會成為 Container。</p>
+      </div>
+      <div class="pipeline-shell">
+        <div class="pipeline-controls">
+          <p>按下播放，看清楚誰產生誰。</p>
+          <button class="primary" type="button" id="playPipeline">播放生命週期</button>
+        </div>
+        <div class="pipeline" id="pipeline" aria-label="Docker 建置與執行流程">
+          <div class="pipe-step"><span>01 定義</span><strong>Dockerfile</strong><code>FROM httpd:2.4</code></div>
+          <span class="pipe-arrow" aria-hidden="true">→</span>
+          <div class="pipe-step"><span>02 建置</span><strong>docker build</strong><code>-t class-apache:1.0</code></div>
+          <span class="pipe-arrow" aria-hidden="true">→</span>
+          <div class="pipe-step"><span>03 封裝</span><strong>Image</strong><code>class-apache:1.0</code></div>
+          <span class="pipe-arrow" aria-hidden="true">→</span>
+          <div class="pipe-step"><span>04 啟動</span><strong>docker run</strong><code>-p 8080:80</code></div>
+          <span class="pipe-arrow" aria-hidden="true">→</span>
+          <div class="pipe-step"><span>05 執行</span><strong>Container</strong><code>apache-web</code></div>
+        </div>
+        <p class="pipeline-status" id="pipelineStatus" aria-live="polite">重點：Dockerfile 不是 Container；Image 也不是正在執行的服務。</p>
+      </div>
+    </section>
+
+    <section class="section-block" id="case">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Real case / 04</p>
+          <h2>同一個 IP，兩個網域，如何找到正確的 Container？</h2>
+        </div>
+        <p>DNS 只負責把網域帶到同一個 IP。真正看著 HTTP <code>Host</code> 並將請求分流的，是最前面的 Reverse Proxy。</p>
+      </div>
+      <div class="case-grid">
+        <div class="case-copy">
+          <h3>你是瀏覽器，請選擇一個網域</h3>
+          <p>觀察請求如何經過「門口接待」，被送到不同的服務。</p>
+          <div class="request-buttons">
+            <button class="request-button" style="--route-color: var(--blue)" type="button" data-route="apache">
+              <strong>www.example.com</strong><span>Apache 網頁</span>
+            </button>
+            <button class="request-button" style="--route-color: var(--pink)" type="button" data-route="wordpress">
+              <strong>blog.example.com</strong><span>WordPress 網站</span>
+            </button>
+          </div>
+          <div class="callout"><strong>為什麼不能兩個都用 <code>80:80</code>？</strong><br>Host 的同一個 IP 與 Port 80 只能有一個入口。先由 Reverse Proxy 接收，再轉送到內部 Container。</div>
+        </div>
+        <div class="architecture" aria-label="Apache 與 WordPress 容器化架構">
+          <span class="arch-title">實際容器架構</span>
+          <div class="arch-board">
+            <div class="arch-node browser-node" data-node="browser"><strong>瀏覽器</strong><small>Host: 尚未選擇</small></div>
+            <div class="arch-node proxy-node" data-node="proxy"><strong>Reverse Proxy</strong><small>觀察網域，決定去向</small></div>
+            <div class="arch-node apache-node" data-node="apache"><strong>Apache Container</strong><small>靜態網站 · internal :80</small></div>
+            <div class="arch-node wordpress-node" data-node="wordpress"><strong>WordPress Container</strong><small>應用程式 · internal :80</small></div>
+            <div class="arch-node database-node" data-node="database"><strong>Database + Volume</strong><small>文章與設定永續保存</small></div>
+          </div>
+          <span class="arch-line line-browser" data-line="entry"></span>
+          <span class="arch-line line-apache" data-line="apache"></span>
+          <span class="arch-line line-wordpress" data-line="wordpress"></span>
+          <p class="route-message" id="routeMessage" aria-live="polite">選擇左側網域，開始發送請求。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="compose">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Compose / 05</p>
+          <h2>Compose 是整間餐廳的開店計畫</h2>
+        </div>
+        <p>它不會把所有程式塞進同一個 Container；它用一份 YAML 一次定義多個服務、網路、Port 與 Volume。</p>
+      </div>
+      <div class="compose-grid">
+        <div class="code-window" aria-label="Compose YAML 範例">
+          <div class="code-header"><span>compose.yml</span><span>概念示意</span></div>
+          <pre><span class="yaml-key">services:</span>
+  <span class="yaml-service">proxy:</span>
+    <span class="yaml-key">image:</span> <span class="yaml-value">nginx</span>
+    <span class="yaml-key">ports:</span> [<span class="yaml-value">"80:80"</span>]
+
+  <span class="yaml-service">apache:</span>
+    <span class="yaml-key">image:</span> <span class="yaml-value">class-apache:1.0</span>
+
+  <span class="yaml-service">wordpress:</span>
+    <span class="yaml-key">image:</span> <span class="yaml-value">wordpress</span>
+    <span class="yaml-key">environment:</span>
+      WORDPRESS_DB_HOST: <span class="yaml-value">db</span>
+
+  <span class="yaml-service">db:</span>
+    <span class="yaml-key">image:</span> <span class="yaml-value">mariadb</span>
+    <span class="yaml-key">volumes:</span>
+      - <span class="yaml-value">db-data:/var/lib/mysql</span>
+
+<span class="yaml-key">volumes:</span>
+  <span class="yaml-service">db-data:</span></pre>
+        </div>
+        <div class="compose-map">
+          <div class="service-tabs" role="tablist" aria-label="Compose 服務解說">
+            <button type="button" class="active" data-service="proxy">proxy</button>
+            <button type="button" data-service="apache">apache</button>
+            <button type="button" data-service="wordpress">wordpress</button>
+            <button type="button" data-service="db">db</button>
+          </div>
+          <div class="compose-visual" aria-label="Compose 內部網路圖">
+            <div class="network-ring">Compose internal network</div>
+            <div class="service-node svc-proxy active" data-service-node="proxy"><strong>proxy</strong><small>唯一對外入口</small></div>
+            <div class="service-node svc-apache" data-service-node="apache"><strong>apache</strong><small>靜態網頁</small></div>
+            <div class="service-node svc-wordpress" data-service-node="wordpress"><strong>wordpress</strong><small>網站應用</small></div>
+            <div class="service-node svc-db" data-service-node="db"><strong>db</strong><small>MariaDB + Volume</small></div>
+          </div>
+          <p class="compose-explain" id="composeExplain" aria-live="polite"><strong>proxy</strong> 是門口接待。它佔用 Host 的 Port 80，但其他服務只在內部 Network 中接受轉送。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-block" id="myths">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Misconceptions / 06</p>
+          <h2>在動手之前，先拆掉三個誤解</h2>
+        </div>
+        <p>名詞會背不等於真的理解。如果能說清楚下面三組差異，就已經抓住 Docker 的核心。</p>
+      </div>
+      <div class="myth-grid">
+        <article class="myth-card"><p class="myth">✕ Image 就是 Container</p><p class="truth">✓ 模板 ≠ 執行實體</p><p>Image 不會自己提供服務；可從同一個 Image 啟動多個互不相干的 Container。</p></article>
+        <article class="myth-card"><p class="myth">✕ EXPOSE 80 就能從外部連線</p><p class="truth">✓ 還要發布 Port</p><p><code>EXPOSE</code> 像標記廚房預期使用的窗口；<code>-p 8080:80</code> 才是把 Host 入口真正接上去。</p></article>
+        <article class="myth-card"><p class="myth">✕ Container 裡的 localhost 是 Host</p><p class="truth">✓ localhost 是它自己</p><p>WordPress 找資料庫時，不應寫 <code>localhost</code>，而是透過 Network 使用 Compose 服務名 <code>db</code>。</p></article>
+      </div>
+    </section>
+
+    <section class="section-block" id="quiz">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Check yourself / 07</p>
+          <h2>現在，你能不能幫 Docker 餐廳開店？</h2>
+        </div>
+        <p>五題即時判斷。答錯沒關係，回饋會把真正的概念補回來。</p>
+      </div>
+      <div class="quiz-shell">
+        <div class="quiz-top">
+          <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+          <span class="score" id="scoreLabel">0 / 5</span>
+        </div>
+        <p class="quiz-question" id="quizQuestion"></p>
+        <div class="quiz-options" id="quizOptions"></div>
+        <p class="quiz-feedback" id="quizFeedback" aria-live="polite"></p>
+        <button class="primary quiz-next" type="button" id="quizNext" hidden>下一題</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <div><strong>Docker 廚房</strong><br><span>先看懂角色，再進入指令操作。</span></div>
+      <div class="sources" aria-label="延伸閱讀">
+        <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/" target="_blank" rel="noreferrer">Container 官方說明</a>
+        <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/" target="_blank" rel="noreferrer">Image 官方說明</a>
+        <a href="https://docs.docker.com/build/concepts/dockerfile/" target="_blank" rel="noreferrer">Dockerfile 官方說明</a>
+        <a href="https://docs.docker.com/get-started/docker-concepts/running-containers/multi-container-applications/" target="_blank" rel="noreferrer">Compose 官方說明</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const concepts = [
+      {
+        id: 'dockerfile', icon: '≣', name: 'Dockerfile', label: '建置說明書', tag: '建置階段', color: '#ff9f43',
+        lead: 'Dockerfile 是一份文字指令，告訴 Docker 如何一步步建置出 Image。',
+        analogy: '標準廚房的施工、設備與備料說明書：先選基礎格局，再裝設備、放入食譜，最後寫上開店動作。',
+        example: '<code>FROM httpd:2.4</code> 選 Apache 基礎；<code>COPY ./website/ ...</code> 把網頁放進 Image。',
+        myth: 'Dockerfile 不會自己運作網站。它要先經過 <code>docker build</code> 變成 Image。'
+      },
+      {
+        id: 'image', icon: '◈', name: 'Image', label: '可複製模板', tag: '封裝成品', color: '#f778ba',
+        lead: 'Image 是已封裝的標準化套件，包含程式、函式庫、檔案與設定，但還沒有在執行。',
+        analogy: '已完成封裝的標準廚房模板。不直接進去改模板，而是用它複製出一間間實際廚房。',
+        example: '<code>httpd:2.4</code>、<code>wordpress</code> 與 <code>mariadb</code> 都是可下載或擴充的 Image。',
+        myth: 'Image 不是正在執行的 Container。一個 Image 可同時啟動很多個 Container。'
+      },
+      {
+        id: 'container', icon: '▦', name: 'Container', label: '執行中實體', tag: '執行階段', color: '#4cc9f0',
+        lead: 'Container 是由 Image 啟動的隔離程序，有自己的檔案視角、網路與執行狀態。',
+        analogy: '根據模板真正開張的一間廚房。它可以打烊、重開、拆除，也不會因此破壞原本模板。',
+        example: '<code>apache-a</code> 和 <code>apache-b</code> 可來自同一 Image，但是兩個獨立 Container。',
+        myth: '<code>docker stop</code> 只是停止；<code>docker rm</code> 才是刪除。刪除 Container 並不等於刪除 Image。'
+      },
+      {
+        id: 'engine', icon: '⚙', name: 'Docker Engine', label: '容器管理中心', tag: 'Host 管理層', color: '#2188ff',
+        lead: 'Docker Engine 接收指令，負責建置 Image，並管理 Container、Network 與 Volume。',
+        analogy: '美食街的中央管理系統：分配空間、開關廚房、連接管線，也記錄各間廚房狀態。',
+        example: '你輸入 <code>docker run</code> 後，由 Engine 實際建立並啟動 Container。',
+        myth: 'Docker 不等於單一 Container。Docker 是建置、分發與執行容器的一組工具與平台。'
+      },
+      {
+        id: 'registry', icon: '⇩', name: 'Registry', label: 'Image 倉庫', tag: '分發階段', color: '#c997ff',
+        lead: 'Registry 是存放與分發 Image 的地方；Docker Hub 是最常見的公開 Registry。',
+        analogy: '存放標準廚房模板的大型倉儲中心，需要時可拉一套到本地，自己完成的也可送上去。',
+        example: '<code>docker pull httpd:2.4</code> 就是從 Registry 拉取 Apache Image。',
+        myth: 'Registry 存的是 Image，不是你目前正在執行的 Container 狀態。'
+      },
+      {
+        id: 'volume', icon: '▤', name: 'Volume', label: '永續資料', tag: '資料層', color: '#54e1a6',
+        lead: 'Volume 讓重要資料離開 Container 的生命週期，Container 刪除重建後仍能接回來。',
+        analogy: '獨立於臨時廚房之外的固定倉庫與冰箱。廚房整間拆掉，倉庫內的材料與帳冊依然存在。',
+        example: 'MariaDB 的 <code>/var/lib/mysql</code> 應接到 Volume，才不會在重建 DB Container 時遺失文章。',
+        myth: 'Container 內「看得到檔案」不代表它是永久資料。重要資料要明確掛載 Volume。'
+      },
+      {
+        id: 'network', icon: '∿', name: 'Network', label: '服務間通訊', tag: '連線層', color: '#ffd166',
+        lead: 'Docker Network 讓 Container 彼此連線，並可用服務名稱代替隨時可能變動的 IP。',
+        analogy: '廚房之間的工作走道與對講系統。只有被安排在同一個內部網路的廚房，才能依規則互相找到。',
+        example: 'WordPress 將資料庫主機設為 <code>db</code>，就可在 Compose Network 中找到資料庫。',
+        myth: 'Container 裡的 <code>localhost</code> 指它自己，不是 Host，也不是另一個 Container。'
+      },
+      {
+        id: 'port', icon: '⇲', name: 'Port mapping', label: '對外窗口', tag: '邊界層', color: '#ffcf73',
+        lead: 'Port mapping 將 Host 的某個 Port，轉接到 Container 內部服務使用的 Port。',
+        analogy: '建築外部的取餐窗口與廚房內部出餐口的號碼對應。',
+        example: '<code>-p 8080:80</code> 代表瀏覽器連 Host 8080，Docker 轉到 Container 80。',
+        myth: '<code>EXPOSE 80</code> 只是 Image 對預期 Port 的描述，不會自動建立 Host 的對外入口。'
+      },
+      {
+        id: 'compose', icon: '☷', name: 'Compose', label: '多服務編排', tag: '應用組合層', color: '#5ce1e6',
+        lead: 'Compose 用一份 YAML 描述整個多 Container 應用：服務、Image、Network、Port、Volume 與設定。',
+        analogy: '整間餐廳的開店營運表：今天哪些廚房要開、誰用哪個倉庫、哪個窗口對外開放。',
+        example: '一次定義 <code>proxy</code>、<code>apache</code>、<code>wordpress</code> 與 <code>db</code> 四個服務。',
+        myth: 'Compose 不是一個「裝著所有程式的超大 Container」，而是同時管理多個獨立 Container。'
+      }
+    ];
+
+    const captions = {
+      dockerfile: '<strong>Dockerfile</strong> 像施工與備料說明書：它描述要用哪個基礎環境、複製什麼檔案，以及服務啟動時要執行什麼。',
+      image: '<strong>Image</strong> 像封裝好的標準廚房模板：內容固定且可重複使用，但還不是一間正在營業的廚房。',
+      container: '<strong>Container</strong> 是實際開張的廚房。同一個 Image 可啟動多個 Container，每一個都有自己的執行狀態。',
+      volume: '<strong>Volume</strong> 是廚房外的固定倉庫。即使 Container 被刪除重建，資料庫與上傳檔案仍可保留。',
+      network: '<strong>Network</strong> 是廚房間的內部通道。WordPress 可以直接用服務名 <code>db</code> 找到資料庫。'
+    };
+
+    const conceptList = document.querySelector('#conceptList');
+    const detail = document.querySelector('#conceptDetail');
+
+    function selectConcept(id, focusDetail = false) {
+      const item = concepts.find((concept) => concept.id === id) || concepts[0];
+      document.querySelectorAll('[data-concept-tab]').forEach((button) => {
+        const active = button.dataset.conceptTab === item.id;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+        button.tabIndex = active ? 0 : -1;
+      });
+      document.querySelector('#detailTag').textContent = item.tag;
+      document.querySelector('#detailTitle').textContent = item.name;
+      document.querySelector('#detailLead').textContent = item.lead;
+      document.querySelector('#detailAnalogy').innerHTML = item.analogy;
+      document.querySelector('#detailExample').innerHTML = item.example;
+      document.querySelector('#detailMyth').innerHTML = item.myth;
+      detail.dataset.symbol = item.icon;
+      detail.style.setProperty('--active-color', item.color);
+      if (focusDetail) detail.focus();
+    }
+
+    concepts.forEach((item, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.role = 'tab';
+      button.dataset.conceptTab = item.id;
+      button.setAttribute('aria-controls', 'conceptDetail');
+      button.setAttribute('aria-selected', String(index === 0));
+      button.tabIndex = index === 0 ? 0 : -1;
+      button.style.setProperty('--concept-color', item.color);
+      button.className = index === 0 ? 'active' : '';
+      button.innerHTML = `<span class="icon" aria-hidden="true">${item.icon}</span><span><strong>${item.name}</strong><small>${item.label}</small></span>`;
+      button.addEventListener('click', () => selectConcept(item.id));
+      button.addEventListener('keydown', (event) => {
+        if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+        event.preventDefault();
+        const nextIndex = ['ArrowDown', 'ArrowRight'].includes(event.key)
+          ? (index + 1) % concepts.length
+          : (index - 1 + concepts.length) % concepts.length;
+        conceptList.children[nextIndex].focus();
+        selectConcept(concepts[nextIndex].id);
+      });
+      conceptList.append(button);
+    });
+    selectConcept('dockerfile');
+
+    document.querySelectorAll('.mode-switch button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const isReal = button.dataset.mode === 'real';
+        document.querySelector('#heroLab').classList.toggle('real-mode', isReal);
+        document.querySelectorAll('.mode-switch button').forEach((peer) => {
+          const active = peer === button;
+          peer.classList.toggle('active', active);
+          peer.setAttribute('aria-pressed', String(active));
+        });
+      });
+    });
+
+    document.querySelectorAll('.zone').forEach((zone, index) => {
+      zone.addEventListener('click', () => {
+        document.querySelectorAll('.zone').forEach((peer) => peer.classList.remove('active'));
+        zone.classList.add('active');
+        document.querySelector('#heroCaption').innerHTML = captions[zone.dataset.concept];
+        document.querySelector('.lab-caption .number').textContent = String(index + 1);
+      });
+    });
+
+    const pipelineText = [
+      '<strong>Dockerfile：</strong>把建置方法寫成可重複執行的指令。',
+      '<strong>docker build：</strong>逐步讀取 Dockerfile，建置每一層內容。',
+      '<strong>Image：</strong>得到一個唯讀、可分發、可複製的標準模板。',
+      '<strong>docker run：</strong>指定名稱、Port、Volume 與 Network，準備啟動實體。',
+      '<strong>Container：</strong>Apache 現在是一個正在執行、可接收請求的隔離程序。'
+    ];
+    let pipelineRunning = false;
+    document.querySelector('#playPipeline').addEventListener('click', async () => {
+      if (pipelineRunning) return;
+      pipelineRunning = true;
+      const button = document.querySelector('#playPipeline');
+      const steps = [...document.querySelectorAll('.pipe-step')];
+      button.disabled = true;
+      button.textContent = '流程進行中…';
+      steps.forEach((step) => step.classList.remove('active'));
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      for (let i = 0; i < steps.length; i += 1) {
+        steps.forEach((step, stepIndex) => step.classList.toggle('active', stepIndex === i));
+        document.querySelector('#pipelineStatus').innerHTML = pipelineText[i];
+        await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 30 : 1050));
+      }
+      button.disabled = false;
+      button.textContent = '再播放一次';
+      pipelineRunning = false;
+    });
+
+    let routeTimer;
+    function routeRequest(route) {
+      clearTimeout(routeTimer);
+      document.querySelectorAll('.request-button').forEach((button) => button.classList.toggle('active', button.dataset.route === route));
+      const nodes = Object.fromEntries([...document.querySelectorAll('[data-node]')].map((node) => [node.dataset.node, node]));
+      const lines = Object.fromEntries([...document.querySelectorAll('[data-line]')].map((line) => [line.dataset.line, line]));
+      Object.values(nodes).forEach((node) => node.classList.remove('lit'));
+      Object.values(lines).forEach((line) => line.classList.remove('active'));
+      const domain = route === 'apache' ? 'www.example.com' : 'blog.example.com';
+      nodes.browser.querySelector('small').textContent = `Host: ${domain}`;
+      nodes.browser.classList.add('lit');
+      document.querySelector('#routeMessage').textContent = `① DNS 把 ${domain} 指向這台主機。`;
+      routeTimer = setTimeout(() => {
+        lines.entry.classList.add('active');
+        nodes.proxy.classList.add('lit');
+        document.querySelector('#routeMessage').textContent = `② Reverse Proxy 讀取 Host: ${domain}，選擇對應服務。`;
+      }, 550);
+      setTimeout(() => {
+        lines[route].classList.add('active');
+        nodes[route].classList.add('lit');
+        if (route === 'wordpress') nodes.database.classList.add('lit');
+        document.querySelector('#routeMessage').textContent = route === 'apache'
+          ? '③ 請求抵達 Apache Container，回傳靜態網頁。'
+          : '③ 請求抵達 WordPress Container，它再透過內部 Network 讀取資料庫。';
+      }, 1150);
+    }
+    document.querySelectorAll('[data-route]').forEach((button) => button.addEventListener('click', () => routeRequest(button.dataset.route)));
+
+    const composeDescriptions = {
+      proxy: '<strong>proxy</strong> 是門口接待。它佔用 Host 的 Port 80，但其他服務只在內部 Network 中接受轉送。',
+      apache: '<strong>apache</strong> 是靜態網站廚房。它可在 Container 內繼續使用 Port 80，無須直接佔用 Host Port 80。',
+      wordpress: '<strong>wordpress</strong> 負責網站應用邏輯。它不把 <code>db</code> 當成 localhost，而是當成同一 Network 裡的另一個服務名。',
+      db: '<strong>db</strong> 是資料庫廚房。它的程序可重建，但 <code>db-data</code> Volume 讓文章、帳號與設定保留下來。'
+    };
+    document.querySelectorAll('[data-service]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const service = button.dataset.service;
+        document.querySelectorAll('[data-service]').forEach((peer) => peer.classList.toggle('active', peer === button));
+        document.querySelectorAll('[data-service-node]').forEach((node) => node.classList.toggle('active', node.dataset.serviceNode === service));
+        document.querySelector('#composeExplain').innerHTML = composeDescriptions[service];
+      });
+    });
+
+    const quiz = [
+      { q: '同一個 Apache Image 可以同時啟動幾個 Container？', options: ['只能一個', '可以多個', '必須先複製 Dockerfile', '取決於網域數量'], answer: 1, why: 'Image 是模板，可以啟動多個獨立 Container，就像用同一套標準模板開多間分店。' },
+      { q: '刪除 MariaDB Container 後，要讓 WordPress 文章仍然存在，最重要的是？', options: ['使用 Volume', '增加 EXPOSE', '重寫 Dockerfile', '刪除 Network'], answer: 0, why: 'Volume 把資料的生命週期與 Container 分開，所以服務可重建，重要資料仍保留。' },
+      { q: 'WordPress Container 要找 Compose 裡名為 db 的資料庫，應使用哪個主機名？', options: ['localhost', '127.0.0.1', 'db', 'Host 的公開 IP'], answer: 2, why: 'Compose Network 內可用服務名找到彼此。Container 內的 localhost 只會回到它自己。' },
+      { q: '兩個網域指向同一 IP 與 Port 80，最前面的哪個元件負責分流？', options: ['DNS', 'Volume', 'Reverse Proxy', 'Dockerfile'], answer: 2, why: 'DNS 只將網域解析到 IP；Reverse Proxy 會查看 HTTP Host 並轉送到對應 Container。' },
+      { q: 'Compose 最準確的角色是什麼？', options: ['把所有程式裝進一個 Container', '只負責下載 Image', '管理多服務的定義與組合', '取代 Linux Host'], answer: 2, why: 'Compose 用 YAML 統一描述多個獨立服務以及它們的 Port、Network、Volume 與設定。' }
+    ];
+    let quizIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function renderQuiz() {
+      answered = false;
+      const item = quiz[quizIndex];
+      document.querySelector('#quizQuestion').textContent = `${quizIndex + 1}. ${item.q}`;
+      document.querySelector('#quizFeedback').textContent = '選擇一個答案。';
+      document.querySelector('#quizNext').hidden = true;
+      const options = document.querySelector('#quizOptions');
+      options.innerHTML = '';
+      item.options.forEach((label, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'quiz-option';
+        button.textContent = label;
+        button.addEventListener('click', () => answerQuiz(index));
+        options.append(button);
+      });
+      document.querySelector('#progressBar').style.width = `${(quizIndex / quiz.length) * 100}%`;
+      document.querySelector('#scoreLabel').textContent = `${score} / ${quiz.length}`;
+    }
+
+    function answerQuiz(choice) {
+      if (answered) return;
+      answered = true;
+      const item = quiz[quizIndex];
+      const buttons = [...document.querySelectorAll('.quiz-option')];
+      buttons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === item.answer) button.classList.add('correct');
+        if (index === choice && choice !== item.answer) button.classList.add('wrong');
+      });
+      if (choice === item.answer) score += 1;
+      document.querySelector('#quizFeedback').innerHTML = `<strong>${choice === item.answer ? '答對了。' : '還差一點。'}</strong> ${item.why}`;
+      document.querySelector('#scoreLabel').textContent = `${score} / ${quiz.length}`;
+      document.querySelector('#progressBar').style.width = `${((quizIndex + 1) / quiz.length) * 100}%`;
+      const next = document.querySelector('#quizNext');
+      next.hidden = false;
+      next.textContent = quizIndex === quiz.length - 1 ? '查看結果' : '下一題';
+    }
+
+    document.querySelector('#quizNext').addEventListener('click', () => {
+      if (quizIndex < quiz.length - 1) {
+        quizIndex += 1;
+        renderQuiz();
+        document.querySelector('#quizQuestion').focus?.();
+        return;
+      }
+      const shell = document.querySelector('.quiz-shell');
+      const message = score === quiz.length
+        ? '完全理解！你已經可以進入 Docker 實作。'
+        : score >= 4
+          ? '核心概念已經很穩，再回看答錯的元件就好。'
+          : '建議再玩一次「元件地圖」與「實際架構」，再重新挑戰。';
+      shell.innerHTML = `<div style="text-align:center;padding:2rem 1rem"><p class="eyebrow" style="justify-content:center">RESULT</p><h3 style="font-size:clamp(2.2rem,7vw,4.5rem);margin-bottom:.5rem">${score} / ${quiz.length}</h3><p style="color:#c8d8e5;max-width:38rem;margin:0 auto 1.5rem">${message}</p><button class="primary" type="button" id="restartQuiz">重新挑戰</button></div>`;
+      shell.querySelector('#restartQuiz').addEventListener('click', () => window.location.reload());
+    });
+
+    renderQuiz();
+  </script>
+</body>
+</html>

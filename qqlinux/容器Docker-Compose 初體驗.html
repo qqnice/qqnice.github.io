@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="WEEK1 Ubuntu 24.04 + Docker 入門互動教材：Image、Container、Port、Bind Mount、Dockerfile，以及 Docker Compose 前導。">
+<meta name="theme-color" content="#12345b">
+<title>容器Docker-Compose 初體驗｜WEEK1 Docker 入門</title>
+<style>
+:root{
+  --navy:#12345b;--navy2:#1d4f84;--ink:#14263f;--muted:#66758a;
+  --bg:#f4f7fb;--card:#fff;--line:#dde6f1;--soft:#eef5fc;
+  --orange:#e76d35;--blue:#3c92cf;--green:#3b9a68;--yellow:#d79c2c;
+  --shadow:0 14px 35px rgba(26,55,88,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.68}
+button,input{font:inherit}
+a{color:inherit}
+.shell{width:min(1160px,calc(100% - 30px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;color:var(--navy)}
+.brand .logo{font-size:28px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.12em}
+nav{display:flex;gap:16px;font-size:14px;font-weight:800}
+nav a{text-decoration:none;color:#53637a}
+nav a:hover{color:var(--navy)}
+.hero{background:radial-gradient(circle at 80% 15%,rgba(60,146,207,.18),transparent 28%),linear-gradient(135deg,#fbfdff,#edf6ff 55%,#fff);border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:1.35fr .8fr;gap:42px;padding:70px 0 58px;align-items:center}
+.eyebrow{font-size:12px;letter-spacing:.18em;font-weight:900;color:var(--blue)}
+h1{margin:8px 0 18px;font-size:clamp(38px,5.8vw,68px);line-height:1.06;color:var(--navy);letter-spacing:-.04em}
+.lead{font-size:18px;color:#52647c;max-width:740px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.btn{border:0;border-radius:12px;padding:12px 17px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--navy);color:white}
+.btn.secondary{background:white;border:1px solid var(--line);color:var(--navy)}
+.hero-card{background:white;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:var(--shadow)}
+.hero-card h3{margin:0 0 10px;color:var(--navy)}
+.hero-flow{display:grid;gap:8px}
+.hero-flow div{padding:10px 12px;background:#f8fbff;border:1px solid var(--line);border-radius:11px;font-weight:800}
+.hero-flow .arrow{text-align:center;border:0;background:transparent;padding:0;color:#8aa0b9}
+section{padding:66px 0}
+.section-head{max-width:790px;margin-bottom:30px}
+.kicker{font-size:12px;letter-spacing:.15em;font-weight:900;color:var(--blue)}
+h2{margin:5px 0 12px;color:var(--navy);font-size:clamp(28px,4vw,44px);line-height:1.15;letter-spacing:-.025em}
+.section-head p{margin:0;color:var(--muted);font-size:17px}
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.path span{background:white;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:13px;font-weight:850}
+.path i{font-style:normal;color:#91a4bb}
+.concepts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.concept{background:white;border:1px solid var(--line);border-radius:17px;padding:18px;min-height:170px;cursor:pointer;transition:.2s;position:relative}
+.concept:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.concept.active{border-color:#82b9df;background:#f7fcff}
+.concept .icon{font-size:29px}
+.concept h3{margin:8px 0 4px;color:var(--navy)}
+.concept p{margin:0;color:var(--muted);font-size:14px}
+.concept .detail{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:#44566d}
+.concept.active .detail{display:block}
+.notice{margin-top:18px;background:#fff8df;border:1px solid #eddda2;border-left:5px solid var(--yellow);padding:15px 17px;border-radius:12px}
+.lab-bg{background:white;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.lab-list{display:grid;gap:12px}
+.lab{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.lab-head{width:100%;border:0;background:#fff;padding:16px 18px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:15px;cursor:pointer}
+.lab-head:hover{background:#f8fbff}
+.lab-title{display:flex;align-items:center;gap:12px}
+.lab-no{min-width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#eaf4fc;color:var(--navy);font-weight:1000}
+.lab-title strong{display:block;color:var(--navy)}
+.lab-title small{color:var(--muted)}
+.chev{font-size:20px;color:#7b90a8;transition:.2s}
+.lab.open .chev{transform:rotate(180deg)}
+.lab-body{display:none;padding:0 18px 20px 68px}
+.lab.open .lab-body{display:block}
+.code-wrap{position:relative;margin:12px 0}
+pre{margin:0;background:#0f223a;color:#d9ecff;padding:15px 16px;border-radius:12px;overflow:auto;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}
+.copy{position:absolute;right:8px;top:8px;border:1px solid #435b75;background:#1d3755;color:white;border-radius:8px;padding:6px 9px;font-size:11px;cursor:pointer}
+.explain{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.explain div{background:#f6f9fd;border:1px solid var(--line);border-radius:11px;padding:11px;font-size:13px}
+.explain b{display:block;color:var(--navy)}
+.complete{margin-top:14px;display:flex;align-items:center;gap:8px;color:#40546d;font-weight:800}
+.complete input{width:19px;height:19px}
+.port-panel{display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;gap:12px;background:#f8fbff;border:1px solid var(--line);border-radius:20px;padding:25px}
+.machine{background:white;border:1px solid #ccd9e8;border-radius:15px;padding:18px;text-align:center}
+.machine h3{margin:0;color:var(--navy)}
+.port{margin-top:11px;background:#edf5fb;border-radius:10px;padding:10px;font-weight:900}
+.pipe{text-align:center}
+.pipe .arrow{font-size:32px;color:#6285a7}
+.pipe small{display:block;color:var(--muted);font-weight:800}
+.sim-actions{margin-top:18px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.sim-result{text-align:center;min-height:34px;margin-top:14px;font-weight:900;color:var(--navy)}
+.mount{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mount-card{background:white;border:1px solid var(--line);border-radius:17px;padding:18px}
+.mount-card h3{margin:0 0 8px;color:var(--navy)}
+.mount-card p{color:var(--muted);font-size:14px}
+.dockerfile-flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:15px}
+.dockerfile-flow span{background:white;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-weight:900}
+.dockerfile-flow i{font-style:normal;color:#7991aa}
+.commands{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.cmd{background:white;border:1px solid var(--line);border-radius:13px;padding:13px 15px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cmd code{color:#0f365d;font-weight:850;word-break:break-all}
+.cmd span{font-size:13px;color:var(--muted);text-align:right}
+.quiz{display:grid;gap:13px}
+.q{background:white;border:1px solid var(--line);border-radius:16px;padding:18px}
+.q h3{font-size:16px;margin:0 0 12px;color:var(--navy)}
+.options{display:grid;gap:7px}
+.options label{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.options label:hover{background:#f8fbff}
+.quiz-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:17px}
+.score{font-weight:1000;color:var(--navy)}
+.progress-box{background:var(--navy);color:white;border-radius:20px;padding:23px;margin-top:28px}
+.progress-line{height:12px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:#68d394;transition:.35s}
+.progress-text{display:flex;justify-content:space-between;margin-top:9px;color:#cbd9e8;font-size:13px}
+footer{background:#0b2340;color:#b9c9da;padding:24px 0}
+.footer{display:flex;justify-content:space-between;gap:18px;align-items:center}
+.footer strong{color:#fff}
+.footer a{text-decoration:none;color:white}
+@media(max-width:960px){
+  .hero-grid{grid-template-columns:1fr}.concepts{grid-template-columns:1fr 1fr}
+  .explain{grid-template-columns:1fr}.commands{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  nav{display:none}.hero-grid{padding:48px 0}.concepts,.mount{grid-template-columns:1fr}
+  .port-panel{grid-template-columns:1fr}.pipe .arrow{transform:rotate(90deg)}
+  .lab-body{padding-left:18px}.footer{flex-direction:column;align-items:flex-start}
+  section{padding:50px 0}.lead{font-size:16px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell nav">
+    <a class="brand" href="#top"><span class="logo">🐳</span><span>Docker WEEK1<small>UBUNTU 24.04 · CONTAINER BASICS</small></span></a>
+    <nav>
+      <a href="#concept">核心觀念</a>
+      <a href="#labs">實作</a>
+      <a href="#port">Port</a>
+      <a href="#storage">資料</a>
+      <a href="#quiz">測驗</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="shell hero-grid">
+    <div>
+      <span class="eyebrow">WEEK1 · FROM IMAGE TO CONTAINER</span>
+      <h1>容器 Docker-Compose<br>初體驗</h1>
+      <p class="lead">本週目標不是背指令，而是理解 <strong>Image → Container → Port → Volume → Network</strong> 之間的關係，並用 Ubuntu、Nginx、Bind Mount、Dockerfile 完成第一輪容器實作。</p>
+      <div class="actions">
+        <a class="btn primary" href="#labs">開始實作</a>
+        <a class="btn secondary" href="#quiz">先測觀念</a>
+      </div>
+    </div>
+    <aside class="hero-card">
+      <h3>WEEK1 學習路徑</h3>
+      <div class="hero-flow">
+        <div>Dockerfile</div><div class="arrow">↓ docker build</div>
+        <div>Image</div><div class="arrow">↓ docker run</div>
+        <div>Container</div><div class="arrow">↓ ports / mounts</div>
+        <div>可存取、可修改、可重建的服務</div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="concept">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">CORE CONCEPTS</span>
+      <h2>先把五個名詞放進腦中的同一張圖</h2>
+      <p>點擊每一張卡片，可展開它在 WEEK1 裡扮演的角色。</p>
+    </div>
+    <div class="path">
+      <span>Dockerfile</span><i>→</i><span>Image</span><i>→</i><span>Container</span><i>→</i><span>Port</span><i>→</i><span>Volume</span><i>→</i><span>Network</span>
+    </div>
+    <div class="concepts">
+      <article class="concept" tabindex="0"><div class="icon">📦</div><h3>Image</h3><p>映像檔：系統／應用程式的安裝模板。</p><div class="detail">可以把它想成「還沒開機的應用程式模板」。同一個 Image 可以建立很多 Container。</div></article>
+      <article class="concept" tabindex="0"><div class="icon">🧊</div><h3>Container</h3><p>Image 實際執行後的環境。</p><div class="detail">Container 有自己相對獨立的檔案系統與套件，但和 Host 共用 Linux 核心。</div></article>
+      <article class="concept" tabindex="0"><div class="icon">🔌</div><h3>Port</h3><p>把 Host 的入口對應到 Container 內的服務。</p><div class="detail"><code>-p 8080:80</code> 代表 Host 8080 → Container 80。</div></article>
+      <article class="concept" tabindex="0"><div class="icon">💾</div><h3>Volume / Mount</h3><p>把重要資料與 Container 分離。</p><div class="detail">WEEK1 先學 Bind Mount：Host 目錄直接掛進 Container，修改 Host 檔案即可立即反映。</div></article>
+    </div>
+    <div class="notice"><strong>Registry / Docker Hub：</strong> Registry 是存放 Image 的地方；Docker Hub 是公開 Registry，可以把它想成 Docker Image 的 GitHub。</div>
+  </div>
+</section>
+
+<section class="lab-bg" id="labs">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">HANDS-ON LAB</span>
+      <h2>七個實作，從 Hello World 走到自己的 Image</h2>
+      <p>展開每一關查看指令。做完可勾選「已完成」，頁面會記錄本機瀏覽器的進度。</p>
+    </div>
+    <div class="lab-list">
+
+      <article class="lab open">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">0</span><span><strong>環境準備</strong><small>Ubuntu 24.04、Docker、Compose v2</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>cat /etc/os-release
+sudo apt update
+sudo apt upgrade -y
+
+sudo apt install -y docker.io
+docker --version
+
+sudo apt install -y docker-compose-v2
+docker compose version
+
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker</pre></div>
+          <div class="notice">加入 <code>docker</code> 群組後，一般使用者可直接執行 docker；但 docker 群組成員等同擁有很高的系統權限，正式伺服器要謹慎。</div>
+          <label class="complete"><input type="checkbox" data-step="0"> 我已完成環境準備</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">1</span><span><strong>Hello World</strong><small>第一次從 Registry 取得 Image 並建立 Container</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker run hello-world
+
+docker images
+docker ps
+docker ps -a</pre></div>
+          <div class="explain"><div><b>如果本機沒有 Image</b>Docker 會先從 Registry 下載。</div><div><b>接著</b>建立 Container 並執行程式。</div><div><b>Hello World 結束後</b>Container 停止，但仍可在 <code>docker ps -a</code> 看見。</div></div>
+          <label class="complete"><input type="checkbox" data-step="1"> 我已完成 Hello World</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">2</span><span><strong>Ubuntu Container</strong><small>進入另一個 Ubuntu 使用者空間</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker pull ubuntu:24.04
+docker run -it ubuntu:24.04 bash
+
+cat /etc/os-release
+apt update
+apt install -y curl
+curl --version
+exit</pre></div>
+          <p>看到 <code>root@xxxx:/#</code> 就代表已經進入 Container。你可以在裡面安裝套件，而 Host 的套件環境不會因此直接被修改。</p>
+          <label class="complete"><input type="checkbox" data-step="2"> 我已完成 Ubuntu Container</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">3</span><span><strong>Container 管理</strong><small>start / stop / restart / rm</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker run -it --name myubuntu ubuntu:24.04 bash
+exit
+
+docker ps -a
+docker start myubuntu
+docker stop myubuntu
+docker restart myubuntu
+docker rm myubuntu
+docker rm -f myubuntu</pre></div>
+          <p><code>docker run</code> 是「建立＋執行」；<code>start</code> 則是啟動已經存在的 Container。</p>
+          <label class="complete"><input type="checkbox" data-step="3"> 我已完成 Container 管理</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">4</span><span><strong>Nginx 網站</strong><small>第一次看到 Host Port → Container Port</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker pull nginx
+docker run -d --name myweb -p 8080:80 nginx
+
+docker ps
+docker logs myweb
+docker logs -f myweb</pre></div>
+          <p>瀏覽器開 <code>http://localhost:8080</code>，預期看到 <strong>Welcome to nginx!</strong>。</p>
+          <label class="complete"><input type="checkbox" data-step="4"> 我已完成 Nginx 網站</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">5</span><span><strong>進入執行中的 Container</strong><small>docker exec</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker exec -it myweb bash
+
+cd /usr/share/nginx/html
+ls
+cat index.html
+exit</pre></div>
+          <p><code>exit</code> 只是離開 shell；Nginx Container 仍然在背景執行。</p>
+          <label class="complete"><input type="checkbox" data-step="5"> 我已完成 docker exec</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">6</span><span><strong>Bind Mount</strong><small>資料與 Container 分離</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker rm -f myweb
+
+mkdir -p ~/docker-lab/website
+nano ~/docker-lab/website/index.html
+
+docker run -d --name myweb -p 8080:80 \
+  -v ~/docker-lab/website:/usr/share/nginx/html:ro \
+  nginx</pre></div>
+          <p>修改 Host 上的 <code>index.html</code> 後重新整理瀏覽器，內容會立即改變。<code>:ro</code> 表示 Container 只能讀取。</p>
+          <label class="complete"><input type="checkbox" data-step="6"> 我已完成 Bind Mount</label>
+        </div>
+      </article>
+
+      <article class="lab">
+        <button class="lab-head" type="button"><span class="lab-title"><span class="lab-no">7</span><span><strong>Dockerfile 建立自己的 Image</strong><small>從操作 Container 進入可重複建置</small></span></span><span class="chev">⌄</span></button>
+        <div class="lab-body">
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>mkdir ~/mydocker
+cd ~/mydocker
+nano Dockerfile</pre></div>
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>FROM ubuntu:24.04
+
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["bash"]</pre></div>
+          <div class="code-wrap"><button class="copy" type="button">複製</button><pre>docker build -t myubuntu:v1 .
+docker images
+docker run -it myubuntu:v1
+curl --version
+exit</pre></div>
+          <div class="notice">Dockerfile 中建議使用 <code>apt-get</code> 而不是 <code>apt</code>；而 <code>docker build -t myubuntu:v1 .</code> 最後的「.」代表目前目錄，不能漏掉。</div>
+          <label class="complete"><input type="checkbox" data-step="7"> 我已完成自己的 Image</label>
+        </div>
+      </article>
+    </div>
+
+    <div class="progress-box">
+      <strong>我的 WEEK1 完成度</strong>
+      <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text"><span id="progressText">0 / 8</span><span>完成實作後再進入 WEEK2 Compose</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="port">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">PORT MAPPING</span>
+      <h2><code>-p 8080:80</code> 到底發生什麼事？</h2>
+      <p>用這個小模擬把「Host Port」與「Container Port」分開理解。</p>
+    </div>
+    <div class="port-panel">
+      <div class="machine"><h3>Ubuntu Host</h3><div class="port">Port 8080</div><small>瀏覽器連線的入口</small></div>
+      <div class="pipe"><div class="arrow">→</div><small>Docker port mapping</small></div>
+      <div class="machine"><h3>Nginx Container</h3><div class="port">Port 80</div><small>Nginx 在 Container 裡監聽</small></div>
+    </div>
+    <div class="sim-actions"><button class="btn primary" id="sendReq" type="button">送出 HTTP Request</button><button class="btn secondary" id="resetReq" type="button">重設</button></div>
+    <div class="sim-result" id="simResult" aria-live="polite">等待你送出 Request…</div>
+  </div>
+</section>
+
+<section class="lab-bg" id="storage">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">DATA & BUILD</span>
+      <h2>資料怎麼保存？Image 又怎麼自己做？</h2>
+      <p>WEEK1 先把 Bind Mount 與 Dockerfile 建立 Image 兩件事分開。</p>
+    </div>
+    <div class="mount">
+      <article class="mount-card"><h3>Bind Mount</h3><p>Host 的真實目錄直接掛進 Container。</p><pre>Host: ~/docker-lab/website
+          ↓
+Container: /usr/share/nginx/html</pre><p>適合練習網站檔案與設定檔：Host 一修改，Container 馬上讀到。</p></article>
+      <article class="mount-card"><h3>Named Volume（下一週預告）</h3><p>由 Docker 管理資料位置。</p><pre>db-data:/var/lib/mysql</pre><p>WEEK1 先知道這個名詞；WEEK2 的 WordPress / MariaDB 會正式使用。</p></article>
+    </div>
+    <div class="dockerfile-flow">
+      <span>Dockerfile</span><i>→ docker build</i><span>myubuntu:v1</span><i>→ docker run</i><span>Container</span>
+    </div>
+  </div>
+</section>
+
+<section id="commands">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">COMMAND CHEAT SHEET</span>
+      <h2>WEEK1 指令地圖</h2>
+      <p>知道每一條指令是在操作 Image、Container、Log 還是 Build，比背完整語法更重要。</p>
+    </div>
+    <div class="commands">
+      <div class="cmd"><code>docker pull nginx</code><span>下載 Image</span></div>
+      <div class="cmd"><code>docker images</code><span>查看 Image</span></div>
+      <div class="cmd"><code>docker run nginx</code><span>建立＋執行 Container</span></div>
+      <div class="cmd"><code>docker ps / docker ps -a</code><span>查看 Container</span></div>
+      <div class="cmd"><code>docker stop / start / restart</code><span>生命週期管理</span></div>
+      <div class="cmd"><code>docker rm / docker rmi</code><span>刪 Container / Image</span></div>
+      <div class="cmd"><code>docker logs NAME</code><span>看執行紀錄</span></div>
+      <div class="cmd"><code>docker exec -it NAME bash</code><span>進入執行中的 Container</span></div>
+      <div class="cmd"><code>docker inspect NAME</code><span>查看詳細設定</span></div>
+      <div class="cmd"><code>docker build -t name .</code><span>建立自己的 Image</span></div>
+      <div class="cmd"><code>docker compose up -d</code><span>Compose 前導</span></div>
+      <div class="cmd"><code>docker compose down</code><span>關閉 Compose Application</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="lab-bg" id="quiz">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">SELF CHECK</span>
+      <h2>5 題確認你是真的懂，不是只是指令跑成功</h2>
+      <p>作答後按「檢查答案」。</p>
+    </div>
+    <form class="quiz" id="quizForm">
+      <div class="q"><h3>1. Image 和 Container 的關係，哪一個最正確？</h3><div class="options">
+        <label><input type="radio" name="q1" value="a"> Container 是 Image 執行後的環境。</label>
+        <label><input type="radio" name="q1" value="b"> Image 是 Container 執行後才產生的 Log。</label>
+        <label><input type="radio" name="q1" value="c"> 兩者完全相同。</label>
+      </div></div>
+      <div class="q"><h3>2. <code>-p 8080:80</code> 的意思是？</h3><div class="options">
+        <label><input type="radio" name="q2" value="a"> Container 8080 → Host 80</label>
+        <label><input type="radio" name="q2" value="b"> Host 8080 → Container 80</label>
+        <label><input type="radio" name="q2" value="c"> 下載 8080 個 Image</label>
+      </div></div>
+      <div class="q"><h3>3. 為什麼重要資料不應只放 Container 裡？</h3><div class="options">
+        <label><input type="radio" name="q3" value="a"> Container 可能被刪除與重新建立。</label>
+        <label><input type="radio" name="q3" value="b"> Container 永遠不能寫檔。</label>
+        <label><input type="radio" name="q3" value="c"> Docker 不支援檔案。</label>
+      </div></div>
+      <div class="q"><h3>4. <code>docker exec -it myweb bash</code> 是做什麼？</h3><div class="options">
+        <label><input type="radio" name="q4" value="a"> 刪除 Image</label>
+        <label><input type="radio" name="q4" value="b"> 進入正在執行的 Container</label>
+        <label><input type="radio" name="q4" value="c"> 安裝 Docker Compose</label>
+      </div></div>
+      <div class="q"><h3>5. Dockerfile 的主要用途是？</h3><div class="options">
+        <label><input type="radio" name="q5" value="a"> 描述如何建立 Image</label>
+        <label><input type="radio" name="q5" value="b"> 只用來看 Log</label>
+        <label><input type="radio" name="q5" value="c"> 只用來設定 DNS</label>
+      </div></div>
+      <div class="quiz-actions"><button class="btn primary" type="submit">檢查答案</button><button class="btn secondary" id="quizReset" type="button">重新作答</button><span class="score" id="score" aria-live="polite"></span></div>
+    </form>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">NEXT STEP</span>
+      <h2>WEEK1 → WEEK2</h2>
+      <p>WEEK1 完成單一 Container、Port、Bind Mount、Dockerfile；WEEK2 才正式進入 Network、Docker Compose、資料庫＋Web 與 Reverse Proxy。</p>
+    </div>
+    <div class="path">
+      <span>Linux 基礎</span><i>→</i><span>Image</span><i>→</i><span>Container</span><i>→</i><span>Port</span><i>→</i><span>Volume</span><i>→</i><span>Dockerfile</span><i>→</i><span>Network</span><i>→</i><span>Docker Compose</span><i>→</i><span>實際部署</span>
+    </div>
+    <div class="notice"><strong>上 WEEK2 前清理：</strong><br><code>docker ps -a</code><br><code>docker rm -f myweb myubuntu</code></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="shell footer">
+    <div><strong>QQ Linux Teaching · WEEK1</strong><br><small>Ubuntu 24.04 · Docker Fundamentals · Image · Container · Port · Mount · Dockerfile</small></div>
+    <a href="#top">回到頂端 ↑</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const root=document;
+  root.querySelectorAll('.concept').forEach(card=>{
+    const toggle=()=>card.classList.toggle('active');
+    card.addEventListener('click',toggle);
+    card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
+
+  root.querySelectorAll('.lab-head').forEach(btn=>{
+    btn.addEventListener('click',()=>btn.closest('.lab').classList.toggle('open'));
+  });
+
+  root.querySelectorAll('.copy').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const text=btn.nextElementSibling.innerText;
+      try{
+        await navigator.clipboard.writeText(text);
+        const old=btn.textContent;btn.textContent='已複製';setTimeout(()=>btn.textContent=old,1200);
+      }catch(e){
+        const area=document.createElement('textarea');area.value=text;document.body.appendChild(area);area.select();
+        document.execCommand('copy');area.remove();
+        const old=btn.textContent;btn.textContent='已複製';setTimeout(()=>btn.textContent=old,1200);
+      }
+    });
+  });
+
+  const checks=[...root.querySelectorAll('.complete input')];
+  const fill=root.getElementById('progressFill'), ptxt=root.getElementById('progressText');
+  const key='qqlinux-week1-progress';
+  function load(){
+    let saved=[];
+    try{saved=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+    checks.forEach(c=>c.checked=saved.includes(c.dataset.step));
+    update();
+  }
+  function update(){
+    const done=checks.filter(c=>c.checked).length;
+    fill.style.width=(done/checks.length*100)+'%';
+    ptxt.textContent=done+' / '+checks.length;
+    try{localStorage.setItem(key,JSON.stringify(checks.filter(c=>c.checked).map(c=>c.dataset.step)));}catch(e){}
+  }
+  checks.forEach(c=>c.addEventListener('change',update)); load();
+
+  const sim=root.getElementById('simResult');
+  root.getElementById('sendReq').addEventListener('click',()=>{
+    sim.textContent='Browser → Host :8080 → Docker Port Mapping → Nginx Container :80 → 回傳網頁';
+  });
+  root.getElementById('resetReq').addEventListener('click',()=>{sim.textContent='等待你送出 Request…';});
+
+  const answers={q1:'a',q2:'b',q3:'a',q4:'b',q5:'a'};
+  const form=root.getElementById('quizForm'), score=root.getElementById('score');
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    let n=0, answered=0;
+    Object.keys(answers).forEach(q=>{
+      const el=form.querySelector('input[name="'+q+'"]:checked');
+      if(el){answered++;if(el.value===answers[q])n++;}
+    });
+    score.textContent=answered<5?'你還有 '+(5-answered)+' 題未作答；目前答對 '+n+' 題。':'得分：'+n+' / 5'+(n===5?' 🎉':'');
+  });
+  root.getElementById('quizReset').addEventListener('click',()=>{
+    form.reset();score.textContent='';
+  });
+})();
+</script>
+</body>
+</html>

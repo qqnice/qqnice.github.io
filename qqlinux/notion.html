@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion 互動學習指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Notion Minimalist (White background, Slate text, Subtle Gray borders, Soft Blue/Red/Green/Yellow accents for blocks) -->
+    <!-- Application Structure Plan: A side-navigation 'Dashboard' layout mimicking Notion's own interface. This structure allows users to explore different modules (Intro, Blocks, Styling, Databases) non-linearly. The left sidebar acts as the primary navigation, while the main content area dynamically updates to show interactive lessons based on the selected topic. This approach maximizes user familiarity with the tool they are learning about. -->
+    <!-- Visualization & Content Choices: 1. Introduction -> Inform -> Donut Chart (Chart.js) -> Shows the multi-functional nature of Notion. 2. Block Basics -> Inform/Interact -> Interactive DOM Manipulation -> Users click buttons to simulate adding Notion blocks (Headings, Checklists) to learn by doing. 3. Styling -> Change -> Interactive Style Toggles -> Users click color swatches to change text/background colors, demonstrating formatting features. 4. Databases -> Organize -> View Toggler (Table vs. Kanban) -> Demonstrates Notion's core power of viewing the same data in multiple ways. All visuals use Canvas or Unicode, NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-item.active {
+            background-color: #f1f5f9;
+            font-weight: 500;
+        }
+        .notion-block {
+            transition: all 0.2s ease;
+        }
+        .notion-block:hover {
+            background-color: #f8fafc;
+        }
+        .color-btn.selected {
+            ring-width: 2px;
+            ring-color: #000;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+
+    <aside class="w-64 bg-slate-50 border-r border-slate-200 flex flex-col h-full shrink-0 hidden md:flex">
+        <div class="p-4 flex items-center gap-2 text-lg font-semibold text-slate-800 border-b border-slate-200">
+            <span>📚</span>
+            <span>Notion 學習指南</span>
+        </div>
+        <div class="p-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-2 px-4">
+            教育訓練模組
+        </div>
+        <nav class="flex-1 px-2 space-y-1 overflow-y-auto" id="sidebar-nav">
+            <button data-target="sec-intro" class="nav-item active w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left">
+                <span>👋</span> 01. 簡介與特色
+            </button>
+            <button data-target="sec-blocks" class="nav-item w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left">
+                <span>🧱</span> 02. 區塊 (Block) 應用
+            </button>
+            <button data-target="sec-styles" class="nav-item w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left">
+                <span>🎨</span> 03. 樣式與排版
+            </button>
+            <button data-target="sec-database" class="nav-item w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left">
+                <span>🗄️</span> 04. 強大的資料庫
+            </button>
+            <button data-target="sec-edu" class="nav-item w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md text-slate-700 hover:bg-slate-100 text-left">
+                <span>🎓</span> 05. 教育版申請
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-200 text-xs text-slate-400">
+            基於電算中心教材製作
+        </div>
+    </aside>
+
+    <main class="flex-1 h-full overflow-y-auto bg-white relative">
+        
+        <header class="md:hidden flex items-center justify-between p-4 border-b border-slate-200 bg-white sticky top-0 z-10">
+            <div class="font-semibold flex items-center gap-2"><span>📚</span> Notion 學習指南</div>
+            <select id="mobile-nav" class="border border-slate-300 rounded p-1 text-sm bg-white">
+                <option value="sec-intro">01. 簡介與特色</option>
+                <option value="sec-blocks">02. 區塊應用</option>
+                <option value="sec-styles">03. 樣式與排版</option>
+                <option value="sec-database">04. 資料庫</option>
+                <option value="sec-edu">05. 教育版申請</option>
+            </select>
+        </header>
+
+        <div class="max-w-4xl mx-auto p-8 md:p-12 pb-24">
+            
+            <section id="sec-intro" class="content-section">
+                <div class="mb-8">
+                    <span class="text-6xl mb-4 block">👋</span>
+                    <h1 class="text-4xl font-bold mb-4 text-slate-900">歡迎來到 Notion</h1>
+                    <p class="text-xl text-slate-600 mb-6 border-b border-slate-100 pb-6">
+                        這份互動指南將帶您快速掌握 Notion 的核心功能。Notion 是一款結合筆記、任務管理、協作平台及資料庫功能的「All-in-one」生產力工具。
+                    </p>
+                </div>
+                
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                    <h2 class="text-lg font-semibold mb-2">本區塊目標</h2>
+                    <p class="text-slate-600 text-sm">了解 Notion 的核心價值與多樣化功能組成，透過數據圖表直觀感受其作為全方位生產力工具的定位。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4">特色介紹</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1 text-slate-400">🔹</span>
+                                <div><strong>高度自定義：</strong> 根據需求自定義工作區、頁面佈局。</div>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1 text-slate-400">🔹</span>
+                                <div><strong>多樣工具整合：</strong> 文字、圖片筆記，待辦事項、日曆和專案管理。</div>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1 text-slate-400">🔹</span>
+                                <div><strong>強大的資料庫：</strong> 自定義表格清單，多種視圖切換。</div>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-1 text-slate-400">🔹</span>
+                                <div><strong>協作與共享：</strong> 支援團隊共同編輯、評論、標記任務。</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <h4 class="text-center font-medium text-slate-700 mb-2">Notion 核心功能應用佔比 (示意)</h4>
+                        <div class="chart-container">
+                            <canvas id="notionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-blocks" class="content-section hidden">
+                <div class="mb-8">
+                    <span class="text-6xl mb-4 block">🧱</span>
+                    <h1 class="text-4xl font-bold mb-4 text-slate-900">區塊 (Block) 基礎與應用</h1>
+                    <p class="text-xl text-slate-600 mb-6 border-b border-slate-100 pb-6">
+                        在 Notion 中，頁面上的每一個段落、圖片、標題或清單，都是一個獨立的「區塊」。這是 Notion 最核心的概念。
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                    <h2 class="text-lg font-semibold mb-2">本區塊目標</h2>
+                    <p class="text-slate-600 text-sm">透過互動式模擬編輯器，實際體驗如何使用指令新增不同類型的區塊（如標題、待辦清單、強調標註），學習建構頁面的基本單位。</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1">
+                        <h3 class="text-xl font-semibold mb-4">如何新增區塊？</h3>
+                        <p class="text-slate-600 mb-4 text-sm">最快的方法是輸入 <code class="bg-slate-100 px-1 rounded text-red-500">/</code> 斜線指令，接著輸入關鍵字即可呼叫選單。</p>
+                        
+                        <div class="space-y-2 mb-6">
+                            <button class="block-add-btn w-full text-left p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition flex items-center gap-3" data-type="h2">
+                                <span class="text-xl text-slate-400">H2</span>
+                                <div>
+                                    <div class="font-medium text-slate-800">Heading 2</div>
+                                    <div class="text-xs text-slate-500">新增中標題 (/h2)</div>
+                                </div>
+                            </button>
+                            <button class="block-add-btn w-full text-left p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition flex items-center gap-3" data-type="todo">
+                                <span class="text-xl text-slate-400">☑️</span>
+                                <div>
+                                    <div class="font-medium text-slate-800">To-do list</div>
+                                    <div class="text-xs text-slate-500">新增待辦清單 (/todo)</div>
+                                </div>
+                            </button>
+                            <button class="block-add-btn w-full text-left p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition flex items-center gap-3" data-type="callout">
+                                <span class="text-xl text-slate-400">💡</span>
+                                <div>
+                                    <div class="font-medium text-slate-800">Callout</div>
+                                    <div class="text-xs text-slate-500">新增強調標註 (/callout)</div>
+                                </div>
+                            </button>
+                        </div>
+                        <button id="clear-blocks" class="text-sm text-red-500 hover:text-red-700 underline">清除所有測試區塊</button>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="border border-slate-200 rounded-xl shadow-sm bg-white overflow-hidden flex flex-col h-[500px]">
+                            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center gap-2 text-sm text-slate-500">
+                                <span>📄</span> <span>我的第一個頁面</span>
+                            </div>
+                            <div class="p-8 flex-1 overflow-y-auto" id="mock-editor">
+                                <h1 class="text-3xl font-bold mb-4 outline-none text-slate-800">頁面標題</h1>
+                                <p class="text-slate-500 mb-2 notion-block group relative">
+                                    <span class="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-slate-300">⋮⋮</span>
+                                    請點擊左側的按鈕，模擬在此處新增區塊...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-styles" class="content-section hidden">
+                <div class="mb-8">
+                    <span class="text-6xl mb-4 block">🎨</span>
+                    <h1 class="text-4xl font-bold mb-4 text-slate-900">變更樣式與排版</h1>
+                    <p class="text-xl text-slate-600 mb-6 border-b border-slate-100 pb-6">
+                        Notion 提供了豐富的文字與版面樣式設定，讓您的筆記不再只有單調的黑白，您可以為特定區塊設定文字顏色或背景色。
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                    <h2 class="text-lg font-semibold mb-2">本區塊目標</h2>
+                    <p class="text-slate-600 text-sm">互動體驗 Notion 的樣式選單。點擊下方色彩面板，觀察右側目標區塊的視覺變化，學習如何為筆記加上重點顏色與背景。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">顏色選單模擬</h3>
+                        <p class="text-sm text-slate-500 mb-6">點選下方顏色按鈕，改變右側示範區塊的樣式。</p>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-slate-700 mb-3 border-b border-slate-100 pb-1">文字顏色 (Text Color)</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50" data-color="text-slate-800">預設</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-slate-500" data-color="text-slate-500">灰色</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-red-500" data-color="text-red-500">紅色</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-orange-500" data-color="text-orange-500">橘色</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-green-600" data-color="text-green-600">綠色</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-blue-500" data-color="text-blue-500">藍色</button>
+                                    <button class="color-btn text-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-50 text-purple-500" data-color="text-purple-500">紫色</button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-slate-700 mb-3 border-b border-slate-100 pb-1">背景顏色 (Background)</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:bg-slate-100" data-bg="bg-transparent">預設背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-slate-100" data-bg="bg-slate-100">灰色背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-red-100" data-bg="bg-red-100">紅色背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-orange-100" data-bg="bg-orange-100">橘色背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-green-100" data-bg="bg-green-100">綠色背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-blue-100" data-bg="bg-blue-100">藍色背景</button>
+                                    <button class="color-btn bg-color-btn px-3 py-1 rounded border border-slate-200 text-sm hover:opacity-80 bg-purple-100" data-bg="bg-purple-100">紫色背景</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col justify-center">
+                        <div class="text-xs text-slate-400 uppercase tracking-wider mb-2">示範區塊 (Target Block)</div>
+                        <div id="style-target" class="p-6 rounded-lg border border-slate-200 transition-all duration-300 text-slate-800 bg-transparent text-lg flex items-start gap-4 shadow-sm">
+                            <span class="text-2xl mt-1">📌</span>
+                            <div>
+                                <div class="font-bold mb-1">重點筆記事項</div>
+                                <div>透過左側的顏色選單，您可以改變這段文字的顏色，或是為這個區塊加上底色。這在整理大量資訊時非常有幫助！</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 border-t border-slate-100 pt-6">
+                            <h4 class="font-medium text-slate-800 mb-2">多欄位排版提示</h4>
+                            <p class="text-sm text-slate-600">在實際的 Notion 中，您可以將游標移到區塊左側的 <code>⋮⋮</code> 拖曳把手，按住並拖曳到另一個區塊的「最右側」或「最左側」，看到垂直藍線時放開，即可完成多欄排版。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-database" class="content-section hidden">
+                <div class="mb-8">
+                    <span class="text-6xl mb-4 block">🗄️</span>
+                    <h1 class="text-4xl font-bold mb-4 text-slate-900">強大的資料庫 (Databases)</h1>
+                    <p class="text-xl text-slate-600 mb-6 border-b border-slate-100 pb-6">
+                        Notion 最強大的功能在於其資料庫系統。同一組數據，可以根據需求轉換為表格 (Table)、看板 (Board)、日曆 (Calendar) 等多種檢視方式。
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                    <h2 class="text-lg font-semibold mb-2">本區塊目標</h2>
+                    <p class="text-slate-600 text-sm">透過切換不同的「檢視 (View)」按鈕，觀察同一份專案任務清單如何動態重組。這展示了 Notion 資料庫「資料與呈現分離」的核心優勢。</p>
+                </div>
+
+                <div class="border border-slate-200 rounded-xl shadow-sm bg-white overflow-hidden mb-8">
+                    <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-2 font-medium text-slate-700">
+                            <span>💼</span> 執行中的工作 (Active Projects)
+                        </div>
+                        <div class="flex gap-1 bg-slate-200 p-1 rounded-md">
+                            <button class="view-toggle-btn active px-3 py-1 rounded text-sm font-medium bg-white shadow-sm text-slate-800" data-view="table">
+                                ≡ 表格
+                            </button>
+                            <button class="view-toggle-btn px-3 py-1 rounded text-sm font-medium text-slate-600 hover:text-slate-800" data-view="board">
+                                ◫ 看板
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="db-view-container" class="p-0 bg-white min-h-[300px]">
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm flex gap-3">
+                    <span class="text-blue-500 text-lg">ℹ️</span>
+                    <div>
+                        <strong>進階應用：</strong>除了基本的檢視切換，Notion 資料庫還支援「篩選 (Filter)」、「排序 (Sort)」以及強大的「公式 (Formula)」和「關聯 (Relation)」功能，能將不同資料庫連結在一起。
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-edu" class="content-section hidden">
+                <div class="mb-8">
+                    <span class="text-6xl mb-4 block">🎓</span>
+                    <h1 class="text-4xl font-bold mb-4 text-slate-900">教育版帳號與模板</h1>
+                    <p class="text-xl text-slate-600 mb-6 border-b border-slate-100 pb-6">
+                        學生與教育工作者只要使用學校提供的電子郵件註冊，即可免費升級至 Plus 版 (教育加值版)，享受更多進階功能。
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                    <h2 class="text-lg font-semibold mb-2">本區塊目標</h2>
+                    <p class="text-slate-600 text-sm">提供清晰的步驟指引，幫助校內師生了解如何獲取教育版權限，並介紹如何套用電算中心提供的專屬模板快速開始。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border border-slate-200 rounded-xl p-6 bg-white shadow-sm">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><span>🏫</span> 教育版申請步驟</h3>
+                        <ol class="space-y-4 relative border-l border-slate-200 ml-3">
+                            <li class="pl-6 relative">
+                                <div class="absolute w-6 h-6 bg-slate-100 border border-slate-300 rounded-full flex items-center justify-center text-xs font-bold text-slate-600 -left-3 top-0">1</div>
+                                <h4 class="font-medium text-slate-800">使用公務/學校帳號註冊</h4>
+                                <p class="text-sm text-slate-500 mt-1">前往 Notion 首頁，輸入學校信箱 (如 @nutc.edu.tw) 進行註冊。</p>
+                            </li>
+                            <li class="pl-6 relative">
+                                <div class="absolute w-6 h-6 bg-slate-100 border border-slate-300 rounded-full flex items-center justify-center text-xs font-bold text-slate-600 -left-3 top-0">2</div>
+                                <h4 class="font-medium text-slate-800">收取註冊碼</h4>
+                                <p class="text-sm text-slate-500 mt-1">至信箱收取驗證碼並完成輸入。</p>
+                            </li>
+                            <li class="pl-6 relative">
+                                <div class="absolute w-6 h-6 bg-slate-100 border border-slate-300 rounded-full flex items-center justify-center text-xs font-bold text-slate-600 -left-3 top-0">3</div>
+                                <h4 class="font-medium text-slate-800">選擇用途</h4>
+                                <p class="text-sm text-slate-500 mt-1">在「你想如何使用 Notion?」步驟中，選擇「適用於學校 (個人使用)」。</p>
+                            </li>
+                            <li class="pl-6 relative">
+                                <div class="absolute w-6 h-6 bg-slate-100 border border-slate-300 rounded-full flex items-center justify-center text-xs font-bold text-slate-600 -left-3 top-0">4</div>
+                                <h4 class="font-medium text-slate-800">升級方案</h4>
+                                <p class="text-sm text-slate-500 mt-1">進入設定中的「升級方案」，點擊「取得教育加值版」即可完成。</p>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl p-6 bg-white shadow-sm flex flex-col">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2"><span>📋</span> 套用中心模板</h3>
+                        <p class="text-sm text-slate-600 mb-4">電算中心提供了多種實用模板（如：個人業務管理、工作日誌、聯絡人清單等），可幫助您快速建立架構。</p>
+                        
+                        <div class="bg-slate-50 rounded border border-slate-200 p-4 flex-1 mb-4 relative overflow-hidden group">
+                            <div class="absolute top-2 right-2 bg-slate-800 text-white text-xs px-2 py-1 rounded cursor-pointer hover:bg-slate-700 transition">
+                                📄 複製 (Duplicate)
+                            </div>
+                            <div class="font-medium text-slate-800 mb-2 border-b border-slate-200 pb-2">工作日誌 (範本)</div>
+                            <ul class="text-sm text-slate-500 space-y-1">
+                                <li>☑️ 今天的目標</li>
+                                <li>• 遇到的挑戰或問題</li>
+                                <li>☑️ 明日計劃</li>
+                            </ul>
+                        </div>
+                        
+                        <p class="text-xs text-slate-500">前往教育訓練專區網頁，開啟模板後點擊右上角「複製 (Duplicate)」即可匯入自己的工作區。</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const navItems = document.querySelectorAll('.nav-item');
+        const contentSections = document.querySelectorAll('.content-section');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        function switchSection(targetId) {
+            contentSections.forEach(sec => sec.classList.add('hidden'));
+            const targetSec = document.getElementById(targetId);
+            if(targetSec) targetSec.classList.remove('hidden');
+
+            navItems.forEach(item => {
+                if(item.dataset.target === targetId) {
+                    item.classList.add('active');
+                    item.classList.add('bg-slate-100');
+                } else {
+                    item.classList.remove('active');
+                    item.classList.remove('bg-slate-100');
+                }
+            });
+            mobileNav.value = targetId;
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                switchSection(e.currentTarget.dataset.target);
+            });
+        });
+
+        mobileNav.addEventListener('change', (e) => {
+            switchSection(e.target.value);
+        });
+
+        const ctx = document.getElementById('notionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['筆記與文件', '專案與任務管理', '資料庫與表格', '團隊協作'],
+                datasets: [{
+                    data: [35, 30, 25, 10],
+                    backgroundColor: [
+                        '#3b82f6', 
+                        '#10b981', 
+                        '#f59e0b', 
+                        '#8b5cf6'  
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter' },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: { family: 'Inter', size: 14 },
+                        bodyFont: { family: 'Inter', size: 13 }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        const blockAddBtns = document.querySelectorAll('.block-add-btn');
+        const mockEditor = document.getElementById('mock-editor');
+        const clearBlocksBtn = document.getElementById('clear-blocks');
+
+        blockAddBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const type = e.currentTarget.dataset.type;
+                const newBlock = document.createElement('div');
+                newBlock.className = 'notion-block group relative mb-2 animate-[fadeIn_0.3s_ease-out]';
+                
+                const dragHandle = '<span class="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-slate-300 select-none">⋮⋮</span>';
+
+                if (type === 'h2') {
+                    newBlock.innerHTML = `${dragHandle}<h2 class="text-xl font-bold text-slate-800 mt-4 mb-1 outline-none" contenteditable="true">中標題 (Heading 2)</h2>`;
+                } else if (type === 'todo') {
+                    newBlock.innerHTML = `
+                        ${dragHandle}
+                        <div class="flex items-start gap-2 text-slate-700">
+                            <input type="checkbox" class="mt-1.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                            <span class="outline-none flex-1" contenteditable="true">待辦事項 (請輸入內容)</span>
+                        </div>
+                    `;
+                } else if (type === 'callout') {
+                    newBlock.innerHTML = `
+                        ${dragHandle}
+                        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 mt-2">
+                            <span class="text-xl">💡</span>
+                            <div class="outline-none flex-1" contenteditable="true">這是一個強調標註區塊。可以在此輸入重要提示。</div>
+                        </div>
+                    `;
+                }
+
+                mockEditor.appendChild(newBlock);
+                mockEditor.scrollTop = mockEditor.scrollHeight;
+            });
+        });
+
+        clearBlocksBtn.addEventListener('click', () => {
+            mockEditor.innerHTML = `
+                <h1 class="text-3xl font-bold mb-4 outline-none text-slate-800" contenteditable="true">頁面標題</h1>
+                <p class="text-slate-500 mb-2 notion-block group relative outline-none" contenteditable="true">
+                    <span class="absolute -left-6 top-0 opacity-0 group-hover:opacity-100 cursor-grab text-slate-300">⋮⋮</span>
+                    請點擊左側的按鈕，模擬在此處新增區塊...
+                </p>
+            `;
+        });
+
+        const styleTarget = document.getElementById('style-target');
+        const textColorBtns = document.querySelectorAll('.text-color-btn');
+        const bgColorBtns = document.querySelectorAll('.bg-color-btn');
+
+        let currentTextColor = 'text-slate-800';
+        let currentBgColor = 'bg-transparent';
+
+        function updateStyleTarget() {
+            styleTarget.className = `p-6 rounded-lg border border-slate-200 transition-all duration-300 text-lg flex items-start gap-4 shadow-sm ${currentTextColor} ${currentBgColor}`;
+        }
+
+        textColorBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                textColorBtns.forEach(b => b.classList.remove('selected', 'ring-2', 'ring-slate-400'));
+                const targetBtn = e.currentTarget;
+                targetBtn.classList.add('selected', 'ring-2', 'ring-slate-400');
+                currentTextColor = targetBtn.dataset.color;
+                updateStyleTarget();
+            });
+        });
+
+        bgColorBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                bgColorBtns.forEach(b => b.classList.remove('selected', 'ring-2', 'ring-slate-400'));
+                const targetBtn = e.currentTarget;
+                targetBtn.classList.add('selected', 'ring-2', 'ring-slate-400');
+                currentBgColor = targetBtn.dataset.bg;
+                updateStyleTarget();
+            });
+        });
+
+        const dbTasks = [
+            { id: 1, name: '個人notion頁面建置', date: '2024/09/13 - 10/04', status: '執行中', statusColor: 'bg-blue-100 text-blue-700', type: '任務' },
+            { id: 2, name: '學習基本功能操作', date: '2024/09/20', status: '尚未開始', statusColor: 'bg-slate-100 text-slate-700', type: '任務' },
+            { id: 3, name: '模板套用', date: '2024/09/27', status: '尚未開始', statusColor: 'bg-slate-100 text-slate-700', type: '任務' },
+            { id: 4, name: '舉辦教育訓練課程', date: '2024/10/02', status: '尚未開始', statusColor: 'bg-slate-100 text-slate-700', type: '行程' }
+        ];
+
+        const dbContainer = document.getElementById('db-view-container');
+        const viewToggles = document.querySelectorAll('.view-toggle-btn');
+
+        function renderTable() {
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
+                                <th class="p-3 font-medium">Aa 工作項目名稱</th>
+                                <th class="p-3 font-medium">📅 執行時間</th>
+                                <th class="p-3 font-medium">⭕ 執行狀態</th>
+                                <th class="p-3 font-medium">🏷️ 類型</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+            `;
+            
+            dbTasks.forEach(task => {
+                html += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition group">
+                        <td class="p-3 font-medium text-slate-800 flex items-center gap-2">
+                            <span class="opacity-0 group-hover:opacity-100 cursor-grab text-slate-300">⋮⋮</span>
+                            ${task.name}
+                        </td>
+                        <td class="p-3 text-slate-600">${task.date}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-medium ${task.statusColor}">${task.status}</span></td>
+                        <td class="p-3 text-slate-500">${task.type}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table></div>`;
+            dbContainer.innerHTML = html;
+        }
+
+        function renderBoard() {
+            const columns = {
+                '尚未開始': dbTasks.filter(t => t.status === '尚未開始'),
+                '執行中': dbTasks.filter(t => t.status === '執行中'),
+                '已完成': dbTasks.filter(t => t.status === '已完成')
+            };
+
+            let html = `<div class="flex gap-4 p-4 overflow-x-auto min-h-[300px] bg-slate-50/50">`;
+            
+            for (const [status, tasks] of Object.entries(columns)) {
+                html += `
+                    <div class="flex-1 min-w-[250px]">
+                        <div class="flex items-center gap-2 mb-3 px-1">
+                            <span class="text-sm font-semibold text-slate-700">${status}</span>
+                            <span class="text-xs text-slate-400 bg-slate-200 px-1.5 rounded-full">${tasks.length}</span>
+                        </div>
+                        <div class="space-y-3">
+                `;
+                
+                tasks.forEach(task => {
+                    html += `
+                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:shadow transition group">
+                            <div class="text-sm font-medium text-slate-800 mb-2 group-hover:text-blue-600">${task.name}</div>
+                            <div class="flex items-center justify-between text-xs text-slate-500">
+                                <span class="flex items-center gap-1">📅 ${task.date.split(' - ')[0]}</span>
+                                <span class="bg-slate-100 px-1.5 rounded">${task.type}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                            <button class="w-full text-left text-sm text-slate-400 hover:text-slate-600 p-2 flex items-center gap-1">
+                                <span>+</span> 新增
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            dbContainer.innerHTML = html;
+        }
+
+        viewToggles.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                viewToggles.forEach(b => {
+                    b.classList.remove('active', 'bg-white', 'shadow-sm', 'text-slate-800');
+                    b.classList.add('text-slate-600');
+                });
+                const target = e.currentTarget;
+                target.classList.add('active', 'bg-white', 'shadow-sm', 'text-slate-800');
+                target.classList.remove('text-slate-600');
+                
+                if (target.dataset.view === 'table') {
+                    renderTable();
+                } else {
+                    renderBoard();
+                }
+            });
+        });
+
+        renderTable();
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .content-section {
+                animation: fadeIn 0.4s ease-out;
+            }
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>

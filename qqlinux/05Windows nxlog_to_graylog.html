@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NXLog to Graylog 整合指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自訂滾動條與一些小動畫 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .toast {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(1rem);
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-200">
+
+    <!-- 頂部導覽列 -->
+    <nav class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+            <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <h1 class="text-xl font-bold tracking-wide">Windows NXLog ➔ Graylog 整合指南</h1>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+        
+        <!-- 左側進度條 (Desktop) -->
+        <aside class="hidden md:block md:col-span-3">
+            <div class="sticky top-24 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold mb-4 text-slate-700">部署步驟</h3>
+                <ul class="space-y-4 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                    <li class="relative flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold z-10 ring-4 ring-white">1</div>
+                        <a href="#step1" class="text-slate-600 hover:text-blue-600 font-medium">修改設定檔</a>
+                    </li>
+                    <li class="relative flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold z-10 ring-4 ring-white">2</div>
+                        <a href="#step2" class="text-slate-600 hover:text-blue-600 font-medium">重啟 NXLog 服務</a>
+                    </li>
+                    <li class="relative flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold z-10 ring-4 ring-white">3</div>
+                        <a href="#step3" class="text-slate-600 hover:text-blue-600 font-medium">Graylog 接收設定</a>
+                    </li>
+                    <li class="relative flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full bg-red-400 text-white flex items-center justify-center text-sm font-bold z-10 ring-4 ring-white">!</div>
+                        <a href="#troubleshooting" class="text-slate-600 hover:text-red-500 font-medium">故障排除 (無法啟動)</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- 右側主要內容 -->
+        <div class="md:col-span-9 space-y-8">
+
+            <!-- 步驟 1: 設定檔產生器 -->
+            <section id="step1" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 scroll-mt-24">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-blue-100 text-blue-700 p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">第一步：產生並修改 <code class="bg-slate-100 px-2 py-1 rounded text-lg text-pink-600">nxlog.conf</code></h2>
+                </div>
+                
+                <p class="text-slate-600 mb-4">請在下方輸入你的 Graylog 伺服器資訊，系統會自動為你產生正確的設定檔。預設路徑為 <code class="text-sm bg-slate-100 px-1 rounded">C:\Program Files\nxlog\conf\nxlog.conf</code>。</p>
+
+                <!-- 互動輸入區 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Graylog Server IP</label>
+                        <input type="text" id="graylog-ip" value="10.24.1.100" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">接收 Port (GELF UDP)</label>
+                        <input type="number" id="graylog-port" value="32201" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    </div>
+                </div>
+
+                <!-- 程式碼顯示區 -->
+                <div class="relative group">
+                    <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="copyCode('config-output')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            複製代碼
+                        </button>
+                    </div>
+                    <pre class="bg-slate-800 text-slate-50 p-4 md:p-6 rounded-lg overflow-x-auto text-sm font-mono leading-relaxed"><code id="config-output"></code></pre>
+                </div>
+            </section>
+
+            <!-- 步驟 2: 重啟服務 -->
+            <section id="step2" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 scroll-mt-24">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-indigo-100 text-indigo-700 p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">第二步：重新啟動 NXLog 服務</h2>
+                </div>
+
+                <p class="text-slate-600 mb-4">設定檔儲存後，必須重新啟動服務才會生效。強烈建議使用<strong>系統管理員身分</strong>執行命令提示字元 (CMD) 來操作。</p>
+
+                <div class="relative group mt-4">
+                    <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="copyCode('restart-cmd')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-sm flex items-center gap-2 transition-colors">
+                            複製指令
+                        </button>
+                    </div>
+                    <pre class="bg-slate-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono"><code id="restart-cmd">net stop nxlog
+net start nxlog</code></pre>
+                </div>
+            </section>
+
+            <!-- 步驟 3: Graylog 設定 -->
+            <section id="step3" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 scroll-mt-24">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-emerald-100 text-emerald-700 p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">第三步：在 Graylog 端設定接收 (Input)</h2>
+                </div>
+
+                <ol class="list-decimal list-inside space-y-3 text-slate-700 ml-2">
+                    <li>登入 Graylog 網頁管理介面。</li>
+                    <li>前往頂部選單 <strong>System</strong> ➔ <strong>Inputs</strong>。</li>
+                    <li>在 <em>Select Input</em> 下拉選單中，選擇 <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-bold border border-yellow-200">GELF UDP</span>。</li>
+                    <li>點擊 <strong>Launch new input</strong> 按鈕。</li>
+                    <li>填寫關鍵資訊：
+                        <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-slate-600 bg-slate-50 p-4 rounded border border-slate-100">
+                            <li><strong>Title:</strong> Windows_NXLog (自訂名稱)</li>
+                            <li><strong>Bind address:</strong> <code>0.0.0.0</code> (保持預設)</li>
+                            <li><strong>Port:</strong> <code class="text-pink-600 font-bold bg-pink-50 px-1 rounded" id="display-port">32201</code> (必須與 nxlog.conf 一致)</li>
+                        </ul>
+                    </li>
+                    <li>點擊 <strong>Save</strong>。確認狀態轉為綠色的 <span class="text-emerald-600 font-bold">Running</span>。</li>
+                </ol>
+            </section>
+
+            <!-- 故障排除專區 -->
+            <section id="troubleshooting" class="bg-red-50 p-6 md:p-8 rounded-xl shadow-sm border border-red-200 scroll-mt-24">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-red-100 text-red-600 p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-red-800">故障排除：服務無法啟動怎麼辦？</h2>
+                </div>
+                
+                <p class="text-red-700 mb-6 font-medium">如果執行 `net start nxlog` 失敗，通常是因為設定檔有語法錯誤或路徑錯誤。請依照以下步驟排查：</p>
+
+                <div class="space-y-4">
+                    <!-- 檢查錯誤日誌 -->
+                    <details class="group bg-white rounded-lg border border-red-200 shadow-sm overflow-hidden" open>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-4 text-slate-800 bg-red-100/50 hover:bg-red-100 transition-colors">
+                            <span>1. 查看 NXLog 內部錯誤日誌 (最快的方法)</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </summary>
+                        <div class="p-4 text-slate-700 border-t border-red-100">
+                            <p class="mb-2">用記事本打開：<code class="bg-slate-100 px-1 rounded text-pink-600">C:\Program Files\nxlog\data\nxlog.log</code></p>
+                            <p>捲動到檔案的<strong>最底下</strong>，尋找帶有 <strong>ERROR</strong> 或 <strong>failed</strong> 的字眼。它通常會精準告訴你是哪一行寫錯了（例如：<code class="bg-slate-100 px-1">config error at line 25</code>）。</p>
+                        </div>
+                    </details>
+
+                    <!-- 使用驗證指令 -->
+                    <details class="group bg-white rounded-lg border border-red-200 shadow-sm overflow-hidden">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-4 text-slate-800 bg-red-100/50 hover:bg-red-100 transition-colors">
+                            <span>2. 讓 NXLog 幫你抓蟲 (使用 -v 參數)</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </summary>
+                        <div class="p-4 text-slate-700 border-t border-red-100">
+                            <p class="mb-2">以系統管理員身分開啟 CMD，執行以下指令驗證設定檔語法：</p>
+                            <div class="relative group">
+                                <pre class="bg-slate-900 text-green-400 p-3 rounded text-sm overflow-x-auto"><code id="verify-cmd">"C:\Program Files\nxlog\nxlog.exe" -v</code></pre>
+                                <button onclick="copyCode('verify-cmd')" class="absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity">複製</button>
+                            </div>
+                            <p class="mt-2 text-sm text-slate-500">如果畫面顯示錯誤，請針對該行進行修改；如果什麼都沒顯示或顯示 OK，代表語法無誤。</p>
+                        </div>
+                    </details>
+
+                    <!-- 常見的三大地雷 -->
+                    <details class="group bg-white rounded-lg border border-red-200 shadow-sm overflow-hidden">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-4 text-slate-800 bg-red-100/50 hover:bg-red-100 transition-colors">
+                            <span>3. 檢查三個最常見的「隱形地雷」</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </summary>
+                        <div class="p-4 text-slate-700 border-t border-red-100">
+                            <ul class="list-disc list-inside space-y-3">
+                                <li>
+                                    <strong>安裝路徑不對：</strong><br>
+                                    <span class="ml-5 text-sm text-slate-600">如果你安裝的是 32 位元版，預設路徑其實是 <code class="bg-slate-100">C:\Program Files (x86)\nxlog</code>。請確保設定檔頂部的 <code class="bg-slate-100 text-pink-600">define ROOT</code> 與你的實際資料夾一致。</span>
+                                </li>
+                                <li>
+                                    <strong>混入了全形空白：</strong><br>
+                                    <span class="ml-5 text-sm text-slate-600">從網頁複製時常會帶入中文字的全形空白（　）。NXLog 看不懂這個，請確保縮排使用的是半形空白或 Tab。</span>
+                                </li>
+                                <li>
+                                    <strong>標籤沒有閉合：</strong><br>
+                                    <span class="ml-5 text-sm text-slate-600">檢查是否所有的 <code class="bg-slate-100">&lt;Input in&gt;</code> 都有對應的 <code class="bg-slate-100">&lt;/Input&gt;</code>。少一個斜線就會報錯。</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 複製成功提示 (Toast) -->
+    <div id="toast" class="toast fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 z-50">
+        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span class="font-medium">已複製到剪貼簿！</span>
+    </div>
+
+    <script>
+        // 設定檔模板 (使用 Template Literal)
+        const generateTemplate = (ip, port) => `Panic Soft
+#NoFreeOnExit TRUE
+
+define ROOT     C:\\Program Files\\nxlog
+define CERTDIR  %ROOT%\\cert
+define CONFDIR  %ROOT%\\conf\\nxlog.d
+define LOGDIR   %ROOT%\\data
+
+include %CONFDIR%\\*.conf
+define LOGFILE  %LOGDIR%\\nxlog.log
+LogFile %LOGFILE%
+
+Moduledir %ROOT%\\modules
+CacheDir  %ROOT%\\data
+Pidfile   %ROOT%\\data\\nxlog.pid
+SpoolDir  %ROOT%\\data
+
+# 載入 GELF 擴充模組，讓 NXLog 支援 Graylog 的格式
+<Extension _gelf>
+    Module xm_gelf
+</Extension>
+
+# 定義輸入來源 (Windows 事件檢視器)
+<Input in>
+    # Vista (含)以後的 Windows 系統皆使用此模組
+    Module im_msvistalog
+</Input>
+
+# 定義輸出目標 (Graylog Server)
+<Output out>
+    Module om_udp
+    Host ${ip}
+    Port ${port}
+    OutputType GELF
+</Output>
+
+# 定義路由：將 in 收集到的資料往 out 送
+<Route 1>
+    Path in => out
+</Route>`;
+
+        // DOM 元素
+        const ipInput = document.getElementById('graylog-ip');
+        const portInput = document.getElementById('graylog-port');
+        const configOutput = document.getElementById('config-output');
+        const displayPort = document.getElementById('display-port');
+        const toast = document.getElementById('toast');
+
+        // 更新畫面設定檔內容
+        function updateConfig() {
+            const ip = ipInput.value || '10.24.1.100';
+            const port = portInput.value || '32201';
+            configOutput.textContent = generateTemplate(ip, port);
+            displayPort.textContent = port;
+        }
+
+        // 監聽輸入框變更
+        ipInput.addEventListener('input', updateConfig);
+        portInput.addEventListener('input', updateConfig);
+
+        // 複製程式碼功能
+        function copyCode(elementId) {
+            const textToCopy = document.getElementById(elementId).textContent;
+            
+            // 使用剪貼簿 API 或 Fallback
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(showToast);
+            } else {
+                // Fallback for iFrame or non-HTTPS
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    console.error('Copy failed', err);
+                    alert("複製失敗，請手動選取複製");
+                }
+                textArea.remove();
+            }
+        }
+
+        // 顯示 Toast 提示
+        let toastTimeout;
+        function showToast() {
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // 初始化第一次渲染
+        updateConfig();
+        
+        // 簡單的進度條高亮邏輯 (偵測滾動)
+        const navLinks = document.querySelectorAll('aside a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                const li = link.parentElement;
+                const circle = li.querySelector('div');
+                if (link.getAttribute('href').substring(1) === current) {
+                    circle.classList.add('ring-blue-200');
+                    link.classList.add('text-blue-600', 'font-bold');
+                } else {
+                    circle.classList.remove('ring-blue-200');
+                    link.classList.remove('text-blue-600', 'font-bold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

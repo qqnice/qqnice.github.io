@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機械手臂安全與操作測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .correct-answer {
+            background-color: #10B981 !important; /* Tailwind green-500 */
+            color: white !important;
+            border-color: #10B981 !important;
+        }
+        .wrong-answer {
+            background-color: #EF4444 !important; /* Tailwind red-500 */
+            color: white !important;
+            border-color: #EF4444 !important;
+        }
+        .explanation-show {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+
+    <div class="max-w-3xl w-full bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">QQ 達明 TM 協作型機械手臂安全與操作測驗</h1>
+            <p class="text-blue-100">共 50 題，每題 2 分，滿分 100 分</p>
+        </div>
+
+        <!-- Progress and Score (Hidden initially) -->
+        <div id="status-bar" class="bg-gray-100 p-4 flex justify-between items-center border-b hidden">
+            <div class="font-semibold text-gray-700">
+                進度：<span id="current-q-num">1</span> / 50
+            </div>
+            <div class="font-semibold text-blue-600">
+                目前得分：<span id="current-score">0</span>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="p-8 text-center">
+            <h2 class="text-xl text-gray-700 mb-6">QQ 準備好開始測驗了嗎？</h2>
+            <button onclick="startQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md transition duration-300">
+                開始測驗
+            </button>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="p-6 md:p-8 hidden">
+            <!-- Question -->
+            <div class="mb-6">
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-gray-800 leading-relaxed">
+                    <!-- Question will be inserted here -->
+                </h2>
+            </div>
+
+            <!-- Options -->
+            <div id="options-container" class="space-y-3 mb-8">
+                <!-- Options will be inserted here -->
+            </div>
+
+            <!-- Explanation (Hidden until answered) -->
+            <div id="explanation-container" class="hidden bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md mb-6 explanation-show">
+                <h3 class="font-bold text-blue-800 mb-2">📝 解析：</h3>
+                <p id="explanation-text" class="text-gray-700 leading-relaxed"></p>
+            </div>
+
+            <!-- Next Button (Hidden until answered) -->
+            <div class="text-right">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-md transition duration-300">
+                    下一題 ➔
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="p-8 text-center hidden">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">測驗完成！</h2>
+            <div class="bg-gray-100 rounded-lg p-6 mb-8 inline-block">
+                <p class="text-lg text-gray-600 mb-2">您的總得分是</p>
+                <p class="text-5xl font-extrabold text-blue-600" id="final-score">0</p>
+                <p class="text-gray-500 mt-2">/ 100 分</p>
+            </div>
+            
+            <div id="result-message" class="text-xl mb-8 font-medium"></div>
+
+            <button onclick="restartQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition duration-300">
+                重新測驗
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 題目資料
+        const questions = [
+            {
+                q: "第01題：協作型機械手臂的安全規範沒有包含哪項安全功能？",
+                options: ["A. 速度限制", "B. 空間限制", "C. 力量限制", "D. 亮度限制"],
+                answer: 3, // D
+                explanation: "ISO/TS 15066協作機器人安全規範主要包含速度與距離監控、功率與力量限制等，亮度限制屬於外部環境條件，非機械手臂本體的安全規範功能。"
+            },
+            {
+                q: "第02題：請問協作型機械手臂必須符合哪項安全規範？",
+                options: ["A. ISO10812-1", "B. ISO10218-1", "C. ISO10821-2", "D. ISO10218-2"],
+                answer: 1, // B
+                explanation: "協作型手臂作為工業機器人的一種，必須符合ISO 10218-1這項工業機器人基礎安全標準的規範。"
+            },
+            {
+                q: "第03題：在ISO定義的機械手臂安全中，最重要的一項是？",
+                options: ["A. 具有緊急停止按鈕", "B. 可控制速度", "C. 可外接PLC", "D. 具備內建視覺系統"],
+                answer: 0, // A
+                explanation: "緊急停止(E-Stop)按鈕是能立即切斷動力、使機器人完全停止的最基礎且最重要的安全防護設計。"
+            },
+            {
+                q: "第04題：在按下緊急停止按鈕後，機械手臂會如何反應？",
+                options: ["A. 所有關節開始緩慢降速，直到機械手臂完全靜止", "B. 從第一軸開始向上逐一斷電，直到機械手臂完全靜止", "C. 所有關節同時斷電，機械手臂完全靜止", "D. 從第一軸開始緩慢降速，直到機械手臂完全靜止"],
+                answer: 2, // C
+                explanation: "觸發緊急停止時，安全系統會立即切斷所有關節的伺服馬達電源並作動煞車，使手臂瞬間靜止以確保人員安全。"
+            },
+            {
+                q: "第05題：以下何者關於協作型機械手臂與工業型機械手臂的敘述不正確？",
+                options: ["A. 在正常情況下，協作型機械手臂與工業型機械手臂皆需要實體圍籬", "B. 在正確設定安全功能的情況下，協作型機械手臂可以和人在同一個場域下一起進行作業", "C. 協作型機械手臂通常具有手拉教導的功能", "D. 以上皆非"],
+                answer: 0, // A
+                explanation: "協作型手臂(Cobot)最大的設計特色，即為在符合安全設定的情況下，可與人類共同作業而無需加裝實體防護圍籬。"
+            },
+            {
+                q: "第06題：請選出正確的視覺辨識流程排序",
+                options: ["A. 調整相機參數、編輯視覺辨識任務、相機與平面校正", "B. 相機與平面校正、調整相機參數、編輯視覺辨識任務", "C. 調整相機參數、相機與平面校正、編輯視覺辨識任務", "D. 編輯視覺辨識任務、相機與平面校正、調整相機參數"],
+                answer: 2, // C
+                explanation: "視覺辨識需先取得清晰影像（調整相機參數），接著確保相機與工作面平行以獲得正確空間比例（相機與平面校正），最後再設定要辨識的條件（編輯視覺任務）。"
+            },
+            {
+                q: "第07題：哪個不是調整內建視覺相機參數時重要的參數？",
+                options: ["A. 光圈", "B. 快門時間", "C. 焦距", "D. 白平衡"],
+                answer: 0, // A
+                explanation: "光圈、快門與焦距會直接影響影像的清晰度與特徵對比，而白平衡主要影響色彩，對多數形狀輪廓辨識任務而言並非首要調整重點。"
+            },
+            {
+                q: "第08題：在進行工作平面校正時，校正板應放置於？",
+                options: ["A. 工作下方", "B. 工件上方", "C. 桌上", "D. 地上"],
+                answer: 1, // B
+                explanation: "為了讓視覺系統準確換算實際夾取位置的空間座標，校正板必須放置在實際的工作平面（如桌上）以確保高度一致。"
+            },
+            {
+                q: "第09題：校正工作平面流程中哪一項可以略過？",
+                options: ["A. 傾斜校正", "B. 設定工作平面", "C. 校正工作平面", "D. 儲存工作平面"],
+                answer: 0, // A
+                explanation: "若相機安裝時已透過硬體機構確保垂直於工作平面，軟體內的傾斜校正步驟便可視情況省略，但平面的設定與校正仍必須執行。"
+            },
+            {
+                q: "第10題：在定點式定位編輯流程中，哪一個相機參數無法進行調整？",
+                options: ["A. 快門時間", "B. 焦距", "C. 白平衡", "D. 以上皆非"],
+                answer: 1, // B
+                explanation: "達明手臂內建相機採手動對焦，其焦距必須透過轉動實體鏡頭上的對焦環來調整，無法在軟體流程介面中設定。"
+            },
+            {
+                q: "第11題：在定點式定位流程中，需選用哪一項功能定位工件？",
+                options: ["A. 影像強化", "B. 物件偵測", "C. 辨識", "D. 量測"],
+                answer: 1, // B
+                explanation: "尋找工件的位置(X, Y)與旋轉角度(Rz)屬於「物件偵測」(Pattern Match)的範疇，此為定點式定位的核心功能。"
+            },
+            {
+                q: "第12題：使用TM Landmark定位時，相機與Landmark的最佳距離為何？",
+                options: ["A. 10~30公分", "B. 5~10公分", "C. 25~35公分", "D. 30~35公分"],
+                answer: 0, // A
+                explanation: "根據原廠建議，讀取TM Landmark時，相機與標記應保持在10~30公分之間，以確保3D姿態的辨識精度最佳。"
+            },
+            {
+                q: "第13題：使用定點式定位找到工件後會產生何種座標系？",
+                options: ["A. 機器人座標系", "B. 工具座標系", "C. 視覺座標系", "D. 相機座標系"],
+                answer: 2, // C
+                explanation: "成功定位工件後，系統會基於該工件特徵建立一個專屬的「視覺座標系」(Vision Base)，讓手臂的後續動作能對齊此座標系執行。"
+            },
+            {
+                q: "第14題：若在開啟內建相機後發現畫面模糊的狀況，應調整哪個相機參數？",
+                options: ["A. 光圈", "B. 快門時間", "C. 焦距", "D. 白平衡"],
+                answer: 2, // C
+                explanation: "畫面模糊(失焦)是因為鏡頭焦點未對準，需調整相機上的實體焦距環直到畫面清晰。"
+            },
+            {
+                q: "第15題：若在開啟內建相機後發現畫面很暗，應調整哪個相機參數？",
+                options: ["A. 光圈", "B. 快門時間", "C. 焦距", "D. 白平衡"],
+                answer: 1, // B
+                explanation: "畫面過暗代表進光量不足，透過軟體介面增加快門時間(曝光時間)可有效提升影像亮度。"
+            },
+            {
+                q: "第16題：若在開啟內建相機後發現畫面的色彩很奇怪，應調整哪個相機參數？",
+                options: ["A. 光圈", "B. 快門時間", "C. 焦距", "D. 白平衡"],
+                answer: 3, // D
+                explanation: "色彩失真通常是因為環境光源色溫與相機設定不符，此時需重新調整白平衡以還原真實色彩。"
+            },
+            {
+                q: "第17題：請問以下哪一項視覺功能需要先進行工作平面校正？",
+                options: ["A. AI辨識", "B. Landmark定位", "C. 伺服式定位", "D. 定點式定位"],
+                answer: 3, // D
+                explanation: "定點式定位(Fixed positioning)依賴相機與平面的幾何關係來換算真實尺寸與座標，因此必須先完成工作平面校正。"
+            },
+            {
+                q: "第18題：在定點式定位中，通常會使用物件的輪廓特徵來搜尋物件，請問以下哪一個說明是正確的？",
+                options: ["A. 可以使用框選區域的方式來選擇要辨識的輪廓特徵", "B. 可以使用橡皮擦工具來清除不需要的輪廓特徵", "C. 可以使用鉛筆工具自己畫出想要使用的輪廓", "D. 以上皆是"],
+                answer: 3, // D
+                explanation: "TM視覺軟體提供了框選、橡皮擦與鉛筆等豐富的特徵編輯工具，讓使用者能精確定義欲尋找的邊緣輪廓。"
+            },
+            {
+                q: "第19題：使用定點式定位找到工件後，座標系會生成在工件的哪裡？",
+                options: ["A. 所框選之樣版的正中心", "B. 工件的左上角", "C. 工件的右上角", "D. 工件正中心"],
+                answer: 0, // A
+                explanation: "系統預設會以建立樣版(Pattern)時，所框選區域的幾何正中心作為基準點來生成該物件的視覺座標系。"
+            },
+            {
+                q: "第20題：在視覺節點中，會有兩個出口，分別為Pass和Fail，請問系統是按照什麼條件來決定要走哪一個出口？",
+                options: ["A. 相機亮度是否充足", "B. 視覺任務是否編寫完成", "C. 工件是否有成功定位", "D. 以上皆是"],
+                answer: 2, // C
+                explanation: "視覺節點執行後，若成功找到工件並完成定位即會走向Pass出口，若找不到特徵或判定失敗則走向Fail出口。"
+            },
+            {
+                q: "第21題：請問達明機械手臂有幾個軸？(Joint)",
+                options: ["A. 5", "B. 6", "C. 7", "D. 8"],
+                answer: 1, // B
+                explanation: "達明協作型機械手臂具備六個旋轉關節，屬於六自由度(6 DoF)的六軸機械手臂。"
+            },
+            {
+                q: "第22題：請問協作型機械手臂的末端安裝工具的表面稱為？",
+                options: ["A. 法蘭面", "B. 手臂座標系", "C. 末端模組", "D. 工具座標系"],
+                answer: 0, // A
+                explanation: "機械手臂最末端用來鎖附夾爪、吸盤等末端效應器的金屬連接介面，在工業術語中統一稱為法蘭面(Flange)。"
+            },
+            {
+                q: "第23題：請問達明機械手臂座標系原點定義在哪裡？",
+                options: ["A. 手臂的末端", "B. 工具的中心點", "C. 手臂的底座圓心處", "D. 以上皆是"],
+                answer: 2, // C
+                explanation: "機器人基礎座標系(Robot Base)的絕對原點(0,0,0)預設定義在機械手臂底座(Base)的圓心處。"
+            },
+            {
+                q: "第24題：請問座標系右手定則的食指代表的是哪一個軸向？",
+                options: ["A. X", "B. Y", "C. Z", "D. 以上皆非"],
+                answer: 1, // B
+                explanation: "依據三維空間的右手定則，大拇指代表X軸正向，食指代表Y軸正向，中指代表Z軸正向。"
+            },
+            {
+                q: "第25題：在鎖附吸附/夾取工具至法蘭面時，使用的工具為以下何者？",
+                options: ["A. 十字起子", "B. 一字起子", "C. 活動板手", "D. 六角板手"],
+                answer: 3, // D
+                explanation: "手臂法蘭面及多數工業配件皆採用內六角螺絲進行固定，因此拆裝時需使用對應的六角板手(內六角板手)。"
+            },
+            {
+                q: "第26題：在鎖附吸附/夾取工具至法蘭面時，使用的螺絲為以下何者？",
+                options: ["A. 內六角螺絲", "B. 十字螺絲", "C. 星型螺絲", "D. 外六角螺絲"],
+                answer: 0, // A
+                explanation: "為了確保足夠的鎖附扭力且避免螺絲頭滑牙，法蘭面常規的緊固件為內六角螺絲。"
+            },
+            {
+                q: "第27題：手臂控制棒(Stick)上面不包含以下何種按鍵？",
+                options: ["A. 開機鍵", "B. 專案停止鍵", "C. 專案刪除鍵", "D. 手/自動模式切換鍵"],
+                answer: 2, // C
+                explanation: "控制棒(Robot Stick)包含開關機、暫停/停止、手自動切換與手拉教導等實體按鍵。專案刪除為軟體介面操作，不在硬體控制棒上。"
+            },
+            {
+                q: "第28題：手臂複合線方向在機器人座標系下定義為哪一個方向？",
+                options: ["A. +X", "B. -X", "C. +Y", "D. +Z"],
+                answer: 1, // B
+                explanation: "在原廠預設狀態下，手臂底座後方（即複合訊號線/電源線出線方向）對應於機器人座標系的-X方向。"
+            },
+            {
+                q: "第29題：在使用手臂時，使用者必須先依據夾爪、吸盤、螺絲刀等工具設置正確的工具中心點，請問工具中心點的英文簡稱為？",
+                options: ["A. TCH", "B. T1", "C. TCP", "D. TOOL"],
+                answer: 2, // C
+                explanation: "工具中心點英文全名為Tool Center Point，簡稱TCP，是確保手臂運動與旋轉軌跡符合預期的重要設定。"
+            },
+            {
+                q: "第30題：在裝配有兩指夾爪的情況下，機械手臂的工具中心點通常會設定在以下何處？",
+                options: ["A. 圖A (法蘭面)", "B. 圖B (其他位置)", "C. 圖C (兩指夾爪中間)", "D. 圖D (其他位置)"],
+                answer: 2, // C
+                explanation: "兩指夾爪實際與工件互動、施力及定位的基準點位於兩指的中間夾取位置，因此TCP應設定在該處。"
+            },
+            {
+                q: "第31題：在Point中，包含以下何種設定？",
+                options: ["A. 運動設定", "B. 點位管理", "C. 軌跡混合", "D. 以上皆是"],
+                answer: 3, // D
+                explanation: "在TMflow的Point(點位)節點中，可設定到達該點的運動方式、進行點位數值管理，並能設定與下個點的軌跡混合(Blend)比例。"
+            },
+            {
+                q: "第32題：在下圖中，有P1、P2、P3總共三個點位，若想要將夾爪上的圓柱在不碰撞的前提下插入到柱子中，以下何者為較正確的設定？",
+                options: ["A. 圖A配置", "B. 圖B配置", "C. 圖C配置", "D. 圖D配置"],
+                answer: 1, // B
+                explanation: "為了避免提前轉彎造成碰撞，插入孔洞的最後一段軌跡必須為直進直出的直線運動(如圖C的無混和垂直下降軌跡)。"
+            },
+            {
+                q: "第33題：若想要使用TMflow的Move功能來將圓柱從柱子中垂直向上取出，請問在Move中應該如何設定？",
+                options: ["A. 直線 / 選擇座標系：工具 / Z軸走+200mm", "B. 直線 / 選擇座標系：工具 / Z軸走-200mm", "C. 直線 / 選擇座標系：機器人座標系 / Z軸走+200mm", "D. 點對點 / 選擇座標系：機器人座標系 / Z軸走-200mm"],
+                answer: 2, // C
+                explanation: "要將工件垂直向上拔出，最直覺的設定是沿著機器人世界座標系(Base)的Z軸正方向(+Z，即垂直往上)作直線移動。"
+            },
+            {
+                q: "第34題：若要等夾爪開啟/關閉或吸盤真空作動完成再繼續後面的取放，應該使用哪種功能？",
+                options: ["A. Move", "B. Point", "C. Wait for", "D. Set"],
+                answer: 2, // C
+                explanation: "氣動/電動元件作動需要反應時間，必須加入Wait for(等待)節點，等待感測器訊號到位後再繼續移動以免掉料。"
+            },
+            {
+                q: "第35題：若要在程式中控制夾爪的開關/氣吸的開關，應該使用哪個功能？",
+                options: ["A. Point", "B. Move", "C. Set", "D. Wait for"],
+                answer: 2, // C
+                explanation: "在TMflow中，使用Set(設定)節點可對控制器輸出數位訊號(DO)，藉此觸發外部夾爪或電磁閥的動作。"
+            },
+            {
+                q: "第36題：若要在程式中設定變數的值，應該使用哪個功能？",
+                options: ["A. Point", "B. Move", "C. Set", "D. Wait for"],
+                answer: 2, // C
+                explanation: "Set(設定)節點除了用來控制硬體I/O，也可對軟體內部的變數(如計數器)進行數值賦予或數學運算。"
+            },
+            {
+                q: "第37題：若要在程式中讓專案自己停止，應該使用哪個功能？",
+                options: ["A. Warp", "B. Pause", "C. Goto", "D. Stop"],
+                answer: 3, // D
+                explanation: "當程式邏輯執行完畢，或達到特定條件需完全結束運行時，應使用Stop(停止)節點來終止專案。"
+            },
+            {
+                q: "第38題：在TMflow中變數可以設定為以下何種型別？",
+                options: ["A. int", "B. float", "C. double", "D. 以上皆是"],
+                answer: 3, // D
+                explanation: "TMflow支援包含整數(int)、浮點數(float/double)、布林值(bool)與字串(string)等多種資料型態以滿足各種邏輯需求。"
+            },
+            {
+                q: "第39題：在點位設定中，若不想讓手臂完全停止在該點位，應設定以下何種功能？",
+                options: ["A. 點對點", "B. 軌跡混和", "C. 直線", "D. 速度設定"],
+                answer: 1, // B
+                explanation: "啟用軌跡混和(Blend)能讓手臂到達目標前以平滑弧線過渡到下一個點位而不減速至零，可有效提升整體運作效率。"
+            },
+            {
+                q: "第40題：執行專案時，若想在顯示板上顯示字樣，應使用以下何種功能？",
+                options: ["A. Display", "B. Set", "C. If", "D. Show"],
+                answer: 0, // A
+                explanation: "Display(顯示)節點可將變數數值或自訂字串列印在軟體畫面的顯示面板上，方便進行除錯或給予操作員提示。"
+            },
+            {
+                q: "第41題：以下何種功能可以取代用線連接節點的功能？",
+                options: ["A. Set", "B. Goto", "C. Move", "D. Wait for"],
+                answer: 1, // B
+                explanation: "當流程過長或需進行迴圈時，使用Goto(跳轉)節點可不需實體拉線，直接跳轉至指定的節點繼續執行，使程式畫面保持整潔。"
+            },
+            {
+                q: "第42題：以下何種功能可以編輯判斷式，用以判斷不同條件？",
+                options: ["A. Set", "B. Move", "C. Wait for", "D. If"],
+                answer: 3, // D
+                explanation: "If(條件判斷)節點可根據變數、I/O訊號或數學運算結果是否成立(True/False)，來引導程式走向不同的執行分支。"
+            },
+            {
+                q: "第43題：HMI Controller具備哪些參考方向可以控制手臂移動？",
+                options: ["A. Joint", "B. 座標系", "C. 工具座標系", "D. 以上皆是"],
+                answer: 3, // D
+                explanation: "手動控制面板(Controller)允許使用者切換單一關節角度(Joint)、世界座標系(Base)或工具座標系(Tool)來寸動手臂。"
+            },
+            {
+                q: "第44題：若想要在程式中進行迴圈控制(如執行30次)，請問使用以下哪一個型別的變數最合適？",
+                options: ["A. string", "B. bool", "C. int", "D. float"],
+                answer: 2, // C
+                explanation: "迴圈執行次數為完整且不可分割的數字(不含小數)，因此使用int(整數)型別變數作為計數器最為合適且節省資源。"
+            },
+            {
+                q: "第45題：在建立新專案時，專案名稱不能包含以下何者？",
+                options: ["A. 英文", "B. 中文", "C. 數字", "D. 以上皆非"],
+                answer: 1, // B
+                explanation: "為避免系統底層檔案路徑編碼出錯或跨語系相容性問題，專案名稱通常僅接受英數字與底線，不能包含中文字元。"
+            },
+            {
+                q: "第46題：以下針對TMflow程式編輯的敘述何者正確？",
+                options: ["A. 使用者可以針對節點進行複製並貼上在其他位置", "B. 使用者可以設定手臂同時執行不同的兩個點位", "C. Point及Move節點皆包含點位資訊在裡面", "D. 以上皆是"],
+                answer: 0, // A
+                explanation: "TMflow支援將圖形化節點進行複製(Copy)與貼上(Paste)，讓使用者能快速建立重複的程式邏輯。"
+            },
+            {
+                q: "第47題：請問機械手臂在以下哪個狀態下可以進行程式的編輯以及設定？",
+                options: ["A. 機械手臂為停止狀態，且為手動模式", "B. 機械手臂運行中，且為自動模式", "C. 機械手臂為停止狀態，且為自動模式", "D. 機械手臂運行中，且為手動模式"],
+                answer: 0, // A
+                explanation: "基於安全設計，唯有在手臂處於停止狀態並切換至「手動模式」(Manual Mode)時，軟體才會解鎖點位與專案的編輯功能。"
+            },
+            {
+                q: "第48題：請問在使用單步執行的時候，不能從以下哪一種節點開始單步執行？",
+                options: ["A. Set", "B. Point", "C. Start", "D. Vision"],
+                answer: 0, // A
+                explanation: "單步執行(Step run)通常是為了除錯，需從具體的動作節點(如Point, Set)開始。Start為專案的流程起點，不屬於可單步執行的動作節點。"
+            },
+            {
+                q: "第49題：在使用Point節點紀錄點位前，應該要先確定哪些資訊？",
+                options: ["A. 當前座標系", "B. 當前工具中心點", "C. 當前手臂位置", "D. 以上皆是"],
+                answer: 3, // D
+                explanation: "紀錄一個點位時，系統會同時綁定當下的基準座標系(Base)、工具中心點(TCP)及手臂的空間位置，這三者皆正確才能確保後續跑點不發生偏差。"
+            },
+            {
+                q: "第50題：在使用Display功能時，以下說明何者正確？",
+                options: ["A. Display只能用來展示變數", "B. Display節點不用放置於程式流程中也可以有效果", "C. 在Display節點中使用+newline+可以換行顯示變數", "D. 以上皆是"],
+                answer: 2, // C
+                explanation: "Display節點支援字串串接與跳脫字元，輸入特定的+newline+標籤即可達到換行顯示的效果，讓資訊更容易閱讀。"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        let currentQuestions = []; // 新增一個變數來儲存打亂後的題目
+
+        // DOM 元素
+        const startScreen = document.getElementById('start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const statusBar = document.getElementById('status-bar');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const nextBtn = document.getElementById('next-btn');
+        const currentQNumDisplay = document.getElementById('current-q-num');
+        const currentScoreDisplay = document.getElementById('current-score');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // 洗牌演算法 (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            statusBar.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            currentQuestions = shuffleArray(questions); // 每次開始時打亂題目順序
+            updateScoreDisplay();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const currentQ = currentQuestions[currentQuestionIndex]; // 改用打亂後的題庫
+            
+            // 更新進度條
+            currentQNumDisplay.textContent = currentQuestionIndex + 1;
+            
+            // 設定題目 (移除原本寫死的「第XX題：」，動態加入當前的作答題號)
+            const cleanQuestionText = currentQ.q.replace(/^第\d+題[：:]\s*/, '');
+            questionText.textContent = `第 ${String(currentQuestionIndex + 1).padStart(2, '0')} 題：${cleanQuestionText}`;
+            
+            // 清空並生成選項
+            optionsContainer.innerHTML = '';
+            currentQ.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700 font-medium focus:outline-none';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // 隱藏解析與下一題按鈕
+            explanationContainer.classList.add('hidden');
+            explanationContainer.classList.remove('explanation-show');
+            nextBtn.classList.add('hidden');
+            
+            // 根據是否為最後一題改變按鈕文字
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                nextBtn.textContent = '看成績 ➔';
+                nextBtn.classList.replace('bg-gray-800', 'bg-green-600');
+                nextBtn.classList.replace('hover:bg-gray-900', 'hover:bg-green-700');
+            } else {
+                nextBtn.textContent = '下一題 ➔';
+                nextBtn.classList.replace('bg-green-600', 'bg-gray-800');
+                nextBtn.classList.replace('hover:bg-green-700', 'hover:bg-gray-900');
+            }
+        }
+
+        function checkAnswer(selectedIndex, selectedBtn) {
+            if (answered) return; // 避免重複作答
+            answered = true;
+
+            const currentQ = currentQuestions[currentQuestionIndex]; // 改用打亂後的題庫
+            const allBtns = optionsContainer.children;
+
+            // 禁用所有按鈕
+            Array.from(allBtns).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed', 'opacity-70');
+            });
+
+            // 判斷對錯並上色
+            if (selectedIndex === currentQ.answer) {
+                selectedBtn.classList.add('correct-answer');
+                score += 2; // 答對加 2 分
+                updateScoreDisplay();
+            } else {
+                selectedBtn.classList.add('wrong-answer');
+                // 標示出正確答案
+                allBtns[currentQ.answer].classList.add('correct-answer');
+                allBtns[currentQ.answer].classList.remove('opacity-70');
+            }
+
+            // 顯示解析
+            explanationText.textContent = currentQ.explanation;
+            explanationContainer.classList.remove('hidden');
+            explanationContainer.classList.add('explanation-show');
+            
+            // 顯示下一題按鈕
+            nextBtn.classList.remove('hidden');
+        }
+
+        function updateScoreDisplay() {
+            currentScoreDisplay.textContent = score;
+        }
+
+        function nextQuestion() {
+            // 改用 currentQuestions 陣列長度判斷
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            statusBar.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            // 設定最終分數
+            finalScoreDisplay.textContent = score;
+            
+            // 根據分數給予評語
+            if (score === 100) {
+                resultMessage.innerHTML = "<span class='text-green-600'>太厲害了！滿分！您是機械手臂大師！🏆</span>";
+            } else if (score >= 80) {
+                resultMessage.innerHTML = "<span class='text-blue-600'>表現優異！對手臂操作有很好的掌握度！👍</span>";
+            } else if (score >= 60) {
+                resultMessage.innerHTML = "<span class='text-yellow-600'>及格過關！還有進步的空間喔！💪</span>";
+            } else {
+                resultMessage.innerHTML = "<span class='text-red-500'>加油！建議再多複習一下相關知識喔！📚</span>";
+            }
+        }
+
+        function restartQuiz() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

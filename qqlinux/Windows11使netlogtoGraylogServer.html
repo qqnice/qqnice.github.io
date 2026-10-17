@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 透過 NXLog 傳送日誌至 Graylog 實戰教學</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --code-bg: #1e1e1e;
+            --admin-color: #d9534f;
+            --highlight: #ffc107;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            background-color: #e9ecef;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            transition: 0.3s;
+        }
+        .tab-btn:hover { background-color: #dde2e6; }
+        .tab-btn.active {
+            background-color: var(--card-bg);
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.4s;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .admin-badge {
+            display: inline-block;
+            background-color: var(--admin-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .config-box {
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .config-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        .copy-btn {
+            background-color: var(--highlight);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .copy-btn:hover { background-color: #e0a800; }
+        pre {
+            background-color: var(--code-bg);
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-highlight { color: #ffd700; font-weight: bold; }
+        .step-list { padding-left: 20px; }
+        .step-list li { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Windows 11 送 Log 至 Graylog</h1>
+        <p>NXLog 安裝與設定互動指南</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'phase1')">1. 安裝套件</button>
+        <button class="tab-btn" onclick="openTab(event, 'phase2')">2. 修改設定檔</button>
+        <button class="tab-btn" onclick="openTab(event, 'phase3')">3. 啟動服務</button>
+        <button class="tab-btn" onclick="openTab(event, 'phase4')">4. 驗證除錯</button>
+    </div>
+
+    <div id="phase1" class="tab-content active">
+        <h2>第一階段：安裝 NXLog 套件</h2>
+        <ul class="step-list">
+            <li><strong>下載安裝檔：</strong>前往 NXLog 官方網站下載 <b>NXLog Community Edition</b> 的 Windows MSI 安裝檔。</li>
+            <li>
+                <span class="admin-badge">🛡️ 需管理員權限</span><br>
+                <strong>執行安裝：</strong>雙擊 MSI 檔案。若跳出 UAC (使用者帳戶控制) 提示，請點選「是」。<br>
+                <em>預設安裝路徑為：<code>C:\Program Files\nxlog</code></em>
+            </li>
+        </ul>
+    </div>
+
+    <div id="phase2" class="tab-content">
+        <h2>第二階段：設定 nxlog.conf</h2>
+        <ul class="step-list">
+            <li>
+                <span class="admin-badge">🛡️ 需管理員權限</span><br>
+                <strong>以系統管理員身分開啟編輯器：</strong>這步非常重要！請按 <code>Win</code> 鍵，搜尋 <code>Notepad</code>，按右鍵選擇<strong>「以系統管理員身分執行」</strong>。
+            </li>
+            <li>
+                <strong>開啟並修改檔案：</strong>在記事本開啟 <code>C:\Program Files\nxlog\conf\nxlog.conf</code>，清空原有內容，貼上以下設定：
+            </li>
+        </ul>
+
+        <div class="config-box">
+            <div class="config-header">
+                <span>📄 nxlog.conf (重點設定檔)</span>
+                <button class="copy-btn" onclick="copyCode()">📋 一鍵複製</button>
+            </div>
+            <pre id="configCode">
+<span class="code-comment"># 發生嚴重錯誤時的處理機制</span>
+<span class="code-keyword">Panic Soft</span>
+<span class="code-comment">#NoFreeOnExit TRUE</span>
+
+<span class="code-comment"># 定義系統變數，對應安裝路徑</span>
+<span class="code-keyword">define</span> ROOT     C:\Program Files\nxlog
+<span class="code-keyword">define</span> CERTDIR  %ROOT%\cert
+<span class="code-keyword">define</span> CONFDIR  %ROOT%\conf\nxlog.d
+<span class="code-keyword">define</span> LOGDIR   %ROOT%\data
+
+<span class="code-keyword">include</span> %CONFDIR%\*.conf
+<span class="code-keyword">define</span> LOGFILE  %LOGDIR%\nxlog.log
+<span class="code-keyword">LogFile</span> %LOGFILE%
+
+<span class="code-keyword">Moduledir</span> %ROOT%\modules
+<span class="code-keyword">CacheDir</span>  %ROOT%\data
+<span class="code-keyword">Pidfile</span>   %ROOT%\data\nxlog.pid
+<span class="code-keyword">SpoolDir</span>  %ROOT%\data
+
+<span class="code-comment"># ==========================================
+# 擴展模組區 (將資料轉成 Graylog 支援的 GELF 格式)
+# ==========================================</span>
+&lt;Extension _gelf&gt;
+    <span class="code-keyword">Module</span> xm_gelf
+&lt;/Extension&gt;
+
+<span class="code-comment"># ==========================================
+# 輸入區 (Windows 事件檢視器收集)
+# ==========================================</span>
+&lt;Input in&gt;
+    <span class="code-keyword">Module</span> im_msvistalog
+&lt;/Input&gt;
+
+<span class="code-comment"># ==========================================
+# 輸出區 (傳送到 Graylog)
+# ==========================================</span>
+&lt;Output out&gt;
+    <span class="code-keyword">Module</span> om_udp
+    <span class="code-comment"># 【請注意】將下方 IP 改為你真實的 Graylog Server IP</span>
+    <span class="code-keyword">Host</span> <span class="code-highlight">10.24.1.XXX</span>
+    <span class="code-keyword">Port</span> <span class="code-highlight">32201</span>
+    <span class="code-keyword">OutputType</span> GELF
+&lt;/Output&gt;
+
+<span class="code-comment"># ==========================================
+# 路由區 (建立資料流)
+# ==========================================</span>
+&lt;Route 1&gt;
+    <span class="code-keyword">Path</span> in => out
+&lt;/Route&gt;</pre>
+        </div>
+    </div>
+
+    <div id="phase3" class="tab-content">
+        <h2>第三階段：啟動服務與防火牆</h2>
+        <ul class="step-list">
+            <li>
+                <span class="admin-badge">🛡️ 需管理員權限</span><br>
+                <strong>重新啟動 NXLog 服務：</strong>在開始按鈕點右鍵，選擇「終端機 (系統管理員)」，輸入：<br>
+                <br>
+                <code>Restart-Service nxlog</code>
+                <br><br>
+                <em>若無紅字錯誤，代表重啟成功。</em>
+            </li>
+            <li>
+                <strong>防火牆檢查：</strong>確保你的 Windows 本機防火牆及網路環境，允許對外使用 <strong>UDP Port 32201</strong> 傳輸。
+            </li>
+        </ul>
+    </div>
+
+    <div id="phase4" class="tab-content">
+        <h2>第四階段：驗證與除錯</h2>
+        <ul class="step-list">
+            <li>
+                <strong>檢查 NXLog 內部日誌：</strong><br>
+                開啟 <code>C:\Program Files\nxlog\data\nxlog.log</code>。<br>
+                出現 <code>INFO nxlog-ce-x.x.x started</code> 代表啟動成功；若有 <code>ERROR</code>，檔案內會標示是設定檔哪行有誤。
+            </li>
+            <li>
+                <strong>檢查 Graylog 端設定：</strong><br>
+                確保 Graylog Server 上有建立 <strong>GELF UDP</strong> 的 Input，且 Port 正確設為 <code>32201</code>，同時伺服器防火牆有放行該 Port。
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Tab switching logic
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).style.display = "block";
+        setTimeout(() => document.getElementById(tabName).classList.add("active"), 10);
+        evt.currentTarget.classList.add("active");
+    }
+
+    // Copy code logic
+    function copyCode() {
+        var codeBlock = document.getElementById("configCode");
+        var textToCopy = codeBlock.innerText || codeBlock.textContent;
+        
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            var copyBtn = document.querySelector('.copy-btn');
+            copyBtn.innerText = '✅ 複製成功';
+            copyBtn.style.backgroundColor = '#28a745';
+            copyBtn.style.color = '#fff';
+            
+            setTimeout(function() {
+                copyBtn.innerText = '📋 一鍵複製';
+                copyBtn.style.backgroundColor = 'var(--highlight)';
+                copyBtn.style.color = '#000';
+            }, 2000);
+        }).catch(function(err) {
+            alert('複製失敗，請手動選取複製！');
+        });
+    }
+</script>
+
+</body>
+</html>

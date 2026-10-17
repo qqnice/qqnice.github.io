@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Canvas 教學互動全解析</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        en: ['"Outfit"', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    },
+                    colors: {
+                        google: {
+                            blue: '#4285F4',
+                            red: '#EA4335',
+                            yellow: '#FBBC05',
+                            green: '#34A853',
+                            surface: '#f8f9fa',
+                            dark: '#202124'
+                        },
+                        gemini: {
+                            start: '#1e88e5',
+                            mid: '#8e24aa',
+                            end: '#e53935'
+                        }
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 8s ease infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0f1115; /* 暗色科技背景 */
+            color: #e2e8f0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 漸層文字與邊框 */
+        .text-gradient {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .gemini-gradient {
+            background: linear-gradient(135deg, #1e88e5, #8e24aa, #e53935);
+        }
+        
+        .gemini-text {
+            background: linear-gradient(to right, #1e88e5, #8e24aa, #e53935);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 捲動浮現動畫 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 隱藏捲軸 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1115; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* 玻璃擬物化 (Glassmorphism) */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 工具提示動畫 */
+        #ai-tooltip {
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateY(10px) translateX(-50%);
+            z-index: 50;
+        }
+        #ai-tooltip.show {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+            pointer-events: auto;
+        }
+
+        /* Framework Tabs */
+        .fw-tab-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #8e24aa;
+            color: #fff;
+        }
+        .fw-tab-content {
+            display: none;
+            animation: fadeInRight 0.5s ease forwards;
+        }
+        .fw-tab-content.active {
+            display: block;
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 背景光暈效果 -->
+    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none -z-10"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/20 blur-[120px] pointer-events-none -z-10"></div>
+
+    <!-- Hero Section (Mocking Canvas UI) -->
+    <header class="min-h-screen flex flex-col justify-center items-center px-4 md:px-10 py-20 relative">
+        <div class="text-center mb-12 reveal z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-sm text-gray-300 mb-6">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                教學互動新紀元
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight font-en">
+                Gemini <span class="gemini-text">Canvas</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed">
+                從「單向問答工具」升級為「人機共創工作區」。<br>
+                將學生看不見的思考過程與抽象技術概念，完美具象化。
+            </p>
+        </div>
+
+        <!-- 模擬 Gemini Canvas 介面 -->
+        <div class="w-full max-w-6xl h-[600px] glass-panel rounded-2xl flex overflow-hidden shadow-2xl shadow-purple-900/20 border border-gray-700 reveal relative group">
+            
+            <!-- 裝飾用視窗控制鈕 -->
+            <div class="absolute top-4 left-4 flex gap-2 z-20">
+                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+            </div>
+
+            <!-- 左側 Chat Panel -->
+            <div class="w-1/3 bg-gray-900/60 border-r border-gray-700/50 flex flex-col pt-12 relative">
+                <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                    <!-- User Msg -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center text-white text-sm">U</div>
+                        <div class="bg-gray-800 rounded-2xl rounded-tl-sm p-4 text-sm text-gray-300">
+                            幫我寫一個 Ubuntu 伺服器建置的教學腳本，並在右邊顯示。
+                        </div>
+                    </div>
+                    <!-- AI Msg -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-full gemini-gradient flex-shrink-0 flex items-center justify-center text-white text-xs"><i class="fa-solid fa-sparkles"></i></div>
+                        <div class="bg-gray-800/50 rounded-2xl rounded-tl-sm p-4 text-sm text-gray-300 border border-purple-500/30">
+                            沒問題，我已經在右側畫布為您生成了建置腳本。您可以直接在上面圈選不懂的指令，我會為您解釋。
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Box -->
+                <div class="p-4 border-t border-gray-700/50">
+                    <div class="bg-gray-800 rounded-full px-4 py-3 flex items-center gap-3">
+                        <i class="fa-solid fa-paperclip text-gray-500"></i>
+                        <input type="text" placeholder="向 Gemini 提問..." class="bg-transparent w-full outline-none text-sm text-gray-300" disabled>
+                        <i class="fa-solid fa-paper-plane text-purple-500"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側 Canvas Panel -->
+            <div class="w-2/3 bg-[#1e1e2e] relative flex flex-col">
+                <div class="h-12 border-b border-gray-700/50 flex justify-between items-center px-6">
+                    <span class="text-sm font-mono text-gray-400"><i class="fa-brands fa-ubuntu text-orange-500 mr-2"></i>setup_server.sh</span>
+                    <div class="flex gap-3">
+                        <button class="text-xs px-3 py-1 bg-purple-600/20 text-purple-400 rounded-md border border-purple-500/30"><i class="fa-solid fa-play mr-1"></i> Run Preview</button>
+                    </div>
+                </div>
+                <div class="p-8 font-mono text-sm leading-relaxed text-gray-300 flex-1 overflow-y-auto relative" id="hero-code-box">
+                    <span class="text-purple-400">#!/bin/bash</span><br>
+                    <span class="text-gray-500"># Update system packages</span><br>
+                    sudo apt update && sudo apt upgrade -y<br><br>
+                    <span class="text-gray-500"># Install Nginx</span><br>
+                    sudo apt install nginx -y<br>
+                    <span class="bg-blue-900/40 text-blue-200 px-1 rounded cursor-text group/highlight">sudo ufw allow 'Nginx HTTP'</span><br><br>
+                    <span class="text-gray-500"># Start service</span><br>
+                    sudo systemctl enable nginx<br>
+                    sudo systemctl start nginx<br>
+                    
+                    <!-- Hover Tooltip Demo inside Hero -->
+                    <div class="absolute hidden group-hover/highlight:flex items-center gap-2 bg-gray-800 border border-gray-600 rounded-lg shadow-xl p-2 left-1/4 top-1/3 transform -translate-y-8 z-30 transition-all">
+                        <button class="px-3 py-1.5 hover:bg-gray-700 rounded text-xs text-purple-400 whitespace-nowrap"><i class="fa-solid fa-comment-dots mr-1"></i> 請 Gemini 解釋</button>
+                        <button class="px-3 py-1.5 hover:bg-gray-700 rounded text-xs text-gray-300 whitespace-nowrap"><i class="fa-solid fa-pen mr-1"></i> 修改程式碼</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </header>
+
+    <!-- Section 1: 三大核心機制 (Interactive Demos) -->
+    <section class="py-20 px-4 md:px-10 relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-center reveal">三大核心機制</h2>
+            <p class="text-center text-gray-400 mb-16 reveal">Vibe Coding 精神的完美實踐場所</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Mechanism 1: Select & Ask (Interactive) -->
+                <div class="glass-panel p-8 rounded-2xl reveal relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i class="fa-solid fa-pen-nib text-6xl text-blue-400"></i></div>
+                    <h3 class="text-2xl font-bold mb-4 text-blue-400">1. 局部精準編修<br><span class="text-sm font-normal text-gray-400">(Select & Ask)</span></h3>
+                    <p class="text-sm text-gray-300 mb-6 leading-relaxed">
+                        無需重寫全文。只要用滑鼠「反白」文字或程式碼，就能針對該局部要求擴充、解釋或除錯。
+                    </p>
+                    
+                    <!-- Interactive Demo Box -->
+                    <div class="mt-4 p-4 bg-gray-900 rounded-xl border border-gray-700 relative text-sm text-gray-400 select-none">
+                        <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider flex justify-between">
+                            <span>Interactive Demo</span>
+                            <span class="animate-pulse text-blue-400"><i class="fa-solid fa-mouse-pointer"></i> 試著選取下方文字</span>
+                        </div>
+                        <div id="selectable-text" class="cursor-text selection:bg-purple-500/40 selection:text-white leading-loose relative">
+                            「學習金字塔理論指出，實作演練能達到 75% 的知識留存率，而主動教導他人則高達 90%。」
+                        </div>
+                        
+                        <!-- Dynamic Tooltip -->
+                        <div id="ai-tooltip" class="absolute top-0 left-1/2 opacity-0 pointer-events-none bg-gray-800 border border-gray-600 rounded-lg shadow-2xl p-1.5 flex gap-1 transform -translate-y-full mt-2">
+                            <button class="tooltip-btn px-3 py-1.5 hover:bg-gray-700 rounded text-xs text-purple-400 flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles"></i> 擴充說明</button>
+                            <button class="tooltip-btn px-3 py-1.5 hover:bg-gray-700 rounded text-xs text-green-400 flex items-center gap-1"><i class="fa-solid fa-language"></i> 翻譯</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mechanism 2: Real-time Preview (Interactive) -->
+                <div class="glass-panel p-8 rounded-2xl reveal relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i class="fa-solid fa-code text-6xl text-green-400"></i></div>
+                    <h3 class="text-2xl font-bold mb-4 text-green-400">2. 即時預覽與直接編輯</h3>
+                    <p class="text-sm text-gray-300 mb-6 leading-relaxed">
+                        生成的程式碼、網頁或互動圖表，可在 Canvas 內直接預覽結果。學生能手動介入修改，落實 Human-in-the-loop。
+                    </p>
+
+                    <!-- Interactive Toggle Box -->
+                    <div class="mt-4 bg-gray-900 rounded-xl border border-gray-700 overflow-hidden flex flex-col h-40">
+                        <div class="flex justify-between items-center bg-gray-800 px-3 py-2 border-b border-gray-700">
+                            <span class="text-xs text-gray-400">chart.js</span>
+                            <div class="flex bg-gray-900 rounded p-0.5">
+                                <button id="btn-code" class="text-[10px] px-2 py-1 rounded bg-gray-700 text-white transition-colors">Code</button>
+                                <button id="btn-preview" class="text-[10px] px-2 py-1 rounded text-gray-400 hover:text-white transition-colors">Preview</button>
+                            </div>
+                        </div>
+                        <div class="relative flex-1">
+                            <!-- Code View -->
+                            <div id="view-code" class="absolute inset-0 p-4 text-xs font-mono text-gray-400 overflow-hidden">
+                                <span class="text-pink-400">const</span> data = [<span class="text-purple-400">10</span>, <span class="text-purple-400">20</span>, <span class="text-purple-400">30</span>];<br>
+                                renderChart(data, <span class="text-yellow-300">'#canvas'</span>);<br>
+                                <span class="text-gray-500">// Real-time rendering</span>
+                            </div>
+                            <!-- Preview View -->
+                            <div id="view-preview" class="absolute inset-0 p-4 flex items-end justify-center gap-2 opacity-0 pointer-events-none transition-opacity duration-300 bg-gray-800">
+                                <div class="w-6 bg-blue-500 rounded-t" style="height: 30%"></div>
+                                <div class="w-6 bg-purple-500 rounded-t" style="height: 60%"></div>
+                                <div class="w-6 bg-green-500 rounded-t" style="height: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mechanism 3: Multi-modal (Visual) -->
+                <div class="glass-panel p-8 rounded-2xl reveal relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity"><i class="fa-solid fa-layer-group text-6xl text-purple-400"></i></div>
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400">3. 多模態輸出轉換</h3>
+                    <p class="text-sm text-gray-300 mb-6 leading-relaxed">
+                        一鍵將長篇深度研究報告，轉化為資訊圖表、互動式測驗，或基礎網頁應用程式，打破文件格式邊界。
+                    </p>
+
+                    <div class="mt-4 h-40 bg-gray-900 rounded-xl border border-gray-700 flex items-center justify-center p-4 relative overflow-hidden">
+                        <div class="flex items-center gap-4 text-2xl text-gray-500 z-10">
+                            <i class="fa-solid fa-file-lines hover:text-white transition-colors cursor-pointer" title="文件"></i>
+                            <i class="fa-solid fa-arrow-right text-sm text-gray-600"></i>
+                            <i class="fa-solid fa-chart-pie hover:text-blue-400 transition-colors cursor-pointer" title="圖表"></i>
+                            <i class="fa-solid fa-arrow-right text-sm text-gray-600"></i>
+                            <i class="fa-solid fa-gamepad hover:text-purple-400 transition-colors cursor-pointer" title="互動應用"></i>
+                        </div>
+                        <!-- Decorative animated background -->
+                        <div class="absolute w-32 h-32 bg-purple-600/20 rounded-full blur-xl animate-pulse-slow"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: 四大實務應用框架 (Vertical Tabs) -->
+    <section class="py-20 px-4 md:px-10 bg-gray-900/50 border-y border-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold mb-12 text-center reveal">教學互動的 <span class="gemini-text">四大實務框架</span></h2>
+
+            <div class="flex flex-col lg:flex-row gap-8 reveal">
+                <!-- Tabs Menu -->
+                <div class="w-full lg:w-1/3 flex flex-col gap-2">
+                    <button class="fw-tab-btn active text-left px-6 py-4 rounded-lg font-bold text-gray-400 hover:bg-gray-800 transition-all flex items-center gap-3" data-target="fw1">
+                        <div class="w-8 h-8 rounded bg-blue-900/50 flex items-center justify-center text-blue-400"><i class="fa-solid fa-code"></i></div>
+                        1. 程式碼視覺化與拆解
+                    </button>
+                    <button class="fw-tab-btn text-left px-6 py-4 rounded-lg font-bold text-gray-400 hover:bg-gray-800 transition-all flex items-center gap-3" data-target="fw2">
+                        <div class="w-8 h-8 rounded bg-purple-900/50 flex items-center justify-center text-purple-400"><i class="fa-solid fa-cubes"></i></div>
+                        2. PjBL 協作沙盒
+                    </button>
+                    <button class="fw-tab-btn text-left px-6 py-4 rounded-lg font-bold text-gray-400 hover:bg-gray-800 transition-all flex items-center gap-3" data-target="fw3">
+                        <div class="w-8 h-8 rounded bg-green-900/50 flex items-center justify-center text-green-400"><i class="fa-solid fa-gamepad"></i></div>
+                        3. 動態測驗與個人化
+                    </button>
+                    <button class="fw-tab-btn text-left px-6 py-4 rounded-lg font-bold text-gray-400 hover:bg-gray-800 transition-all flex items-center gap-3" data-target="fw4">
+                        <div class="w-8 h-8 rounded bg-red-900/50 flex items-center justify-center text-red-400"><i class="fa-solid fa-microscope"></i></div>
+                        4. 歷程留痕與 SoTL
+                    </button>
+                </div>
+
+                <!-- Tabs Content -->
+                <div class="w-full lg:w-2/3 glass-panel rounded-2xl p-8 lg:p-12 min-h-[400px] border-t-4 border-t-purple-500 relative overflow-hidden">
+                    <!-- Background decor -->
+                    <i class="fa-brands fa-google absolute -bottom-10 -right-10 text-9xl text-gray-800/30 opacity-50 z-0"></i>
+                    
+                    <!-- Content 1 -->
+                    <div id="fw1" class="fw-tab-content active relative z-10">
+                        <div class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold mb-4 border border-blue-500/30">落實 Vibe Coding</div>
+                        <h3 class="text-3xl font-bold mb-6 text-white">程式碼視覺化與局部拆解</h3>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                            在帶領學生進行伺服器建置或雲端部署教學時，最怕學生直接複製貼上整包腳本。
+                        </p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-blue-400 mb-2"><i class="fa-solid fa-chalkboard-user mr-2"></i>互動設計：</h4>
+                            <p class="text-sm text-gray-300 leading-relaxed">
+                                學生在 Canvas 生成 Shell Script，遇到不懂參數直接反白請 AI 局部解釋。Canvas 更支援<strong class="text-white">程式碼視覺化</strong>，將抽象的演算法直接轉為動態動畫，讓學生直觀「看見」邏輯運作。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Content 2 -->
+                    <div id="fw2" class="fw-tab-content relative z-10">
+                        <div class="inline-block px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold mb-4 border border-purple-500/30">專題孵化器</div>
+                        <h3 class="text-3xl font-bold mb-6 text-white">PjBL 協作沙盒</h3>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                            專題導向學習（PjBL）強調迭代與修正。Canvas 左右分軌版面設計，正是讓專題在碰撞中成型的最佳沙盒。
+                        </p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-purple-400 mb-2"><i class="fa-solid fa-chalkboard-user mr-2"></i>互動設計：</h4>
+                            <p class="text-sm text-gray-300 leading-relaxed">
+                                學生在右側貼上草案，左側請 Gemini 扮演「資安審查員」。AI 發現漏洞後，學生直接在右側畫布修改與答辯。<strong class="text-white">壓力測試與方案收斂在同一視覺空間無縫完成</strong>。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Content 3 -->
+                    <div id="fw3" class="fw-tab-content relative z-10">
+                        <div class="inline-block px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold mb-4 border border-green-500/30">活化靜態教材</div>
+                        <h3 class="text-3xl font-bold mb-6 text-white">動態測驗與個人化教材</h3>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                            傳統教材往往是靜態的 PDF 或簡報，而 Canvas 賦予了教材高度的互動性與擴展性。
+                        </p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-green-400 mb-2"><i class="fa-solid fa-chalkboard-user mr-2"></i>互動設計：</h4>
+                            <p class="text-sm text-gray-300 leading-relaxed">
+                                教師貼入課程重點，指令 Gemini 生成「互動選擇題」或「情境模擬遊戲」。學生在畫布點擊作答，系統即時驗證回饋，不僅提升參與感，更能延伸探索。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Content 4 -->
+                    <div id="fw4" class="fw-tab-content relative z-10">
+                        <div class="inline-block px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-bold mb-4 border border-red-500/30">反覆打磨軌跡</div>
+                        <h3 class="text-3xl font-bold mb-6 text-white">歷程留痕與 SoTL 研究</h3>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                            Canvas 的操作邏輯本身就是在鼓勵反覆打磨，完美對齊教學實踐研究（SoTL）的需求。
+                        </p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700">
+                            <h4 class="font-bold text-red-400 mb-2"><i class="fa-solid fa-chalkboard-user mr-2"></i>互動設計：</h4>
+                            <p class="text-sm text-gray-300 leading-relaxed">
+                                從「AI 初步生成 → 學生反白局部 → 追問與修改 Prompt → 手動微調」，這些具體的迭代軌跡，正是探討學生後設認知極佳的質性資料。
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <footer class="py-20 px-4 text-center reveal relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMTBoNDB2MUgweiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPgo8cGF0aCBkPSJNMTAgMHY0MGgxdi00MHoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz4KPC9zdmc+')] opacity-20 z-0"></div>
+        <div class="max-w-3xl mx-auto relative z-10">
+            <h2 class="text-4xl font-bold mb-6 text-white">準備好開啟人機協作課堂了嗎？</h2>
+            <p class="text-gray-400 mb-8 text-lg">
+                Gemini Canvas 讓 AI 不再只是個發號施令的「代筆者」，<br>
+                而是與學生並肩坐在工作檯前的「學習夥伴」。
+            </p>
+            <button class="px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-all" onclick="alert('讓我們開始規劃您的第一堂 Canvas 互動課程！')">
+                導入課程設計 <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Scroll Reveal Animation
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+            
+            revealElements.forEach(el => revealObserver.observe(el));
+
+            // 2. Interactive Select & Ask Demo
+            const selectableBox = document.getElementById('selectable-text');
+            const aiTooltip = document.getElementById('ai-tooltip');
+            
+            // Function to handle selection
+            const checkSelection = () => {
+                const selection = window.getSelection();
+                const text = selection.toString().trim();
+                
+                if (text.length > 0 && selection.rangeCount > 0) {
+                    // Check if selection is inside our demo box
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    const boxRect = selectableBox.parentElement.getBoundingClientRect();
+                    
+                    // Position tooltip above the selection
+                    const topPos = rect.top - boxRect.top - 10;
+                    const leftPos = rect.left - boxRect.left + (rect.width / 2);
+                    
+                    aiTooltip.style.top = `${topPos}px`;
+                    aiTooltip.style.left = `${leftPos}px`;
+                    aiTooltip.classList.add('show');
+                } else {
+                    aiTooltip.classList.remove('show');
+                }
+            };
+
+            selectableBox.addEventListener('mouseup', checkSelection);
+            selectableBox.addEventListener('keyup', checkSelection);
+            document.addEventListener('mousedown', (e) => {
+                if(!selectableBox.contains(e.target) && !aiTooltip.contains(e.target)){
+                    aiTooltip.classList.remove('show');
+                }
+            });
+
+            // Tooltip button clicks
+            document.querySelectorAll('.tooltip-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 處理中...';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> 完成';
+                        setTimeout(() => {
+                            aiTooltip.classList.remove('show');
+                            window.getSelection().removeAllRanges();
+                            // reset text
+                            const isExpand = btn.textContent.includes('擴充');
+                            btn.innerHTML = isExpand ? '<i class="fa-solid fa-wand-magic-sparkles"></i> 擴充說明' : '<i class="fa-solid fa-language"></i> 翻譯';
+                        }, 1000);
+                    }, 800);
+                });
+            });
+
+            // 3. Code/Preview Toggle Demo
+            const btnCode = document.getElementById('btn-code');
+            const btnPreview = document.getElementById('btn-preview');
+            const viewCode = document.getElementById('view-code');
+            const viewPreview = document.getElementById('view-preview');
+
+            const setToggle = (mode) => {
+                if (mode === 'code') {
+                    btnCode.className = 'text-[10px] px-2 py-1 rounded bg-gray-700 text-white transition-colors';
+                    btnPreview.className = 'text-[10px] px-2 py-1 rounded text-gray-400 hover:text-white transition-colors';
+                    viewCode.style.opacity = '1';
+                    viewCode.style.pointerEvents = 'auto';
+                    viewPreview.style.opacity = '0';
+                    viewPreview.style.pointerEvents = 'none';
+                } else {
+                    btnPreview.className = 'text-[10px] px-2 py-1 rounded bg-gray-700 text-white transition-colors';
+                    btnCode.className = 'text-[10px] px-2 py-1 rounded text-gray-400 hover:text-white transition-colors';
+                    viewCode.style.opacity = '0';
+                    viewCode.style.pointerEvents = 'none';
+                    viewPreview.style.opacity = '1';
+                    viewPreview.style.pointerEvents = 'auto';
+                }
+            };
+
+            btnCode.addEventListener('click', () => setToggle('code'));
+            btnPreview.addEventListener('click', () => setToggle('preview'));
+
+            // 4. Frameworks Tabs Demo
+            const fwBtns = document.querySelectorAll('.fw-tab-btn');
+            const fwContents = document.querySelectorAll('.fw-tab-content');
+
+            fwBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Reset all
+                    fwBtns.forEach(b => b.classList.remove('active'));
+                    fwContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Activate selected
+                    btn.classList.add('active');
+                    const targetId = btn.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

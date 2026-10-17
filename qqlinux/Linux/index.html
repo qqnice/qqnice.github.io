@@ -1,0 +1,122 @@
+---
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>QQ Linux 教學 - AI 考古題專區</title>
+  
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      line-height: 1.8; 
+      color: #333; 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background-color: #f4f7f6; 
+    }
+    .container { 
+      background-color: #fff; 
+      padding: 40px 50px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    }
+    h1, h2, h3 { color: #2c3e50; }
+    h1 { 
+      border-bottom: 3px solid #e95420; 
+      padding-bottom: 15px; 
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    h2 { 
+      margin-top: 40px; 
+      border-bottom: 2px solid #eee; 
+      padding-bottom: 10px; 
+    }
+    ul { padding-left: 25px; }
+    li { margin-bottom: 12px; }
+    
+    /* 檔案列表區塊樣式 */
+    .file-list-box { 
+      background-color: #f8f9fa; 
+      border: 1px solid #e1e4e8; 
+      border-radius: 8px; 
+      padding: 20px 30px; 
+      margin-top: 20px;
+    }
+    .file-list-box ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .file-list-box li { 
+      margin-bottom: 10px; 
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 10px;
+    }
+    .file-list-box li:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    a { 
+      color: #0366d6; 
+      text-decoration: none; 
+      font-weight: 500;
+      font-size: 1.1em;
+    }
+    a:hover { text-decoration: underline; color: #0056b3; }
+    
+    /* 關於作者區塊樣式 */
+    .author-box { 
+      background-color: #eef2f5; 
+      padding: 25px 30px; 
+      border-radius: 8px; 
+      margin-top: 50px; 
+      border-left: 6px solid #2c3e50; 
+    }
+    .author-box p { margin: 10px 0 0 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <h1>👨‍💻 Q 老師的 AI 考古題</h1>
+
+    <h2>🚀 如何使用本網站</h2>
+    <p>您目前位於 <strong>AI 考古題專區</strong>，下方列出了本資料夾內的所有教學資源：</p>
+    <ul>
+      <li>📄 <strong>點擊 <code>.html</code> 檔案：</strong> 可直接觀看該主題的互動式教學網頁。</li>
+    </ul>
+
+    <h2>📂 AI 考題 資料夾檔案目錄</h2>
+    <div class="file-list-box">
+      <ul>
+        
+        {% for page in site.pages %}
+          {% if page.url contains '/linux/' and page.name != 'index.html' and page.name != '404.html' %}
+            <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+
+        {% for file in site.static_files %}
+          {% if file.path contains '/linux/' %}
+            <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+      </ul>
+    </div>
+
+    <div class="author-box">
+      <h3>👨‍🏫 關於作者</h3>
+      <p><strong>QQ 老師 (Wen-Yen Lin)</strong> 現任教於國立臺中科技大學資訊管理學系。</p>
+      <p>長期致力於資訊管理教學、教學實踐研究 (SoTL) 以及新興科技的應用。希望透過這個開源分享區，幫助無論是初學者還是進階開發者，都能以更輕鬆、更有趣的方式跨入 Linux 與雲端運算的世界！</p>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Shield 防禦 DDoS 原理與架構圖解</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            aws: {
+              squid: '#232f3e',
+              orange: '#ff9900',
+              blue: '#0073bb',
+              lightBlue: '#00a4e4',
+              dark: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
+
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+          <svg class="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 9.01-7 10.15-3.87-1.14-7-5.48-7-10.15V6.3l7-3.12zM12 7a2 2 0 00-2 2v2a2 2 0 004 0V9a2 2 0 00-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            AWS Shield <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-medium border border-amber-500/30">DDoS 防護架構圖解</span>
+          </h1>
+          <p class="text-xs text-slate-400">零距離拆解全球邊緣節點流量清洗與主動緩解機制</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="#simulator" class="text-xs font-semibold px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+          🚀 體驗動態攻擊模擬
+        </a>
+        <a href="#architecture" class="text-xs font-medium px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          📐 架構圖解
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-12">
+
+    <!-- Section 1: Core Concept & Analogy -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="space-y-4">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            核心運作原理
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+            AWS Shield 如何阻止 DDoS？
+          </h2>
+          <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
+            AWS Shield 的核心戰略是<strong class="text-amber-400">「就近化解、全球分散、智慧過濾」</strong>。它不是讓所有洪水般的垃圾流量直衝你的單一伺服器，而是利用 AWS 分佈在全球的上百個邊緣節點（Edge Locations）與數十 Tbps 的骨幹網路，第一時間將攻擊流量<strong class="text-white">就近分流（Anycast）</strong>並送入專屬硬體進行<strong class="text-white">深層清洗（Scrubbing）</strong>，最後只讓純淨的正常請求抵達你的應用程式。
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-xl">
+              <div class="text-amber-400 font-bold text-sm mb-1">1. Anycast 全球吸納</div>
+              <div class="text-xs text-slate-400">利用 BGP 繞送，將全球分散的殭屍流量就近引導至最近的邊緣站點，避免單點頻寬爆炸。</div>
+            </div>
+            <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-xl">
+              <div class="text-blue-400 font-bold text-sm mb-1">2. 即時微秒級清洗</div>
+              <div class="text-xs text-slate-400">底層專屬封包過濾晶片自動檢查 TCP/UDP 畸形封包、SYN 握手完整性，於邊界毫秒內丟棄（Drop）。</div>
+            </div>
+            <div class="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-xl">
+              <div class="text-emerald-400 font-bold text-sm mb-1">3. 智慧 L7 規則聯防</div>
+              <div class="text-xs text-slate-400">Shield Advanced 自動學習正常流量基線，結合 AWS WAF 即時產生阻擋規則，防禦複雜 HTTP 洪水。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
+        <div>
+          <div class="text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2">生活化比喻</div>
+          <h3 class="text-xl font-bold text-white mb-3">機場邊境安檢 vs 專車通關</h3>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
+            <span class="block">
+              <strong>如果沒有 Shield：</strong> 就像 10 萬名暴徒與 10 位持票旅客同時衝向你的公司辦公大樓大廳。大門瞬間被擠破、警衛昏倒、正常客人完全進不來（主機當機崩潰）。
+            </span>
+            <span class="block pt-2">
+              <strong>有 AWS Shield 護航：</strong> 
+              AWS 在國境邊界設立了 400+ 個<strong>「海外邊境檢查站」</strong>。
+            </span>
+          </p>
+          <ul class="text-xs text-slate-400 space-y-2 mt-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+            <li class="flex items-start gap-2">
+              <span class="text-amber-400 font-bold">🛡️ Standard：</span>
+              <span>身分證/機票檢查（L3/L4 協定檢查）。持有假機票（偽造 IP/SYN Flood）的暴徒直接在境外被扣押遣返。</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-sky-400 font-bold">💎 Advanced：</span>
+              <span>隨身行李 X 光掃描 + 便衣特警駐點（L7 WAF + SRT 專家團隊）。即使假裝成正常乘客，只要攜帶違禁品（惡意 API 刷單），立刻被精準攔截。</span>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+          <span>防護成效：</span>
+          <span class="text-emerald-400 font-semibold">後端伺服器僅接觸 100% 合法乾淨流量</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulator" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            即時動態模擬實驗室
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">AWS Shield 封包清洗動態模擬</h2>
+          <p class="text-xs text-slate-400">點擊不同場景，親眼觀察封包在邊緣節點（PoP）、清洗中心（Scrubbing）與後端主機間的即時交互</p>
+        </div>
+
+        <!-- Simulation Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btn-normal" onclick="setSimMode('normal')" class="sim-btn px-3.5 py-2 rounded-lg text-xs font-semibold border transition bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+            🟢 正常連線
+          </button>
+          <button id="btn-syn" onclick="setSimMode('syn')" class="sim-btn px-3.5 py-2 rounded-lg text-xs font-semibold border transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700">
+            ⚡ L4 SYN Flood (容量型)
+          </button>
+          <button id="btn-http" onclick="setSimMode('http')" class="sim-btn px-3.5 py-2 rounded-lg text-xs font-semibold border transition bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700">
+            🛑 L7 HTTP Flood (應用層)
+          </button>
+          <button id="btn-noshield" onclick="setSimMode('noshield')" class="sim-btn px-3.5 py-2 rounded-lg text-xs font-semibold border transition bg-red-950/40 text-red-400 border-red-800/50 hover:bg-red-900/40">
+            ⚠️ 關閉 Shield (無防護)
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulation Monitor & Canvas Area -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+        <!-- Live Metrics Cards -->
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">即時進入流量</div>
+            <div id="metric-inbound" class="text-lg font-bold font-mono text-white">45 Mbps</div>
+          </div>
+          <span class="p-2 rounded-lg bg-slate-800 text-slate-300">📥</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">Shield 邊緣過濾率</div>
+            <div id="metric-blocked" class="text-lg font-bold font-mono text-emerald-400">0%</div>
+          </div>
+          <span class="p-2 rounded-lg bg-emerald-950 text-emerald-400">🛡️</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">後端伺服器 CPU</div>
+            <div id="metric-cpu" class="text-lg font-bold font-mono text-sky-400">12%</div>
+          </div>
+          <span class="p-2 rounded-lg bg-sky-950 text-sky-400">🖥️</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">網站可用性狀態</div>
+            <div id="metric-status" class="text-sm font-bold text-emerald-400">健康 (HTTP 200)</div>
+          </div>
+          <span id="metric-status-icon" class="p-2 rounded-lg bg-emerald-950 text-emerald-400">✅</span>
+        </div>
+      </div>
+
+      <div class="relative w-full h-80 sm:h-96 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner">
+        <canvas id="flowCanvas" class="w-full h-full block"></canvas>
+        
+        <!-- Overlay Node Labels on Canvas -->
+        <div class="absolute inset-0 pointer-events-none flex justify-between p-4 sm:p-6 text-xs font-mono">
+          <div class="space-y-1">
+            <span class="inline-block px-2 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-300">
+              🌐 用戶 / 殭屍網路
+            </span>
+          </div>
+          <div class="space-y-1 text-center">
+            <span class="inline-block px-2 py-1 rounded bg-amber-950/80 border border-amber-600/50 text-amber-300 font-bold">
+              ⚡ AWS 全球邊緣 / Shield
+            </span>
+          </div>
+          <div class="space-y-1 text-right">
+            <span class="inline-block px-2 py-1 rounded bg-blue-950/80 border border-blue-600/50 text-blue-300">
+              🏢 後端伺服器 (VPC / EC2)
+            </span>
+          </div>
+        </div>
+
+        <!-- Real-time Status Overlay Prompt -->
+        <div id="sim-explanation" class="absolute bottom-3 left-4 right-4 sm:left-6 sm:right-6 bg-slate-900/90 backdrop-blur border border-slate-700 px-4 py-2.5 rounded-lg text-xs text-slate-300 flex items-center justify-between">
+          <div id="sim-text" class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">● 正常狀態：</span> 正常用戶流暢瀏覽，延遲低於 25ms，未偵測到攻擊。
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono hidden sm:block">
+            模式: <span id="current-mode-label" class="text-amber-400 font-semibold">正常連線</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="space-y-6">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">AWS DDoS 多層縱深防禦架構</h2>
+        <p class="text-slate-400 text-sm">
+          AWS 採用「層層削弱、內外分工」的階梯式架構，不讓惡意流量踏進 VPC 內網一步
+        </p>
+      </div>
+
+      <!-- Architecture Visual Diagram Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+        <!-- Layer 1: Edge & Shield Standard -->
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 relative flex flex-col justify-between shadow-lg">
+          <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[11px] tracking-wide uppercase">
+            第一道防線 (免費用戶標配)
+          </div>
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="text-amber-400">01.</span> AWS 邊緣網路與 Shield Standard
+              </h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              部署在 CloudFront CDN、Route 53 DNS 與全球邊緣接入點（Edge PoPs）。
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-amber-400 font-semibold block mb-0.5">防護層級：L3 / L4 (網路與傳輸層)</span>
+                <span class="text-slate-400">專門阻擋 SYN Flood、UDP 反射放大攻擊、ACK 洪水。</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-slate-200 font-semibold block mb-0.5">自動 SYN Proxy 握手</span>
+                <span class="text-slate-400">邊緣節點代為完成三次交握，驗證來源真偽，假封包當場丟棄。</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-amber-400/90 font-mono">
+            費用：$0 (所有 AWS 客戶全自動內建)
+          </div>
+        </div>
+
+        <!-- Layer 2: Shield Advanced + AWS WAF -->
+        <div class="bg-slate-900 border border-sky-500/40 rounded-2xl p-6 relative flex flex-col justify-between shadow-lg ring-1 ring-sky-500/20">
+          <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-sky-500 text-slate-950 font-bold text-[11px] tracking-wide uppercase">
+            第二道防線 (企業進階防護)
+          </div>
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="text-sky-400">02.</span> Shield Advanced + AWS WAF
+              </h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              防護 ALB、NLB、CloudFront、Route 53 與 EC2 彈性 IP，專克精密型攻擊。
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-sky-400 font-semibold block mb-0.5">防護層級：L7 (應用層深度過濾)</span>
+                <span class="text-slate-400">機器學習建立應用程式平時健康基線，自動辨識異常突發請求。</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-slate-200 font-semibold block mb-0.5">自動緩解 (Auto-Mitigation)</span>
+                <span class="text-slate-400">遇 HTTP Flood 自動生成 WAF Rate-based Rule 即時擋下特定指紋。</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-sky-400/90 font-mono">
+            費用：$3,000/月 (含 WAF 吃到飽 + 專家支援)
+          </div>
+        </div>
+
+        <!-- Layer 3: Origin VPC & Cost Protection -->
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 relative flex flex-col justify-between shadow-lg">
+          <div class="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[11px] tracking-wide uppercase">
+            第三道防線 (核心後端與財務保障)
+          </div>
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="text-emerald-400">03.</span> 專屬團隊 (SRT) 與費用補償
+              </h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              攻擊者變更手法時由資深專家介入，並防止因 Auto Scaling 造成的百萬帳單災難。
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-emerald-400 font-semibold block mb-0.5">SRT (Shield Response Team)</span>
+                <span class="text-slate-400">24/7 待命，授權專家直接進入您的 WAF 撰寫自訂攔截規則。</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                <span class="text-slate-200 font-semibold block mb-0.5">DDoS 成本保護 (Cost Protection)</span>
+                <span class="text-slate-400">因承受攻擊流量導致 CloudFront/ALB 暴增的費用，AWS 予以退款抵免。</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400/90 font-mono">
+            保障：服務不中斷 + 荷包免破產
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8">
+      <div class="max-w-3xl mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">典型攻擊實例：Shield 如何見招拆招？</h2>
+        <p class="text-xs sm:text-sm text-slate-400">以下兩個最經典的 DDoS 場景，展示 Standard 與 Advanced 如何各司其職：</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Scenario A -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">攻擊實例 1</span>
+            <span class="text-xs font-mono text-slate-400">Layer 4 - SYN Flood 洪水</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-100">駭客調動 20 萬台物聯網設備，每秒發動 800 Gbps 虛假連線</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            攻擊者偽造隨機來源 IP，持續發送 TCP SYN 封包，試圖耗盡伺服器連線隊列。
+          </p>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs space-y-1.5">
+            <div class="text-amber-400 font-semibold">🛡️ AWS Shield Standard 的防禦動作：</div>
+            <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px]">
+              <li>流量在距離各國殭屍最近的 CloudFront 邊緣節點被吸收。</li>
+              <li>Shield 邊緣硬體執行 <strong>SYN Cookies / SYN Proxy</strong> 機制，要求客戶端完成驗證。</li>
+              <li>因為偽造 IP 的殭屍電腦無法回應 ACK，<strong>99.9% 惡意封包在邊緣 0.001 秒內直接被拋棄（Drop）</strong>。</li>
+              <li>抵達 EC2 的封包數量為 0，後端工程師甚至完全不知情，業務平穩運作。</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Scenario B -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">攻擊實例 2</span>
+            <span class="text-xs font-mono text-slate-400">Layer 7 - 搶票 API 搜尋洪水</span>
+          </div>
+          <h4 class="text-base font-bold text-slate-100">演唱會開賣！駭客偽裝正常瀏覽器，狂刷「複雜票價查詢 API」</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            每一個請求皆為完整 TCP 連線與合法 HTTP 請求，單看封包完全正常，但每秒 50 萬次查詢會讓資料庫瞬間當機。
+          </p>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs space-y-1.5">
+            <div class="text-sky-400 font-semibold">💎 AWS Shield Advanced + WAF 的防禦動作：</div>
+            <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px]">
+              <li>Shield Advanced 的<strong>異常檢測演算法</strong>察覺該 API 流量偏離日常基線達 1,200%。</li>
+              <li>自動觸發<strong>自動緩解機制（Automatic Layer 7 Mitigation）</strong>，分析攻擊特徵（如 User-Agent 畸形、特定標頭、單 IP 請求頻率）。</li>
+              <li>5 秒內自動在 AWS WAF 建立封鎖規則，向惡意請求回傳 <strong>429 / 403</strong>，或自動派發 JavaScript 驗證挑戰（CAPTCHA）。</li>
+              <li>真正想買票的歌迷順利購票，資料庫負載維持在安全範圍內。</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-xl sm:text-2xl font-bold text-white">版本比較：我該選擇 Standard 還是 Advanced？</h2>
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-xs sm:text-sm border-collapse bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <thead>
+            <tr class="bg-slate-950 border-b border-slate-800 text-slate-400">
+              <th class="p-4 font-semibold">評估維度</th>
+              <th class="p-4 font-semibold text-amber-400">AWS Shield Standard (免費版)</th>
+              <th class="p-4 font-semibold text-sky-400">AWS Shield Advanced (企業進階版)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-300">
+            <tr>
+              <td class="p-4 font-medium text-white">適合對象</td>
+              <td class="p-4">個人網站、中小企業形象站、API 流量單純的服務</td>
+              <td class="p-4 font-semibold text-white">電商平台、遊戲服務器、金融機構、高聲量售票系統</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-medium text-white">主要防護層</td>
+              <td class="p-4">L3 / L4 (網路層、傳輸層)</td>
+              <td class="p-4">L3 / L4 / L7 (涵蓋應用層 HTTP/HTTPS 洪水)</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-medium text-white">支援保護資源</td>
+              <td class="p-4">CloudFront、Route 53</td>
+              <td class="p-4">CloudFront、Route 53、ALB、NLB、Global Accelerator、EC2 EIP</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-medium text-white">AWS WAF 費用</td>
+              <td class="p-4">依規則數量與請求數額外計費</td>
+              <td class="p-4 text-emerald-400 font-semibold">完全免費包含（WAF 規則與請求費全免）</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-medium text-white">財務暴增保護 (Cost Protection)</td>
+              <td class="p-4 text-slate-500">❌ 無（Auto Scaling 暴增流量需照單付費）</td>
+              <td class="p-4 text-emerald-400 font-semibold">✅ 有（因抵禦攻擊產生的暴增用量可申請折抵退款）</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-medium text-white">專人 24/7 支援</td>
+              <td class="p-4 text-slate-500">❌ 無（依一般 Support Plan 提單）</td>
+              <td class="p-4 text-emerald-400 font-semibold">✅ 有專屬 SRT (Shield Response Team) 專家即時應對</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-1">
+      <p>AWS Shield Architecture & Visual Explainer • 根據 AWS 最新白皮書與架構最佳實踐設計</p>
+      <p class="text-slate-600">提示：在架構前端掛載 Amazon CloudFront 或 Route 53，即可自動獲得全球級 Shield Standard 基礎防護。</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simulation state
+    let simMode = 'normal'; // 'normal', 'syn', 'http', 'noshield'
+    const canvas = document.getElementById('flowCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Setup responsive canvas size
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Particle definition
+    class Packet {
+      constructor(type) {
+        this.reset(type);
+      }
+
+      reset(type) {
+        this.x = 20 + Math.random() * 40;
+        this.y = 50 + Math.random() * (canvas.height - 100);
+        this.type = type || (simMode === 'normal' ? 'normal' : (Math.random() < 0.75 ? 'attack' : 'normal'));
+        this.speed = 2.2 + Math.random() * 2.5;
+        this.size = this.type === 'attack' ? 3.5 : 4;
+        this.alpha = 1;
+        this.state = 'inbound'; // 'inbound', 'mitigated', 'passed'
+        this.color = this.type === 'attack' 
+          ? (simMode === 'syn' ? '#f43f5e' : '#c084fc') 
+          : '#10b981';
+      }
+
+      update() {
+        const edgeX = canvas.width * 0.5;
+        const targetX = canvas.width - 60;
+
+        if (this.state === 'inbound') {
+          this.x += this.speed;
+
+          // Check if reached Edge/Shield
+          if (this.x >= edgeX) {
+            if (simMode === 'noshield') {
+              // Without shield, everything passes to server and crushes it
+              this.state = 'passed';
+            } else if (this.type === 'attack') {
+              // Shield stops it!
+              this.state = 'mitigated';
+            } else {
+              // Legitimate traffic passes
+              this.state = 'passed';
+            }
+          }
+        } else if (this.state === 'mitigated') {
+          // Disperse/Drop at edge
+          this.y += (Math.random() - 0.5) * 4 + 1.5;
+          this.alpha -= 0.05;
+          if (this.alpha <= 0) {
+            this.reset();
+          }
+        } else if (this.state === 'passed') {
+          this.x += this.speed;
+          if (this.x >= targetX) {
+            this.alpha -= 0.06;
+            if (this.alpha <= 0) {
+              this.reset();
+            }
+          }
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trail glow
+        if (this.state === 'inbound' || this.state === 'passed') {
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x - this.speed * 4, this.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    // Initialize particle pool
+    const particles = [];
+    const MAX_PARTICLES = 140;
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      const p = new Packet();
+      p.x = Math.random() * (canvas.width * 0.45);
+      particles.push(p);
+    }
+
+    function drawArchitectureBackdrop() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const edgeX = w * 0.5;
+      const destX = w - 60;
+
+      // Draw Connection Pipelines
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+
+      // Path from left to edge
+      ctx.beginPath();
+      ctx.moveTo(40, h / 2);
+      ctx.lineTo(edgeX, h / 2);
+      ctx.stroke();
+
+      // Path from edge to backend
+      ctx.beginPath();
+      ctx.moveTo(edgeX, h / 2);
+      ctx.lineTo(destX, h / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw Center Shield Node (Edge / PoP)
+      ctx.save();
+      const nodeRadius = 38;
+      
+      // Outer glow ring
+      const ringColor = simMode === 'noshield' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.25)';
+      ctx.fillStyle = ringColor;
+      ctx.beginPath();
+      ctx.arc(edgeX, h / 2, nodeRadius + 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Node body
+      ctx.fillStyle = simMode === 'noshield' ? '#450a0a' : '#1e1b4b';
+      ctx.strokeStyle = simMode === 'noshield' ? '#ef4444' : '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(edgeX, h / 2, nodeRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Icon / Text inside Node
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (simMode === 'noshield') {
+        ctx.fillText('SHIELD OFF', edgeX, h / 2 - 6);
+        ctx.fillStyle = '#f87171';
+        ctx.font = '9px monospace';
+        ctx.fillText('BYPASSED', edgeX, h / 2 + 8);
+      } else {
+        ctx.fillText('AWS SHIELD', edgeX, h / 2 - 6);
+        ctx.fillStyle = '#fde68a';
+        ctx.font = '9px monospace';
+        ctx.fillText('SCRUBBING', edgeX, h / 2 + 8);
+      }
+      ctx.restore();
+
+      // Draw Target Backend Node (VPC / Servers)
+      ctx.save();
+      const srvRadius = 32;
+      ctx.fillStyle = simMode === 'noshield' ? '#7f1d1d' : '#064e3b';
+      ctx.strokeStyle = simMode === 'noshield' ? '#ef4444' : '#10b981';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(destX, h / 2, srvRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('VPC 伺服器', destX, h / 2 - 6);
+      ctx.font = '9px monospace';
+      ctx.fillStyle = simMode === 'noshield' ? '#fca5a5' : '#a7f3d0';
+      ctx.fillText(simMode === 'noshield' ? 'OVERLOAD' : 'ONLINE', destX, h / 2 + 8);
+      ctx.restore();
+
+      // Draw Source Node (Internet / Botnet)
+      ctx.save();
+      const srcRadius = 26;
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(40, h / 2, srcRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '9px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('流量來源', 40, h / 2);
+      ctx.restore();
+    }
+
+    // Main animation loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawArchitectureBackdrop();
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function setSimMode(mode) {
+      simMode = mode;
+
+      // Update button styling
+      document.querySelectorAll('.sim-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40', 'bg-amber-500/20', 'text-amber-300', 'border-amber-500/40', 'bg-purple-500/20', 'text-purple-300', 'border-purple-500/40', 'bg-red-500/30', 'text-red-300', 'border-red-500/60');
+        btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      });
+
+      const activeBtn = document.getElementById(`btn-${mode}`);
+      const inboundEl = document.getElementById('metric-inbound');
+      const blockedEl = document.getElementById('metric-blocked');
+      const cpuEl = document.getElementById('metric-cpu');
+      const statusEl = document.getElementById('metric-status');
+      const statusIcon = document.getElementById('metric-status-icon');
+      const simText = document.getElementById('sim-text');
+      const modeLabel = document.getElementById('current-mode-label');
+
+      if (mode === 'normal') {
+        activeBtn.classList.replace('bg-slate-800', 'bg-emerald-500/20');
+        activeBtn.classList.replace('text-slate-300', 'text-emerald-300');
+        activeBtn.classList.replace('border-slate-700', 'border-emerald-500/40');
+        
+        inboundEl.textContent = '45 Mbps';
+        inboundEl.className = 'text-lg font-bold font-mono text-white';
+        blockedEl.textContent = '0%';
+        blockedEl.className = 'text-lg font-bold font-mono text-emerald-400';
+        cpuEl.textContent = '12%';
+        cpuEl.className = 'text-lg font-bold font-mono text-sky-400';
+        statusEl.textContent = '健康 (HTTP 200)';
+        statusEl.className = 'text-sm font-bold text-emerald-400';
+        statusIcon.textContent = '✅';
+        statusIcon.className = 'p-2 rounded-lg bg-emerald-950 text-emerald-400';
+        modeLabel.textContent = '正常連線';
+        modeLabel.className = 'text-emerald-400 font-semibold';
+        simText.innerHTML = '<span class="text-emerald-400 font-bold">● 正常狀態：</span> 正常用戶流暢瀏覽，延遲低於 25ms，未偵測到任何攻擊。';
+      } 
+      else if (mode === 'syn') {
+        activeBtn.classList.replace('bg-slate-800', 'bg-amber-500/20');
+        activeBtn.classList.replace('text-slate-300', 'text-amber-300');
+        activeBtn.classList.replace('border-slate-700', 'border-amber-500/40');
+
+        inboundEl.textContent = '680 Gbps';
+        inboundEl.className = 'text-lg font-bold font-mono text-red-400';
+        blockedEl.textContent = '99.8%';
+        blockedEl.className = 'text-lg font-bold font-mono text-emerald-400';
+        cpuEl.textContent = '16%';
+        cpuEl.className = 'text-lg font-bold font-mono text-emerald-400';
+        statusEl.textContent = '安全守護 (Shield 攔截中)';
+        statusEl.className = 'text-sm font-bold text-amber-400';
+        statusIcon.textContent = '🛡️';
+        statusIcon.className = 'p-2 rounded-lg bg-amber-950 text-amber-400';
+        modeLabel.textContent = 'L4 SYN Flood 攻擊';
+        modeLabel.className = 'text-amber-400 font-semibold';
+        simText.innerHTML = '<span class="text-amber-400 font-bold">● L4 攻擊攔截：</span> 680 Gbps 惡意 SYN 封包在 AWS 邊緣節點被自動清洗與丟棄（紅色光點散逸），伺服器毫無波瀾！';
+      }
+      else if (mode === 'http') {
+        activeBtn.classList.replace('bg-slate-800', 'bg-purple-500/20');
+        activeBtn.classList.replace('text-slate-300', 'text-purple-300');
+        activeBtn.classList.replace('border-slate-700', 'border-purple-500/40');
+
+        inboundEl.textContent = '420,000 Req/s';
+        inboundEl.className = 'text-lg font-bold font-mono text-purple-400';
+        blockedEl.textContent = '96.5%';
+        blockedEl.className = 'text-lg font-bold font-mono text-emerald-400';
+        cpuEl.textContent = '28%';
+        cpuEl.className = 'text-lg font-bold font-mono text-sky-400';
+        statusEl.textContent = 'WAF 智慧緩解中';
+        statusEl.className = 'text-sm font-bold text-purple-400';
+        statusIcon.textContent = '💎';
+        statusIcon.className = 'p-2 rounded-lg bg-purple-950 text-purple-400';
+        modeLabel.textContent = 'L7 HTTP Flood 攻擊';
+        modeLabel.className = 'text-purple-400 font-semibold';
+        simText.innerHTML = '<span class="text-purple-400 font-bold">● L7 智慧過濾：</span> Shield Advanced 辨識出突增的 API 查詢指紋，透過 WAF 自動套用限速規則，僅放行合法買家。';
+      }
+      else if (mode === 'noshield') {
+        activeBtn.classList.replace('bg-slate-800', 'bg-red-500/30');
+        activeBtn.classList.replace('text-slate-300', 'text-red-300');
+        activeBtn.classList.replace('border-slate-700', 'border-red-500/60');
+
+        inboundEl.textContent = '720 Gbps (無過濾)';
+        inboundEl.className = 'text-lg font-bold font-mono text-red-500';
+        blockedEl.textContent = '0.0%';
+        blockedEl.className = 'text-lg font-bold font-mono text-slate-500';
+        cpuEl.textContent = '100% (當機)';
+        cpuEl.className = 'text-lg font-bold font-mono text-red-500 animate-pulse';
+        statusEl.textContent = '伺服器崩潰 (HTTP 504)';
+        statusEl.className = 'text-sm font-bold text-red-500';
+        statusIcon.textContent = '💥';
+        statusIcon.className = 'p-2 rounded-lg bg-red-950 text-red-500';
+        modeLabel.textContent = '無防護狀態';
+        modeLabel.className = 'text-red-400 font-semibold';
+        simText.innerHTML = '<span class="text-red-400 font-bold">● 服務癱瘓：</span> 失去 Shield 邊緣清洗，所有惡意連線直撲 EC2，頻寬被塞爆、連線數耗盡，正常用戶完全無法開啟網頁！';
+      }
+
+      // Re-seed particles to match new mode immediately
+      particles.forEach(p => p.reset());
+    }
+
+    // Start simulation loop on window load
+    window.onload = function() {
+      animate();
+    };
+  </script>
+</body>
+</html>

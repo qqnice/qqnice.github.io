@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 寫作偵測器 v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --red: #f85149;
+  --orange: #d29922;
+  --green: #3fb950;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  line-height: 1.6;
+  padding: 24px 16px;
+}
+.container { max-width: 880px; margin: 0 auto; }
+
+header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+header h1 { font-size: 1.75rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+header .sub { color: var(--muted); font-size: 0.82rem; }
+.version-badge {
+  display: inline-block; background: rgba(88,166,255,0.12); color: var(--accent);
+  border: 1px solid rgba(88,166,255,0.25); border-radius: 20px;
+  padding: 2px 10px; font-size: 0.72rem; margin-left: 8px; vertical-align: middle;
+}
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--surface2); padding: 4px; border-radius: 8px; width: fit-content; }
+.tab { padding: 7px 18px; border: none; background: transparent; color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 0.875rem; transition: all 0.15s; }
+.tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+textarea {
+  width: 100%; min-height: 200px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+  padding: 12px 14px; font-size: 0.9rem; line-height: 1.65; resize: vertical; font-family: inherit; transition: border-color 0.15s;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+.char-count { color: var(--muted); font-size: 0.78rem; text-align: right; margin-top: 5px; }
+
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 8px; padding: 44px 24px;
+  text-align: center; cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(88,166,255,0.04); }
+.drop-zone input[type=file] { display: none; }
+.drop-zone .dz-icon { font-size: 2rem; margin-bottom: 8px; }
+.drop-zone .dz-formats { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+.file-loaded { margin-top: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 9px 14px; font-size: 0.82rem; color: var(--accent); display: none; }
+
+.analyze-btn {
+  width: 100%; padding: 12px; margin-top: 14px; background: var(--accent); color: #0d1117;
+  border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.analyze-btn:hover { opacity: 0.88; }
+.analyze-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.loading-box { text-align: center; padding: 36px; }
+.spinner { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.results-header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
+.gauge-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+.gauge-svg { transform: rotate(-90deg); display: block; }
+.gauge-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+.gauge-num { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.gauge-lbl { font-size: 0.58rem; color: var(--muted); margin-top: 2px; letter-spacing: 0.4px; }
+
+.risk-badge { display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin-bottom: 7px; letter-spacing: 0.4px; }
+.badge-low    { background: rgba(63,185,80,0.18);  color: var(--green);  border: 1px solid rgba(63,185,80,0.3); }
+.badge-medium { background: rgba(210,153,34,0.18); color: var(--orange); border: 1px solid rgba(210,153,34,0.3); }
+.badge-high   { background: rgba(248,81,73,0.18);  color: var(--red);   border: 1px solid rgba(248,81,73,0.3); }
+.badge-vhigh  { background: rgba(248,81,73,0.28);  color: var(--red);   border: 1px solid var(--red); }
+.risk-section h2 { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+.meta-info { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.metric-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+.metric-name { font-size: 0.8rem; color: var(--muted); line-height: 1.35; }
+.metric-wt { font-size: 0.65rem; opacity: 0.55; }
+.metric-val { font-size: 0.8rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.metric-desc { font-size: 0.73rem; color: var(--muted); line-height: 1.45; }
+
+.phrases-box { margin-top: 14px; }
+.phrases-box h3 { font-size: 0.88rem; color: var(--text); margin-bottom: 9px; }
+.phrase-cloud { display: flex; flex-wrap: wrap; gap: 5px; }
+.phrase-tag { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.22); padding: 2px 9px; border-radius: 20px; font-size: 0.75rem; }
+
+.method-note { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.16); border-radius: 8px; padding: 12px 15px; font-size: 0.75rem; color: var(--muted); line-height: 1.65; margin-top: 14px; }
+.method-note strong { color: var(--accent); }
+
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🔍 AI 寫作偵測器 <span class="version-badge">v2.0</span></h1>
+    <p class="sub">Academic AI Writing Detector &nbsp;·&nbsp; 支援中英文 &nbsp;·&nbsp; .txt / .docx / .pdf &nbsp;·&nbsp; 7 項偵測指標</p>
+  </header>
+
+  <div class="card" id="input-card">
+    <div class="tabs">
+      <button class="tab active" id="tab-text" onclick="switchTab('text')">✏️ 貼上文字</button>
+      <button class="tab" id="tab-file" onclick="switchTab('file')">📁 上傳檔案</button>
+    </div>
+
+    <div id="pane-text" class="tab-content active">
+      <textarea id="text-input" placeholder="在此貼上要分析的文字（中文或英文皆可，建議 200 字以上）..."></textarea>
+      <div class="char-count" id="char-count">0 字元</div>
+    </div>
+
+    <div id="pane-file" class="tab-content">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <div class="dz-icon">📄</div>
+        <div>拖放檔案至此，或點擊選擇</div>
+        <div class="dz-formats">支援：.txt &nbsp;·&nbsp; .docx &nbsp;·&nbsp; .pdf</div>
+        <input type="file" id="file-input" accept=".txt,.docx,.pdf">
+      </div>
+      <div class="file-loaded" id="file-loaded"></div>
+    </div>
+
+    <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">🔍 開始分析</button>
+  </div>
+
+  <div class="card hidden" id="loading-card">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);font-size:0.88rem;">分析中，請稍候...</p>
+    </div>
+  </div>
+
+  <div id="results-card" class="hidden"></div>
+
+</div>
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let fileText = '';
+let pdfjsReady = false;
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  ['text','file'].forEach(n => {
+    document.getElementById('tab-'+n).classList.toggle('active', n===name);
+    document.getElementById('pane-'+n).classList.toggle('active', n===name);
+  });
+}
+
+document.getElementById('text-input').addEventListener('input', function() {
+  document.getElementById('char-count').textContent = this.value.length + ' 字元';
+});
+
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+document.getElementById('file-input').addEventListener('change', e => { if(e.target.files[0]) loadFile(e.target.files[0]); });
+
+async function loadFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const info = document.getElementById('file-loaded');
+  info.style.display='none'; info.style.color='var(--accent)'; fileText='';
+  try {
+    if      (ext==='txt')  { fileText = await file.text(); }
+    else if (ext==='docx') { const buf=await file.arrayBuffer(); fileText=(await mammoth.extractRawText({arrayBuffer:buf})).value; }
+    else if (ext==='pdf')  { fileText = await loadPDF(file); }
+    else { alert('不支援的格式，請使用 .txt、.docx 或 .pdf'); return; }
+    info.style.display='block';
+    info.textContent = `✅ 已載入：${file.name}（${fileText.length} 字元）`;
+  } catch(err) {
+    info.style.display='block'; info.style.color='var(--red)';
+    info.textContent = `❌ 載入失敗：${err.message}`;
+  }
+}
+
+async function loadPDF(file) {
+  if (!pdfjsReady) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsReady=true;
+  }
+  const buf=await file.arrayBuffer();
+  const pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
+  let out='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const pg=await pdf.getPage(i);
+    const ct=await pg.getTextContent();
+    out+=ct.items.map(x=>x.str).join(' ')+'\n';
+  }
+  return out;
+}
+
+function loadScript(src) {
+  return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+}
+
+async function runAnalysis() {
+  const isText = document.getElementById('pane-text').classList.contains('active');
+  const text = (isText ? document.getElementById('text-input').value : fileText).trim();
+  if (!text || text.length < 80) { alert('請提供至少 80 字元的文字（建議 200 字以上）'); return; }
+  document.getElementById('loading-card').classList.remove('hidden');
+  document.getElementById('results-card').classList.add('hidden');
+  document.getElementById('analyze-btn').disabled=true;
+  await new Promise(r=>setTimeout(r,200));
+  const result = analyse(text);
+  document.getElementById('loading-card').classList.add('hidden');
+  document.getElementById('analyze-btn').disabled=false;
+  renderResults(result);
+}
+
+// ── Language ──────────────────────────────────────────────────────────────────
+function detectLang(text) {
+  const zh=(text.match(/[一-鿿㐀-䶿]/g)||[]).length;
+  return zh/Math.max(1,text.replace(/\s/g,'').length)>0.15?'zh':'en';
+}
+
+// ── Segmentation ──────────────────────────────────────────────────────────────
+function splitSentences(text, lang) {
+  if(lang==='zh') return text.split(/[。！？；\n]+/).map(s=>s.trim()).filter(s=>s.length>4);
+  const raw=text.match(/[^.!?\n]+[.!?\n]+/g)||text.split('\n');
+  return raw.map(s=>s.trim()).filter(s=>s.split(/\s+/).length>3);
+}
+function splitParagraphs(text) {
+  return text.split(/\n\s*\n/).map(p=>p.trim()).filter(p=>p.length>30);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHRASE DATABASES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// 1. AI Signature Phrases (formulaic expressions)
+const SIG_PHRASES = {
+  en: [
+    // Meta-commentary
+    'it is worth noting','it is important to note','it should be noted','it is noteworthy that',
+    'it is worth mentioning','it is worth emphasizing','it bears noting',
+    'needless to say','it goes without saying','without a doubt','without question',
+    'it is undeniable that','undeniably','unquestionably','it is clear that',
+    'it is evident that','it is apparent that','it can be seen that','one can observe that',
+    // Connectives
+    'furthermore','moreover','additionally','in addition to this','not only that',
+    'on the other hand','in contrast','conversely','by the same token',
+    // Opening/closing formulas
+    'first and foremost','last but not least','in conclusion','in summary','to summarize',
+    'to conclude','all in all','in a nutshell','taking everything into account',
+    'as previously mentioned','as mentioned above','as mentioned earlier','as discussed above',
+    'as noted earlier','the aforementioned','the above-mentioned',
+    // Trendy AI phrases
+    'delve into','delve deeper','deep dive','dive deep','let us delve',
+    'in the realm of','in the landscape of','in the context of this',
+    'moving forward','going forward','looking ahead',
+    'bridge the gap','bridging the gap','fill the gap',
+    'cutting-edge','state-of-the-art','ever-evolving','rapidly evolving',
+    'paradigm shift','game-changer','game-changing',
+    // Hedging + certainty combos
+    'it is generally accepted','it is widely recognized','it is commonly understood',
+    'research suggests that','studies suggest','evidence suggests','evidence indicates',
+    'in recent years','in recent decades','over the past decades',
+    // Role phrases
+    'plays a crucial role','plays a vital role','plays a pivotal role',
+    'plays an important role','plays a central role','plays a key role',
+    'serves as a cornerstone','serves as a foundation',
+    // Importance amplifiers
+    'of utmost importance','of paramount importance','cannot be overstated',
+    'cannot be understated','it is essential to','it is imperative to',
+    'it is crucial to','it is vital to',
+    // Discourse
+    'in today\'s world','in today\'s society','in the modern era',
+    'in today\'s fast-paced','in an increasingly','in a world where',
+    'this paper aims to','this study seeks to','this essay explores',
+    'this paper will examine','the purpose of this','the aim of this',
+    // Misc
+    'shed light on','bring to light','sheds light on',
+    'a wide range of','a plethora of','a myriad of','a variety of factors',
+    'significant strides','significant progress','significant advances',
+    'take into consideration','take into account',
+    'at its core','at the heart of','in essence',
+    'thought-provoking','groundbreaking','transformative','revolutionary impact',
+    'holistic approach','holistic understanding','comprehensive approach',
+    'leverage','utilize','facilitate','endeavor','navigate',
+    'in order to fully understand','so as to better understand',
+  ],
+  zh: [
+    // 後設評論
+    '值得注意的是','值得一提的是','需要指出的是','需要強調的是','值得強調的是',
+    '不可忽視的是','不容忽視的是','值得關注的是',
+    '毋庸置疑','無可否認','不言而喻','顯而易見',
+    '可以看出','由此可以看出','不難發現','由此可見',
+    // 過渡連接
+    '此外','另外','除此之外','不僅如此','與此同時','同時也',
+    '相比之下','相較而言','反觀','從另一角度',
+    // 開頭結尾套語
+    '綜上所述','總而言之','綜合以上','綜上分析','由此可見',
+    '總的來說','概括而言','總體而言','從整體來看',
+    '以上所述','如前所述','如上所述','正如前文所述',
+    // 重要性表達
+    '至關重要','不可或缺','舉足輕重','至關緊要',
+    '具有重要意義','具有深遠意義','具有重要的現實意義',
+    '發揮著重要作用','發揮著關鍵作用','發揮著不可替代的作用',
+    '佔據重要地位','處於核心地位',
+    // AI 口頭禪
+    '深入探討','深入分析','全面了解','全面探討','系統性地',
+    '多元化','系統化','規範化','現代化','精細化',
+    '從某種程度上','在某種程度上','在很大程度上','在一定程度上',
+    '從某種意義上說','從某種角度而言','從某種層面看',
+    '這表明','這說明','這意味著','這反映了','這揭示了',
+    '隨著社會的進步','隨著時代的發展','在現代社會',
+    '在當今時代','在當今世界','在全球化背景下','在信息化時代',
+    '有助於','有利於','有助推動','為...奠定基礎',
+    '相輔相成','相互促進','密不可分','息息相關',
+    '面臨著前所未有的','帶來了前所未有的',
+    '取得了顯著成果','取得了重要進展','取得重要突破',
+    '引發了廣泛關注','受到廣泛關注','引起高度重視',
+    '不斷深化','不斷完善','不斷推進',
+    '日益重要','愈發重要','越來越重要',
+    '致力於','旨在','力求','努力實現',
+    '體現了','彰顯了','凸顯了','折射出',
+    '為此','鑒於此','有鑒於此',
+    '本文旨在','本研究旨在','本文試圖','本文探討',
+  ]
+};
+
+// 2. AI Evaluative Adjectives / Adverbs (overused high-praise terms)
+const EVAL_WORDS = {
+  en: [
+    'significant','significantly','crucial','crucially','vital','vitally',
+    'essential','essentially','important','importantly','key','major',
+    'critical','critically','fundamental','fundamentally','primary','primarily',
+    'central','notable','notably','remarkable','remarkably',
+    'substantial','substantially','considerable','considerably',
+    'prominent','prevalent','pervasive','ubiquitous',
+    'innovative','innovatively','transformative','revolutionary',
+    'groundbreaking','pioneering','cutting-edge','state-of-the-art',
+    'comprehensive','thoroughly','rigorous','rigorously',
+    'robust','systematic','systematically','dynamic','sustainable',
+    'holistic','integrated','profound','profoundly',
+    'immense','immensely','paramount','invaluable','indispensable',
+    'unprecedented','unparalleled','remarkable','exceptional',
+  ],
+  zh: [
+    '重要','關鍵','核心','顯著','重大','深遠','深刻',
+    '廣泛','全面','有效','積極','豐富','寶貴','獨特',
+    '創新','突出','強大','完善','先進','精準',
+    '嚴格','系統','科學','規範','標準','成熟',
+    '顯著提升','顯著提高','顯著改善','顯著增強',
+    '積極作用','積極影響','積極意義','積極推動',
+    '深遠影響','深刻影響','重要影響','重要價值',
+  ]
+};
+
+// 3. Transition starters
+const TRANSITIONS = {
+  en: ['however','therefore','furthermore','moreover','additionally','consequently',
+       'nevertheless','nonetheless','thus','hence','accordingly','subsequently',
+       'in contrast','on the other hand','as a result','for example','for instance',
+       'in particular','specifically','overall','in conclusion','to summarize',
+       'first','firstly','secondly','thirdly','finally','lastly',
+       'to begin with','to start with','in addition','besides','alternatively'],
+  zh: ['然而','因此','此外','另外','所以','故而','由此','相比之下',
+       '與此同時','首先','其次','再次','最後','綜上所述',
+       '例如','舉例來說','具體而言','特別是','尤其是',
+       '值得注意的是','不過','但是','雖然','儘管','即使',
+       '總而言之','換言之','也就是說']
+};
+
+// 4. Enumeration markers (AI loves these sequences)
+const ENUM_EN = [
+  [/\bfirst(?:ly)?\b/i, /\bsecond(?:ly)?\b/i, /\bthird(?:ly)?\b/i],
+  [/\bfirst(?:ly)?\b/i, /\bsecond(?:ly)?\b/i, /\bfinally\b/i],
+  [/\bto begin with\b/i, /\bfurthermore\b/i, /\bin conclusion\b/i],
+  [/\bone[, ]\b/i, /\btwo[, ]\b/i, /\bthree[, ]\b/i],
+];
+const ENUM_ZH_SEQ = ['首先','其次','再次','再者','第一','第二','第三','最後','最终'];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// METRIC FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// M1: Sentence burstiness
+function metricBurstiness(sentences, lang) {
+  if(sentences.length<5) return {score:50,desc:'句子數量不足，無法可靠評估'};
+  const lengths=sentences.map(s=>lang==='zh'?s.replace(/\s/g,'').length:s.split(/\s+/).length).filter(l=>l>0);
+  const mean=lengths.reduce((a,b)=>a+b,0)/lengths.length;
+  const sd=Math.sqrt(lengths.reduce((a,b)=>a+(b-mean)**2,0)/lengths.length);
+  const cv=sd/mean;
+  const score=cv<0.15?92:cv<0.25?78:cv<0.38?58:cv<0.55?38:cv<0.75?20:10;
+  const desc=score>=70?`CV=${cv.toFixed(2)}，句子長度高度均一，缺乏人類寫作的自然起伏`
+            :score>=45?`CV=${cv.toFixed(2)}，句子長度變化中等`
+            :`CV=${cv.toFixed(2)}，句子長度自然多變，符合人類寫作模式`;
+  return {score,desc};
+}
+
+// M2: AI signature phrase density
+function metricSigPhrases(text, lang, baseLen) {
+  const lower=text.toLowerCase();
+  const list=SIG_PHRASES[lang]||SIG_PHRASES.en;
+  const found=[];
+  for(const ph of list){
+    const esc=ph.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp(esc,'gi');
+    const m=lower.match(re)||[];
+    for(let i=0;i<m.length;i++) found.push(ph);
+  }
+  const density=(found.length/Math.max(1,baseLen))*1000;
+  const score=density<1?12:density<3?32:density<6?58:density<10?78:92;
+  const desc=found.length===0?'未偵測到明顯 AI 套語'
+            :`偵測到 ${found.length} 次 AI 套語，密度 ${density.toFixed(1)}/千${lang==='zh'?'字':'詞'}`;
+  return {score,desc,found:[...new Set(found)]};
+}
+
+// M3: AI evaluative adjective overuse
+function metricEvalAdj(text, lang, baseLen) {
+  const lower=text.toLowerCase();
+  const list=EVAL_WORDS[lang]||EVAL_WORDS.en;
+  let count=0; const found=[];
+  for(const w of list){
+    const esc=w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=lang==='en'?new RegExp('\\b'+esc+'\\b','gi'):new RegExp(esc,'g');
+    const m=lower.match(re)||[];
+    if(m.length){count+=m.length; found.push(w+'(×'+m.length+')');}
+  }
+  const density=(count/Math.max(1,baseLen))*1000;
+  const score=density<5?15:density<12?35:density<22?60:density<35?78:90;
+  const desc=count===0?'評價性詞彙使用節制'
+            :`偵測到 ${count} 次高頻評價詞，密度 ${density.toFixed(1)}/千${lang==='zh'?'字':'詞'}`
+            +(score>=65?'，堆疊過密，AI 特徵顯著':'');
+  return {score,desc,found};
+}
+
+// M4: Transition word overuse
+function metricTransitions(sentences, lang) {
+  if(sentences.length<5) return {score:50,desc:'句子數量不足'};
+  const list=TRANSITIONS[lang]||TRANSITIONS.en;
+  let count=0;
+  for(const s of sentences){
+    const lower=s.toLowerCase().trim();
+    for(const tr of list){
+      if(lower.startsWith(tr+' ')||lower.startsWith(tr+'，')||lower.startsWith(tr+',')||lower===tr){count++;break;}
+    }
+  }
+  const ratio=count/sentences.length;
+  const score=ratio<0.05?15:ratio<0.12?30:ratio<0.20?55:ratio<0.30?75:88;
+  const desc=`${count}/${sentences.length} 句以過渡詞開頭（${(ratio*100).toFixed(0)}%）`
+            +(score>=65?'，密度偏高，AI 常見模式':score>=45?'，頻率中等':'，使用自然');
+  return {score,desc};
+}
+
+// M5: Paragraph uniformity
+function metricParagraphs(paragraphs, lang) {
+  if(paragraphs.length<3) return {score:50,desc:'段落數量不足（需至少 3 段）'};
+  const lengths=paragraphs.map(p=>lang==='zh'?p.replace(/\s/g,'').length:p.split(/\s+/).length);
+  const mean=lengths.reduce((a,b)=>a+b,0)/lengths.length;
+  const sd=Math.sqrt(lengths.reduce((a,b)=>a+(b-mean)**2,0)/lengths.length);
+  const cv=sd/mean;
+  const score=cv<0.15?85:cv<0.28?68:cv<0.45?50:cv<0.65?30:15;
+  const desc=`${paragraphs.length} 段，長度 CV=${cv.toFixed(2)}`
+            +(score>=65?'，高度均一，具備 AI 結構化特徵':score>=40?'，規律性中等':'，段落長度靈活自然');
+  return {score,desc};
+}
+
+// M6: Enumeration pattern overuse
+function metricEnumeration(text, sentences, lang) {
+  let hits=0;
+  if(lang==='en'){
+    for(const seq of ENUM_EN){
+      let matched=true;
+      for(const re of seq){ if(!re.test(text)){ matched=false; break; } }
+      if(matched) hits++;
+    }
+  } else {
+    // Chinese: detect 首先/其次/最後 etc.
+    const lower=text;
+    const patterns=[
+      ['首先','其次','最後'],['首先','其次','再次'],
+      ['第一','第二','第三'],['一方面','另一方面','此外'],
+      ['一是','二是','三是'],
+    ];
+    for(const seq of patterns){
+      if(seq.every(w=>lower.includes(w))) hits++;
+    }
+  }
+  // Also detect if many sentences start with ordinal markers
+  const ordinalRe=lang==='en'
+    ?/^\s*(first(?:ly)?|second(?:ly)?|third(?:ly)?|fourth(?:ly)?|finally|lastly)/i
+    :/^\s*(首先|其次|再次|再者|第一|第二|第三|第四|最後|最终)/;
+  const ordCount=sentences.filter(s=>ordinalRe.test(s)).length;
+  const ordRatio=ordCount/Math.max(1,sentences.length);
+
+  const combinedHits=hits+(ordRatio>0.25?2:ordRatio>0.1?1:0);
+  const score=combinedHits===0?15:combinedHits===1?35:combinedHits===2?60:combinedHits===3?78:90;
+  const desc=`偵測到 ${hits} 組列舉序列，${ordCount} 句以序號詞開頭`
+            +(score>=65?'，過度依賴結構性列舉，是 AI 的典型組織方式':score>=40?'，列舉使用中等':'，結構自然，未見過度列舉');
+  return {score,desc};
+}
+
+// M7: Vocabulary repetition
+function metricVocab(text, lang) {
+  let tokens;
+  if(lang==='zh'){
+    const chars=text.replace(/[^一-鿿]/g,'');
+    if(chars.length<30) return {score:50,desc:'字元不足'};
+    tokens=[]; for(let i=0;i<chars.length-1;i++) tokens.push(chars.slice(i,i+2));
+  } else {
+    tokens=(text.toLowerCase().match(/\b[a-z]{3,}\b/g)||[]);
+    if(tokens.length<30) return {score:50,desc:'詞彙量不足'};
+  }
+  const win=Math.min(100,tokens.length);
+  const windows=[]; const step=Math.max(1,Math.floor(tokens.length/12));
+  for(let i=0;i<=tokens.length-win;i+=step) windows.push(new Set(tokens.slice(i,i+win)).size/win);
+  const avgTTR=windows.reduce((a,b)=>a+b,0)/windows.length;
+  const score=avgTTR<0.35?75:avgTTR<0.45?58:avgTTR<0.55?42:avgTTR<0.65?28:15;
+  const desc=`移動窗口 TTR=${avgTTR.toFixed(2)}`
+            +(score>=60?'，詞彙重複率偏高':score>=40?'，詞彙多樣性中等':'，詞彙豐富多樣');
+  return {score,desc};
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN ANALYSER
+// ═══════════════════════════════════════════════════════════════════════════════
+function analyse(text) {
+  const lang      = detectLang(text);
+  const sentences = splitSentences(text, lang);
+  const paragraphs= splitParagraphs(text);
+  const baseLen   = lang==='zh' ? text.replace(/\s/g,'').length : text.trim().split(/\s+/).length;
+
+  const burst   = metricBurstiness(sentences, lang);
+  const phrase  = metricSigPhrases(text, lang, baseLen);
+  const evalAdj = metricEvalAdj(text, lang, baseLen);
+  const trans   = metricTransitions(sentences, lang);
+  const para    = metricParagraphs(paragraphs, lang);
+  const enumM   = metricEnumeration(text, sentences, lang);
+  const vocab   = metricVocab(text, lang);
+
+  // Weights: phrase 26, burst 16, evalAdj 14, trans 12, para 11, enum 11, vocab 10
+  const total = Math.round(
+    phrase.score  * 0.26 +
+    burst.score   * 0.16 +
+    evalAdj.score * 0.14 +
+    trans.score   * 0.12 +
+    para.score    * 0.11 +
+    enumM.score   * 0.11 +
+    vocab.score   * 0.10
+  );
+
+  return {
+    score: total, lang, baseLen,
+    sentCount: sentences.length, paraCount: paragraphs.length,
+    metrics: [
+      { name:'AI 特徵套語密度',        score:phrase.score,  desc:phrase.desc,   weight:26 },
+      { name:'句子長度均一性',          score:burst.score,   desc:burst.desc,    weight:16 },
+      { name:'AI 評價形容詞過度使用',   score:evalAdj.score, desc:evalAdj.desc,  weight:14 },
+      { name:'過渡詞密度',              score:trans.score,   desc:trans.desc,    weight:12 },
+      { name:'段落結構均一性',          score:para.score,    desc:para.desc,     weight:11 },
+      { name:'列舉模式分析',            score:enumM.score,   desc:enumM.desc,    weight:11 },
+      { name:'詞彙重複性',              score:vocab.score,   desc:vocab.desc,    weight:10 },
+    ],
+    foundPhrases: phrase.found.slice(0,28),
+    foundEval:    evalAdj.found.slice(0,16),
+  };
+}
+
+// ── Risk level ────────────────────────────────────────────────────────────────
+function riskInfo(score) {
+  if(score>=72) return {label:'高 AI 風險',   cls:'badge-vhigh',  heading:'此文本極可能主要由 AI 撰寫',      color:'#f85149'};
+  if(score>=52) return {label:'中度 AI 風險', cls:'badge-high',   heading:'此文本可能含有大量 AI 生成內容',  color:'#d29922'};
+  if(score>=32) return {label:'低度 AI 風險', cls:'badge-medium', heading:'偵測到部分 AI 輔助寫作跡象',      color:'#d29922'};
+  return               {label:'人類寫作',     cls:'badge-low',    heading:'此文本呈現典型人類寫作特徵',      color:'#3fb950'};
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderResults(r) {
+  const ri = riskInfo(r.score);
+  const circ = 2 * Math.PI * 46;
+  const dash = circ * (1 - r.score / 100);
+
+  const metricsHTML = r.metrics.map(m => {
+    const c   = m.score >= 65 ? 'var(--red)' : m.score >= 45 ? 'var(--orange)' : 'var(--green)';
+    const lbl = m.score >= 65 ? '偏向 AI' : m.score >= 45 ? '中性' : '偏向人類';
+    return '<div class="metric-card">'
+      + '<div class="metric-top">'
+      + '<span class="metric-name">' + m.name + '<br><span class="metric-wt">權重 ' + m.weight + '%</span></span>'
+      + '<span class="metric-val" style="color:' + c + '">' + m.score + ' · ' + lbl + '</span>'
+      + '</div>'
+      + '<div class="bar-bg"><div class="bar-fill" style="width:' + m.score + '%;background:' + c + '"></div></div>'
+      + '<div class="metric-desc">' + m.desc + '</div>'
+      + '</div>';
+  }).join('');
+
+  const phrasesHTML = r.foundPhrases.length > 0
+    ? '<div class="phrases-box"><h3>⚠️ 偵測到的 AI 套語（' + r.foundPhrases.length + ' 種）</h3>'
+      + '<div class="phrase-cloud">' + r.foundPhrases.map(p => '<span class="phrase-tag">' + p + '</span>').join('') + '</div></div>'
+    : '<div class="phrases-box"><p style="font-size:0.82rem;color:var(--green)">✅ 未偵測到顯著 AI 套語</p></div>';
+
+  const evalHTML = r.foundEval.length > 0
+    ? '<hr class="section-divider">'
+      + '<div class="phrases-box"><h3>📊 高頻評價詞樣本</h3>'
+      + '<div class="phrase-cloud">' + r.foundEval.map(p => '<span class="phrase-tag" style="background:rgba(210,153,34,0.12);color:var(--orange);border-color:rgba(210,153,34,0.25)">' + p + '</span>').join('') + '</div></div>'
+    : '';
+
+  const langLabel = r.lang === 'zh' ? '中文' : '英文';
+  const sizeLabel = r.lang === 'zh' ? r.baseLen + ' 字' : r.baseLen + ' 詞';
+
+  const svgCirc = circ.toFixed(2);
+  const svgDash = dash.toFixed(2);
+
+  document.getElementById('results-card').innerHTML =
+    '<div class="card">'
+    + '<div class="results-header">'
+    + '<div class="gauge-wrap">'
+    + '<svg class="gauge-svg" width="110" height="110" viewBox="0 0 110 110">'
+    + '<circle cx="55" cy="55" r="46" fill="none" stroke="var(--border)" stroke-width="9"/>'
+    + '<circle cx="55" cy="55" r="46" fill="none" stroke="' + ri.color + '" stroke-width="9"'
+    + ' stroke-dasharray="' + svgCirc + '" stroke-dashoffset="' + svgDash + '" stroke-linecap="round"/>'
+    + '</svg>'
+    + '<div class="gauge-center">'
+    + '<div class="gauge-num" style="color:' + ri.color + '">' + r.score + '</div>'
+    + '<div class="gauge-lbl">AI 可能性</div>'
+    + '</div></div>'
+    + '<div class="risk-section">'
+    + '<div class="risk-badge ' + ri.cls + '">' + ri.label + '</div>'
+    + '<h2>' + ri.heading + '</h2>'
+    + '<div class="meta-info">語言：' + langLabel + ' &nbsp;·&nbsp; ' + sizeLabel + ' &nbsp;·&nbsp; ' + r.sentCount + ' 句 &nbsp;·&nbsp; ' + r.paraCount + ' 段</div>'
+    + '</div></div>'
+    + '<div class="metrics-grid">' + metricsHTML + '</div>'
+    + phrasesHTML + evalHTML
+    + '<div class="method-note">'
+    + '<strong>⚙️ v2.0 偵測指標（7 項加權）：</strong>'
+    + 'AI特徵套語(26%) · 句子均一性(16%) · 評價形容詞過度使用(14%) · 過渡詞密度(12%) · 段落均一性(11%) · 列舉模式(11%) · 詞彙重複性(10%)<br>'
+    + '<strong>⚠️ 重要限制：</strong>啟發式工具，對 ESL 寫作假陽性率可達 61%（Liang et al., 2023）。'
+    + '分析結果僅供參考，不應作為學術不誠信的單一判斷依據。中文偵測準確率低於英文，請審慎解讀。'
+    + '</div></div>';
+
+  document.getElementById('results-card').classList.remove('hidden');
+  document.getElementById('results-card').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graylog 6.0 部署指南 (Ubuntu 24.04)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            scroll-behavior: smooth;
+        }
+        code, pre {
+            font-family: 'Fira Code', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .toast-enter {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 300ms ease-out;
+        }
+    </style>
+</head>
+<body class="antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 hidden md:flex flex-col h-full z-10">
+        <div class="p-6">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Graylog SOP
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Ubuntu 24.04 Server</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3">
+                <li><a href="#env-setup" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">環境參數設定</a></li>
+                <li><a href="#phase1" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">1. 網路與 MAC 設定</a></li>
+                <li><a href="#phase2" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">2. 基礎套件安裝</a></li>
+                <li><a href="#phase3" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">3. MongoDB 安裝</a></li>
+                <li><a href="#phase4" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">4. OpenSearch 安裝</a></li>
+                <li><a href="#phase5" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">5. Graylog Server 安裝</a></li>
+                <li><a href="#phase6" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">6. Windows 11 Log 接收</a></li>
+                <li><a href="#reference" class="block px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition">參考來源</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-slate-950 h-full relative">
+        <div class="max-w-4xl mx-auto px-6 py-10 lg:px-12">
+            
+            <header class="mb-10 pb-6 border-b border-slate-800">
+                <h2 class="text-3xl font-bold text-white mb-4">Graylog + MongoDB + OpenSearch 完整部署指南</h2>
+                <p class="text-slate-400">本指南將協助您在 VirtualBox (Ubuntu 24.04 Server) 建立 Graylog 日誌伺服器，並設定 Windows 11 轉發日誌。</p>
+            </header>
+
+            <!-- Interactive Variables -->
+            <section id="env-setup" class="mb-12 bg-slate-900 border border-indigo-500/30 rounded-xl p-6 shadow-lg shadow-indigo-500/10">
+                <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                    <span class="bg-indigo-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-3">!</span>
+                    互動式環境設定
+                </h3>
+                <p class="text-sm text-slate-400 mb-4">請在下方輸入您的 Ubuntu VM 被分配到的 IP。本文件的設定檔與指令將會<strong class="text-indigo-400">自動即時更新</strong>。</p>
+                <div class="flex items-center gap-4">
+                    <label for="vm-ip" class="text-sm font-medium text-slate-300">Ubuntu VM IP:</label>
+                    <input type="text" id="vm-ip" value="10.24.1.x" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-48 p-2.5 outline-none transition" placeholder="例如: 10.24.1.50">
+                </div>
+            </section>
+
+            <!-- Phase 1 -->
+            <section id="phase1" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第一階段：VirtualBox 網路設定</h3>
+                <p class="text-slate-300 mb-4">由於您的環境是由 DHCP 發配 <code class="bg-slate-800 px-1 py-0.5 rounded text-blue-300">10.24.1.0/24</code>，請確保 VM 網卡處於橋接模式並設定 MAC 亂數。</p>
+                <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-2 bg-slate-900 p-5 rounded-lg border border-slate-800">
+                    <li>開啟 VirtualBox，對著 Ubuntu 24.04 VM 點擊右鍵選擇 <strong>「設定」(Settings)</strong>。</li>
+                    <li>進入 <strong>「網路」(Network)</strong> 選單，選擇 <strong>「介面卡 1」(Adapter 1)</strong>。</li>
+                    <li>將 <strong>「附加到」(Attached to)</strong> 改為 <strong class="text-green-400">「橋接介面卡」(Bridged Adapter)</strong>。</li>
+                    <li>點擊下方的 <strong>「進階」(Advanced)</strong>，在 <strong>「MAC 位址」</strong> 右側點擊 <strong>「產生新的隨機 MAC 位址」</strong>。</li>
+                    <li>確認 <strong>「混雜模式」</strong> 設為「拒絕」，點擊「確定」並啟動 VM。</li>
+                    <li>開機後使用 <code>ip a</code> 指令確認是否獲取到 <span class="dynamic-ip font-bold text-indigo-400">10.24.1.x</span> 網段的 IP。</li>
+                </ol>
+            </section>
+
+            <!-- Phase 2 -->
+            <section id="phase2" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第二階段：系統基礎與依賴套件安裝</h3>
+                <p class="text-slate-300 mb-4">更新系統並安裝 Graylog 運行所需的 Java 17 及其他工具。</p>
+                <div class="code-block-wrapper">
+                    <button class="copy-btn" onclick="copyCode('code-phase2')">Copy</button>
+                    <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase2" class="text-sm text-green-400">sudo apt update && sudo apt upgrade -y
+sudo apt install -y apt-transport-https openjdk-17-jre-headless uuid-runtime pwgen dirmngr gnupg wget curl</code></pre>
+                </div>
+            </section>
+
+            <!-- Phase 3 -->
+            <section id="phase3" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第三階段：安裝與設定 MongoDB 7.0</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">1. 匯入金鑰並加入 Repository：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase3-1')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase3-1" class="text-sm text-gray-300">curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">2. 安裝並啟動 MongoDB：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase3-2')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase3-2" class="text-sm text-gray-300">sudo apt update
+sudo apt install -y mongodb-org
+sudo systemctl daemon-reload
+sudo systemctl enable --now mongod</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 4 -->
+            <section id="phase4" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第四階段：安裝與設定 OpenSearch 2.x</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">1. 匯入金鑰並安裝 OpenSearch：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase4-1')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase4-1" class="text-sm text-gray-300">curl -o- https://artifacts.opensearch.org/publickeys/opensearch.pgp | sudo gpg --dearmor --batch --yes -o /usr/share/keyrings/opensearch-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/opensearch-keyring.gpg] https://artifacts.opensearch.org/releases/bundle/opensearch/2.x/apt stable main" | sudo tee /etc/apt/sources.list.d/opensearch-2.x.list
+
+sudo apt update
+sudo env OPENSEARCH_INITIAL_ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16) apt install -y opensearch</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">2. 配置 OpenSearch (<code class="text-sm text-pink-400">/etc/opensearch/opensearch.yml</code>)：</h4>
+                        <p class="text-sm text-slate-400 mb-2">將原內容清空，填入以下設定以配合 Graylog 運作（單節點並關閉安全插件）：</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase4-2')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase4-2" class="text-sm text-yellow-300">cluster.name: graylog
+node.name: ${HOSTNAME}
+path.data: /var/lib/opensearch
+path.logs: /var/log/opensearch
+discovery.type: single-node
+network.host: 127.0.0.1
+action.auto_create_index: false
+plugins.security.disabled: true</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">3. 啟動 OpenSearch：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase4-3')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase4-3" class="text-sm text-gray-300">sudo systemctl enable --now opensearch</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 5 -->
+            <section id="phase5" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第五階段：安裝與設定 Graylog Server</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">1. 安裝 Graylog 6.0：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase5-1')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase5-1" class="text-sm text-gray-300">wget https://packages.graylog2.org/repo/packages/graylog-6.0-repository_latest.deb
+sudo dpkg -i graylog-6.0-repository_latest.deb
+sudo apt update
+sudo apt install -y graylog-server</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">2. 產生金鑰與設定密碼 <code class="text-sm text-indigo-400">1qaz%TGB</code>：</h4>
+                        <p class="text-sm text-slate-400 mb-2">分別執行以下指令，並<strong>記下產生的字串</strong>：</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase5-2')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase5-2" class="text-sm text-gray-300"><span class="text-green-500"># 產生 96 字元的 password_secret</span>
+pwgen -N 1 -s 96
+
+<span class="text-green-500"># 將預設密碼 1qaz%TGB 轉為 SHA-256 雜湊值</span>
+echo -n "1qaz%TGB" | sha256sum</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">3. 配置 Graylog (<code class="text-sm text-pink-400">/etc/graylog/server/server.conf</code>)：</h4>
+                        <p class="text-sm text-slate-400 mb-2">修改設定檔，填入剛才產生的字串，預設帳號為 <code>admin</code>：</p>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase5-3')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase5-3" class="text-sm text-yellow-300">password_secret = <span class="text-slate-400">&lt;填入剛才 pwgen 產生的 96 字元&gt;</span>
+root_password_sha2 = <span class="text-slate-400">&lt;填入剛才 sha256sum 產生的雜湊值&gt;</span>
+root_username = admin
+http_bind_address = 0.0.0.0:9000</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium text-slate-200 mb-2">4. 啟動 Graylog：</h4>
+                        <div class="code-block-wrapper">
+                            <button class="copy-btn" onclick="copyCode('code-phase5-4')">Copy</button>
+                            <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase5-4" class="text-sm text-gray-300">sudo systemctl daemon-reload
+sudo systemctl enable --now graylog-server</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 6 -->
+            <section id="phase6" class="mb-12">
+                <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">第六階段：設定接收 Windows 11 Log</h3>
+                
+                <div class="mb-8 p-5 bg-slate-800 rounded-lg border border-slate-700">
+                    <h4 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                        <span class="bg-blue-500 text-white w-6 h-6 rounded flex items-center justify-center text-sm font-bold">A</span> 
+                        在 Graylog 開啟 Syslog Input
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-300">
+                        <li>打開瀏覽器，前往 <a href="#" class="text-blue-400 hover:underline">http://<span class="dynamic-ip">10.24.1.x</span>:9000</a>。</li>
+                        <li>使用帳號 <code class="text-green-400">admin</code> 與密碼 <code class="text-green-400">1qaz%TGB</code> 登入。</li>
+                        <li>導覽至 <strong>System</strong> -> <strong>Inputs</strong>。</li>
+                        <li>下拉選擇 <strong>Syslog UDP</strong>，點擊 <strong>Launch new input</strong>。</li>
+                        <li>填寫資訊：Title: <code>Windows 11 Logs</code>, Bind address: <code>0.0.0.0</code>, Port: <code>1514</code>。</li>
+                        <li>點擊 <strong>Save</strong>。</li>
+                    </ol>
+                </div>
+
+                <div class="p-5 bg-slate-800 rounded-lg border border-slate-700">
+                    <h4 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                        <span class="bg-green-500 text-white w-6 h-6 rounded flex items-center justify-center text-sm font-bold">B</span> 
+                        在 Windows 11 端設定轉發 (NXLog)
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-300 mb-4">
+                        <li>在 Windows 11 下載並安裝 <a href="https://nxlog.co/products/nxlog-community-edition/download" target="_blank" class="text-blue-400 hover:underline">NXLog Community Edition</a>。</li>
+                        <li>使用系統管理員權限編輯：<code>C:\Program Files\nxlog\conf\nxlog.conf</code>。</li>
+                        <li>將內容替換為以下配置：</li>
+                    </ol>
+                    <div class="code-block-wrapper">
+                        <button class="copy-btn" onclick="copyCode('code-phase6-nxlog')">Copy</button>
+                        <pre class="bg-slate-900 border border-slate-800 rounded-lg p-4 overflow-x-auto"><code id="code-phase6-nxlog" class="text-sm text-cyan-300">Panic Soft
+
+define ROOT     C:\Program Files\nxlog
+define CERTDIR  %ROOT%\cert
+define CONFDIR  %ROOT%\conf
+define LOGDIR   %ROOT%\data
+define LOGFILE  %LOGDIR%\nxlog.log
+LogFile %LOGFILE%
+
+Moduledir %ROOT%\modules
+CacheDir  %ROOT%\data
+Pidfile   %ROOT%\data\nxlog.pid
+SpoolDir  %ROOT%\data
+
+&lt;Extension _syslog&gt;
+    Module      xm_syslog
+&lt;/Extension&gt;
+
+&lt;Input in&gt;
+    Module      im_msvistalog
+&lt;/Input&gt;
+
+&lt;Output out&gt;
+    Module      om_udp
+    Host        <span class="dynamic-ip font-bold text-white bg-indigo-600 px-1 rounded">10.24.1.x</span>  # 對應您的 Ubuntu VM IP
+    Port        1514       # 對應 Graylog 設定的 Port
+    Exec        to_syslog_snare();
+&lt;/Output&gt;
+
+&lt;Route 1&gt;
+    Path        in =&gt; out
+&lt;/Route&gt;</code></pre>
+                    </div>
+                    <p class="text-slate-300 mt-4">4. 在 Windows 11 的「服務」(services.msc) 中，重新啟動 <strong>nxlog</strong> 服務即可。</p>
+                </div>
+            </section>
+
+            <!-- Reference -->
+            <section id="reference" class="mb-12 py-6 border-t border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-4">📌 參考來源</h3>
+                <a href="https://ithelp.ithome.com.tw/articles/10351442" target="_blank" class="flex items-center p-4 bg-slate-900 border border-slate-800 rounded-lg hover:border-indigo-500 transition group">
+                    <div class="flex-1">
+                        <h4 class="text-indigo-400 font-semibold group-hover:text-indigo-300">Ubuntu 22.04 安裝 Graylog 5.1</h4>
+                        <p class="text-sm text-slate-500 mt-1">IT邦幫忙 - iThome</p>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </section>
+
+            <footer class="text-center text-sm text-slate-500 pb-10">
+                Generated Interactive SOP for Graylog Setup.
+            </footer>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // 處理動態 IP 替換
+        const ipInput = document.getElementById('vm-ip');
+        const dynamicIpElements = document.querySelectorAll('.dynamic-ip');
+
+        ipInput.addEventListener('input', function(e) {
+            let newIp = e.target.value.trim();
+            if (newIp === '') {
+                newIp = '10.24.1.x'; // Fallback
+            }
+            dynamicIpElements.forEach(el => {
+                el.innerText = newIp;
+            });
+        });
+
+        // 顯示 Toast 提示框 (不使用 alert)
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-800 border border-green-500 text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transition-all duration-300 transform translate-y-10 opacity-0';
+            toast.innerHTML = `
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="font-medium text-sm">${message}</span>
+            `;
+            container.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 10);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // 複製程式碼功能
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) return;
+
+            // 取得純文字並清理潛在的 HTML 標籤殘留 (雖然 innerText 通常已經很乾淨)
+            const textToCopy = codeElement.innerText;
+
+            // 使用 TextArea 作為相容性更高的複製手段
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            // 隱藏 textArea
+            textArea.style.position = "absolute";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('已複製到剪貼簿！');
+                } else {
+                    showToast('複製失敗，請手動選取複製。');
+                }
+            } catch (err) {
+                showToast('瀏覽器不支援複製功能。');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+    </script>
+</body>
+</html>

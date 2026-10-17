@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍳 QQ Docker 魔法廚房</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EC;
+    --warm-white: #FFFBF4;
+    --parchment: #F5ECD7;
+    --amber-light: #FAC775;
+    --amber: #EF9F27;
+    --amber-dark: #BA7517;
+    --amber-deep: #854F0B;
+    --coral-light: #F5C4B3;
+    --coral: #D85A30;
+    --coral-dark: #993C1D;
+    --teal-light: #9FE1CB;
+    --teal: #1D9E75;
+    --teal-dark: #0F6E56;
+    --ink: #2C2520;
+    --ink-light: #5C4A3A;
+    --smoke: #8A7A6A;
+    --border: rgba(186,117,23,0.2);
+    --shadow: rgba(133,79,11,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--cream);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(253,246,236,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--amber-deep);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--smoke);
+    text-decoration: none;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .nav-links a:hover {
+    color: var(--amber-deep);
+    background: rgba(239,159,39,0.1);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239,159,39,0.15) 0%, transparent 70%);
+  }
+  .hero-bg-circle.c1 { width: 600px; height: 600px; top: -100px; left: -150px; }
+  .hero-bg-circle.c2 { width: 400px; height: 400px; bottom: 0; right: -50px; background: radial-gradient(circle, rgba(29,158,117,0.1) 0%, transparent 70%); }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 13px;
+    color: var(--amber-dark);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero-title .accent { color: var(--amber); }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--ink-light);
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-concepts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 3.5rem;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .concept-pill {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 8px 18px;
+    font-size: 14px;
+    color: var(--ink-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .concept-pill:hover {
+    border-color: var(--amber);
+    background: rgba(239,159,39,0.05);
+    transform: translateY(-2px);
+  }
+
+  .concept-pill .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .concept-pill.teal .dot { background: var(--teal); }
+  .concept-pill.coral .dot { background: var(--coral); }
+
+  .scroll-hint {
+    font-size: 13px;
+    color: var(--smoke);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: fadeUp 0.6s 0.5s ease both, bobble 2s 1.5s ease-in-out infinite;
+  }
+
+  .scroll-arrow {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ─── SECTION SHARED ─── */
+  section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber-dark);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 2px;
+    background: var(--amber);
+    border-radius: 1px;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    font-weight: 900;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ─── CHAPTER DIVIDER ─── */
+  .chapter-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 0 0;
+    max-width: 860px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .chapter-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px dashed var(--border);
+  }
+
+  .chapter-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--smoke);
+    white-space: nowrap;
+    padding: 4px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 20px;
+  }
+
+  /* ─── SCENARIO CARD ─── */
+  .scenario-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scenario-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--amber), var(--coral));
+    border-radius: 4px 0 0 4px;
+  }
+
+  .scenario-card.danger::before { background: linear-gradient(180deg, var(--coral), #993C1D); }
+  .scenario-card.success::before { background: linear-gradient(180deg, var(--teal), #085041); }
+
+  .scenario-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--smoke);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  /* ─── DISASTER LIST ─── */
+  .disaster-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 1.5rem 0;
+  }
+
+  .disaster-list li {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem 1.25rem 4.5rem;
+    position: relative;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .disaster-list li::before {
+    position: absolute;
+    left: 1.25rem;
+    top: 1.1rem;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .disaster-list li:nth-child(1)::before { content: '🌶️'; }
+  .disaster-list li:nth-child(2)::before { content: '🔥'; }
+  .disaster-list li:nth-child(3)::before { content: '😰'; }
+
+  .disaster-list li strong {
+    display: block;
+    color: var(--coral-dark);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ─── CONCEPT GRID ─── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 2rem 0;
+  }
+
+  .concept-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.25s;
+    cursor: default;
+  }
+
+  .concept-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--amber);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .concept-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    line-height: 1;
+  }
+
+  .concept-card h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber-deep);
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .concept-card .tech-name {
+    font-size: 11px;
+    color: var(--smoke);
+    margin-bottom: 0.75rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .concept-card p {
+    font-size: 14px;
+    color: var(--ink-light);
+    line-height: 1.65;
+  }
+
+  .concept-card .tag {
+    display: inline-block;
+    margin-top: 0.75rem;
+    background: rgba(239,159,39,0.1);
+    color: var(--amber-dark);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .concept-card .tag.teal {
+    background: rgba(29,158,117,0.1);
+    color: var(--teal-dark);
+  }
+
+  .concept-card .tag.coral {
+    background: rgba(216,90,48,0.1);
+    color: var(--coral-dark);
+  }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    display: flex;
+    gap: 1rem;
+    background: rgba(239,159,39,0.06);
+    border: 1px solid rgba(239,159,39,0.25);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .callout .callout-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .callout.teal {
+    background: rgba(29,158,117,0.06);
+    border-color: rgba(29,158,117,0.25);
+  }
+
+  .callout strong {
+    color: var(--amber-deep);
+    font-weight: 700;
+  }
+
+  .callout.teal strong { color: var(--teal-dark); }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block .code-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--smoke);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .code-block code {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--amber-light);
+    display: block;
+    white-space: pre;
+  }
+
+  .code-block code .comment { color: #5C5248; }
+  .code-block code .key { color: #9FE1CB; }
+  .code-block code .str { color: #FAC775; }
+  .code-block code .cmd { color: #fff; font-weight: 700; }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-diagram {
+    background: var(--ink);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .flow-diagram pre {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--amber-light);
+    white-space: pre;
+  }
+
+  /* ─── QUIZ ─── */
+  .quiz-section {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+  }
+
+  .quiz-section h3 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-item {
+    margin-bottom: 1.75rem;
+  }
+
+  .quiz-question {
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    font-size: 15px;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quiz-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--ink-light);
+    text-align: left;
+    width: 100%;
+  }
+
+  .quiz-option:hover:not(:disabled) {
+    border-color: var(--amber);
+    background: rgba(239,159,39,0.05);
+  }
+
+  .quiz-option.correct {
+    border-color: var(--teal);
+    background: rgba(29,158,117,0.08);
+    color: var(--teal-dark);
+  }
+
+  .quiz-option.wrong {
+    border-color: var(--coral);
+    background: rgba(216,90,48,0.08);
+    color: var(--coral-dark);
+    text-decoration: line-through;
+  }
+
+  .quiz-option .opt-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--smoke);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .quiz-feedback {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(29,158,117,0.1); color: var(--teal-dark); }
+  .quiz-feedback.no { background: rgba(216,90,48,0.1); color: var(--coral-dark); }
+
+  /* ─── GLOSSARY TABLE ─── */
+  .glossary-wrap {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .glossary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .glossary-table th {
+    background: var(--parchment);
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber-deep);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .glossary-table td {
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .glossary-table tr:last-child td { border-bottom: none; }
+
+  .glossary-table tr:hover td { background: rgba(239,159,39,0.04); }
+
+  .glossary-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber-deep);
+    white-space: nowrap;
+    width: 130px;
+  }
+
+  .glossary-table td:nth-child(2) {
+    color: var(--smoke);
+    font-size: 13px;
+    width: 160px;
+  }
+
+  .glossary-table td:nth-child(3) {
+    color: var(--ink-light);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 3rem 2rem;
+    font-size: 13px;
+    color: var(--smoke);
+  }
+
+  footer strong { color: var(--amber-dark); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bobble {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ─── READING PROGRESS ─── */
+  #progress-bar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--amber), var(--coral));
+    width: 0%;
+    z-index: 99;
+    transition: width 0.1s;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ─── PORT DEMO ─── */
+  .port-demo {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  .port-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .port-box {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1.5px solid;
+    text-align: center;
+    min-width: 160px;
+  }
+
+  .port-box.browser {
+    border-color: var(--teal);
+    background: rgba(29,158,117,0.08);
+    color: var(--teal-dark);
+  }
+
+  .port-box.host {
+    border-color: var(--amber);
+    background: rgba(239,159,39,0.08);
+    color: var(--amber-deep);
+  }
+
+  .port-box.container {
+    border-color: var(--coral);
+    background: rgba(216,90,48,0.08);
+    color: var(--coral-dark);
+  }
+
+  .port-arrow {
+    font-size: 18px;
+    color: var(--smoke);
+  }
+
+  .port-box .label {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .port-box .value { font-weight: 700; font-size: 15px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .concept-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <a href="#top" class="nav-logo">🍳 Docker 魔法廚房</a>
+  <ul class="nav-links">
+    <li><a href="#chapter1">第一章</a></li>
+    <li><a href="#chapter2">第二章</a></li>
+    <li><a href="#chapter2-5">第二‧五章</a></li>
+    <li><a href="#chapter3">第三章</a></li>
+    <li><a href="#chapter4">第四章</a></li>
+    <li><a href="#glossary">口訣表</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ─── -->
+<div id="top" class="hero">
+  <div class="hero-bg-circle c1"></div>
+  <div class="hero-bg-circle c2"></div>
+
+  <div class="hero-badge">給新手的觀念指南</div>
+
+  <h1 class="hero-title">
+    歡迎來到<br>
+    <span class="accent">QQ Docker</span><br>
+    魔法廚房
+  </h1>
+
+  <p class="hero-subtitle">
+    想像你準備開一家餐廳，而這家餐廳的運作方式，<br>
+    將徹底改變你對「架設網站」的想像。
+  </p>
+
+  <div class="hero-concepts">
+    <div class="concept-pill"><span class="dot"></span>Container 容器</div>
+    <div class="concept-pill"><span class="dot"></span>Image 映像檔</div>
+    <div class="concept-pill teal"><span class="dot teal"></span>Dockerfile</div>
+    <div class="concept-pill teal"><span class="dot teal"></span>Docker Hub</div>
+    <div class="concept-pill coral"><span class="dot coral"></span>docker-compose</div>
+    <div class="concept-pill coral"><span class="dot coral"></span>Volume 儲存卷</div>
+    <div class="concept-pill"><span class="dot"></span>Port 連接埠</div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>往下開始學習</span>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</div>
+
+<!-- ─── CHAPTER 1 ─── -->
+<div class="chapter-divider" id="chapter1">
+  <hr>
+  <span class="chapter-num">第一章</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">傳統廚房的悲劇</div>
+  <h2 class="section-title fade-in">為什麼我們需要 Docker？</h2>
+
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 1.5rem;">
+    你租了一個很大的空地（<strong>Server / Ubuntu 主機</strong>），蓋了一個大廚房。你決定同時賣三種料理：四川麻辣鍋、法式精緻甜點、義大利麵。
+  </p>
+
+  <div class="scenario-card danger fade-in">
+    <h3>🏚️ 情境：同一間廚房，三種衝突料理</h3>
+    <p style="color: var(--ink-light); font-size: 15px;">麻辣鍋的爐火、甜點的恆溫要求、義大利麵的大量沸水——全部擠在同一個空間裡，只會發生一件事：</p>
+  </div>
+
+  <ul class="disaster-list fade-in">
+    <li>
+      <strong>互相污染（環境衝突）</strong>
+      麻辣鍋的辣椒粉飄到了法式蛋糕上，甜點毀了。技術上是：A 系統需要 Python 2.7 的舊版套件，覆蓋了 B 系統需要的 Python 3.11，兩個都掛掉。
+    </li>
+    <li>
+      <strong>一人生病，全家遭殃（缺乏容錯）</strong>
+      學徒不小心把油鍋打翻引發火災，不僅麻辣鍋不能賣，連法式甜點和義大利麵也跟著停擺，整間餐廳關門大吉。
+    </li>
+    <li>
+      <strong>新人要花三天才能上工（環境建置困難）</strong>
+      每次招募新學徒，都要重新教他採購鍋具、接瓦斯管、調整火力……光建置環境就花掉三天。
+    </li>
+  </ul>
+</section>
+
+<!-- ─── CHAPTER 2 ─── -->
+<div class="chapter-divider" id="chapter2">
+  <hr>
+  <span class="chapter-num">第二章</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">核心觀念</div>
+  <h2 class="section-title fade-in">Docker 魔法廚房降臨</h2>
+
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 2rem;">
+    引進了 Docker 魔法系統之後，整個廚房的運作方式徹底改變。以下是三個核心觀念：
+  </p>
+
+  <div class="concept-grid">
+    <div class="concept-card fade-in">
+      <span class="concept-icon">🏗️</span>
+      <h3>Server（主機）</h3>
+      <div class="tech-name">Ubuntu / Cloud VM</div>
+      <p>只是提供水電和空地的基礎設施。它什麼料理都不做，只負責讓泡泡們存在。</p>
+      <span class="tag">基礎設施</span>
+    </div>
+
+    <div class="concept-card fade-in">
+      <span class="concept-icon">🫧</span>
+      <h3>Container（容器）</h3>
+      <div class="tech-name">docker run</div>
+      <p>魔法獨立小廚房泡泡。有完整爐子、鍋子、水源——跟隔壁泡泡完全不共用。壞了就戳破重蓋。</p>
+      <span class="tag teal">隔離 · 容錯</span>
+    </div>
+
+    <div class="concept-card fade-in">
+      <span class="concept-icon">🧊</span>
+      <h3>Image（映像檔）</h3>
+      <div class="tech-name">docker image</div>
+      <p>名廚製作的標準化冷凍廚房模組。唯讀的母版，永遠不被改動。解凍展開就是 Container。</p>
+      <span class="tag coral">唯讀 · 母版</span>
+    </div>
+  </div>
+
+  <div class="callout teal fade-in">
+    <span class="callout-icon">💡</span>
+    <div>
+      <strong>Image 是唯讀的！</strong>
+      這個冷凍模組是「母版」，它永遠不會被改動。你從它解凍出一個容器，是在製作複印本——不管複印本被燒爛幾次，母版永遠完好如初。
+    </div>
+  </div>
+
+  <div class="callout fade-in">
+    <span class="callout-icon">✨</span>
+    <div>
+      <strong>同時複製的超能力：</strong>
+      週末訂單暴增？同一個廚房模組，可以同時變出三間義大利麵小廚房一起開工，週一再收掉兩間。這就是「水平擴展」（Scaling）的概念。
+    </div>
+  </div>
+</section>
+
+<!-- ─── CHAPTER 2.5 ─── -->
+<div class="chapter-divider" id="chapter2-5">
+  <hr>
+  <span class="chapter-num">第二‧五章</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">Image 的來源</div>
+  <h2 class="section-title fade-in">Dockerfile 與 Docker Hub</h2>
+
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 2rem;">
+    學生常常問：「這個冷凍模組，是誰做出來的？」答案有兩種：自己做，或去賣場拿。
+  </p>
+
+  <div class="concept-grid">
+    <div class="concept-card fade-in">
+      <span class="concept-icon">🗒️</span>
+      <h3>Dockerfile</h3>
+      <div class="tech-name">製作冷凍模組的食譜卡</div>
+      <p>一張指令清單，告訴 Docker 工廠按步驟製作模組。執行 <code style="font-family:Space Mono,monospace;font-size:12px;color:var(--amber-deep)">docker build</code> 就能產出 Image。</p>
+      <span class="tag">自訂模組</span>
+    </div>
+
+    <div class="concept-card fade-in">
+      <span class="concept-icon">🏬</span>
+      <h3>Docker Hub</h3>
+      <div class="tech-name">冷凍食品大賣場</div>
+      <p>全球最大的模組賣場，nginx、mysql、node 等現成模組全部免費取用。<code style="font-family:Space Mono,monospace;font-size:12px;color:var(--amber-deep)">docker pull</code> 直接下載。</p>
+      <span class="tag teal">現成模組</span>
+    </div>
+  </div>
+
+  <div class="code-block fade-in">
+    <div class="code-label">Dockerfile 範例</div>
+    <code><span class="comment"># 以官方 Ubuntu 模組為基礎</span>
+<span class="key">FROM</span> <span class="str">ubuntu:22.04</span>
+
+<span class="comment"># 安裝義大利麵專用環境</span>
+<span class="key">RUN</span> <span class="str">apt-get install -y nodejs npm</span>
+
+<span class="comment"># 把我的獨家程式碼放進去</span>
+<span class="key">COPY</span> <span class="str">./my-app /app</span>
+
+<span class="comment"># 廚房開始時執行的命令</span>
+<span class="key">CMD</span> <span class="str">["node", "/app/server.js"]</span></code>
+  </div>
+
+  <div class="callout fade-in">
+    <span class="callout-icon">🎯</span>
+    <div>
+      <strong>學習捷徑：</strong>
+      初學者九成的時間，都是直接從 Docker Hub 取用現成模組，再用 Dockerfile 做小幅度客製化。不需要從零開始造輪子。
+    </div>
+  </div>
+</section>
+
+<!-- ─── CHAPTER 3 ─── -->
+<div class="chapter-divider" id="chapter3">
+  <hr>
+  <span class="chapter-num">第三章</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">自動化點菜單</div>
+  <h2 class="section-title fade-in">docker-compose.yml</h2>
+
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 1.5rem;">
+    一個完整的網站，通常需要好幾間廚房同時運作：點餐窗口、食材倉庫、外送接單……手動逐一變出泡泡既容易出錯又麻煩。
+  </p>
+
+  <div class="code-block fade-in">
+    <div class="code-label">docker-compose.yml</div>
+    <code><span class="comment"># 工頭，請幫我蓋好以下整間餐廳：</span>
+<span class="key">services</span>:
+  <span class="key">web</span>:         <span class="comment"># 點餐窗口廚房</span>
+    <span class="key">image</span>: <span class="str">my-app</span>
+    <span class="key">ports</span>:
+      - <span class="str">"9000:80"</span>   <span class="comment"># 街上9000號 → 廚房內部80號</span>
+    <span class="key">depends_on</span>:
+      - <span class="str">db</span>
+
+  <span class="key">db</span>:          <span class="comment"># 食材倉庫冰庫</span>
+    <span class="key">image</span>: <span class="str">mysql:8</span>
+    <span class="key">volumes</span>:
+      - <span class="str">db-data:/var/lib/mysql</span>
+
+<span class="key">volumes</span>:
+  <span class="key">db-data</span>:     <span class="comment"># 永久大冰箱</span></code>
+  </div>
+
+  <div class="scenario-card success fade-in">
+    <h3>✨ 魔法工頭指令</h3>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:0.5rem;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <code style="font-family:Space Mono,monospace; font-size:13px; background:var(--ink); color:var(--amber-light); padding:8px 14px; border-radius:8px; white-space:nowrap;">docker compose up -d</code>
+        <span style="font-size:14px; color:var(--teal-dark);">→ 一分鐘內，整間餐廳蓋好開張</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <code style="font-family:Space Mono,monospace; font-size:13px; background:var(--ink); color:var(--amber-light); padding:8px 14px; border-radius:8px; white-space:nowrap;">docker compose down</code>
+        <span style="font-size:14px; color:var(--teal-dark);">→ 所有泡泡收走，空地恢復清爽</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label fade-in" style="margin-top: 2.5rem;">Port 連接埠說明</div>
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 1rem;">
+    Port 就是廚房的傳菜口編號。容器是個密閉的泡泡，外面的客人（瀏覽器）必須透過指定的窗口才能進來。
+  </p>
+
+  <div class="port-demo fade-in">
+    <div class="port-row">
+      <div class="port-box browser">
+        <div class="label">瀏覽器</div>
+        <div class="value">localhost:9000</div>
+      </div>
+      <span class="port-arrow">→</span>
+      <div class="port-box host">
+        <div class="label">主機大門</div>
+        <div class="value">Port 9000</div>
+      </div>
+      <span class="port-arrow">→</span>
+      <div class="port-box container">
+        <div class="label">容器內部</div>
+        <div class="value">Port 80</div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--smoke); font-family:Space Mono,monospace; margin-top:4px;">
+      設定 "9000:80" → 街上 9000 號大門，接通廚房內部 80 號傳菜口
+    </p>
+  </div>
+</section>
+
+<!-- ─── CHAPTER 4 ─── -->
+<div class="chapter-divider" id="chapter4">
+  <hr>
+  <span class="chapter-num">第四章</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">最重要的一課</div>
+  <h2 class="section-title fade-in">Volume 儲存卷：保住客人的訂單</h2>
+
+  <p class="fade-in" style="color: var(--ink-light); margin-bottom: 1.5rem;">
+    這是所有新手最常犯的致命錯誤。
+  </p>
+
+  <div class="scenario-card danger fade-in">
+    <h3>😱 情境：消失的蛋糕</h3>
+    <p style="color: var(--ink-light); font-size: 15px;">
+      學徒把做好的精美法式蛋糕（你的網站文章、資料庫記錄）放在魔法小廚房的桌上。當你把這個小廚房「波！」一聲收掉時，裡面的蛋糕就跟著灰飛煙滅了！
+    </p>
+  </div>
+
+  <div class="callout fade-in" style="background:rgba(216,90,48,0.05); border-color:rgba(216,90,48,0.2);">
+    <span class="callout-icon">⚠️</span>
+    <div>
+      這不是 Bug，<strong style="color:var(--coral-dark)">這是 Docker 的設計哲學：</strong>
+      容器要能隨時被銷毀和重建，以此保證環境永遠純淨一致。因此資料絕對不能住在容器裡。
+    </div>
+  </div>
+
+  <div class="concept-card fade-in" style="margin: 1.5rem 0;">
+    <span class="concept-icon">🧊</span>
+    <h3>Volume（儲存卷）</h3>
+    <div class="tech-name">廚房外的永久大冰箱</div>
+    <p>在真正的餐廳空地（Ubuntu 主機）上，安裝一台永久大冰箱。用魔法管子把泡泡裡的備料區和外面的大冰箱連通——資料直接存進主機硬碟，容器可以刪了重建幾百次都不影響。</p>
+    <span class="tag teal">資料持久化</span>
+  </div>
+
+  <div class="code-block fade-in">
+    <div class="code-label">Volume 對應示意</div>
+    <code><span class="comment"># 把容器內的路徑，接到主機的永久資料夾</span>
+<span class="key">volumes</span>:
+  - <span class="str">./db-data</span>:<span class="str">/var/lib/mysql</span>
+
+<span class="comment">  ↑ 主機硬碟     ↑ 容器內路徑</span>
+<span class="comment">  (永久大冰箱)   (廚房備料架)</span></code>
+  </div>
+
+  <div class="callout teal fade-in">
+    <span class="callout-icon">✅</span>
+    <div>
+      <strong>結果：</strong>
+      不管你把魔法小廚房刪除幾百次、升級幾十次、換到不同伺服器，只要大冰箱（Volume）還在，你的所有資料就永遠安全。
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUIZ ─── -->
+<section>
+  <div class="section-label fade-in">學習測驗</div>
+  <h2 class="section-title fade-in">廚房學徒的考驗</h2>
+
+  <div class="quiz-section fade-in">
+    <h3>🍽️ 看看你學會了幾成？</h3>
+
+    <div class="quiz-item">
+      <p class="quiz-question">Q1. 你把 Docker Container 刪掉重建，之前存在容器裡的資料庫資料會怎樣？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="錯！容器是隨時可拋棄的泡泡，裡面的資料會跟著消失。必須用 Volume 接到外面的大冰箱，資料才能保留。">
+          <span class="opt-letter">A</span>
+          資料會自動備份，不用擔心
+        </button>
+        <button class="quiz-option" onclick="answer(this, true)" data-feedback="正確！容器本身不儲存資料，必須把資料透過 Volume 掛載到主機硬碟，才能在容器重建後保留。">
+          <span class="opt-letter">B</span>
+          資料會不見，必須用 Volume 才能保留
+        </button>
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="不對，Docker 沒有這樣的機制。這個選項是虛構的喔。">
+          <span class="opt-letter">C</span>
+          資料會暫存在 Docker Hub 上
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="quiz-item">
+      <p class="quiz-question">Q2. Image（映像檔）是什麼？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="Container 才是正在執行的廚房。Image 是還沒解凍的模組。">
+          <span class="opt-letter">A</span>
+          正在執行中的容器廚房
+        </button>
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="Volume 才是永久大冰箱，負責儲存資料。">
+          <span class="opt-letter">B</span>
+          用來儲存資料的永久大冰箱
+        </button>
+        <button class="quiz-option" onclick="answer(this, true)" data-feedback="正確！Image 是唯讀的標準化模組（冷凍廚房），從它解凍展開就能得到 Container。它本身永遠不被修改。">
+          <span class="opt-letter">C</span>
+          唯讀的標準化冷凍廚房模組，解凍後變成 Container
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="quiz-item">
+      <p class="quiz-question">Q3. docker-compose.yml 的用途是什麼？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="answer(this, true)" data-feedback="正確！docker-compose.yml 是整合裝潢清單，一口氣定義好多個容器的設定、網路、Volume，讓你一個指令就能建起整間「餐廳」。">
+          <span class="opt-letter">A</span>
+          一次定義並啟動多個容器，讓整個服務環境一鍵部署
+        </button>
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="Dockerfile 才是製作 Image 的食譜卡。docker-compose.yml 是用來描述如何組合多個容器的。">
+          <span class="opt-letter">B</span>
+          製作 Docker Image 的食譜卡
+        </button>
+        <button class="quiz-option" onclick="answer(this, false)" data-feedback="Docker Hub 是那個現成模組的大賣場。docker-compose.yml 是本地的部署設定檔。">
+          <span class="opt-letter">C</span>
+          上傳 Image 到 Docker Hub 的工具
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── GLOSSARY ─── -->
+<div class="chapter-divider" id="glossary">
+  <hr>
+  <span class="chapter-num">口訣總表</span>
+  <hr>
+</div>
+
+<section>
+  <div class="section-label fade-in">廚房學徒必記</div>
+  <h2 class="section-title fade-in">一眼看懂對照表</h2>
+
+  <div class="glossary-wrap fade-in">
+    <table class="glossary-table">
+      <thead>
+        <tr>
+          <th>技術名詞</th>
+          <th>廚房比喻</th>
+          <th>一句話記憶</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Server</td>
+          <td>提供水電的空地</td>
+          <td>只是個地基，什麼都不煮</td>
+        </tr>
+        <tr>
+          <td>Dockerfile</td>
+          <td>製作模組的食譜卡</td>
+          <td>告訴工廠怎麼一步步做出我的模組</td>
+        </tr>
+        <tr>
+          <td>Docker Hub</td>
+          <td>冷凍食品大賣場</td>
+          <td>nginx、mysql 等現成模組直接取用</td>
+        </tr>
+        <tr>
+          <td>Image</td>
+          <td>唯讀的冷凍廚房模組</td>
+          <td>母版，永遠不被改動，解凍就變 Container</td>
+        </tr>
+        <tr>
+          <td>Container</td>
+          <td>從模組解凍的廚房泡泡</td>
+          <td>壞了就戳破重蓋，可同時複製多個</td>
+        </tr>
+        <tr>
+          <td>Port</td>
+          <td>廚房的傳菜口編號</td>
+          <td>外面的門牌 9000 接到裡面的窗口 80</td>
+        </tr>
+        <tr>
+          <td>docker-compose</td>
+          <td>給工頭的整合裝潢清單</td>
+          <td>帶著清單，到哪都能開整間餐廳</td>
+        </tr>
+        <tr>
+          <td>Volume</td>
+          <td>廚房外的永久大冰箱</td>
+          <td>資料不住容器，住大冰箱，重開機才不哭</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout teal fade-in" style="margin-top:2rem;">
+    <span class="callout-icon">🧑‍🍳</span>
+    <div>
+      <strong>最後一句話送給所有學徒：</strong>
+      容器天生就是要被拋棄的——這不是它的缺點，這是它的超能力。學會擁抱這個「無常」，你就真正懂了 Docker 的靈魂。
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>🍳 <strong>Docker 魔法廚房</strong> · 給新手的觀念指南</p>
+  <p style="margin-top:8px; font-size:12px;">所有技術比喻僅供教學用途，廚房不負責真實火災賠償 🔥</p>
+</footer>
+
+<script>
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+    bar.style.width = Math.min(pct, 100) + '%';
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  function answer(btn, correct) {
+    const item = btn.closest('.quiz-item');
+    if (item.querySelector('.correct') || item.querySelector('.wrong')) return;
+    item.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+    btn.classList.add(correct ? 'correct' : 'wrong');
+    const fb = item.querySelector('.quiz-feedback');
+    fb.textContent = (correct ? '✅ ' : '❌ ') + btn.dataset.feedback;
+    fb.className = 'quiz-feedback show ' + (correct ? 'ok' : 'no');
+    if (!correct) {
+      item.querySelectorAll('.quiz-option').forEach(b => {
+        if (b.getAttribute('onclick').includes('true')) b.classList.add('correct');
+      });
+    }
+  }
+</script>
+</body>
+</html>

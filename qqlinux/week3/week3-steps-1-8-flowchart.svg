@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2580" viewBox="0 0 1600 2580" role="img" aria-labelledby="title desc">
+<title id="title">WEEK3：STEP 1–8 備份與還原實作流程圖</title><desc id="desc">由上而下依序完成下載腳本、第一次備份、版本盤點、設定調整、演練前檢查、刪除資料 Volume、還原、瀏覽器驗收。右側列出不通過時的處理。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#456e61"/></marker><marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#bb7361"/></marker></defs>
+<rect width="1600" height="2580" fill="#f5f7f2"/>
+<style>text{font-family:"Noto Sans CJK TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif} .body{font-size:22px;fill:#3e554b}.small{font-size:19px;fill:#63746a}.heading{font-size:28px;font-weight:700;fill:#244a3c}.mono{font-family:Consolas,Menlo,monospace;font-size:19px;fill:#345a49}</style>
+<text x="70" y="65" class="small" letter-spacing="3">DOCKER LAB / WEEK 03</text>
+<text x="70" y="123" class="heading" style="font-size:45px">備份、驗證、刪除、還原</text>
+<text x="70" y="168" class="body" >STEP 1–8 學生實作流程圖｜由上往下操作；任一檢查不通過，就停止後續動作。</text>
+<rect x="70" y="205" width="980" height="82" rx="12" fill="#e4efe5" stroke="#b4cdb9" stroke-width="2"/>
+<text x="100" y="239" class="body" >開始條件：WEEK2 雙網站正常、WordPress 已有文章與圖片。</text>
+<text x="100" y="269" class="small" >可 SSH 登入 VM，已下載所需 Image；主要工作目錄為 ~/webstack。</text>
+<text x="1140" y="243" class="heading" >右側：不通過時怎麼做</text>
+<text x="1140" y="274" class="small" >保留現況與錯誤訊息，不要盲目重試。</text>
+<path d="M 560 287 V 320" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="325" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="342" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="367" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 1</text>
+<text x="199" y="369" class="heading" >取得備份與還原工具</text>
+<text x="98" y="405" class="body" >進入 ~/webstack，執行 docker compose ps 確認四個服務。</text>
+<text x="98" y="432" class="body" >下載 backup.sh、restore.sh；chmod +x 設定執行權限。</text>
+<text x="98" y="459" class="body" >閱讀腳本，確認下載的內容與檔案名稱。</text>
+<rect x="88" y="497" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="518" class="small" >通過：服務正常，兩支腳本下載成功且可執行。</text>
+<path d="M 1050 425 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="413" class="small" >否</text>
+<rect x="1140" y="359" width="390" height="125" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="391" class="small" font-weight="700">下載失敗或服務異常</text>
+<text x="1160" y="419" class="small" >先修正網址、檔案或服務問題。</text>
+<text x="1160" y="447" class="small" >未通過前不要開始備份。</text>
+<text x="578" y="563" class="small" >通過 ↓</text>
+<path d="M 560 537 V 570" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="575" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="592" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="617" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 2</text>
+<text x="199" y="619" class="heading" >第一次備份：保留變更前狀態</text>
+<text x="98" y="655" class="body" >執行 ./backup.sh：暫停 WordPress，匯出 SQL 與文章清單。</text>
+<text x="98" y="682" class="body" >打包 wp-data 並記錄檔案 SHA-256；恢復 WordPress。</text>
+<text x="98" y="709" class="body" >備份設定與憑證；將「完成」後的目錄設為變數 B。</text>
+<rect x="88" y="747" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="768" class="small" >通過：六個備份檔案齊全，SQL 有資料表，壓縮檔有圖片。</text>
+<path d="M 1050 675 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="663" class="small" >否</text>
+<rect x="1140" y="609" width="390" height="125" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="641" class="small" font-weight="700">備份未完成或內容缺漏</text>
+<text x="1160" y="669" class="small" >不要使用 .partial- 目錄還原。</text>
+<text x="1160" y="697" class="small" >先排除問題，再重新備份。</text>
+<text x="578" y="813" class="small" >通過 ↓</text>
+<path d="M 560 787 V 820" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="825" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="842" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="867" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 3</text>
+<text x="199" y="869" class="heading" >盤點目前實際版本</text>
+<text x="98" y="905" class="body" >查詢 MariaDB、WordPress、PHP、Nginx、Certbot 版本。</text>
+<text x="98" y="932" class="body" >記錄結果，作為下一步選擇 Image 標籤的依據。</text>
+<text x="98" y="959" class="body" >目的：確認現在跑什麼；此步驟不升級資料庫。</text>
+<rect x="88" y="997" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="1018" class="small" >通過：已記錄版本，能辨識與老師範例的差異。</text>
+<path d="M 1050 925 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="913" class="small" >否</text>
+<rect x="1140" y="859" width="390" height="125" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="891" class="small" font-weight="700">版本不清楚或與範例不同</text>
+<text x="1160" y="919" class="small" >先確認實際版本與可用標籤。</text>
+<text x="1160" y="947" class="small" >不確定就請老師協助。</text>
+<text x="578" y="1063" class="small" >通過 ↓</text>
+<path d="M 560 1037 V 1070" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="1075" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="1092" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="1117" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 4</text>
+<text x="199" y="1119" class="heading" >對齊版本設定並加入健康檢查</text>
+<text x="98" y="1155" class="body" >保留 compose.yml.week2；下載 compose.yml.new，用 diff 比較。</text>
+<text x="98" y="1182" class="body" >將 Image 標籤對齊目前版本；核對健康檢查、密碼與掛載。</text>
+<text x="98" y="1209" class="body" >語法及 Volume 檢查通過才替換；pull 後執行 up -d。</text>
+<rect x="88" y="1247" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="1268" class="small" >通過：db 為 healthy，兩個網站正常，原文章仍在。</text>
+<path d="M 1050 1175 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="1163" class="small" >否</text>
+<rect x="1140" y="1109" width="390" height="145" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="1141" class="small" font-weight="700">設定或套用結果不符</text>
+<text x="1160" y="1169" class="small" >未啟動前發現 Volume 不符：</text>
+<text x="1160" y="1197" class="small" >換回舊設定，停止並求助。</text>
+<text x="1160" y="1225" class="small" >套用後失敗：保留 log，求助。</text>
+<text x="578" y="1313" class="small" >通過 ↓</text>
+<path d="M 560 1287 V 1320" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="1325" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="1342" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="1367" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 5</text>
+<text x="199" y="1369" class="heading" >演練前：再次備份與檢查</text>
+<text x="98" y="1405" class="body" >再次執行 ./backup.sh；必須完成，並將 B 更新成新備份目錄。</text>
+<text x="98" y="1432" class="body" >確認 Compose 支援 --wait-timeout。</text>
+<text x="98" y="1459" class="body" >執行 sha256sum -c SHA256SUMS；檢查 wp-config.php 計數。</text>
+<rect x="88" y="1497" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="1518" class="small" >通過：五個檢查碼全為 OK，wp-config.php 計數為 1。</text>
+<path d="M 1050 1425 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="1413" class="small" >否</text>
+<rect x="1140" y="1359" width="390" height="145" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="1391" class="small" font-weight="700">任一檢查未通過</text>
+<text x="1160" y="1419" class="small" >禁止執行 down -v。</text>
+<text x="1160" y="1447" class="small" >若已超過老師指定停損時間，</text>
+<text x="1160" y="1475" class="small" >保留備份，另行安排演練。</text>
+<text x="578" y="1563" class="small" >通過 ↓</text>
+<path d="M 560 1537 V 1570" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="1575" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="1592" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="1617" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 6</text>
+<text x="199" y="1619" class="heading" >製造災難：刪除本專案資料 Volume</text>
+<text x="98" y="1655" class="body" >最後確認 B 正確，備份目錄的六個檔案仍存在。</text>
+<text x="98" y="1682" class="body" >執行 docker compose down -v。</text>
+<text x="98" y="1709" class="body" >執行 docker volume ls；以瀏覽器確認網站已停止服務。</text>
+<rect x="88" y="1747" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="1768" class="small" >通過：webstack_db-data、webstack_wp-data 都已不存在。</text>
+<path d="M 1050 1675 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="1663" class="small" >否</text>
+<rect x="1140" y="1609" width="390" height="125" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="1641" class="small" font-weight="700">Volume 仍存在或結果不明</text>
+<text x="1160" y="1669" class="small" >停止，保留現況並求助。</text>
+<text x="1160" y="1697" class="small" >不要為了繼續而反覆刪除。</text>
+<text x="578" y="1813" class="small" >通過 ↓</text>
+<path d="M 560 1787 V 1820" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="1825" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="1842" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="1867" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 7</text>
+<text x="199" y="1869" class="heading" >從備份還原並比對</text>
+<text x="98" y="1905" class="body" >執行 ./restore.sh &quot;$B&quot;；先驗證備份、Volume 名稱與不存在條件。</text>
+<text x="98" y="1932" class="body" >建立空 Volume → 還原 wp-data → 比對每個檔案 SHA-256。</text>
+<text x="98" y="1959" class="body" >只啟動 db，等健康檢查通過 → 匯入 SQL → 比對文章清單。</text>
+<text x="98" y="1986" class="body" >兩項比對都一致，再啟動全部服務，確認腳本正常結束。</text>
+<rect x="88" y="1997" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="2018" class="small" >通過：顯示「檔案比對一致」「文章比對一致」與還原完成。</text>
+<path d="M 1050 1925 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="1913" class="small" >否</text>
+<rect x="1140" y="1859" width="390" height="125" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="1891" class="small" font-weight="700">還原檢查、匯入或啟動失敗</text>
+<text x="1160" y="1919" class="small" >保留錯誤與已還原的狀態。</text>
+<text x="1160" y="1947" class="small" >請老師協助；不要反覆 down -v。</text>
+<text x="578" y="2063" class="small" >通過 ↓</text>
+<path d="M 560 2037 V 2070" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="2075" width="980" height="212" rx="12" fill="#fff" stroke="#d3dfd3" stroke-width="2"/>
+<rect x="88" y="2092" width="92" height="36" rx="6" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="134" y="2117" text-anchor="middle" fill="white" font-size="17" font-weight="700">STEP 8</text>
+<text x="199" y="2119" class="heading" >瀏覽器驗收：確認真的能使用</text>
+<text x="98" y="2155" class="body" >開啟 WordPress 網站，確認原文章與圖片都在。</text>
+<text x="98" y="2182" class="body" >登入 WordPress 後台，確認登入功能正常。</text>
+<text x="98" y="2209" class="body" >開啟另一個靜態網站，確認頁面正常；保存驗收截圖。</text>
+<rect x="88" y="2247" width="944" height="29" rx="4" fill="#edf3e9" stroke="#edf3e9" stroke-width="2"/>
+<text x="100" y="2268" class="small" >通過：文章、圖片、後台登入與靜態網站全部正常。</text>
+<path d="M 1050 2175 H 1128" fill="none" stroke="#bb7361" stroke-width="3" marker-end="url(#red)"/>
+<text x="1072" y="2163" class="small" >否</text>
+<rect x="1140" y="2109" width="390" height="145" rx="12" fill="#fbefe5" stroke="#e3c9b8" stroke-width="2"/>
+<text x="1160" y="2141" class="small" font-weight="700">功能不正常或出現安裝畫面</text>
+<text x="1160" y="2169" class="small" >不要按 WordPress「安裝」。</text>
+<text x="1160" y="2197" class="small" >保留畫面、檢查服務與 log，</text>
+<text x="1160" y="2225" class="small" >請老師協助定位問題。</text>
+<path d="M 560 2287 V 2345" fill="none" stroke="#456e61" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="70" y="2350" width="980" height="70" rx="12" fill="#276554" stroke="#276554" stroke-width="2"/>
+<text x="560" y="2394" text-anchor="middle" fill="white" font-size="27" font-weight="700">完成：同一台 VM 的資料 Volume 還原演練</text>
+<text x="70" y="2466" class="heading" >教學界線</text>
+<text x="70" y="2502" class="small" >① STEP 3–4 限制版本系列；非資料庫跨版本升級，也不等於鎖定同一個 Image。</text>
+<text x="70" y="2535" class="small" >② STEP 5 是檔案完整性檢查；STEP 7–8 才驗證還原。down -v 不刪除主機上的設定與憑證。</text>
+</svg>

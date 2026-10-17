@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 協作歷程與反思評量：教學框架與實務</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',    // Slate 900
+                            primary: '#4f46e5', // Indigo 600
+                            secondary: '#10b981',// Emerald 500
+                            accent: '#8b5cf6',  // Violet 500
+                            light: '#f8fafc',   // Slate 50
+                            muted: '#64748b'    // Slate 500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            scroll-behavior: smooth;
+        }
+
+        /* 捲動浮現動畫 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 強調引言區塊 */
+        .hero-quote {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 6px solid #4f46e5;
+        }
+
+        /* 卡片懸浮與漸層邊框 */
+        .gradient-border-card {
+            position: relative;
+            background: #fff;
+            border-radius: 1rem;
+            z-index: 1;
+        }
+        .gradient-border-card::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 1.1rem;
+            background: linear-gradient(45deg, #4f46e5, #8b5cf6, #10b981);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .gradient-border-card:hover::before {
+            opacity: 1;
+        }
+
+        /* 隱藏捲軸 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Tabs 切換過渡 */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased font-sans">
+
+    <!-- 進度條 -->
+    <div class="fixed top-0 left-0 h-1.5 bg-brand-primary z-50 transition-all duration-300" id="progressBar" style="width: 0%;"></div>
+
+    <!-- Header & Hero -->
+    <header class="pt-24 pb-16 px-6 max-w-5xl mx-auto reveal">
+        <div class="text-center mb-10">
+            <span class="inline-block py-1 px-3 rounded-full bg-indigo-100 text-brand-primary text-sm font-bold tracking-wider mb-4 border border-indigo-200">
+                師資培育社群講座
+            </span>
+            <h1 class="text-4xl md:text-6xl font-black text-brand-dark tracking-tight leading-tight mb-4">
+                AI 協作歷程與反思評量
+            </h1>
+            <p class="text-xl md:text-2xl text-brand-muted font-medium mb-2">
+                教學框架與實務：從代筆到夥伴
+            </p>
+            <p class="text-md text-slate-500 mt-4">
+                講師：林文彥 副教授（資訊管理學系）
+            </p>
+        </div>
+
+        <!-- 核心心法 Callout -->
+        <div class="hero-quote p-8 md:p-10 rounded-2xl shadow-sm reveal mt-12 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-4 -mr-4 text-indigo-200 opacity-30">
+                <i class="fa-solid fa-quote-right text-9xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-brand-dark mb-4 relative z-10 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-yellow-500"></i> 一句話帶走
+            </h2>
+            <p class="text-xl md:text-2xl text-slate-700 font-medium leading-relaxed mb-6 relative z-10">
+                「AI 時代的教學，不是看誰能給出最完美的答案，而是看<span class="text-brand-primary font-bold border-b-2 border-brand-primary">誰能引導學生問出最有深度的問題，並做出最精準的判斷。</span>」
+            </p>
+            <div class="bg-white/80 backdrop-blur rounded-xl p-5 border border-indigo-100 relative z-10">
+                <p class="font-bold text-slate-800">🎯 核心心法：</p>
+                <p class="text-slate-600 mt-1">凡是 AI 能一鍵生成的，就不要拿來評分；要評就評 AI 生不出來的——<strong>你的起點、你的拒絕、你斷網後的手</strong>。</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- 壹、破局 -->
+    <section class="py-16 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-10 flex items-center gap-3 border-b-2 border-slate-100 pb-4">
+                <span class="bg-brand-dark text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl">壹</span>
+                破局：重新定義 AI 時代的教與學
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <!-- 黑箱危機 -->
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+                    <h3 class="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-box-archive"></i> 1. 作業「黑箱危機」
+                    </h3>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-1"></i>
+                            <div><strong>傳統困境：</strong>期末一次性繳交報告，難以判斷 AI 參與比例，陷入防堵與擁抱的無解兩難。</div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-clipboard-question text-brand-primary mt-1"></i>
+                            <div><strong>靈魂拷問：</strong>我們到底在考學生，還是在考 AI 的生成能力？</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 評量轉移 -->
+                <div class="bg-indigo-50 rounded-2xl p-8 border border-indigo-100">
+                    <h3 class="text-xl font-bold text-brand-primary mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i> 3. 評量的黃金轉移
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-wide block mb-1">過去 (What)</span>
+                            <span class="text-slate-700 line-through decoration-red-400">評斷最終產出</span> → 極易被取代，失去鑑別度。
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-brand-primary">
+                            <span class="text-sm font-bold text-brand-primary uppercase tracking-wide block mb-1">現在 (How & Why)</span>
+                            <ul class="list-disc pl-5 text-slate-700 space-y-1">
+                                <li><strong>How (思考過程)：</strong>學生如何拆解問題、提問。</li>
+                                <li><strong>Why (後設認知)：</strong>為何採納或拒絕 AI 建議。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 代筆到夥伴 -->
+            <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-people-arrows"></i> 2. 從「代筆工具」到「學習夥伴（Copilot）」
+            </h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 uppercase text-sm tracking-wider">
+                            <th class="p-4 border-b w-1/4">面向</th>
+                            <th class="p-4 border-b w-3/8 text-red-600 bg-red-50/50"><i class="fa-solid fa-xmark mr-1"></i> 拋棄：單向依賴</th>
+                            <th class="p-4 border-b w-3/8 text-emerald-600 bg-emerald-50/50"><i class="fa-solid fa-check mr-1"></i> 導入：流暢協作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-700">
+                        <tr>
+                            <td class="p-4 border-b font-bold bg-white">概念</td>
+                            <td class="p-4 border-b bg-white">一鍵生成</td>
+                            <td class="p-4 border-b bg-white font-bold text-brand-primary">Vibe Coding（流暢協作）</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 border-b font-bold bg-slate-50">定位</td>
+                            <td class="p-4 border-b bg-slate-50">單向依賴的代筆工具</td>
+                            <td class="p-4 border-b bg-slate-50">高頻對話與共創的學習夥伴</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 border-b font-bold bg-white">結果</td>
+                            <td class="p-4 border-b bg-white">剝奪思考、產出毫無靈魂的制式內容</td>
+                            <td class="p-4 border-b bg-white font-bold text-emerald-600">建立透明化的敏捷學習迴圈</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- 貳、框架 -->
+    <section class="py-16 px-6 bg-slate-50 reveal">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4 flex items-center gap-3 pb-2">
+                <span class="bg-brand-dark text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl">貳</span>
+                框架：人機協作的黃金三角
+            </h2>
+            <p class="text-lg text-slate-600 mb-10 border-l-4 border-brand-primary pl-4">三個工具缺一不可——<strong class="text-brand-accent">Gemini 負責逼問</strong>、<strong class="text-slate-800">Notion 負責留痕</strong>、<strong class="text-brand-secondary">Tronclass 負責卡點</strong>。</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Gemini -->
+                <div class="gradient-border-card p-8 h-full flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fa-solid fa-sparkles text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">1. 發散與測試的沙盒<br><span class="text-purple-600">Gemini（AI 協作端）</span></h3>
+                    <ul class="text-slate-600 space-y-3 flex-grow text-sm">
+                        <li><i class="fa-solid fa-circle-play text-purple-400 mr-2"></i><strong>Ping-Pong 互動：</strong>不只是單向問答，而是來回對話；教導下達有效 Prompt。</li>
+                        <li><i class="fa-solid fa-border-all text-purple-400 mr-2"></i><strong>設定邊界：</strong>賦予具體情境、角色與限制條件，避免泛泛之談。</li>
+                        <li><i class="fa-solid fa-bullseye text-purple-400 mr-2"></i><strong>協作目標：</strong>引導 AI 提供「批判與建議」，而非直接給出答案。</li>
+                    </ul>
+                    <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-purple-500 font-medium">
+                        提問 → 回應 → 追問 → 反饋 → 優化
+                    </div>
+                </div>
+
+                <!-- Notion -->
+                <div class="gradient-border-card p-8 h-full flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fa-solid fa-cube text-2xl text-slate-700"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">2. 收斂與透明儀表板<br><span class="text-slate-700">Notion（歷程紀錄端）</span></h3>
+                    <ul class="text-slate-600 space-y-4 flex-grow text-sm">
+                        <li>
+                            <strong class="block text-slate-800 mb-1"><i class="fa-solid fa-flag-checkered text-slate-400 mr-1"></i> Before AI（我的起點）：</strong>
+                            強制填寫。在碰 AI 前確立原始思考基線，防止被 AI 錨定。
+                        </li>
+                        <li>
+                            <strong class="block text-slate-800 mb-1"><i class="fa-solid fa-user-gear text-slate-400 mr-1"></i> Human-in-the-loop：</strong>
+                            以反思紀錄表詳細記錄決策。必須寫下「為何採納/拒絕/修改」。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tronclass -->
+                <div class="gradient-border-card p-8 h-full flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fa-solid fa-shield-halved text-2xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">3. 敏捷檢核的樞紐<br><span class="text-emerald-600">Tronclass（評量控管端）</span></h3>
+                    <ul class="text-slate-600 space-y-4 flex-grow text-sm">
+                        <li>
+                            <strong class="block text-emerald-700 mb-1"><i class="fa-solid fa-shoe-prints mr-1"></i> 小碎步 (Micro-stepping)：</strong>
+                            將長週期的專題拆解為高頻率、低佔分的形成性評量。
+                        </li>
+                        <li>
+                            <strong class="block text-emerald-700 mb-1"><i class="fa-solid fa-hand-paper mr-1"></i> 強制同步與攔截：</strong>
+                            每個 Sprint 必須提交 Notion 連結，及早發現並攔截學習迷思，避免期末一翻兩瞪眼。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 參＆伍整合：實境演練 (Tabs) -->
+    <section class="py-16 px-6 bg-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b-2 border-slate-100 pb-4 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold flex items-center gap-3">
+                        <span class="bg-brand-dark text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl">參</span>
+                        實境演練：課堂「小碎步」落地
+                    </h2>
+                    <p class="text-slate-500 mt-2">適用於所有學科。示範情境：PjBL 系統部署專題 (架設個人雲端服務)</p>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="flex flex-wrap gap-2 mb-6" id="sprintTabs">
+                <button class="tab-btn active px-6 py-3 rounded-lg font-bold transition-all bg-brand-primary text-white shadow-md transform scale-105" data-target="sprint0">
+                    0. 準備階段
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg font-bold transition-all bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-brand-primary" data-target="sprint1">
+                    Sprint 1: 發散
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg font-bold transition-all bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-brand-primary" data-target="sprint2">
+                    Sprint 2: 收斂
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg font-bold transition-all bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-brand-primary" data-target="sprint3">
+                    Sprint 3: 產出
+                </button>
+            </div>
+
+            <!-- Tabs Content -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 md:p-8 min-h-[350px]">
+                
+                <!-- Sprint 0 -->
+                <div id="sprint0" class="tab-content active">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-hourglass-start text-brand-muted"></i> 階段 0：手寫起點 (Before AI)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                            <h4 class="font-bold text-blue-800 mb-2"><i class="fa-solid fa-user-graduate"></i> 學生任務</h4>
+                            <p class="text-slate-700">斷網限時手寫思考基線。<br><span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded mt-2 inline-block">不可外包・不可竄改</span></p>
+                        </div>
+                        <div class="bg-amber-50 p-5 rounded-xl border border-amber-100">
+                            <h4 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-radar"></i> 教師偵測訊號</h4>
+                            <p class="text-slate-700">連基本元件或痛點都寫不出 → <strong class="text-amber-600">發現概念缺口</strong>，代表學生根本不知從何查起。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 1 -->
+                <div id="sprint1" class="tab-content">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-person-running text-brand-primary"></i> Sprint 1：問題定義與發散 (提問力)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-blue-800 mb-2"><i class="fa-solid fa-user-graduate"></i> 學生任務</h4>
+                            <p class="text-slate-700 text-sm mb-3">寫下構想，用 Gemini 腦力激盪找盲點。</p>
+                            <div class="bg-white p-3 rounded text-sm text-slate-600 border border-blue-200">
+                                <strong class="text-blue-700">Ubuntu 範例：</strong>只問 AI「為什麼需要這服務」，並用自己的話畫出架構圖。
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 p-5 rounded-xl border border-amber-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-chalkboard-user"></i> 教師視角</h4>
+                            <p class="text-slate-700 text-sm">檢查 Notion 的 <strong>Ping-Pong Log</strong>，確保學生引導 AI 收斂、而非被牽著走。</p>
+                        </div>
+                        <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-emerald-800 mb-2"><i class="fa-solid fa-radar"></i> 偵測訊號</h4>
+                            <p class="text-slate-700 text-sm">
+                                ✅ 畫得出元件關係 ＝ <strong>真懂</strong><br>
+                                ❌ 只列出一堆安裝指令 ＝ <strong>全抄</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 2 -->
+                <div id="sprint2" class="tab-content">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-person-running text-brand-primary"></i> Sprint 2：方案收斂與壓力測試 (佔分 40%)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-blue-800 mb-2"><i class="fa-solid fa-user-graduate"></i> 學生任務</h4>
+                            <p class="text-slate-700 text-sm mb-3">提草案，令 AI 扮「魔鬼代言人」進行嚴苛批判。</p>
+                            <div class="bg-white p-3 rounded text-sm text-slate-600 border border-blue-200">
+                                <strong class="text-blue-700">Ubuntu 範例：</strong>AI 攻擊方案漏洞，學生須逐項寫下「採納/拒絕」理由。
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 p-5 rounded-xl border border-amber-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-chalkboard-user"></i> 教師視角</h4>
+                            <p class="text-slate-700 text-sm">審閱 Notion 的 <strong>決策區</strong>，評估學生如何防禦論點或修正草案。</p>
+                        </div>
+                        <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-emerald-800 mb-2"><i class="fa-solid fa-radar"></i> 偵測訊號</h4>
+                            <p class="text-slate-700 text-sm">
+                                ❌ 寫「因為怪怪的」 ＝ <strong>假反思</strong><br>
+                                ✅ 寫「拒用 HTTP 因帳密明文傳輸，改用 Let's Encrypt」 ＝ <strong>真理解</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 3 -->
+                <div id="sprint3" class="tab-content">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-flag-checkered text-brand-secondary"></i> Sprint 3：最終產出與去 AI 化答辯
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-blue-800 mb-2"><i class="fa-solid fa-user-graduate"></i> 學生任務</h4>
+                            <p class="text-slate-700 text-sm mb-3">編修產出，進行事實查核與技術細節確認。</p>
+                            <div class="bg-white p-3 rounded text-sm text-slate-600 border border-blue-200">
+                                <strong class="text-blue-700">Ubuntu 範例：</strong>現場斷網除錯 (Offline Defense)。
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 p-5 rounded-xl border border-amber-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-amber-800 mb-2"><i class="fa-solid fa-chalkboard-user"></i> 教師視角</h4>
+                            <p class="text-slate-700 text-sm">對比 Notion 歷程與最終產出，檢視「知識整合」程度是否一致。</p>
+                        </div>
+                        <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100 col-span-1 md:col-span-1">
+                            <h4 class="font-bold text-emerald-800 mb-2"><i class="fa-solid fa-radar"></i> 偵測訊號</h4>
+                            <p class="text-slate-700 text-sm">
+                                透過斷網答辯，觀察學生是卡在指令層、概念層、還是全都不懂，<strong>直接暴露真實學習邊界</strong>。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 肆、三道防線 -->
+    <section class="py-16 px-6 bg-slate-800 text-white reveal">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-4 flex items-center gap-3 pb-2 border-b border-slate-600">
+                <span class="bg-white text-slate-800 w-10 h-10 rounded-lg flex items-center justify-center text-xl">肆</span>
+                貫穿全週期：三道防外包防線
+            </h2>
+            <p class="text-xl text-indigo-300 mb-8 italic">「AI 能偽造中間的產出，但偽造不了頭尾的真實性。」</p>
+
+            <div class="space-y-4">
+                <!-- Accordion 1 -->
+                <div class="bg-slate-700 rounded-xl overflow-hidden border border-slate-600 transition-all hover:border-indigo-400">
+                    <button class="accordion-btn w-full px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="text-xl font-bold flex items-center gap-3">
+                            <i class="fa-solid fa-lock text-indigo-400"></i> 事前防線｜手寫基線 (Written Baseline)
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-6 pt-2 text-slate-300 border-t border-slate-600">
+                        強制填寫「Before AI」起點，在碰 AI 前確立原始思考。這是一切評分的錨點，確保學生不會把 AI 的想法當成自己的出發點。
+                    </div>
+                </div>
+
+                <!-- Accordion 2 -->
+                <div class="bg-slate-700 rounded-xl overflow-hidden border border-slate-600 transition-all hover:border-indigo-400">
+                    <button class="accordion-btn w-full px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="text-xl font-bold flex items-center gap-3">
+                            <i class="fa-solid fa-shield-cat text-indigo-400"></i> 事中防線｜防禦式批判 (Defensive Critique)
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-6 pt-2 text-slate-300 border-t border-slate-600">
+                        強制要求 AI 扮演嚴苛的審查者攻擊草案，學生必須逐項為自己的方案辯護，並清楚寫下採納或拒絕修改的理由，展現高階思維。
+                    </div>
+                </div>
+
+                <!-- Accordion 3 -->
+                <div class="bg-slate-700 rounded-xl overflow-hidden border border-slate-600 transition-all hover:border-indigo-400">
+                    <button class="accordion-btn w-full px-6 py-5 flex justify-between items-center focus:outline-none">
+                        <span class="text-xl font-bold flex items-center gap-3">
+                            <i class="fa-solid fa-wifi text-indigo-400 relative"><span class="absolute top-0 right-0 w-full h-0.5 bg-red-500 transform rotate-45 origin-center -translate-y-1"></span></i> 事後防線｜斷網答辯 (Offline Defense)
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-6 pt-2 text-slate-300 border-t border-slate-600">
+                        現場斷網實作與口頭答辯。這是終極檢驗，驗證學生本人是否真學會了過程中的知識，未通過即視為學習空洞化。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 陸、評量轉型 & SoTL -->
+    <section class="py-16 px-6 bg-slate-50 reveal">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-10 flex items-center gap-3 border-b-2 border-slate-200 pb-4">
+                <span class="bg-brand-dark text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl">陸</span>
+                評量轉型與 SoTL 教學實踐研究
+            </h2>
+
+            <!-- Rubrics -->
+            <h3 class="text-2xl font-bold text-slate-800 mb-6"><i class="fa-solid fa-scale-balanced text-brand-primary"></i> Tronclass 專用評量尺規 (Rubrics)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <!-- Criterion 1 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-slate-100 text-slate-500 font-bold px-3 py-1 rounded-bl-lg">30%</div>
+                    <h4 class="font-bold text-lg text-brand-dark mb-2">Prompt 迭代深度</h4>
+                    <p class="text-sm text-slate-600 mb-3"><strong class="text-emerald-600">🌟 優秀指標：</strong>至少 3 輪 Ping-Pong，針對盲點追問，給予明確情境與限制。</p>
+                    <p class="text-xs text-slate-400 bg-slate-50 p-2 rounded">評估能力：提問力與問題解決</p>
+                </div>
+                <!-- Criterion 2 -->
+                <div class="bg-white p-6 rounded-xl border-2 border-brand-primary shadow-md relative overflow-hidden transform md:-translate-y-2">
+                    <div class="absolute top-0 right-0 bg-brand-primary text-white font-bold px-3 py-1 rounded-bl-lg">40%</div>
+                    <h4 class="font-bold text-lg text-brand-dark mb-2">批判性反思與決策 <span class="text-xs text-brand-primary font-normal bg-indigo-50 px-2 py-0.5 rounded ml-1">最高權重</span></h4>
+                    <p class="text-sm text-slate-600 mb-3"><strong class="text-emerald-600">🌟 優秀指標：</strong>具體指出 AI 優缺點，明確論述「為何拒絕/修改」，展現強大事實查核。</p>
+                    <p class="text-xs text-brand-primary bg-indigo-50 p-2 rounded">評估能力：後設認知與高階批判性思維</p>
+                </div>
+                <!-- Criterion 3 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-slate-100 text-slate-500 font-bold px-3 py-1 rounded-bl-lg">30%</div>
+                    <h4 class="font-bold text-lg text-brand-dark mb-2">最終產出與統整</h4>
+                    <p class="text-sm text-slate-600 mb-3"><strong class="text-emerald-600">🌟 優秀指標：</strong>結構嚴謹，融合原創觀點與 AI 精華，無生硬感。</p>
+                    <p class="text-xs text-slate-400 bg-slate-50 p-2 rounded">評估能力：知識整合與專業表達</p>
+                </div>
+                <!-- Criterion 4 -->
+                <div class="bg-red-50 p-6 rounded-xl border border-red-200 shadow-sm relative overflow-hidden border-dashed">
+                    <div class="absolute top-0 right-0 bg-red-100 text-red-600 font-bold px-3 py-1 rounded-bl-lg text-sm">Pass / Fail</div>
+                    <h4 class="font-bold text-lg text-red-800 mb-2">去 AI 化答辯 (門檻)</h4>
+                    <p class="text-sm text-slate-700 mb-3">斷網現場驗證學生本人是否真學會。</p>
+                    <p class="text-xs text-red-600 bg-red-100 p-2 rounded">若未通過即視為學習空洞化</p>
+                </div>
+            </div>
+
+            <!-- SoTL -->
+            <h3 class="text-2xl font-bold text-slate-800 mb-6"><i class="fa-solid fa-microscope text-brand-secondary"></i> 轉化為教學實踐研究 (SoTL) 的金礦</h3>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 md:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-gem text-brand-primary"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-1">質性碎石</h4>
+                            <p class="text-sm text-slate-600">學生在 Notion 留下的結構化思考軌跡，是極佳的「質性分析文本」。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-chart-line text-brand-secondary"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-1">成效驗證</h4>
+                            <p class="text-sm text-slate-600">具體分析學生「問題解決力」與「高階批判性思維」的提升軌跡。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-book-open text-amber-600"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-1">學術黃金</h4>
+                            <p class="text-sm text-slate-600">提煉出具體證據，直接轉化為未來教學實踐計畫 (SoTL) 或學術期刊素材。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-fire-flame-curved text-rose-500"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 mb-1">迷思熱點分析</h4>
+                            <p class="text-sm text-slate-600">若全班多數卡在同一步，就把該概念往前移、列為下階段教學重點。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 名詞速查 Glossary -->
+    <section class="py-12 px-6 bg-slate-900 text-slate-300">
+        <div class="max-w-5xl mx-auto">
+            <h3 class="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-2"><i class="fa-solid fa-book-bookmark text-indigo-400"></i> 名詞速查</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="font-bold text-indigo-300 mb-2">Ping-Pong Log</h4>
+                    <p class="text-sm leading-relaxed">學生在 Notion 記錄「與 AI 來回對話」的歷程。每一輪記下：提問/限制、AI 回覆、我的判斷與理由。讓思考過程變為具體軌跡。</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-indigo-300 mb-2">Human-in-the-loop</h4>
+                    <p class="text-sm leading-relaxed">在 AI 產出流程中，由人為負責關鍵決策點（採納/拒絕/修改），保留人的判斷權，避免大腦外包。</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-indigo-300 mb-2">小碎步 (Micro-stepping)</h4>
+                    <p class="text-sm leading-relaxed">把長週期專題拆成高頻、低佔分的形成性評量，讓學習問題及早浮現並介入。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-8 bg-brand-dark text-slate-500 text-sm">
+        <p>本大綱供師培社群教師複製、改作與帶回課堂使用。</p>
+    </footer>
+
+    <!-- 互動腳本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. 頂部進度條
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById('progressBar').style.width = scrolled + '%';
+            });
+
+            // 2. 捲動浮現動畫
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+            
+            revealElements.forEach(el => revealObserver.observe(el));
+
+            // 3. Sprints 標籤頁切換
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Reset buttons
+                    tabBtns.forEach(b => {
+                        b.classList.remove('bg-brand-primary', 'text-white', 'shadow-md', 'scale-105', 'active');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    
+                    // Activate clicked button
+                    btn.classList.remove('bg-slate-100', 'text-slate-600');
+                    btn.classList.add('bg-brand-primary', 'text-white', 'shadow-md', 'scale-105', 'active');
+                    
+                    // Hide all contents
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        setTimeout(() => content.style.display = 'none', 300); // Wait for fade out
+                    });
+                    
+                    // Show target content
+                    const targetId = btn.getAttribute('data-target');
+                    const targetContent = document.getElementById(targetId);
+                    
+                    setTimeout(() => {
+                        targetContent.style.display = 'block';
+                        // Trigger reflow
+                        void targetContent.offsetWidth;
+                        targetContent.classList.add('active');
+                    }, 300);
+                });
+            });
+
+            // 4. 防線手風琴 (Accordion)
+            const accordions = document.querySelectorAll('.accordion-btn');
+            accordions.forEach(acc => {
+                acc.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('.accordion-icon');
+                    
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-180');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

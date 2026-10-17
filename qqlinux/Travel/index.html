@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中歐與巴爾幹史詩壯遊 40 Days Grand Tour</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        theme: {
+                            50: 'var(--theme-50)',
+                            100: 'var(--theme-100)',
+                            500: 'var(--theme-500)',
+                            600: 'var(--theme-600)',
+                            700: 'var(--theme-700)',
+                            800: 'var(--theme-800)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            /* Default to Amber (Phase 1) */
+            --theme-50: #fffbeb;
+            --theme-100: #fef3c7;
+            --theme-500: #f59e0b;
+            --theme-600: #d97706;
+            --theme-700: #b45309;
+            --theme-800: #92400e;
+            --bg-color: #fcfcfc;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        iframe, img { transition: opacity 0.5s ease; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 transition-colors duration-500">
+        <div class="max-w-7xl mx-auto px-4 py-4 md:py-6">
+            <h1 class="text-2xl md:text-4xl text-center text-slate-800 tracking-wide font-bold font-serif">
+                中歐與巴爾幹 <span class="text-theme-600 italic transition-colors duration-500">史詩壯遊</span>
+            </h1>
+            <p class="text-center text-xs md:text-sm text-slate-500 mt-2 uppercase tracking-widest font-semibold">40 Days Ultimate Grand Tour • Jul 4 - Aug 12</p>
+            
+            <!-- Phase Navigation Tabs -->
+            <div class="flex justify-center mt-6 mb-2 gap-2 md:gap-4 px-2">
+                <button onclick="jumpToPhase(1)" class="px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold border-2 border-amber-500 text-amber-700 hover:bg-amber-50 transition-all" id="tab-phase-1">
+                    🇨🇿 第一章：中歐童話 (四人)
+                </button>
+                <button onclick="jumpToPhase(2)" class="px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold border-2 border-blue-500 text-blue-700 hover:bg-blue-50 transition-all opacity-50" id="tab-phase-2">
+                    🇭🇷 第二章：亞得里亞海
+                </button>
+                <button onclick="jumpToPhase(3)" class="px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 transition-all opacity-50" id="tab-phase-3">
+                    🇸🇮 第三章：阿爾卑斯翡翠
+                </button>
+            </div>
+
+            <!-- Horizontal Timeline -->
+            <div class="mt-6 relative pt-2 overflow-x-auto pb-6 hide-scrollbar" id="timelineScrollBox">
+                <div class="min-w-[2000px] px-4 flex justify-between items-center relative mx-auto">
+                    <div class="absolute top-1/2 left-4 right-4 h-1 bg-slate-200 -translate-y-1/2 z-0 rounded-full"></div>
+                    <div id="topProgressLine" class="absolute top-1/2 left-4 h-1 bg-theme-500 -translate-y-1/2 z-0 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                    <div id="topTimelineNodes" class="w-full flex justify-between z-10 px-2"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-8">
+        
+        <section class="w-full">
+            <div id="detailCard" class="bg-white rounded-3xl shadow-xl overflow-hidden transition-all duration-500 border border-slate-100">
+                
+                <!-- Hero Image Area -->
+                <div class="relative h-64 md:h-[450px] w-full bg-slate-100 skeleton" id="imageContainer">
+                    <img id="heroImage" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Destination" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-0">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-6 md:p-10 text-white w-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span id="cardDay" class="bg-theme-600 text-white text-xs md:text-sm font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-md transition-colors duration-500"></span>
+                            <span id="cardDate" class="text-sm font-medium opacity-90 shadow-sm"></span>
+                            <span id="cardGroup" class="ml-auto text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-md border border-white/30 hidden md:block"></span>
+                        </div>
+                        <h2 id="cardTitle" class="text-3xl md:text-5xl font-bold mb-3 leading-tight drop-shadow-lg font-serif">載入中...</h2>
+                        <p id="cardLocation" class="text-lg md:text-xl font-medium text-white/90 flex items-center gap-2 drop-shadow-md">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div id="contentGrid" class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Left Column (Logistics) -->
+                    <div class="space-y-6 lg:col-span-7">
+                        
+                        <!-- Timeline Overview (Small context) -->
+                        <div class="mb-6 pb-6 border-b border-slate-100">
+                            <h3 class="text-theme-700 font-bold text-lg mb-2 transition-colors duration-500" id="phaseTitle"></h3>
+                            <p class="text-slate-600 text-sm leading-relaxed" id="phaseDesc"></p>
+                        </div>
+
+                        <!-- Transport -->
+                        <div class="flex items-start gap-4 p-5 rounded-2xl bg-theme-50 border border-theme-100 transition-colors duration-500">
+                            <div class="bg-white p-2.5 rounded-xl shadow-sm text-theme-600 transition-colors duration-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">交通戰略</h4>
+                                <p id="cardTime" class="text-slate-800 font-bold text-sm leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <!-- Highlight -->
+                        <div>
+                            <h4 class="text-sm font-bold text-theme-600 mb-3 flex items-center gap-2 transition-colors duration-500">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
+                                專屬高光時刻
+                            </h4>
+                            <p id="cardHighlight" class="text-slate-700 text-[15px] leading-loose bg-slate-50 p-5 rounded-xl border border-slate-100"></p>
+                        </div>
+
+                        <!-- Dining -->
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 text-amber-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800 mb-1.5">味蕾饗宴</h4>
+                                <p id="cardDining" class="text-slate-600 text-[15px] leading-relaxed"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Tips -->
+                        <div id="tipsContainer" class="mt-4">
+                            <h4 class="text-sm font-bold text-rose-500 mb-2 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                護肝守則
+                            </h4>
+                            <p id="cardTips" class="text-slate-600 text-sm leading-relaxed border-l-4 border-rose-400 pl-4 py-2 bg-rose-50 rounded-r-lg italic font-medium"></p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column (Map & Stay) -->
+                    <div class="space-y-6 lg:col-span-5 flex flex-col">
+                        <!-- Accommodation -->
+                        <div class="bg-slate-800 text-white p-5 rounded-2xl shadow-md relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10">
+                                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">今晚住宿基地</h4>
+                            <p id="cardStay" class="text-lg font-bold leading-relaxed relative z-10"></p>
+                        </div>
+                        
+                        <!-- Map -->
+                        <div class="flex-grow flex flex-col mt-2">
+                            <h4 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                每日雷達定位
+                            </h4>
+                            <div class="rounded-xl overflow-hidden shadow-sm border border-slate-200 h-64 lg:h-full min-h-[250px] relative bg-slate-100">
+                                <iframe id="googleMap" width="100%" height="100%" frameborder="0" style="border:0" src="" allowfullscreen aria-hidden="false" tabindex="0" class="opacity-0 transition-opacity duration-500"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const itineraryData = [
+            // ================= PHASE 1: CZECHIA & AUSTRIA (4 People) =================
+            {
+                day: 1, date: "7/4 (六)", phase: 1, group: "四人專屬",
+                title: "啟程：飛往中歐", location: "Taipei ➔ Istanbul",
+                mapQuery: "Taoyuan International Airport", keyword: "airport,plane",
+                time: "土耳其航空 TK 25 (21:45 出發 ➔ 05:10 抵達)",
+                stay: "機上",
+                highlight: "帶著滿滿的期待，四人齊聚機場。搭乘晚間 21:45 航班前往伊斯坦堡 (飛行 12h25m)，準備展開長達四十天的歐洲盛大長征！",
+                food: "機上餐點",
+                tips: "確認編號：SJFDNH。建議在飛機上盡量休息，調整時差。"
+            },
+            {
+                day: 2, date: "7/5 (日)", phase: 1, group: "四人專屬",
+                title: "抵達布拉格：初識百塔之城", location: "Istanbul ➔ Prague (布拉格)",
+                mapQuery: "Old Town Square, Prague", keyword: "prague,oldtown",
+                time: "土航 TK 1769 (16:40 出發 ➔ 18:15 抵達) ➔ 預訂休旅車接送",
+                stay: "布拉格第 1 區（老城區）或第 2 區（新城區）",
+                highlight: "在伊斯坦堡轉機後，於傍晚 18:15 抵達布拉格。前往飯店 Check-in 放行李。稍作休息後，散步至老城廣場看天文鐘，走到查理大橋欣賞日落。",
+                food: "推薦 George Prime Steak (頂級牛排館) 享用極佳肉質；想喝熱湯則推 Pho Vietnam Tuan & Lan 或 Modrý Zub 迅速暖胃。",
+                tips: "事先預約 Prague Airport Transfers 的休旅車，四人平攤划算且能裝下所有大行李。"
+            },
+            {
+                day: 3, date: "7/6 (一)", phase: 1, group: "四人專屬",
+                title: "布拉格：皇室壯麗氣場", location: "Prague Castle",
+                mapQuery: "Prague Castle", keyword: "prague,castle",
+                time: "路面電車 (購買24小時交通券，Tram 22號線上山)",
+                stay: "布拉格第 1 區 或 第 2 區",
+                highlight: "早上搭乘電車直達「布拉格城堡區」，參觀聖維特大教堂、舊皇宮與黃金巷。下午順著葡萄園步道漫步下山，經過小城區 (Malá Strana)。",
+                food: "午餐：城堡區附近 Pork's (全布拉格最酥脆烤豬腳)。晚餐：回到市區推薦 Mash Hana (正宗日式料理) 轉換口味。",
+                tips: "布拉格城堡區腹地廣大，且有石板路，需準備一雙好穿好走的平底鞋。"
+            },
+            {
+                day: 4, date: "7/7 (二)", phase: 1, group: "四人專屬",
+                title: "布拉格：在地深度與夏日河畔", location: "Vyšehrad & Petřín",
+                mapQuery: "Vysehrad, Prague", keyword: "prague,river",
+                time: "市區地鐵 (Metro)、路面電車與步行",
+                stay: "布拉格第 1 區 或 第 2 區",
+                highlight: "早上前往高堡區，俯瞰布拉格紅屋頂與伏爾塔瓦河全景。下午搭乘纜車上佩特任山散步，或沿著 Náplavka 碼頭市集逛逛，享受夏日度假感。",
+                food: "晚餐可選百年建築內的 Café Imperial 享用精緻傳統肉類，或至極受歡迎的泰式餐廳 Lemon Leaf 點打拋豬與酸辣湯解膩。",
+                tips: "高堡區是攝影取景的最佳地點，避開了老城區的擁擠人潮。"
+            },
+            {
+                day: 5, date: "7/8 (三)", phase: 1, group: "四人專屬",
+                title: "市區漫步與 FC2026 研討會", location: "Prague City",
+                mapQuery: "Prague, Czechia", keyword: "prague,city",
+                time: "依研討會地點搭乘市區大眾運輸",
+                stay: "布拉格第 1 區 或 第 2 區",
+                highlight: "上午在布拉格市區做最後的悠閒巡禮與採買。中午前往參加 FC2026 研討會，與世界學者進行交流，晚上出席大會盛大晚宴。",
+                food: "白天市區簡餐或咖啡廳；晚上享用大會精心準備的晚宴。",
+                tips: "出席 FC2026 研討會與晚宴，建議準備合適的商務或半正式服裝。"
+            },
+            {
+                day: 6, date: "7/9 (四)", phase: 1, group: "四人專屬",
+                title: "布拉格 ➔ 塔博爾 ➔ 百威城", location: "České Budějovice",
+                mapQuery: "Ceske Budejovice", keyword: "tabor,town",
+                time: "搭乘捷克國鐵（ČD）。布拉格到塔博爾 (1.5h)，塔博爾到百威城 (50m)",
+                stay: "百威城市區（近普熱米斯爾·奧托卡二世廣場）",
+                highlight: "中途在塔博爾下車，大行李寄放車站，輕裝逛這座中世紀迷宮古城。下午領行李前往百威城。",
+                food: "午餐在塔博爾的 Goldie Restaurant 吃高級牛排；晚餐在百威城廣場周邊喝正宗百威生啤酒。",
+                tips: "四人同行搭火車非常舒適，寄放行李戰術完美解鎖中途景點。"
+            },
+            {
+                day: 7, date: "7/10 (五)", phase: 1, group: "四人專屬",
+                title: "純白童話：赫盧博卡城堡", location: "Hluboká Castle",
+                mapQuery: "Hluboka Castle, Czechia", keyword: "hluboka,castle",
+                time: "百威城搭地區公車 (單程約 30 分鐘)",
+                stay: "百威城市區",
+                highlight: "早上輕裝出發，參觀「捷克最美城堡」純白色的赫盧博卡城堡。下午在城堡花園散步，傍晚回到百威城。",
+                food: "午餐在城堡山腳吃當地特產「烤鯉魚」；晚餐回百威城吃 Minipivovar Krajinská 27 (在地精釀啤酒館)。",
+                tips: "這天完全不用帶大行李，公車往返極度輕鬆。"
+            },
+            {
+                day: 8, date: "7/11 (六)", phase: 1, group: "四人專屬",
+                title: "百威城 ➔ CK 小鎮", location: "Český Krumlov (CK小鎮)",
+                mapQuery: "Cesky Krumlov", keyword: "ceskykrumlov,town",
+                time: "透過旅館預約計程車/休旅車 (車程約 30 分鐘)",
+                stay: "CK 小鎮老城區內",
+                highlight: "【護肝戰術】搭專車直接送到 CK 旅館門口，完美避開推行李走石板路的地獄！下午登上彩繪塔，參觀 CK 城堡區。",
+                food: "【務必提早訂位】晚餐吃 Krčma v Šatlavské ulici (地窖餐廳)，直火炭烤牛排與豬肋排是全鎮最佳！",
+                tips: "石板路是行李箱殺手，點對點專車是這天最棒的投資。"
+            },
+            {
+                day: 9, date: "7/12 (日)", phase: 1, group: "四人專屬",
+                title: "CK 小鎮：童話慢活", location: "Český Krumlov",
+                mapQuery: "Cesky Krumlov Castle", keyword: "ceskykrumlov,river",
+                time: "全日步行",
+                stay: "CK 小鎮老城區內",
+                highlight: "避開旅行團的清晨是 CK 最美的時候。隨性在巷弄穿梭，逛手作藝品店，或坐在河邊咖啡館看著泛舟的人們。",
+                food: "推薦品嚐南波希米亞經典的「烤鱒魚 (Grilled Trout)」。",
+                tips: "享受完全不趕行程的慢活童話小鎮時光。"
+            },
+            {
+                day: 10, date: "7/13 (一)", phase: 1, group: "四人專屬",
+                title: "跨國移動：奧地利湖區", location: "Gmunden (格蒙登)",
+                mapQuery: "Gmunden, Austria", keyword: "gmunden,lake",
+                time: "CK Shuttle 8人座包車 (CK ➔ 奧地利 Linz) ➔ 轉乘奧地利國鐵 ÖBB ➔ Gmunden",
+                stay: "格蒙登湖畔飯店或民宿",
+                highlight: "跨國移動日！專車輕鬆接送越境。下午抵達特勞恩湖畔的格蒙登，感受奧地利人私藏的避暑勝地。",
+                food: "在湖畔餐館享用奧地利知名的「Steckerlfisch」(串烤鮮魚)，搭配奧地利白酒。",
+                tips: "包車跨國是四人最完美的解法，舒適且精準掌控時間。"
+            },
+            {
+                day: 11, date: "7/14 (二)", phase: 1, group: "四人專屬",
+                title: "一日明信片：哈修塔特", location: "Hallstatt (哈修塔特)",
+                mapQuery: "Hallstatt, Austria", keyword: "hallstatt,village",
+                time: "火車前往 Hallstatt 車站 ➔ 轉渡輪進入小鎮",
+                stay: "格蒙登湖畔飯店或民宿",
+                highlight: "搭船進入舉世聞名的哈修塔特，看明信片般的經典村落景色，參觀世界最古老鹽礦。傍晚回到寧靜的格蒙登。",
+                food: "湖邊景觀餐廳的烤魚或維也納炸牛排 (Wiener Schnitzel)。",
+                tips: "哈修塔特人潮眾多，把寧靜的住宿留給格蒙登是非常聰明的選擇。"
+            },
+            {
+                day: 12, date: "7/15 (三)", phase: 1, group: "四人專屬",
+                title: "格蒙登：絕美水上城堡", location: "Schloss Ort (奧特堡)",
+                mapQuery: "Schloss Ort, Gmunden", keyword: "gmunden,castle",
+                time: "步行與湖區遊船",
+                stay: "格蒙登湖畔飯店或民宿",
+                highlight: "留在格蒙登度假。沿著湖濱長廊散步，走過木棧橋參觀建在湖面上的「奧特堡」。時間充裕可搭乘特勞恩湖遊船。",
+                food: "換口味！推薦 Restaurant Namaste (印度菜) 或亞洲餐館，吃點香料燉肉與熱食。",
+                tips: "深度體驗奧地利人的湖畔度假文化。"
+            },
+            {
+                day: 13, date: "7/16 (四)", phase: 1, group: "四人專屬",
+                title: "設計與美食之都", location: "Graz (格拉茲)",
+                mapQuery: "Graz, Austria", keyword: "graz,city",
+                time: "奧地利國鐵 ÖBB (車程約 3-3.5 小時)",
+                stay: "格拉茲市中心 (Hauptplatz 附近)",
+                highlight: "早上南下進入奧地利第二大城。下午參觀舊城區，搭透明電梯上城堡山 (Schlossberg) 俯瞰獨特的紅屋頂海。",
+                food: "必吃特產「南瓜籽油」沙拉！推薦 Glockl Bräu 吃極具水準的烤豬肋排或施蒂利亞燉牛肉。",
+                tips: "格拉茲的美食水準極高，盡情享受奧地利肉食盛宴。"
+            },
+            {
+                day: 14, date: "7/17 (五)", phase: 1, group: "轉場日",
+                title: "跨入巴爾幹：抵達薩格勒布", location: "Zagreb (札格瑞布)",
+                mapQuery: "Zagreb, Croatia", keyword: "zagreb,street",
+                time: "跨國火車 (約 3h) 或 FlixBus (約 2.5h) ➔ 抵達後搭 Uber 前往飯店",
+                stay: "Zagreb 火車站 (前站) 附近飯店",
+                highlight: "【四人行程圓滿結束，兩人專屬旅程展開】抵達克羅埃西亞首都，入住絕佳地段。下午在「綠色馬蹄鐵」林蔭大道散步。",
+                food: "晚餐吃克羅埃西亞國民美食「烤肉腸 (Ćevapi)」！推薦 Plac Kitchen & Grill。",
+                tips: "完美的交通動線，住在火車站前站，為隔天去機場取車打下完美基礎。"
+            },
+
+            // ================= PHASE 2: ADRIATIC ROMANCE (Couple) =================
+            {
+                day: 15, date: "7/18 (六)", phase: 2, group: "兩人專屬",
+                title: "機場取車，直奔浪漫水都", location: "Rovinj (羅維尼)",
+                mapQuery: "Rovinj, Croatia", keyword: "rovinj,sunset",
+                time: "早上搭 Uber 回 ZAG 機場取車 ➔ 直上 A6/A8 高速公路 (約 3h)",
+                stay: "Rovinj 鎮上",
+                highlight: "【護肝戰略】去機場取車避開市區塞車，穩拿自排車！下午牽手穿梭羅維尼粉彩石板巷弄，傍晚看無敵夕陽。",
+                food: "海港邊預訂戶外座位，點綜合炭烤海鮮大拼盤配白葡萄酒。",
+                tips: "租車時詳細錄影，拿到車後直接上高速，享受順暢的公路旅行開局。"
+            },
+            {
+                day: 16, date: "7/19 (日)", phase: 2, group: "兩人專屬",
+                title: "羅維尼：純粹南歐慢活", location: "Rovinj (羅維尼)",
+                mapQuery: "Church of St. Euphemia, Rovinj", keyword: "rovinj,coast",
+                time: "全日無車日 (0 公里)",
+                stay: "Rovinj 鎮上 (連住)",
+                highlight: "睡到自然醒。漫步至半島高點聖尤菲米亞教堂俯瞰壯闊海景。下午在飯店泳池放鬆，或海濱咖啡廳發呆。",
+                food: "伊斯特里亞半島的高級乾式熟成牛排 (Dry-aged Steak)。",
+                tips: "把手錶收起來，完全屬於兩人的浪漫約會日。"
+            },
+            {
+                day: 17, date: "7/20 (一)", phase: 2, group: "兩人專屬",
+                title: "南下長征，最美落日與海風琴", location: "Zadar (札達爾)",
+                mapQuery: "Sea Organ, Zadar", keyword: "zadar,sunset",
+                time: "行駛 A1 高速公路 (車程約 3.5h)",
+                stay: "Zadar 古城周邊",
+                highlight: "傍晚前往海濱步道聆聽「海風琴」，欣賞世界最美夕陽，入夜觀賞「向太陽致敬」光影秀。",
+                food: "達爾馬提亞燉牛肉 (Pašticada)，紅酒慢燉入口即化。",
+                tips: "車程較長，建議中途在高速公路大型休息站喝咖啡伸展。"
+            },
+            {
+                day: 18, date: "7/21 (二)", phase: 2, group: "兩人專屬",
+                title: "森林輕裝行，瀑布森呼吸", location: "Krka National Park",
+                mapQuery: "Krka National Park", keyword: "krka,waterfall",
+                time: "Zadar ➔ Krka 國家公園 ➔ Zadar (單趟約 50 分鐘)",
+                stay: "Zadar 古城周邊 (連住)",
+                highlight: "無行李移動！輕鬆走在木棧道享受芬多精，近距離感受斯克拉丁大瀑布。下午優雅返回古城休息。",
+                food: "古城內的地中海直火燒烤，來份帶骨肋眼牛排慰勞雙腳。",
+                tips: "建議早上 9 點前抵達公園入口，避開人潮與烈日。"
+            },
+            {
+                day: 19, date: "7/22 (三)", phase: 2, group: "兩人專屬",
+                title: "羅馬皇宮漫步，抵達避風港", location: "Makarska (馬卡爾斯卡)",
+                mapQuery: "Makarska, Croatia", keyword: "split,palace",
+                time: "Zadar ➔ Split (午餐) ➔ Makarska (走D8海岸線)",
+                stay: "Makarska 海濱度假區",
+                highlight: "中午停靠 Split 在戴克里先宮喝咖啡。下午行駛最美 D8 公路，抵達沒有跳島人潮的避世勝地 Makarska。",
+                food: "Split 古城牆內的餐酒館吃新鮮烤魚。",
+                tips: "在 Split 直接導航外圍大型付費停車場，免除進古城塞車的崩潰。"
+            },
+            {
+                day: 20, date: "7/23 (四)", phase: 2, group: "兩人專屬",
+                title: "山海第一排：徹底躺平", location: "Makarska",
+                mapQuery: "Makarska Beach", keyword: "makarska,beach",
+                time: "全日無車日 (0 公里)",
+                stay: "Makarska 海濱度假區 (連住)",
+                highlight: "零壓力的一天。面對著壯麗「生物科沃山」享用早餐，下午沿松樹林海濱步道散步，享受不用看手錶的純粹放鬆。",
+                food: "傍晚在卵石海灘旁露天餐館大啖頂級海陸大餐。",
+                tips: "將旅途疲勞全部捨棄的充電日。"
+            },
+            {
+                day: 21, date: "7/24 (五)", phase: 2, group: "兩人專屬",
+                title: "跨海大橋與君臨城近郊", location: "Mlini (姆利尼)",
+                mapQuery: "Mlini, Croatia", keyword: "ston,oysters",
+                time: "行駛全新佩列沙茨大橋 (免過海關)，途經 Ston",
+                stay: "Mlini 秘境小鎮",
+                highlight: "行駛全新跨海大橋。中途必停 Ston 鎮。下午避開君臨城擁擠，入住近郊秘境 Mlini，在平靜海灣旁喝調酒。",
+                food: "【絕對必吃】歐洲長城小鎮 Ston 的現撈新鮮生蠔與淡菜！",
+                tips: "多虧了新大橋，免去排隊過兩次波士尼亞海關的噩夢。"
+            },
+            {
+                day: 22, date: "7/25 (六)", phase: 2, group: "兩人專屬",
+                title: "漫步君臨城，古城牆無敵海景", location: "Dubrovnik (杜布羅夫尼克)",
+                mapQuery: "Dubrovnik City Walls", keyword: "dubrovnik,wall",
+                time: "搭乘接駁船或 Uber 進入舊城區 (0 公里)",
+                stay: "Mlini 秘境小鎮 (連住)",
+                highlight: "早上 8 點登上壯觀古城牆。傍晚搭乘纜車登上 Srđ 山，俯瞰紅磚瓦與湛藍海水的絕景。",
+                food: "纜車站旁的 Panorama 餐廳，點牛排配無敵海景 (需提早一個月預訂)。",
+                tips: "城牆上毫無遮蔽，務必一早前往並做好防曬。"
+            },
+            {
+                day: 23, date: "7/26 (日)", phase: 2, group: "兩人專屬",
+                title: "尊榮放空，海濱慢時光", location: "Mlini",
+                mapQuery: "Lokrum Island", keyword: "mlini,resort",
+                time: "全日自由活動",
+                stay: "Mlini 秘境小鎮 (連住)",
+                highlight: "專屬的度假留白。可搭船去洛克魯姆島與孔雀散步，或單純待在 Mlini 海灘享受兩人世界。",
+                food: "找間隱藏在巷弄內的餐館，來頓充滿儀式感的法式海陸雙拼晚宴。",
+                tips: "為太太安排的極致耍廢日，把南歐的慵懶吸收到滿。"
+            },
+            {
+                day: 24, date: "7/27 (一)", phase: 2, group: "兩人專屬",
+                title: "跨越國境：深邃峽灣仙境", location: "Kotor (黑山共和國)",
+                mapQuery: "Kotor, Montenegro", keyword: "kotor,bay",
+                time: "Mlini ➔ 黑山 Kotor (含過海關約 2-2.5h)",
+                stay: "Kotor 或 Perast 周邊",
+                highlight: "沿著壯麗的科托爾灣行駛，視覺震撼極強。傍晚在世界遺產科托爾老城的點點黃光中牽手散步。",
+                food: "挑戰巴爾幹巨型漢堡排 (Pljeskavica) 或超大份量綜合烤肉，便宜又狂野！",
+                tips: "租車時務必確認已加購「黑山跨境許可 (綠卡)」以備海關查驗。"
+            },
+            {
+                day: 25, date: "7/28 (二)", phase: 2, group: "兩人專屬",
+                title: "避開喧囂，峽灣專屬晨昏", location: "Kotor / Perast",
+                mapQuery: "Our Lady of the Rocks", keyword: "perast,island",
+                time: "峽灣深度慢遊",
+                stay: "Kotor 或 Perast 周邊 (連住)",
+                highlight: "搭乘快艇前往峽灣中央的「聖母岩島」。下午找間海景咖啡廳，享受群山環繞的寧靜。",
+                food: "水岸傳統餐館 (Konoba) 吃特產尼古斯火腿與現撈海鮮。",
+                tips: "科托爾城牆高達 1350 階，量力而為。"
+            },
+            {
+                day: 26, date: "7/29 (三)", phase: 2, group: "兩人專屬",
+                title: "海岸公路北返，愛心半島", location: "Primošten (普里莫什滕)",
+                mapQuery: "Primošten, Croatia", keyword: "primosten,coast",
+                time: "Kotor ➔ Primošten (過海關+漫長車程約 4.5-5h)",
+                stay: "Primošten 半島周邊",
+                highlight: "整趟開車最久的一天，沿途欣賞最後的無敵海景。抵達絕美愛心型半島小鎮後，直接去海灘散步舒緩筋骨。",
+                food: "吃頓簡單美味的炭烤花枝與沙拉。",
+                tips: "把移動當作一場公路旅行，保持輕鬆的駕駛心態。"
+            },
+            {
+                day: 27, date: "7/30 (四)", phase: 2, group: "兩人專屬",
+                title: "海景切換山景，入住純粹綠意", location: "Plitvice (十六湖)",
+                mapQuery: "Plitvice Lakes", keyword: "plitvice,cabin",
+                time: "中午過後出發 ➔ 十六湖 (行駛A1轉山路約 2.5h)",
+                stay: "十六湖周邊「在地風味鄉村木屋」",
+                highlight: "早上在海邊睡到自然醒。下午避開烈日驅車進入內陸山區，入住被大草皮包圍的鄉村木屋，徹底放空。",
+                food: "在木屋享用里卡山區特產「鐵鐘烤肉 (Peka)」，肉汁完美鎖在蔬菜中！",
+                tips: "完美的視覺解膩！山區早晚涼，記得為太太準備薄外套。"
+            },
+            {
+                day: 28, date: "7/31 (五)", phase: 2, group: "兩人專屬",
+                title: "無痛解鎖仙境，尊榮避開人潮", location: "Plitvice Lakes",
+                mapQuery: "Veliki Slap, Plitvice", keyword: "plitvice,waterfall",
+                time: "全日健行 (0 公里)",
+                stay: "十六湖周邊木屋 (連住)",
+                highlight: "【黃金護肝戰術】早上 7:00 搶第一波入園！趁涼爽獨享大瀑布與碧綠湖水。中午人潮湧現時剛好走完，撤退回木屋睡午覺。",
+                food: "大份量的綜合炭烤肉盤配熱濃湯，洗去早上的健行疲勞。",
+                tips: "務必提前官網買好 7:00 門票。因為連住兩晚，走完完全沒有急著開車的壓力。"
+            },
+            {
+                day: 29, date: "8/1 (六)", phase: 2, group: "兩人專屬",
+                title: "從容還車，中歐古典優雅", location: "Zagreb (札格瑞布)",
+                mapQuery: "Zagreb", keyword: "zagreb,steak",
+                time: "十六湖 ➔ ZAG 機場還車 (約 2h，11:00前完成) ➔ 飯店",
+                stay: "Zagreb 火車站 (前站) 附近",
+                highlight: "早上悠哉出發，順利還車後無車一身輕。入住前站飯店，下午在平坦的「綠色馬蹄鐵」林蔭大道牽手散步。",
+                food: "慶祝自駕大成功！找一間頂級乾式熟成牛排館，用豐盛紅肉與美酒劃下句點。",
+                tips: "還車時務必與工作人員確認車身並保留單據。"
+            },
+            {
+                day: 30, date: "8/2 (日)", phase: 2, group: "兩人專屬",
+                title: "首都一日慢遊，體驗老錢風", location: "Zagreb",
+                mapQuery: "St. Mark's Church, Zagreb", keyword: "zagreb,cafe",
+                time: "全日市區漫步",
+                stay: "Zagreb 火車站 (前站) 附近 (連住)",
+                highlight: "搭世界最短藍色纜車(免爬坡)上城區欣賞聖馬可教堂。中午鑽進 Tkalčićeva 步行街喝咖啡，度過不需看手錶的一天。",
+                food: "晚上吃評價極高的義式餐酒館，享受悠閒最後一晚。",
+                tips: "完全平坦的散步路線，看到喜歡的甜點店隨時坐下。"
+            },
+
+            // ================= PHASE 3: SLOVENIA ACADEMIC & ALPINE =================
+            {
+                day: 31, date: "8/3 (一)", phase: 3, group: "兩人專屬",
+                title: "啟程，阿爾卑斯新篇章", location: "Ljubljana (盧比安納)",
+                mapQuery: "Ljubljana Castle", keyword: "ljubljana,city",
+                time: "Zagreb ➔ Ljubljana (搭乘 GoOpti 跨國接駁，約 2h)",
+                stay: "盧比安納市區飯店",
+                highlight: "從前站飯店輕鬆步行去搭接駁。抵達後整理研討會簡報，傍晚搭纜車登城堡俯瞰市景。",
+                food: "享用精緻亞洲風味晚餐（泰式/日式），享受抵達後的悠閒約會。",
+                tips: "這天不排緊湊行程，調整節奏準備迎接學術會議。"
+            },
+            {
+                day: 32, date: "8/4 (二)", phase: 3, group: "兩人專屬",
+                title: "ICITL 2026 研討會開幕", location: "Ljubljana",
+                mapQuery: "Congress Square, Ljubljana", keyword: "ljubljana,university",
+                time: "市區內步行或搭車",
+                stay: "盧比安納市區飯店 (連住)",
+                highlight: "全天專注出席 ICITL 2026 國際學術研討會，與世界各地的學者進行專業交流。",
+                food: "大會安排的研討會午餐，或探索大學周邊在地餐館。",
+                tips: "重要學術日，建議穿著正式商務服裝出席。"
+            },
+            {
+                day: 33, date: "8/5 (三)", phase: 3, group: "兩人專屬",
+                title: "ICITL2026研討會與晚宴", location: "Ljubljana",
+                mapQuery: "Ljubljana, Slovenia", keyword: "ljubljana,night",
+                time: "市區內",
+                stay: "盧比安納市區飯店 (連住)",
+                highlight: "白天參與學術研討會；夜晚參加大會精心策劃的盛大晚宴 (Conference Banquet)。",
+                food: "大會晚宴。",
+                tips: "晚宴上可無壓力品飲美酒，隔天早上再取車，安全又輕鬆。"
+            },
+            {
+                day: 34, date: "8/6 (四)", phase: 3, group: "兩人專屬",
+                title: "駛向阿爾卑斯雙湖童話", location: "Lake Bled (布萊德湖)",
+                mapQuery: "Lake Bled", keyword: "bled,lake",
+                time: "早上於市區取第二台車 ➔ 北上前往布萊德湖 (約 45 分鐘)",
+                stay: "布萊德湖區周邊 (遠眺山景小木屋)",
+                highlight: "搭乘手工划槳「Pletna 木船」登湖心小島敲許願鐘，再登城堡俯瞰全湖絕美倒影。",
+                food: "必吃經典甜點「布萊德奶油蛋糕 (Kremna rezina)」搭配湖畔下午茶。",
+                tips: "取車時請務必再次確認為「自排車(Automatic)」。"
+            },
+            {
+                day: 35, date: "8/7 (五)", phase: 3, group: "兩人專屬",
+                title: "深邃寧靜的博希尼秘境", location: "Lake Bohinj (博希尼湖)",
+                mapQuery: "Lake Bohinj", keyword: "bohinj,lake",
+                time: "Bled ➔ 國家公園 ➔ Bohinj",
+                stay: "布萊德湖區或博希尼湖區周邊",
+                highlight: "搭 Vogel 纜車直達海拔 1535 公尺享受 360 度群峰視野。隨後步行探訪森林中的薩維察瀑布 (Savica Waterfall)。",
+                food: "湖畔鄉村小館享用阿爾卑斯山區傳統燉肉與熱湯。",
+                tips: "瀑布健行皆為階梯 (單程20分)，穿防滑運動鞋。"
+            },
+            {
+                day: 36, date: "8/8 (六)", phase: 3, group: "兩人專屬",
+                title: "迎戰 50 個髮夾彎大魔王", location: "Vršič Pass & Bovec",
+                mapQuery: "Vrsic Pass", keyword: "vrsic,mountainroad",
+                time: "湖區 ➔ Vršič Pass ➔ 博韋茨 Bovec",
+                stay: "博韋茨 (Bovec) 或 科巴里德 (Kobarid) 附近",
+                highlight: "挑戰斯國最高公路！途經倒影如鏡的亞斯娜湖、Vršič 最高點。下山欣賞藍綠色「翡翠河」。",
+                food: "翻越山嶺抵達 Bovec 後，品嚐在地手工起司與冷盤慰勞駕駛辛勞。",
+                tips: "【極度重要】下坡請切低速檔，全程利用「引擎煞車」滑行，嚴禁長時間重踩煞車！"
+            },
+            {
+                day: 37, date: "8/9 (日)", phase: 3, group: "兩人專屬",
+                title: "沉浸在翡翠河谷的芬多精", location: "Tolmin Gorges (托爾明)",
+                mapQuery: "Tolmin Gorges", keyword: "tolmin,gorges",
+                time: "博韋茨 ➔ 托爾明峽谷",
+                stay: "托爾明 (Tolmin) 周邊",
+                highlight: "沿著翠綠色 Soča 景觀公路南下。漫步托爾明峽谷岩壁木棧道，吸收森林芬多精。",
+                food: "午餐尋找河岸餐廳，品嚐奶油乾煎的當地特產「索查河鱒魚 (Soča Trout)」。",
+                tips: "此段公路平緩好開，終於可以放慢車速輕鬆享受風景。"
+            },
+            {
+                day: 38, date: "8/10 (一)", phase: 3, group: "兩人專屬",
+                title: "汽車火車穿越大山", location: "Škofja Loka (什科菲亞洛卡)",
+                mapQuery: "Skofja Loka", keyword: "skofjaloka,town",
+                time: "Tolmin ➔ 汽車火車(Motorail) ➔ Škofja Loka",
+                stay: "什科菲亞洛卡 (Škofja Loka)",
+                highlight: "【超級高光】中午把車開上火車平車廂，坐在車內穿越 6 公里黑暗山洞！下午抵達擁有石橋與古城的中世紀老鎮。",
+                food: "在古城廣場旁找間復古餐館，享用斯洛維尼亞傳統烤肉晚餐。",
+                tips: "汽車火車無法預約！旺季請務必提早 40 分鐘抵達 Most na Soči 車站排隊。"
+            },
+            {
+                day: 39, date: "8/11 (二)", phase: 3, group: "兩人專屬",
+                title: "首都巡禮與啟程返台", location: "Ljubljana ➔ Istanbul",
+                mapQuery: "Ljubljana Airport", keyword: "ljubljana,airport",
+                time: "土航 TK 1064 (20:15 出發 ➔ 23:40 抵達)",
+                stay: "機上",
+                highlight: "白天完成市區還車與首都巡禮。傍晚前往機場，搭乘晚間班機離開盧比安納 (飛行 2h25m)。在伊斯坦堡停留 1h50m 轉機。",
+                food: "白天在河畔景觀餐廳享用午餐，晚餐可於機場或機上享用。",
+                tips: "確認編號：SJFDNH。記得保留最後加油收據。使用 Bolt 叫車前往機場，價格透明。"
+            },
+            {
+                day: 40, date: "8/12 (三)", phase: 3, group: "完美歸來",
+                title: "抵達溫暖的家", location: "Istanbul ➔ Taipei",
+                mapQuery: "Taoyuan International Airport", keyword: "taiwan,home",
+                time: "土航 TK 24 (01:30 出發 ➔ 17:55 抵達)",
+                stay: "溫暖的家",
+                highlight: "凌晨從伊斯坦堡起飛 (飛行 11h25m)。帶著 40 天橫跨四國、滿滿的歐陸回憶與數千張絕美照片，平安降落台灣桃園機場。史詩壯遊，完美落幕！",
+                food: "機上餐點與令人懷念的台灣家鄉味",
+                tips: "確認編號：SJFDNH。好好休息，準備回家整理這趟壯遊的珍貴回憶與照片。"
+            }
+        ];
+
+        let currentIndex = 0;
+        let currentPhase = 1;
+
+        // Theme colors logic
+        const themes = {
+            1: { name: 'amber', 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e' },
+            2: { name: 'blue', 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af' },
+            3: { name: 'emerald', 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46' }
+        };
+
+        const phaseDetails = {
+            1: { title: "第一章：中歐經典與波希米亞童話", desc: "四人專屬：完美結合大眾運輸與專車接駁，走過百塔之城布拉格、童話小鎮庫倫洛夫，與奧地利湖區秘境。" },
+            2: { title: "第二章：亞得里亞海蔚藍情詩", desc: "兩人自駕：精準避開人潮，馳騁最美 D8 海岸線，從羅維尼的夕陽到君臨城的古牆，最終潛入十六湖的森林秘境。" },
+            3: { title: "第三章：阿爾卑斯翡翠之Love", desc: "兩人自駕：在盧比安納的學術交流後，挑戰最高公路髮夾彎，並體驗把汽車開上火車的奇幻旅程。" }
+        };
+
+        function init() {
+            renderTimeline();
+            updateDetailCard();
+            updateTheme();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('topTimelineNodes');
+            container.innerHTML = '';
+            
+            itineraryData.forEach((data, index) => {
+                const nodeBtn = document.createElement('button');
+                nodeBtn.className = `relative flex flex-col items-center group focus:outline-none px-4`;
+                nodeBtn.onclick = () => selectDay(index);
+                
+                const isPastOrCurrent = index <= currentIndex;
+                const isCurrent = index === currentIndex;
+                
+                const dot = document.createElement('div');
+                dot.className = `w-4 h-4 md:w-5 md:h-5 rounded-full border-4 transition-all duration-300 z-10 bg-white cursor-pointer
+                                ${isPastOrCurrent ? 'border-theme-500' : 'border-slate-200'}
+                                ${isCurrent ? 'scale-[1.4] shadow-lg bg-theme-100' : 'hover:scale-110'}
+                                `;
+                
+                const label = document.createElement('div');
+                label.className = `absolute top-8 text-[10px] md:text-xs font-bold whitespace-nowrap transition-colors duration-300
+                                  ${isCurrent ? 'text-theme-600' : 'text-slate-400 group-hover:text-theme-500'}`;
+                label.innerText = `D${data.day}`;
+
+                const phaseMarker = document.createElement('div');
+                phaseMarker.className = `absolute -top-6 text-[10px] font-bold text-slate-300 whitespace-nowrap ${index === 0 || itineraryData[index].phase !== itineraryData[index-1].phase ? 'block' : 'hidden'}`;
+                phaseMarker.innerText = `Phase ${data.phase}`;
+                
+                nodeBtn.appendChild(phaseMarker);
+                nodeBtn.appendChild(dot);
+                nodeBtn.appendChild(label);
+                container.appendChild(nodeBtn);
+            });
+            
+            const progressLine = document.getElementById('topProgressLine');
+            if (itineraryData.length > 1) {
+                const percentage = (currentIndex / (itineraryData.length - 1)) * 100;
+                progressLine.style.width = `${percentage}%`; 
+            }
+        }
+
+        function selectDay(index) {
+            if (index === currentIndex) return;
+            currentIndex = index;
+            
+            const newPhase = itineraryData[currentIndex].phase;
+            if(newPhase !== currentPhase) {
+                currentPhase = newPhase;
+                updateTheme();
+            }
+
+            renderTimeline();
+            updateDetailCard();
+            
+            // Auto scroll timeline to center
+            const topContainer = document.getElementById('timelineScrollBox');
+            const activeTopNode = document.getElementById('topTimelineNodes').children[index];
+            if(topContainer && activeTopNode) {
+                const scrollLeft = activeTopNode.offsetLeft - (topContainer.clientWidth / 2) + (activeTopNode.clientWidth / 2);
+                topContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+            }
+        }
+
+        function jumpToPhase(phaseNumber) {
+            const targetIndex = itineraryData.findIndex(d => d.phase === phaseNumber);
+            if(targetIndex !== -1) {
+                selectDay(targetIndex);
+            }
+        }
+
+        function updateTheme() {
+            const root = document.documentElement;
+            const theme = themes[currentPhase];
+            
+            root.style.setProperty('--theme-50', theme[50]);
+            root.style.setProperty('--theme-100', theme[100]);
+            root.style.setProperty('--theme-500', theme[500]);
+            root.style.setProperty('--theme-600', theme[600]);
+            root.style.setProperty('--theme-700', theme[700]);
+            root.style.setProperty('--theme-800', theme[800]);
+
+            // Update Tab Opacities
+            [1, 2, 3].forEach(p => {
+                const tab = document.getElementById(`tab-phase-${p}`);
+                if(p === currentPhase) {
+                    tab.classList.remove('opacity-50');
+                    tab.classList.add('shadow-md', 'scale-105');
+                } else {
+                    tab.classList.add('opacity-50');
+                    tab.classList.remove('shadow-md', 'scale-105');
+                }
+            });
+
+            document.getElementById('phaseTitle').innerText = phaseDetails[currentPhase].title;
+            document.getElementById('phaseDesc').innerText = phaseDetails[currentPhase].desc;
+        }
+
+        function fetchSafeImage(keyword, fallbackSeedText) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const randomId = Math.floor(Math.random() * 10000);
+                img.src = `https://loremflickr.com/1200/800/${keyword}?random=${randomId}`;
+                img.onload = () => resolve(img.src);
+                img.onerror = () => resolve(`https://picsum.photos/seed/${fallbackSeedText}${randomId}/1200/800`);
+                setTimeout(() => resolve(`https://picsum.photos/seed/timeout${randomId}/1200/800`), 6000);
+            });
+        }
+
+        async function updateDetailCard() {
+            const data = itineraryData[currentIndex];
+            const contentGrid = document.getElementById('contentGrid');
+            const imgEl = document.getElementById('heroImage');
+            const imgContainer = document.getElementById('imageContainer');
+            const mapIframe = document.getElementById('googleMap');
+            
+            contentGrid.style.opacity = '0.3';
+            mapIframe.classList.add('opacity-0');
+            
+            imgEl.classList.remove('opacity-100');
+            imgEl.classList.add('opacity-0');
+            imgContainer.classList.add('skeleton');
+
+            setTimeout(() => {
+                document.getElementById('cardDay').innerText = `Day ${data.day}`;
+                document.getElementById('cardDate').innerText = data.date;
+                document.getElementById('cardGroup').innerText = data.group;
+                document.getElementById('cardTitle').innerText = data.title;
+                document.getElementById('cardLocation').querySelector('span').innerText = data.location;
+                document.getElementById('cardTime').innerText = data.time;
+                document.getElementById('cardStay').innerText = data.stay;
+                document.getElementById('cardDining').innerText = data.food;
+                document.getElementById('cardHighlight').innerText = data.highlight;
+                document.getElementById('cardTips').innerText = data.tips;
+                
+                // Update Google Map
+                const encodedQuery = encodeURIComponent(data.mapQuery);
+                mapIframe.src = `https://maps.google.com/maps?q=${encodedQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+                
+                contentGrid.style.opacity = '1';
+                contentGrid.classList.remove('fade-in');
+                void contentGrid.offsetWidth; 
+                contentGrid.classList.add('fade-in');
+            }, 200);
+
+            mapIframe.onload = () => mapIframe.classList.remove('opacity-0');
+
+            const fallbackStr = data.location.replace(/[^a-zA-Z]/g, ''); 
+            const safeImageUrl = await fetchSafeImage(data.keyword, fallbackStr);
+            
+            imgEl.src = safeImageUrl;
+            imgEl.onload = () => {
+                imgContainer.classList.remove('skeleton');
+                imgEl.classList.remove('opacity-0');
+                imgEl.classList.add('opacity-100');
+            };
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

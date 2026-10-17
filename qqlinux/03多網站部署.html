@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>114-2 雲端技術期末實作 - 專案戰情室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white py-12 px-4 shadow-lg">
+        <div class="max-w-5xl mx-auto">
+            <div class="inline-block bg-blue-500/30 text-blue-100 px-3 py-1 rounded-full text-sm font-semibold tracking-wider mb-4 border border-blue-400/30">
+                114-2 FINAL PROJECT
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">單主機多服務架構與地端 AI 部署</h1>
+            <p class="text-lg md:text-xl text-blue-100 max-w-3xl leading-relaxed">
+                這不只是一場期末測驗，而是你成為專業雲端工程師的「職前訓練」。你將在單一節點上整合原生服務、容器化架構，並成功部署當紅的大型語言模型。
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-8 md:py-12 space-y-12">
+
+        <!-- Section 1: 任務總覽 -->
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-bullseye text-2xl text-indigo-600"></i>
+                <h2 class="text-2xl font-bold text-slate-800">核心架構要求</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">基礎設施 (IaaS)</h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Azure VM 環境</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>CPU 4 Core / RAM 16GB</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>HDD 120GB (AI 模型需求)</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>統一綁定 NUTC DNS</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-purple-500 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="fab fa-docker"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">混合式服務部署</h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Nginx 反向代理總機</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>原生 WordPress (Socket)</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Docker 版 WordPress</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-teal-500 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">地端 AI 應用</h3>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Ollama + Open WebUI</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>載入 Gemma4:2B 模型</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>嚴格的測試帳號權限控管</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: 實作藍圖 (Tabs) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-map text-2xl text-indigo-600"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">實作拆解藍圖</h2>
+                </div>
+                <p class="text-sm text-slate-500">遇到困難？一步一步來，分而治之。</p>
+            </div>
+            
+            <div class="flex border-b border-slate-200 overflow-x-auto" id="tabs">
+                <button class="px-6 py-4 font-semibold text-indigo-600 border-b-2 border-indigo-600 hover:bg-slate-50 transition-colors whitespace-nowrap" onclick="switchTab(event, 'step1')">階段一：架構與打底</button>
+                <button class="px-6 py-4 font-medium text-slate-500 border-b-2 border-transparent hover:text-indigo-600 hover:bg-slate-50 transition-colors whitespace-nowrap" onclick="switchTab(event, 'step2')">階段二：系統與中介</button>
+                <button class="px-6 py-4 font-medium text-slate-500 border-b-2 border-transparent hover:text-indigo-600 hover:bg-slate-50 transition-colors whitespace-nowrap" onclick="switchTab(event, 'step3')">階段三：三大核心</button>
+                <button class="px-6 py-4 font-medium text-slate-500 border-b-2 border-transparent hover:text-indigo-600 hover:bg-slate-50 transition-colors whitespace-nowrap" onclick="switchTab(event, 'step4')">階段四：代理與加密</button>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <!-- Tab 1 -->
+                <div id="step1" class="tab-content active">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-900">基礎設施層 (IaaS)</h3>
+                    <div class="space-y-4 text-slate-700">
+                        <p><strong>1. 架構規劃 (Notion)：</strong> 在動手前，先規劃好 3 個子網域、Nginx 轉發 Port 以及防火牆規則。</p>
+                        <p><strong>2. 淨空驗證：</strong> 截圖證明 Azure 虛擬機器列表為空 (需含系統時間)。</p>
+                        <p><strong>3. 開通 VM：</strong> 嚴格依照 4 Core / 16GB / 120GB 規格建立虛擬機。</p>
+                        <p><strong>4. 防火牆 (NSG)：</strong> 開放 Port 22 (SSH), 80 (HTTP), 443 (HTTPS)。</p>
+                        <div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-100 flex gap-3 mt-4">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <div>
+                                <strong class="block mb-1">重大警告：IP 綁定不可逆</strong>
+                                確認 DNS 解析無誤再綁定。若因操作失誤需改 IP，重扣 10 分！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2 -->
+                <div id="step2" class="tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-900">中介軟體層</h3>
+                    <div class="space-y-4 text-slate-700">
+                        <p><strong>1. 更新系統：</strong> <code>sudo apt update && sudo apt upgrade</code></p>
+                        <p><strong>2. 安裝 Nginx：</strong> 擔任總機，負責接收並分發外部流量。</p>
+                        <p><strong>3. 安裝 Docker 環境：</strong> 安裝 Docker Engine 與 Docker Compose。</p>
+                        <p><strong>4. 安裝 PHP/DB：</strong> 為原生 WP 準備 PHP-FPM 與 MariaDB/MySQL 環境。</p>
+                        <p><strong>5. 準備 SSL 工具：</strong> 安裝 Certbot，為最後階段做準備。</p>
+                    </div>
+                </div>
+
+                <!-- Tab 3 -->
+                <div id="step3" class="tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-900">應用服務層 (先確保 Localhost 暢通)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                        <div class="border border-slate-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-700 mb-2">原生 WordPress</h4>
+                            <p class="text-sm mb-2">採用 Socket 通訊。首頁必須展示你的真實照片與姓名。</p>
+                        </div>
+                        <div class="border border-slate-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-700 mb-2">Docker WordPress</h4>
+                            <p class="text-sm mb-2">透過 docker-compose 建置。首頁只能顯示「你的學號」。</p>
+                        </div>
+                        <div class="border border-slate-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-700 mb-2">AI Server</h4>
+                            <p class="text-sm mb-2">部署 Ollama + WebUI。載入 Gemma4:2B。建立非管理員測試帳號。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4 -->
+                <div id="step4" class="tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-900">整合與加密層</h3>
+                    <div class="space-y-4 text-slate-700">
+                        <p><strong>1. Nginx 虛擬主機：</strong> 為三個網域分別撰寫 <code>.conf</code> 設定檔。</p>
+                        <p><strong>2. 精準轉發 (Proxy Pass)：</strong> 分別將流量導向 <code>.sock</code> 路徑及 Docker 對應的主機 Port。</p>
+                        <p><strong>3. 申請 SSL 憑證：</strong> 執行 Certbot，自動配置 HTTPS 並強制重導向。</p>
+                        <p><strong>4. 無痕驗證：</strong> 開啟無痕視窗，親自測試三個網址是否安全且畫面符合規格。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: 業界紀律 (Accordion) -->
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-balance-scale text-2xl text-slate-700"></i>
+                <h2 class="text-2xl font-bold text-slate-800">為什麼規定這麼多？業界紀律解密</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Accordion 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <button class="w-full text-left px-6 py-4 font-bold text-slate-800 flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <span><i class="fas fa-ban text-red-500 w-6"></i> 規定：IP 綁定不可逆，改 IP 重扣 10 分</span>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content bg-slate-50">
+                        <div class="px-6 py-4 border-t border-slate-100 text-slate-700">
+                            <strong>業界真實場景：</strong> 在商用環境中，DNS 擴散需要數小時甚至數天。隨意變動 Production 環境的固定 IP，會直接導致服務中斷 (Downtime) 與大量客訴。這項規定是為了讓各位提早體會「每一次 Enter 鍵敲下去都要負責」的壓力。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <button class="w-full text-left px-6 py-4 font-bold text-slate-800 flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <span><i class="fas fa-clock text-orange-500 w-6"></i> 規定：截圖必須含系統時間戳記與紅框</span>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content bg-slate-50">
+                        <div class="px-6 py-4 border-t border-slate-100 text-slate-700">
+                            <strong>業界真實場景：</strong> 這對應了業界的「系統日誌 (Log) 與事件稽核」精神。發生資安事件或系統當機時，精確的時間點與操作軌跡是釐清責任的唯一依據。「有圖有真相，且時間要對得上」是系統工程師保護自己的基本功。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 3 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <button class="w-full text-left px-6 py-4 font-bold text-slate-800 flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <span><i class="fas fa-pen-nib text-blue-500 w-6"></i> 規定：全程 Notion 記錄，圖文連結並重</span>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content bg-slate-50">
+                        <div class="px-6 py-4 border-t border-slate-100 text-slate-700">
+                            <strong>業界真實場景：</strong> 系統建置完不能只丟一個網址給主管或客戶。撰寫維護手冊、交接文件是工程師的職責。一個缺乏文件紀錄的系統，對企業來說就是巨大的「技術債」。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: 繳交前防雷 Check List -->
+        <section class="bg-indigo-50 rounded-2xl p-6 md:p-8 border border-indigo-100">
+            <h2 class="text-2xl font-bold text-indigo-900 mb-2">繳交前最終防雷清單</h2>
+            <p class="text-indigo-700 mb-6">送出作業前，請勾選確認，保護你的分數不被倒扣！</p>
+            
+            <div class="space-y-3" id="checklist">
+                <label class="flex items-start gap-3 cursor-pointer group p-3 bg-white rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors">
+                    <input type="checkbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-700">我有附上 Notion 規劃筆記連結，且權限設定為「公開可檢視」。</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer group p-3 bg-white rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors">
+                    <input type="checkbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-700">我的「Azure 環境淨空證明」截圖中，右下角<strong>有系統時間戳記</strong>。</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer group p-3 bg-white rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors">
+                    <input type="checkbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-700">我的「IP 與網域交叉驗證」截圖中，<strong>有使用紅框</strong>清楚標示解析 IP 與實體 IP 一致。</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer group p-3 bg-white rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors">
+                    <input type="checkbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-700">繳交的最終成果，<strong>同時包含了</strong>真實的 HTTPS 網址與對應的畫面截圖。</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer group p-3 bg-white rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors">
+                    <input type="checkbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-700">我親自測試過 AI 測試帳號 (qq@gmail.com)，確認它<strong>絕對沒有</strong> Admin 權限。</span>
+                </label>
+            </div>
+            
+            <div id="success-msg" class="mt-6 p-4 bg-green-100 text-green-800 rounded-lg hidden font-bold flex items-center justify-center gap-2">
+                <i class="fas fa-check-circle text-xl"></i> 防禦檢測通過！祝你期末考順利拿高分！
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 text-slate-500 text-sm">
+        <p>114-2 雲端服務技術課程 &copy; 預祝實作順利</p>
+    </footer>
+
+    <script>
+        // Tab 切換邏輯
+        function switchTab(evt, tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const tabButtons = evt.currentTarget.parentElement.querySelectorAll('button');
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-indigo-600', 'border-indigo-600');
+                btn.classList.add('text-slate-500', 'border-transparent');
+                btn.classList.remove('font-semibold');
+                btn.classList.add('font-medium');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.remove('text-slate-500', 'border-transparent', 'font-medium');
+            evt.currentTarget.classList.add('text-indigo-600', 'border-indigo-600', 'font-semibold');
+        }
+
+        // Accordion 折疊面板邏輯
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('.fa-chevron-down');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Checklist 邏輯
+        const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+        const successMsg = document.getElementById('success-msg');
+
+        checkboxes.forEach(box => {
+            box.addEventListener('change', () => {
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                if (allChecked) {
+                    successMsg.classList.remove('hidden');
+                    // Add a little pop animation
+                    successMsg.style.animation = 'fadeIn 0.5s ease-in-out';
+                } else {
+                    successMsg.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索 Google AI Quests：培養下一代 AI 問題解決者</title>
+    <style>
+        :root {
+            --primary-blue: #4285F4;
+            --primary-red: #EA4335;
+            --primary-yellow: #FBBC05;
+            --primary-green: #34A853;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+            --bg-color: #f8f9fa;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-blue), #1a73e8);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #e8eaed;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            color: #202124;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-blue);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .card.red { border-color: var(--primary-red); }
+        .card.yellow { border-color: var(--primary-yellow); }
+        .card.green { border-color: var(--primary-green); }
+
+        .card h4 {
+            color: #202124;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tech-box {
+            background-color: #e8f0fe;
+            border: 1px solid #d2e3fc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .tech-box ul {
+            list-style-position: inside;
+            color: var(--text-light);
+            margin-top: 1rem;
+        }
+
+        .tech-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>探索 Google AI Quests</h1>
+        <p>為下一代問題解決者打造的體驗式人工智慧（AI）素養遊戲化學習平台</p>
+        <div class="cta-buttons">
+            <a href="https://research.google/ai-quests/" target="_blank" class="btn btn-primary">進入遊戲入口</a>
+            <a href="https://docs.google.com/document/d/16XJQwwYKqjHxik86OtlD2iHkZ0lepojQy7eeeRej078/edit" target="_blank" class="btn btn-secondary">查看教師手冊</a>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <section>
+            <h2>什麼是 AI Quests？</h2>
+            <p><strong>AI Quests</strong> 是一款由 Google 研究院與史丹佛大學學習加速器合作開發的「遊戲化學習體驗」工具。它的目的不僅是教導學生演算法的編碼，而是將現實世界中的人工智慧應用帶入課堂。透過沉浸式的角色扮演和故事敘述，學生將化身為 AI 研究人員，面對全球性的社會問題（如氣候變遷或公共衛生），並嘗試利用 AI 尋找解決方案。</p>
+            <p>這個工具是模組化且易於融入的，無論是 STEM（科學、技術、工程、數學）還是人文學科，教師和學生都不需要具備高深的技術背景，只需帶著好奇心即可探索。</p>
+        </section>
+
+        <section>
+            <h2>為什麼我們需要 AI 素養？（目的）</h2>
+            <p>我們常常聽到 AI，但很少探討它如何真正改變人類生活。AI Quests 的核心目的是培養學生的 <strong>AI 素養 (AI Literacy)</strong>：</p>
+            <div class="grid">
+                <div class="card">
+                    <h4>建立連結與理解</h4>
+                    <p>幫助學生了解 AI 是如何運作的，並將日常生活中的技術與其背後的機制連結起來。</p>
+                </div>
+                <div class="card red">
+                    <h4>培養批判性思維</h4>
+                    <p>教導學生評估 AI 系統的公平性、倫理與潛在偏見，不僅是科技的消費者，更是批判性的思考者。</p>
+                </div>
+                <div class="card yellow">
+                    <h4>賦能問題解決者</h4>
+                    <p>讓學生將自己視為能夠利用 AI 技術來解決社會問題、創造美好未來的積極參與者。</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>學生具體該如何使用？</h2>
+            <p>在 AI Quests 中，學生將會經歷一個完整的專案流程，共有四個主要階段：</p>
+            <ol style="margin-left: 2rem; color: var(--text-light); line-height: 1.8;">
+                <li><strong>入職引導 (Onboarding)：</strong>了解任務背景與社會問題（如洪水預測），培養對該議題的同理心。</li>
+                <li><strong>資料探索與分析 (Data Exploration)：</strong>檢查資料集，識別模式。學生會發現資料品質如何直接影響最終的 AI 決策。</li>
+                <li><strong>模型訓練與測試 (Model Training)：</strong>選擇特定的資料來訓練 AI，觀察選擇不同資料時，如何產生誤差或導致準確率下降。</li>
+                <li><strong>挑戰決議 (Challenge Resolution)：</strong>將訓練好的 AI 模型應用於現實場景中做出決策，並反思其倫理與社會影響。</li>
+            </ol>
+            
+            <h3 style="margin-top: 2rem;">任務範例</h3>
+            <div class="grid">
+                <div class="card green">
+                    <h4>🌍 市場沼澤 (Market Swamp)</h4>
+                    <p>學生扮演 AI 研究員，利用歷史資料與基礎設施評估，建立預測河流洪水的模型，幫助弱勢社區做出拯救生命的決策。</p>
+                </div>
+                <div class="card blue">
+                    <h4>👁️ 暗沙丘 (Dark Dunes)</h4>
+                    <p>在虛構的沙漠中，建立一個能早期檢測視力喪失的醫療 AI，學生需要應對醫療資料的複雜性，並了解多樣化資料對準確率的重要性。</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>核心技術揭秘：AI 底層運作邏輯</h2>
+            <p>要掌握 AI，我們必須了解機器是如何從無到有「學會」解決問題的。以下是 AI Quests 所傳達的幾個重要底層技術與素養：</p>
+            
+            <div class="tech-box">
+                <h4 style="color: var(--primary-blue); font-size: 1.2rem;">1. 資料清理與準備 (Data Cleaning & Preparation)</h4>
+                <p>AI 的核心燃料是「資料」，但現實世界的資料往往充滿雜訊、缺失值或偏見（Garbage in, garbage out）。</p>
+                <ul>
+                    <li><strong>清洗的意義：</strong>去除錯誤的數據，填補缺失的資訊，確保數據的代表性。如果用來預測洪水的歷史資料只偏重某個富裕區域，AI 就無法保護弱勢地區，這就是資料偏差 (Data Bias)。</li>
+                </ul>
+            </div>
+
+            <div class="tech-box">
+                <h4 style="color: var(--primary-red); font-size: 1.2rem;">2. 模型訓練 (Model Training)</h4>
+                <p>傳統程式設計是「給定規則得出答案」，而機器學習是「給定資料與答案，讓 AI 自己找出規則」。</p>
+                <ul>
+                    <li><strong>訓練過程：</strong>學生在任務中挑選適合的特徵（如降雨量、地形高度），AI 演算法會藉由大量的範例，不斷調整內部的權重 (Weights)，以找出預測目標的數學關聯性。</li>
+                </ul>
+            </div>
+
+            <div class="tech-box">
+                <h4 style="color: var(--primary-yellow); font-size: 1.2rem;">3. 模型優化與測試 (Optimization & Testing)</h4>
+                <p>訓練完的 AI 並不完美，我們需要驗證它在「沒看過的資料」上的表現。</p>
+                <ul>
+                    <li><strong>測試與調整：</strong>若 AI 預測準確率太低，代表「欠擬合 (Underfitting)」；若只會死背訓練資料但在現實中失效，則是「過擬合 (Overfitting)」。學生需要透過反覆測試，加入更多樣化的資料來優化 AI，確保其具有普遍適應性。</li>
+                </ul>
+            </div>
+
+        </section>
+
+    </div>
+
+    <footer>
+        <p>本網頁內容整理自 Google AI Quests 官方說明與教師手冊</p>
+        <p>© 2026 AI Literacy Hub</p>
+    </footer>
+
+</body>
+</html>

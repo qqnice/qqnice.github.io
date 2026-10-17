@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="WEEK2 Docker Compose 雙網站部署實戰開發流程：WordPress、MariaDB、Apache、Nginx Reverse Proxy、Let's Encrypt。">
+<meta name="theme-color" content="#0f2f5f">
+<title>WEEK2｜Docker Compose 雙網站部署流程</title>
+<style>
+:root{
+  --navy:#0f2f5f;--navy2:#173f78;--ink:#10233f;--muted:#65748a;
+  --bg:#f4f7fb;--card:#fff;--line:#dfe7f2;
+  --blue:#e3f4ff;--blueb:#3f9dd9;
+  --green:#e9f9ee;--greenb:#41a565;
+  --yellow:#fff6d9;--yellowb:#d39a22;
+  --pink:#ffe9ef;--pinkb:#d65c7c;
+  --gray:#eef1f5;--shadow:0 14px 36px rgba(22,49,86,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.65}
+a{color:inherit}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#0e2037;color:#d7f1ff;border-radius:7px;padding:.12rem .38rem;font-size:.9em}
+.shell{width:min(1180px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.91);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav{height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;color:var(--navy)}
+.brand .mark{font-size:28px}
+.brand small{display:block;font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+nav{display:flex;gap:18px;font-size:14px;font-weight:800}
+nav a{text-decoration:none;color:#40516a}
+nav a:hover{color:var(--navy)}
+.hero{background:
+radial-gradient(circle at 80% 18%,rgba(78,169,227,.17),transparent 29%),
+linear-gradient(135deg,#f8fbff 0,#eef6ff 48%,#fff 100%);
+border-bottom:1px solid var(--line)}
+.hero-in{padding:74px 0 62px;display:grid;grid-template-columns:1.45fr .8fr;gap:44px;align-items:center}
+.eyebrow{display:inline-block;font-size:12px;letter-spacing:.18em;font-weight:900;color:#287ab6;margin-bottom:12px}
+h1{font-size:clamp(38px,5.5vw,70px);line-height:1.07;letter-spacing:-.035em;margin:0;color:var(--navy)}
+.hero p{font-size:18px;color:#53657d;max-width:780px;margin:22px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;border-radius:12px;padding:12px 17px;font-weight:900;border:1px solid var(--line)}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.secondary{background:#fff;color:var(--navy)}
+.hero-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}
+.hero-card h3{margin:0 0 16px;color:var(--navy)}
+.domain{border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin:9px 0;background:#fbfdff}
+.domain small{display:block;color:var(--muted)}
+.domain strong{font-size:15px}
+.ip{margin-top:16px;border-radius:13px;padding:13px 15px;background:#edf4ff;display:flex;justify-content:space-between;font-weight:900}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px}
+.fact{padding:13px 10px;border:1px solid #dbe6f3;border-radius:12px;background:rgba(255,255,255,.72);text-align:center}
+.fact b{display:block;font-size:22px;color:var(--navy)}
+.fact span{font-size:12px;color:var(--muted);font-weight:800}
+section{padding:70px 0}
+.section-head{max-width:760px;margin-bottom:34px}
+.kicker{display:block;font-size:12px;letter-spacing:.16em;font-weight:900;color:#2f87c8;margin-bottom:7px}
+h2{font-size:clamp(28px,4vw,45px);line-height:1.15;letter-spacing:-.025em;margin:0 0 14px;color:var(--navy)}
+.section-head p{margin:0;color:var(--muted);font-size:17px}
+.path{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.path span{background:#fff;border:1px solid var(--line);padding:9px 12px;border-radius:999px;font-weight:800;font-size:13px}
+.path i{font-style:normal;color:#8ca0b9}
+.preflight{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:32px}
+.pre{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.pre b{display:block;color:var(--navy);margin-bottom:7px}
+.pre p{margin:0;font-size:14px;color:var(--muted)}
+.flow-wrap{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.phase{border-radius:20px;padding:22px;border:1px solid transparent;box-shadow:0 8px 18px rgba(25,57,92,.05)}
+.phase.blue{background:var(--blue);border-color:#c8e8fb}
+.phase.green{background:var(--green);border-color:#cfeeda}
+.phase.yellow{background:var(--yellow);border-color:#f1dfac}
+.phase.pink{background:var(--pink);border-color:#f3c9d5}
+.phase-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.no{font-size:36px;font-weight:1000;line-height:1;color:rgba(15,47,95,.32)}
+.range{font-size:11px;font-weight:900;letter-spacing:.07em;background:rgba(255,255,255,.65);padding:5px 8px;border-radius:999px}
+.phase h3{margin:0 0 8px;font-size:22px;color:var(--navy)}
+.phase .desc{font-size:14px;color:#53657a;min-height:70px}
+.phase ul{padding-left:19px;margin:16px 0 0}
+.phase li{margin:7px 0;font-size:14px}
+.check{margin-top:16px;border-top:1px dashed rgba(15,47,95,.22);padding-top:14px}
+.check b{font-size:13px;color:var(--navy)}
+.check pre{white-space:pre-wrap;overflow:auto;background:#10233f;color:#d9efff;padding:10px;border-radius:10px;font-size:11px}
+.arrowline{text-align:center;color:#7891ad;font-weight:900;margin:20px 0 0}
+.arch{background:linear-gradient(180deg,#f8fbff,#eef4fb);border:1px solid #d8e4f0;border-radius:24px;padding:30px;box-shadow:var(--shadow)}
+.arch-row{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap}
+.node{background:#fff;border:1px solid #cfdceb;border-radius:16px;min-width:185px;text-align:center;padding:16px 18px}
+.node b{display:block;color:var(--navy)}
+.node small{color:var(--muted)}
+.big-arrow{text-align:center;font-size:28px;color:#55779a;margin:6px 0}
+.branch{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;margin-top:6px}
+.branch .stack{text-align:center}
+.subarrow{font-size:25px;color:#55779a}
+.cert{margin-top:24px;padding:16px;border:1px dashed #8fa9c6;border-radius:15px;background:#fff;display:flex;gap:12px;align-items:center;justify-content:center}
+.arch-notes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.note{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.note b{color:var(--navy)}
+.note p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rule{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}
+.rule h3{margin:0 0 10px;color:var(--navy)}
+.rule ul{padding-left:20px;margin:0}
+.rule li{margin:7px 0}
+.stage-seq{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px}
+.stage-seq span{padding:7px 10px;border-radius:9px;background:#fff2c6;border:1px solid #ead28a;font-weight:900;font-size:12px}
+.final{background:var(--navy);color:#fff}
+.final h2,.final .kicker{color:#fff}
+.final .section-head p{color:#c5d5e8}
+.checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:13px 15px}
+.item strong{color:#fff}
+.item span{display:block;color:#b9cbe0;font-size:13px;margin-top:2px}
+footer{background:#0a213f;color:#b9c9db;padding:24px 0}
+.footer{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.footer strong{color:#fff}
+.footer a{color:#fff;text-decoration:none}
+@media(max-width:980px){
+  .hero-in{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr 1fr}
+  .preflight{grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  nav{display:none}
+  .hero-in{padding:48px 0}
+  .facts,.flow,.preflight,.branch,.arch-notes,.rules,.checklist{grid-template-columns:1fr}
+  section{padding:52px 0}
+  .hero p{font-size:16px}
+  .footer{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="shell nav">
+    <a class="brand" href="#top">
+      <span class="mark">🐳</span>
+      <span><strong>WEEK2</strong><small>DOCKER DEPLOYMENT LAB</small></span>
+    </a>
+    <nav>
+      <a href="#goal">目標</a>
+      <a href="#flow">開發流程</a>
+      <a href="#architecture">最終架構</a>
+      <a href="#https">HTTPS</a>
+      <a href="#check">驗收</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="shell hero-in">
+    <div>
+      <span class="eyebrow">DOCKER COMPOSE · REVERSE PROXY · HTTPS</span>
+      <h1>WEEK2<br>雙網站部署開發流程</h1>
+      <p>從 WEEK1 的單一 Container 出發，一步一步建立 Docker Compose 多服務架構，加入 WordPress、MariaDB、Named Volume、Nginx Reverse Proxy、雙 Domain，以及 Let's Encrypt HTTPS。</p>
+      <div class="actions">
+        <a class="btn primary" href="#flow">查看四階段流程</a>
+        <a class="btn secondary" href="#architecture">看最終架構</a>
+      </div>
+      <div class="facts">
+        <div class="fact"><b>1</b><span>Azure VM</span></div>
+        <div class="fact"><b>1</b><span>Public IP</span></div>
+        <div class="fact"><b>2</b><span>Domain</span></div>
+        <div class="fact"><b>TLS</b><span>Let's Encrypt</span></div>
+      </div>
+    </div>
+    <aside class="hero-card">
+      <h3>最終成果</h3>
+      <div class="domain"><small>WordPress</small><strong>🔒 s123456.qqnice.org</strong></div>
+      <div class="domain"><small>Static Site</small><strong>🔒 k123456.kknice.net</strong></div>
+      <div class="ip"><span>Azure VM</span><span>1.2.3.4</span></div>
+      <p style="font-size:14px;margin-bottom:0">兩個網站共用同一個 Public IP；外界只從 Port 80 / 443 進入 Nginx。</p>
+    </aside>
+  </div>
+</section>
+
+<section id="goal">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">COURSE GOAL</span>
+      <h2>不是背設定檔，而是理解系統怎麼一步一步長出來</h2>
+      <p>WEEK1 已學 Image、Container、Port、Bind Mount、Dockerfile。WEEK2 把這些元件串成真正可以部署的 Web 架構。</p>
+    </div>
+    <div class="path">
+      <span>docker run</span><i>→</i>
+      <span>Compose</span><i>→</i>
+      <span>Network</span><i>→</i>
+      <span>WordPress + DB</span><i>→</i>
+      <span>Volume</span><i>→</i>
+      <span>Reverse Proxy</span><i>→</i>
+      <span>Domain</span><i>→</i>
+      <span>HTTPS</span><i>→</i>
+      <span>Persistence</span>
+    </div>
+
+    <div class="preflight">
+      <div class="pre"><b>① Azure VM</b><p>Static Public IP，NSG 開放 22、80、443。</p></div>
+      <div class="pre"><b>② DNS</b><p>兩個 A Record 都指向同一個 VM Public IP。</p></div>
+      <div class="pre"><b>③ Docker</b><p>Docker、Compose v2、docker 群組都已完成。</p></div>
+      <div class="pre"><b>④ 專案目錄</b><p>全程只使用 <code>~/webstack</code>。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="flow-wrap" id="flow">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">DEVELOPMENT FLOW</span>
+      <h2>四個階段，每一關都要驗證</h2>
+      <p>不要一次貼完整答案。每個階段完成後先 Checkpoint，再進下一個架構層次。</p>
+    </div>
+
+    <div class="flow">
+      <article class="phase blue">
+        <div class="phase-top"><span class="no">01</span><span class="range">STEP 1–6</span></div>
+        <h3>Compose 與 Network</h3>
+        <p class="desc">把 WEEK1 的 <code>docker run</code> 改寫成 <code>compose.yml</code>，再從單一服務走向 Multi-container。</p>
+        <ul>
+          <li>第一份 compose.yml</li>
+          <li>Nginx + Apache 兩服務</li>
+          <li>理解 image / build / ports</li>
+          <li>觀察 Compose default network</li>
+          <li>用 service name 找到另一個 Container</li>
+        </ul>
+        <div class="check">
+          <b>CHECKPOINT</b>
+          <pre>curl http://localhost:8080
+curl http://localhost:8081
+docker compose exec hello getent hosts web</pre>
+        </div>
+      </article>
+
+      <article class="phase green">
+        <div class="phase-top"><span class="no">02</span><span class="range">STEP 7–12</span></div>
+        <h3>WordPress + MariaDB + Volume</h3>
+        <p class="desc">建立應用程式與資料庫服務，並先做好 Named Volume，避免重要資料綁死在 Container。</p>
+        <ul>
+          <li>MariaDB service：db</li>
+          <li>WordPress service：wordpress</li>
+          <li>WORDPRESS_DB_HOST=db</li>
+          <li>db-data / wp-data</li>
+          <li>驗證 WordPress 已連上 DB</li>
+        </ul>
+        <div class="check">
+          <b>CHECKPOINT</b>
+          <pre>docker volume ls
+docker compose logs db
+curl -I http://localhost:8082</pre>
+        </div>
+      </article>
+
+      <article class="phase yellow">
+        <div class="phase-top"><span class="no">03</span><span class="range">STEP 13–18</span></div>
+        <h3>Reverse Proxy 與 DNS</h3>
+        <p class="desc">移除後端的公開 Port，讓 Nginx 成為唯一入口，再用 Host 標頭把兩個 Domain 導向不同服務。</p>
+        <ul>
+          <li>刪除 hello 與 8081 / 8082 publish</li>
+          <li>新增 Nginx :80 / :443</li>
+          <li>server_name + proxy_pass</li>
+          <li>Host header 分流實驗</li>
+          <li>DNS → 同一 Public IP</li>
+        </ul>
+        <div class="check">
+          <b>CHECKPOINT</b>
+          <pre>curl -H "Host: s123456.qqnice.org" http://127.0.0.1/
+curl -H "Host: k123456.kknice.net" http://127.0.0.1/</pre>
+        </div>
+      </article>
+
+      <article class="phase pink">
+        <div class="phase-top"><span class="no">04</span><span class="range">STEP 19–29</span></div>
+        <h3>Let's Encrypt 與 HTTPS</h3>
+        <p class="desc">先用 HTTP-01 完成驗證，再從 Staging 走到正式憑證，最後切 HTTPS、安裝 WordPress、驗證續期。</p>
+        <ul>
+          <li>ACME challenge 測試</li>
+          <li>Staging → 正式憑證</li>
+          <li>HTTP 301 → HTTPS</li>
+          <li>SNI + 正確憑證</li>
+          <li>Persistence</li>
+          <li>renew --dry-run + cron</li>
+        </ul>
+        <div class="check">
+          <b>CHECKPOINT</b>
+          <pre>curl -I https://s123456.qqnice.org
+curl -I https://k123456.kknice.net
+docker compose run --rm certbot renew --dry-run</pre>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">FINAL ARCHITECTURE</span>
+      <h2>完成後的服務關係</h2>
+      <p>只有 Nginx 接觸 Internet；所有後端服務透過 Docker Network 使用 service name 溝通。</p>
+    </div>
+
+    <div class="arch">
+      <div class="arch-row">
+        <div class="node"><div style="font-size:29px">🌐</div><b>Internet</b><small>HTTP 80 / HTTPS 443</small></div>
+      </div>
+      <div class="big-arrow">↓</div>
+      <div class="arch-row">
+        <div class="node"><b>s123456.qqnice.org</b><small>DNS → 1.2.3.4</small></div>
+        <div class="node"><b>k123456.kknice.net</b><small>DNS → 1.2.3.4</small></div>
+      </div>
+      <div class="big-arrow">↓</div>
+      <div class="arch-row">
+        <div class="node" style="min-width:270px;border-color:#8ec29c">
+          <div style="font-size:28px">🟩</div><b>Nginx Container</b><small>Reverse Proxy + TLS Termination</small>
+        </div>
+      </div>
+      <div class="arch-row" style="font-size:30px;color:#55779a;margin-top:4px"><span>↙</span><span>↘</span></div>
+
+      <div class="branch">
+        <div class="stack">
+          <div class="node" style="margin:auto"><div style="font-size:27px">ⓦ</div><b>WordPress</b><small>wordpress:80 · wp-data</small></div>
+          <div class="subarrow">↓</div>
+          <div class="node" style="margin:auto"><div style="font-size:27px">🗄️</div><b>MariaDB</b><small>db:3306 · db-data</small></div>
+        </div>
+        <div class="stack">
+          <div class="node" style="margin:auto"><div style="font-size:27px">🪶</div><b>Apache Static Site</b><small>web:80 · Image</small></div>
+        </div>
+      </div>
+
+      <div class="cert"><span style="font-size:26px">🔐</span><span><b>Certbot</b> → Let's Encrypt → <code>./certbot/conf</code> → Nginx 讀取憑證</span></div>
+    </div>
+
+    <div class="arch-notes">
+      <div class="note"><b>DNS 與 Nginx 的分工</b><p>DNS 只把 Domain 轉成 IP；Nginx 再看 Host / SNI 決定網站與憑證。</p></div>
+      <div class="note"><b>為什麼後端沒有 Public Port？</b><p>Nginx 與後端都在同一 Compose Network，可直接用 wordpress:80、web:80。</p></div>
+      <div class="note"><b>Container ≠ Data</b><p>文章、帳號、圖片與外掛使用 Named Volume 持久保存。</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="https" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">HTTPS FLOW</span>
+      <h2>憑證流程一定要照順序</h2>
+      <p>先確定 HTTP-01 從 Internet 可讀，再碰正式憑證。全班共用 registered domain 時尤其重要。</p>
+    </div>
+    <div class="rules">
+      <article class="rule">
+        <h3>取得憑證</h3>
+        <div class="stage-seq">
+          <span>DNS OK</span><b>→</b>
+          <span>ACME test.txt OK</span><b>→</b>
+          <span>Staging OK</span><b>→</b>
+          <span>教師確認</span><b>→</b>
+          <span>Production</span>
+        </div>
+      </article>
+      <article class="rule">
+        <h3>啟用 HTTPS</h3>
+        <ul>
+          <li>Port 80 保留 <code>/.well-known/acme-challenge/</code></li>
+          <li>其他 HTTP Request 301 到 HTTPS</li>
+          <li>443 依 SNI 選擇憑證</li>
+          <li>Nginx 將 <code>X-Forwarded-Proto</code> 傳給 WordPress</li>
+          <li>WordPress 第一次正式安裝一定從 HTTPS Domain 進入</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="check">
+  <div class="shell">
+    <div class="section-head">
+      <span class="kicker">FINAL CHECK</span>
+      <h2>最後驗收</h2>
+      <p>完成這些項目，才算真正完成 WEEK2 部署。</p>
+    </div>
+    <div class="checklist">
+      <div class="item"><strong>✓ Container</strong><span>nginx、web、wordpress、db 全部 running</span></div>
+      <div class="item"><strong>✓ Public Port</strong><span>只有 Nginx 對外 80 / 443</span></div>
+      <div class="item"><strong>✓ Domain Routing</strong><span>s → WordPress；k → Apache</span></div>
+      <div class="item"><strong>✓ HTTP Redirect</strong><span>兩個 Domain 都 301 → HTTPS</span></div>
+      <div class="item"><strong>✓ Certificate</strong><span>Let's Encrypt 正式憑證，瀏覽器無警告</span></div>
+      <div class="item"><strong>✓ Persistence</strong><span>docker compose down / up 後文章仍存在</span></div>
+      <div class="item"><strong>✓ Renewal</strong><span>certbot renew --dry-run 成功</span></div>
+      <div class="item"><strong>✓ Understanding</strong><span>能說明 Compose、Network、Volume、Reverse Proxy、ACME、SNI</span></div>
+    </div>
+
+    <div style="margin-top:38px;border-top:1px solid rgba(255,255,255,.18);padding-top:28px">
+      <span style="font-size:12px;letter-spacing:.14em;font-weight:900;color:#9ec4ec">LEARNING OUTCOME</span>
+      <h2 style="max-width:900px;margin-top:8px">最後不是「會架 WordPress」，而是能描述、部署、分流、加密並維護一套 Multi-container Web Architecture。</h2>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="shell footer">
+    <div><strong>WEEK2 Docker Deployment Lab</strong><br><small>Compose · Network · WordPress · MariaDB · Nginx · Let's Encrypt</small></div>
+    <a href="#top">回到頂端 ↑</a>
+  </div>
+</footer>
+</body>
+</html>

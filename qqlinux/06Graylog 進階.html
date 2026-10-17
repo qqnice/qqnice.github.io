@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graylog 進階操作與整合實戰 - 互動模擬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 深色戰情室主題 */
+        body {
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* 動畫效果 */
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 自訂捲軸 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* 導航啟用狀態 */
+        .nav-item.active {
+            background-color: #1e293b;
+            border-left: 4px solid #38bdf8;
+            color: #38bdf8;
+        }
+
+        /* 終端機樣式 */
+        .terminal {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
+        }
+
+        /* 資料流動畫 (Splunk 整合) */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        @keyframes moveRight {
+            0% { left: 0%; opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 100%; opacity: 0; transform: scale(0.5); }
+        }
+        @keyframes moveDown {
+            0% { top: 0%; opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { top: 100%; opacity: 0; transform: scale(0.5); }
+        }
+
+        /* 網格虛線背景 */
+        .grid-bg {
+            background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+
+    <!-- 側邊導覽列 -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20 shadow-xl">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <i class="fa-solid fa-layer-group text-sky-400 text-2xl"></i>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-wider">Graylog<span class="text-sky-400">Pro</span></h1>
+                <p class="text-xs text-slate-400">進階操作與整合實戰</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">管理模組</div>
+            <ul class="space-y-1">
+                <li>
+                    <button onclick="switchView('input-view')" id="btn-input-view" class="nav-item active w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-plug w-5 text-center"></i> 1. 記錄輸入 (Inputs)
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('extractor-view')" id="btn-extractor-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-scissors w-5 text-center"></i> 2. 剖析器 (Extractors)
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('dash-view')" id="btn-dash-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i> 3. 資訊看板建置
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('splunk-view')" id="btn-splunk-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-filter-circle-dollar w-5 text-center"></i> 4. Splunk 外部整合
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="flex-1 bg-slate-950 overflow-y-auto relative">
+        
+        <!-- ==================== 模組 1: 記錄輸入 (Inputs) ==================== -->
+        <div id="input-view" class="view-section p-8 fade-in h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">Syslog 記錄輸入設定</h2>
+                <p class="text-slate-400">第一步是讓 Graylog 開始收容資料。以 Debian/Ubuntu 的 rsyslog 為例，修改設定並重啟服務。</p>
+            </header>
+
+            <div class="flex flex-col md:flex-row gap-8 mt-6">
+                <!-- Linux Terminal 模擬 -->
+                <div class="flex-1 bg-slate-800 border border-slate-700 rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-slate-900 px-4 py-2 border-b border-slate-700 flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">root@ubuntu-server:~</span>
+                    </div>
+                    <div class="terminal min-h-[250px] text-sm">
+                        <p class="mb-2">root@ubuntu-server:~# <span class="text-white">nano /etc/rsyslog.conf</span></p>
+                        <p class="text-slate-400"># 將記錄轉送至 Graylog (IP: 192.168.1.111, Port: 514)</p>
+                        <p class="mb-4 text-sky-300 font-bold">*.* @192.168.1.111:514</p>
+                        <p class="mb-2">root@ubuntu-server:~# <span id="cmd-restart" class="text-white typing-effect"></span></p>
+                        <p id="cmd-result" class="hidden text-green-400">Restarting system logging: rsyslogd.</p>
+                    </div>
+                    <div class="p-4 bg-slate-900 border-t border-slate-700 flex justify-end">
+                        <button onclick="startSyslog()" id="btn-start-syslog" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold transition">
+                            執行 service restart rsyslog
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Graylog Input 監控模擬 -->
+                <div class="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-lg relative">
+                    <div class="absolute top-4 right-4 text-xs font-bold px-2 py-1 rounded bg-green-900 text-green-400 border border-green-700 uppercase animate-pulse" id="status-running">
+                        RUNNING
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1"><i class="fa-solid fa-satellite-dish text-sky-400 mr-2"></i>Syslog UDP Input</h3>
+                    <p class="text-sm text-slate-400 mb-6 font-mono">bind_address: 0.0.0.0 | port: 514</p>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center">
+                            <div class="text-slate-400 text-xs mb-1">Network IO (In)</div>
+                            <div class="text-2xl font-bold text-sky-400 font-mono" id="io-counter">0 B/s</div>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center">
+                            <div class="text-slate-400 text-xs mb-1">Total Messages</div>
+                            <div class="text-2xl font-bold text-green-400 font-mono" id="msg-counter">0</div>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-slate-700 text-white py-2 rounded font-bold hover:bg-slate-600 transition border border-slate-600 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-envelope-open-text"></i> Show received messages
+                    </button>
+                    
+                    <!-- 模擬進件清單 -->
+                    <div id="log-stream" class="mt-4 h-24 overflow-hidden text-xs font-mono text-slate-500 space-y-1">
+                        <!-- Logs injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 模組 2: 剖析器 (Extractors) ==================== -->
+        <div id="extractor-view" class="view-section p-8 hidden h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">自訂剖析器 (Regular Expression Extractor)</h2>
+                <p class="text-slate-400">標準格式外，透過正規表示式將一整段訊息 (Message) 切割成有意義的欄位。這裡提供互動測試機。</p>
+            </header>
+
+            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-4xl mx-auto shadow-lg">
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-sky-400 mb-2">1. 載入原始日誌訊息 (Raw Message)</label>
+                    <textarea id="regex-input-log" class="w-full bg-slate-900 border border-slate-600 rounded p-3 text-slate-300 font-mono text-sm focus:border-sky-500 focus:outline-none" rows="2">Jun 02 14:30:01 zimbra-mail postfix/smtpd[4512]: connect from unknown[192.168.50.125]</textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-sky-400 mb-2">2. 定義正規表示式 (Regular Expression)</label>
+                    <div class="flex gap-4">
+                        <input type="text" id="regex-pattern" class="flex-1 bg-slate-900 border border-slate-600 rounded p-3 text-yellow-400 font-mono text-sm focus:border-sky-500 focus:outline-none" value="connect from .*\[(.*)\]" placeholder="請輸入 Regex...">
+                        <button onclick="testRegex()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold transition whitespace-nowrap">
+                            <i class="fa-solid fa-play mr-2"></i> 執行測試
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">提示：括號 <code>(.*)</code> 代表你要擷取的欄位群組 (Capture Group)。</p>
+                </div>
+
+                <div class="border-t border-slate-700 pt-6">
+                    <label class="block text-sm font-bold text-green-400 mb-2">3. 擷取結果 (Extracted Value)</label>
+                    <div id="regex-result-box" class="bg-slate-900 border border-slate-700 rounded p-4 min-h-[60px] flex items-center">
+                        <span class="text-slate-500 italic text-sm">等待測試...</span>
+                    </div>
+                    <div class="mt-4 flex items-center gap-3">
+                        <input type="text" value="src_ip" class="bg-slate-900 border border-slate-600 rounded px-3 py-1.5 text-slate-300 font-mono text-sm w-48" placeholder="輸入要存放的欄位名...">
+                        <button class="bg-green-700 hover:bg-green-600 text-white px-4 py-1.5 rounded text-sm font-bold transition">
+                            <i class="fa-solid fa-save mr-2"></i> 儲存 Extractor
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto mt-6 bg-blue-900/20 border border-blue-800 p-4 rounded-lg flex items-start gap-4">
+                <i class="fa-solid fa-lightbulb text-yellow-400 text-xl mt-1"></i>
+                <div class="text-sm text-slate-300">
+                    <strong>不想自己寫 Regex？</strong><br>
+                    可以前往官方 Marketplace 尋找現成套件！例如 <b>Zimbra Extractors</b> 匯入後，即可自動將 Zimbra 郵件系統的 Log 拆解出寄件者、收件者、IP 等欄位。
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 模組 3: 資訊看板 (Dashboards) ==================== -->
+        <div id="dash-view" class="view-section hidden h-full flex flex-col">
+            <header class="p-8 pb-4">
+                <h2 class="text-2xl font-bold text-white mb-2">資訊看板建置 (Dashboards)</h2>
+                <p class="text-slate-400">當資料成功剖析後，透過「搜尋 -> 產生圖表 -> 加入看板」的直覺操作，快速建立戰情中心。本例示範 Active Directory 事件看板。</p>
+            </header>
+
+            <div class="flex flex-1 overflow-hidden px-8 pb-8 gap-6">
+                <!-- 模擬搜尋介面區 -->
+                <div class="w-1/3 bg-slate-800 border border-slate-700 rounded-lg p-4 flex flex-col">
+                    <h3 class="text-sky-400 font-bold mb-4 border-b border-slate-700 pb-2"><i class="fa-solid fa-magnifying-glass mr-2"></i> 1. 搜尋與統計 (Search)</h3>
+                    
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700 mb-4 font-mono text-sm text-slate-300">
+                        <span class="text-sky-400">Query:</span> source:"DC-01" AND EventID:4625
+                        <br><span class="text-sky-400">Time:</span> Last 24 Hours
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto space-y-4">
+                        <!-- Widget 1 -->
+                        <div class="bg-slate-900 border border-slate-700 p-3 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-bold text-white">Event Count (趨勢圖)</span>
+                                <button onclick="addWidget('w-trend')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded transition">Add to Dashboard</button>
+                            </div>
+                            <div class="h-12 flex items-end gap-1 opacity-70">
+                                <div class="w-1/6 bg-sky-500 h-[20%]"></div><div class="w-1/6 bg-sky-500 h-[40%]"></div><div class="w-1/6 bg-sky-500 h-[100%]"></div><div class="w-1/6 bg-sky-500 h-[30%]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Widget 2 -->
+                        <div class="bg-slate-900 border border-slate-700 p-3 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-bold text-white">Quick Values: Username</span>
+                                <button onclick="addWidget('w-user')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded transition">Add to Dashboard</button>
+                            </div>
+                            <ul class="text-xs text-slate-400 space-y-1">
+                                <li>1. Administrator (45%)</li>
+                                <li>2. guest (20%)</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Widget 3 -->
+                        <div class="bg-slate-900 border border-slate-700 p-3 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-bold text-white">Quick Values: Source IP</span>
+                                <button onclick="addWidget('w-ip')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded transition">Add to Dashboard</button>
+                            </div>
+                            <ul class="text-xs text-slate-400 space-y-1">
+                                <li>1. 192.168.5.10 (60%)</li>
+                                <li>2. 45.33.22.11 (35%)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模擬 Dashboard 面板區 -->
+                <div class="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-6 grid-bg relative overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-2">
+                        <h3 class="text-lg font-bold text-white">Active Directory Security Dashboard</h3>
+                        <span class="text-xs text-slate-500">Edit Mode</span>
+                    </div>
+
+                    <div id="dashboard-canvas" class="grid grid-cols-2 gap-4">
+                        <!-- 動態插入 Widget -->
+                        <div id="empty-dash-msg" class="col-span-2 text-center text-slate-500 py-20 italic">
+                            看板目前是空的。<br>請從左側搜尋結果點擊「Add to Dashboard」來建立您的資訊看板。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 模組 4: Splunk 外部整合 ==================== -->
+        <div id="splunk-view" class="view-section p-8 hidden h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">外部整合：Graylog Plugin for Splunk</h2>
+                <p class="text-slate-400">解決 Splunk 以「資料量計費」的高昂成本。讓 Graylog 當第一線收容所，僅將「高價值」日誌轉發給 Splunk。</p>
+            </header>
+
+            <div class="max-w-5xl mx-auto mt-12 bg-slate-800 border border-slate-700 rounded-xl p-8 relative shadow-2xl">
+                
+                <div class="flex justify-between items-center relative">
+                    
+                    <!-- 來源 -->
+                    <div class="w-1/4 text-center z-10">
+                        <i class="fa-solid fa-server text-5xl text-slate-400 mb-4"></i>
+                        <h4 class="font-bold text-white">企業所有日誌</h4>
+                        <p class="text-sm text-slate-400 font-mono mt-1">1000 GB / Day</p>
+                    </div>
+
+                    <!-- 流向 Graylog -->
+                    <div class="absolute left-[20%] right-[60%] h-2 bg-slate-700 rounded-full top-[30px] overflow-hidden">
+                        <div class="w-full h-full bg-sky-500/30"></div>
+                        <!-- JS 將在此插入粒子 -->
+                        <div id="flow-to-graylog" class="absolute inset-0"></div>
+                    </div>
+
+                    <!-- Graylog 核心 -->
+                    <div class="w-1/4 text-center z-10 relative">
+                        <div class="bg-sky-900 border-2 border-sky-400 rounded-lg p-4 shadow-[0_0_20px_rgba(56,189,248,0.3)]">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Graylog_Logo.svg" alt="Graylog" class="h-8 mx-auto mb-2 bg-white p-1 rounded" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'30\'><text x=\'40\' y=\'20\' font-family=\'Arial\' font-size=\'16\' font-weight=\'bold\' fill=\'white\' text-anchor=\'middle\'>Graylog</text></svg>'">
+                            <h4 class="font-bold text-white text-sm">第一線收容與過濾</h4>
+                            <p class="text-xs text-sky-300 mt-1">免流量授權費</p>
+                        </div>
+                        
+                        <!-- 向下流向 Storage -->
+                        <div class="absolute left-1/2 w-2 h-16 bg-slate-700 -translate-x-1/2 top-full mt-2 overflow-hidden rounded-full">
+                             <div id="flow-to-storage" class="absolute inset-0"></div>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 top-[120%] mt-8 bg-slate-900 border border-slate-600 rounded p-2 text-xs text-slate-400 w-32">
+                            <i class="fa-solid fa-database text-sky-400 mr-1"></i> 全量儲存留存<br>850 GB / Day
+                        </div>
+                    </div>
+
+                    <!-- 流向 Splunk -->
+                    <div class="absolute left-[60%] right-[20%] h-2 bg-slate-700 rounded-full top-[30px] overflow-hidden">
+                        <div class="w-full h-full bg-red-500/20"></div>
+                        <!-- JS 將在此插入粒子 -->
+                        <div id="flow-to-splunk" class="absolute inset-0"></div>
+                    </div>
+
+                    <!-- Splunk 核心 -->
+                    <div class="w-1/4 text-center z-10">
+                        <div class="bg-slate-900 border-2 border-green-500 rounded-lg p-4">
+                            <h3 class="text-xl font-extrabold text-green-500 mb-2 tracking-wider">splunk></h3>
+                            <h4 class="font-bold text-white text-sm">進階 SIEM 關聯分析</h4>
+                            <p class="text-xs text-red-400 mt-1 font-mono">僅轉發: 150 GB / Day</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 成本計算機 -->
+                <div class="mt-24 bg-slate-900 border border-slate-700 rounded-lg p-6 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-1"><i class="fa-solid fa-calculator text-yellow-400 mr-2"></i> 成本節省效益評估</h4>
+                        <p class="text-sm text-slate-400">藉由 Graylog Plugin for Splunk 篩選掉不重要的雜訊 (如成功的連線、Debug資訊)。</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-slate-400 text-sm">原本 Splunk 所需授權: <span class="line-through text-red-400">1000 GB</span></div>
+                        <div class="text-white text-xl font-bold mt-1">優化後授權需求: <span class="text-green-400 text-3xl mx-2">150</span> GB</div>
+                        <div class="text-yellow-400 text-sm font-bold mt-1">授權費用節省 85% !</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // ================= 視圖切換 =================
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.remove('hidden');
+            const btn = document.getElementById('btn-' + viewId);
+            if(btn) btn.classList.add('active');
+
+            // 啟動 Splunk 動畫
+            if(viewId === 'splunk-view') {
+                initSplunkAnimation();
+            }
+        }
+
+        // ================= 模組 1: Syslog 模擬 =================
+        let isSyslogRunning = false;
+        let ioCounter = 0;
+        let msgCounter = 0;
+        let ioInterval;
+        
+        function typeWriter(text, elementId, callback) {
+            let i = 0;
+            const el = document.getElementById(elementId);
+            el.innerHTML = "";
+            function type() {
+                if (i < text.length) {
+                    el.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 50);
+                } else if (callback) {
+                    setTimeout(callback, 500);
+                }
+            }
+            type();
+        }
+
+        function startSyslog() {
+            if(isSyslogRunning) return;
+            const btn = document.getElementById('btn-start-syslog');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            typeWriter("service restart rsyslog", "cmd-restart", () => {
+                document.getElementById('cmd-result').classList.remove('hidden');
+                
+                // 啟動資料流
+                isSyslogRunning = true;
+                const statusBadge = document.getElementById('status-running');
+                statusBadge.classList.replace('bg-green-900', 'bg-green-500');
+                statusBadge.classList.replace('text-green-400', 'text-white');
+                statusBadge.innerText = "ACTIVATED";
+
+                ioInterval = setInterval(() => {
+                    ioCounter = Math.floor(Math.random() * 500) + 150; // 150-650 KB/s
+                    msgCounter += Math.floor(Math.random() * 10) + 2;
+                    
+                    document.getElementById('io-counter').innerText = ioCounter + " KB/s";
+                    document.getElementById('msg-counter').innerText = msgCounter.toLocaleString();
+
+                    // 插入假 Log
+                    const logStream = document.getElementById('log-stream');
+                    const newLog = document.createElement('div');
+                    const time = new Date().toISOString().split('T')[1].substring(0,8);
+                    newLog.innerHTML = `<span class="text-sky-500">${time}</span> fw-core: Permitted TCP connection to 10.1.1.5`;
+                    logStream.prepend(newLog);
+                    if(logStream.children.length > 4) logStream.removeChild(logStream.lastChild);
+
+                }, 1000);
+            });
+        }
+
+        // ================= 模組 2: Regex 模擬 =================
+        function testRegex() {
+            const rawLog = document.getElementById('regex-input-log').value;
+            const patternStr = document.getElementById('regex-pattern').value;
+            const resultBox = document.getElementById('regex-result-box');
+
+            try {
+                // 防呆：確保使用者沒有輸入前後斜線
+                const cleanPattern = patternStr.replace(/^\/|\/$/g, '');
+                const regex = new RegExp(cleanPattern);
+                const match = regex.exec(rawLog);
+
+                if (match && match.length > 1) {
+                    // match[1] 是第一個 capture group
+                    resultBox.innerHTML = `
+                        <div>
+                            <div class="text-xs text-slate-400 mb-1">Match Found (Group 1):</div>
+                            <div class="text-2xl font-bold text-green-400 font-mono">${match[1]}</div>
+                        </div>
+                    `;
+                    resultBox.className = "bg-green-900/20 border border-green-700 rounded p-4 min-h-[60px] flex items-center";
+                } else if (match) {
+                    resultBox.innerHTML = `
+                        <div>
+                            <div class="text-xs text-slate-400 mb-1">Matched, but no Capture Group '()' found.</div>
+                            <div class="text-lg text-yellow-400 font-mono">${match[0]}</div>
+                        </div>
+                    `;
+                    resultBox.className = "bg-yellow-900/20 border border-yellow-700 rounded p-4 min-h-[60px] flex items-center";
+                } else {
+                    resultBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-xmark mr-2"></i>No Match. 正規表示式未命中任何字串。</span>`;
+                    resultBox.className = "bg-red-900/20 border border-red-700 rounded p-4 min-h-[60px] flex items-center";
+                }
+            } catch (e) {
+                resultBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Invalid Regex 語法錯誤</span>`;
+                resultBox.className = "bg-red-900/20 border border-red-700 rounded p-4 min-h-[60px] flex items-center";
+            }
+        }
+
+        // ================= 模組 3: Dashboard 模擬 =================
+        const addedWidgets = new Set();
+        function addWidget(type) {
+            if(addedWidgets.has(type)) return;
+            addedWidgets.add(type);
+
+            const canvas = document.getElementById('dashboard-canvas');
+            const msg = document.getElementById('empty-dash-msg');
+            if(msg) msg.remove();
+
+            let widgetHtml = '';
+            if(type === 'w-trend') {
+                widgetHtml = `
+                    <div class="col-span-2 bg-slate-800 border border-slate-700 rounded p-4 slide-up">
+                        <div class="text-white font-bold mb-4">AD Event 4625 (Failed Logins) Over Time</div>
+                        <div class="h-24 flex items-end gap-2">
+                            <div class="w-full bg-sky-500 h-[20%]"></div><div class="w-full bg-sky-500 h-[30%]"></div>
+                            <div class="w-full bg-sky-500 h-[15%]"></div><div class="w-full bg-red-500 h-[90%] relative group cursor-pointer">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-900 text-white text-xs px-2 py-1 rounded hidden group-hover:block">Spike!</div>
+                            </div>
+                            <div class="w-full bg-sky-500 h-[40%]"></div><div class="w-full bg-sky-500 h-[25%]"></div>
+                        </div>
+                    </div>`;
+            } else if(type === 'w-user') {
+                widgetHtml = `
+                    <div class="bg-slate-800 border border-slate-700 rounded p-4 slide-up">
+                        <div class="text-white font-bold mb-4 text-sm">Top Targeted Usernames</div>
+                        <div class="space-y-2">
+                            <div><div class="flex justify-between text-xs text-slate-300 mb-1"><span>Administrator</span><span>450</span></div><div class="h-2 bg-slate-700 rounded"><div class="h-2 bg-orange-500 rounded" style="width:80%"></div></div></div>
+                            <div><div class="flex justify-between text-xs text-slate-300 mb-1"><span>guest</span><span>120</span></div><div class="h-2 bg-slate-700 rounded"><div class="h-2 bg-orange-400 rounded" style="width:30%"></div></div></div>
+                        </div>
+                    </div>`;
+            } else if(type === 'w-ip') {
+                widgetHtml = `
+                    <div class="bg-slate-800 border border-slate-700 rounded p-4 slide-up">
+                        <div class="text-white font-bold mb-4 text-sm">Top Source IPs</div>
+                        <div class="space-y-2">
+                            <div><div class="flex justify-between text-xs text-slate-300 mb-1"><span>192.168.5.10</span><span>600</span></div><div class="h-2 bg-slate-700 rounded"><div class="h-2 bg-red-500 rounded" style="width:90%"></div></div></div>
+                            <div><div class="flex justify-between text-xs text-slate-300 mb-1"><span>45.33.22.11</span><span>350</span></div><div class="h-2 bg-slate-700 rounded"><div class="h-2 bg-red-400 rounded" style="width:50%"></div></div></div>
+                        </div>
+                    </div>`;
+            }
+            
+            canvas.insertAdjacentHTML('beforeend', widgetHtml);
+        }
+
+        // ================= 模組 4: Splunk 動畫模擬 =================
+        let splunkAnimInitialized = false;
+        function initSplunkAnimation() {
+            if(splunkAnimInitialized) return;
+            splunkAnimInitialized = true;
+
+            const container1 = document.getElementById('flow-to-graylog');
+            const container2 = document.getElementById('flow-to-splunk');
+            const container3 = document.getElementById('flow-to-storage');
+
+            // 產生大量粒子到 Graylog
+            setInterval(() => {
+                createParticle(container1, 'bg-sky-400', 'moveRight');
+            }, 100);
+
+            // 產生少量粒子到 Splunk (過濾後)
+            setInterval(() => {
+                createParticle(container2, 'bg-red-400', 'moveRight');
+            }, 500); // 頻率較低代表過濾
+
+            // 產生大量粒子往下到 Storage
+            setInterval(() => {
+                createParticle(container3, 'bg-slate-500', 'moveDown');
+            }, 120);
+        }
+
+        function createParticle(container, colorClass, animationName) {
+            const p = document.createElement('div');
+            p.className = `particle ${colorClass}`;
+            p.style.animation = `${animationName} 1.5s linear forwards`;
+            
+            // 隨機垂直/水平偏移增加視覺豐富度
+            if(animationName === 'moveRight') {
+                p.style.top = Math.random() * 4 + 'px';
+            } else {
+                p.style.left = Math.random() * 4 + 'px';
+            }
+
+            container.appendChild(p);
+            setTimeout(() => {
+                if(container.contains(p)) container.removeChild(p);
+            }, 1500);
+        }
+
+    </script>
+</body>
+</html>

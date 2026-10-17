@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSL + Ollama + Open WebUI 本地 AI 部署指南</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        .code-block {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .step-active {
+            border-left-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+        .term-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .term-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Mobile Header & Progress -->
+    <div class="md:hidden bg-white shadow-sm z-10 p-4 sticky top-0">
+        <h1 class="text-xl font-bold text-slate-900 mb-2">部署指南</h1>
+        
+        <!-- Mobile Tabs -->
+        <div class="flex border-b border-slate-200 mb-3">
+            <button class="mobile-tab-btn flex-1 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition-colors" data-tab="guide" onclick="switchTab('guide')">部署教學</button>
+            <button class="mobile-tab-btn flex-1 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 transition-colors" data-tab="glossary" onclick="switchTab('glossary')">名詞解釋</button>
+        </div>
+
+        <div id="mobile-progress-container">
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                <div id="mobile-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-right mt-1 text-slate-500"><span id="mobile-progress-text">0</span>/4 步驟完成</p>
+        </div>
+    </div>
+
+    <!-- Sidebar (Desktop) -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg z-10 custom-scrollbar overflow-y-auto">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2">本地 AI 部署</h1>
+            <p class="text-sm text-slate-500 mb-6">在 Windows WSL 上打造專屬的 AI 對話平台。</p>
+            
+            <!-- Desktop Tabs -->
+            <div class="flex gap-2 mb-6 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                <button class="desktop-tab-btn flex-1 py-2 px-3 text-sm font-semibold rounded-md bg-blue-600 text-white shadow-md transition-all flex items-center justify-center gap-2" data-tab="guide" onclick="switchTab('guide')">
+                    <i data-lucide="rocket" class="w-4 h-4"></i> 教學
+                </button>
+                <button class="desktop-tab-btn flex-1 py-2 px-3 text-sm font-semibold rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all flex items-center justify-center gap-2" data-tab="glossary" onclick="switchTab('glossary')">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> 名詞
+                </button>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div id="progress-tracker" class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-slate-700">完成進度</span>
+                    <span class="text-sm font-bold text-blue-600"><span id="progress-text">0</span>/4</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div id="nav-menu-container">
+                <nav class="space-y-2 relative border-l-2 border-slate-100 ml-3" id="nav-menu">
+                    <a href="#step-1" class="nav-link block pl-4 py-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors border-l-2 border-transparent -ml-[2px] step-active" data-target="step-1">
+                </a>
+                <a href="#step-2" class="nav-link block pl-4 py-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors border-l-2 border-transparent -ml-[2px]" data-target="step-2">
+                    2. 安裝 Docker Desktop
+                </a>
+                <a href="#step-3" class="nav-link block pl-4 py-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors border-l-2 border-transparent -ml-[2px]" data-target="step-3">
+                    3. 安裝 Ollama 與 Gemma 模型
+                    <a href="#step-4" class="nav-link block pl-4 py-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors border-l-2 border-transparent -ml-[2px]" data-target="step-4">
+                        4. 啟動 Open WebUI
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="mt-auto p-6 bg-slate-50 border-t border-slate-100">
+            <div class="flex items-start gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-blue-500 shrink-0 mt-0.5"></i>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    請注意：目前官方並未發布「Gemma 4」，本指南採用最新且效能極佳的輕量級 <strong>Gemma 2 2B</strong> 模型。
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 custom-scrollbar overflow-y-auto p-4 md:p-10 lg:px-20 scroll-smooth" id="main-content">
+        
+        <!-- Tab 1: 部署指南 -->
+        <div id="tab-guide" class="tab-content max-w-4xl mx-auto space-y-12 pb-20">
+
+            <!-- Step 1 -->
+            <section id="step-1" class="step-section scroll-mt-24">
+                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shadow-sm">1</div>
+                            <h2 class="text-2xl font-bold text-slate-800">安裝並驗證 Ubuntu 24.04 (WSL)</h2>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" class="step-checkbox w-6 h-6 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer transition-transform group-hover:scale-110">
+                            <span class="text-sm font-medium text-slate-500 group-hover:text-slate-800 transition-colors">標示為完成</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-slate-600 mb-3 flex items-center gap-2">
+                                <i data-lucide="terminal-square" class="w-5 h-5 text-indigo-500"></i>
+                                <strong>環境：</strong>Windows PowerShell (請以系統管理員身分執行)
+                            </p>
+                            <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                                <div class="bg-slate-800 px-4 py-2 flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span class="text-slate-400 text-xs ml-2 font-mono">Administrator: Windows PowerShell</span>
+                                </div>
+                                <div class="p-4 flex justify-between items-start gap-4">
+                                    <code class="code-block text-green-400 text-sm break-all">wsl --install -d Ubuntu-24.04</code>
+                                    <button class="copy-btn shrink-0 flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md text-xs transition-colors" data-copy="wsl --install -d Ubuntu-24.04">
+                                        <i data-lucide="copy" class="w-3 h-3"></i> 複製
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-slate-500 mt-2">👉 安裝完成後可能需要重新啟動電腦。重啟後 Ubuntu 視窗會彈出，請依照畫面設定使用者名稱與密碼。</p>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-6">
+                            <p class="text-slate-600 mb-3 flex items-center gap-2">
+                                <i data-lucide="monitor" class="w-5 h-5 text-orange-500"></i>
+                                <strong>環境：</strong>Ubuntu 終端機 (驗證版本)
+                            </p>
+                            <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                                <div class="bg-slate-800 px-4 py-2 flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span class="text-slate-400 text-xs ml-2 font-mono">ubuntu@wsl</span>
+                                </div>
+                                <div class="p-4 flex justify-between items-start gap-4">
+                                    <code class="code-block text-green-400 text-sm break-all">cat /etc/os-release</code>
+                                    <button class="copy-btn shrink-0 flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md text-xs transition-colors" data-copy="cat /etc/os-release">
+                                        <i data-lucide="copy" class="w-3 h-3"></i> 複製
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-slate-500 mt-2">👉 確認輸出內容包含 <code>PRETTY_NAME="Ubuntu 24.04 LTS"</code>。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2 -->
+            <section id="step-2" class="step-section scroll-mt-24">
+                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shadow-sm">2</div>
+                            <h2 class="text-2xl font-bold text-slate-800">安裝 Docker Desktop (Windows 端)</h2>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" class="step-checkbox w-6 h-6 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer transition-transform group-hover:scale-110">
+                            <span class="text-sm font-medium text-slate-500 group-hover:text-slate-800 transition-colors">標示為完成</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+                            <h3 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                                下載與安裝
+                            </h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                請前往 <a href="https://www.docker.com/products/docker-desktop/" target="_blank" class="text-blue-600 font-semibold hover:underline">Docker 官方網站</a> 下載 Docker Desktop for Windows 並按照一般軟體流程完成安裝。
+                            </p>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-100 rounded-xl p-5">
+                            <h3 class="font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                                關鍵設定：開啟 WSL 整合
+                            </h3>
+                            <ol class="list-decimal list-inside space-y-2 text-sm text-slate-700 leading-relaxed">
+                                <li>啟動 Docker Desktop 應用程式。</li>
+                                <li>點擊右上角的 <strong>齒輪圖示 (Settings)</strong>。</li>
+                                <li>左側選單進入 <strong>Resources</strong> → <strong>WSL integration</strong>。</li>
+                                <li>確保 <strong>"Enable integration with my default WSL distro"</strong> 有打勾。</li>
+                                <li>在下方的清單中，找到 <strong>Ubuntu-24.04</strong> 並將其開關切換為 <strong>開啟 (On)</strong>。</li>
+                                <li>點擊右下角的 <strong>Apply & restart</strong>。</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 3 -->
+            <section id="step-3" class="step-section scroll-mt-24">
+                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shadow-sm">3</div>
+                            <h2 class="text-2xl font-bold text-slate-800">安裝 Ollama 與 Gemma 模型</h2>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" class="step-checkbox w-6 h-6 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer transition-transform group-hover:scale-110">
+                            <span class="text-sm font-medium text-slate-500 group-hover:text-slate-800 transition-colors">標示為完成</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <p class="text-sm text-slate-600 flex items-center gap-2 font-medium">
+                                <i data-lucide="alert-circle" class="w-4 h-4 text-slate-400"></i>
+                                以下指令請全部在 <strong>Ubuntu 終端機</strong> 內執行。
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-slate-700 mb-3">1. 一鍵安裝 Ollama</h3>
+                            <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                                <div class="p-4 flex justify-between items-start gap-4">
+                                    <code class="code-block text-green-400 text-sm break-all">curl -fsSL https://ollama.com/install.sh | sh</code>
+                                    <button class="copy-btn shrink-0 flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md text-xs transition-colors" data-copy="curl -fsSL https://ollama.com/install.sh | sh">
+                                        <i data-lucide="copy" class="w-3 h-3"></i> 複製
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-slate-700 mb-3">2. 下載並執行 Gemma 2 2B 模型</h3>
+                            <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                                <div class="p-4 flex justify-between items-start gap-4">
+                                    <code class="code-block text-green-400 text-sm break-all">ollama run gemma2:2b</code>
+                                    <button class="copy-btn shrink-0 flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md text-xs transition-colors" data-copy="ollama run gemma2:2b">
+                                        <i data-lucide="copy" class="w-3 h-3"></i> 複製
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-slate-500 mt-2">👉 第一次執行需下載模型檔案（約 1.6GB），請耐心等待。</p>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-slate-700 mb-3">3. 驗證本地問答 (CLI 介面)</h3>
+                            <div class="bg-slate-900 rounded-xl p-4 font-mono text-sm shadow-lg overflow-x-auto custom-scrollbar border border-slate-700">
+                                <div class="text-slate-400">...下載完成後會進入對話模式...</div>
+                                <div class="text-blue-400 mt-2">>>> <span class="text-slate-200">你好！請用繁體中文介紹一下你自己。</span></div>
+                                <div class="text-slate-300 mt-2">你好！我是一個大型語言模型，由 Google 訓練...</div>
+                                <div class="text-blue-400 mt-4">>>> <span class="text-slate-400 italic">輸入 /bye 或按下 Ctrl+D 退出問答模式</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 4 -->
+            <section id="step-4" class="step-section scroll-mt-24">
+                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shadow-sm">4</div>
+                            <h2 class="text-2xl font-bold text-slate-800">啟動 Open WebUI 網頁介面</h2>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox" class="step-checkbox w-6 h-6 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer transition-transform group-hover:scale-110">
+                            <span class="text-sm font-medium text-slate-500 group-hover:text-slate-800 transition-colors">標示為完成</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-slate-600 mb-3 flex items-center gap-2">
+                                <i data-lucide="server" class="w-5 h-5 text-indigo-500"></i>
+                                <strong>環境：</strong>Ubuntu 終端機 (確保 Docker 已整合啟動)
+                            </p>
+                            <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                                <div class="p-4 flex justify-between items-start gap-4">
+                                    <code class="code-block text-green-400 text-sm break-all">docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main</code>
+                                    <button class="copy-btn shrink-0 flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md text-xs transition-colors" data-copy="docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main">
+                                        <i data-lucide="copy" class="w-3 h-3"></i> 複製
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 shadow-sm">
+                            <h3 class="font-bold text-blue-900 mb-4 flex items-center gap-2 text-lg">
+                                <i data-lucide="globe" class="w-6 h-6 text-blue-600"></i>
+                                開始體驗您的本地 AI
+                            </h3>
+                            <p class="text-slate-700 mb-4">
+                                容器啟動完成後，請打開您的網頁瀏覽器，前往以下網址：
+                            </p>
+                            <a href="http://localhost:3000" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
+                                訪問 http://localhost:3000
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </a>
+                            <ul class="list-disc list-inside mt-5 text-sm text-slate-600 space-y-2">
+                                <li>首次進入需註冊管理員帳號 (資料完全保存在您的電腦)。</li>
+                                <li>登入後，在畫面上方中央選擇 <strong>gemma2:2b</strong> 模型。</li>
+                                <li>開始您的私人 AI 對話體驗！</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="success-banner" class="hidden glass-panel rounded-2xl p-8 shadow-sm text-center border-green-200 bg-green-50/50">
+                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="party-popper" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-green-800 mb-2">恭喜完成所有部署步驟！</h2>
+                <p class="text-green-600">您現在已經擁有一個強大且隱私安全的本地端 AI 平台。</p>
+            </div>
+
+        </div>
+
+        <!-- Tab 2: 名詞解釋 -->
+        <div id="tab-glossary" class="tab-content hidden max-w-4xl mx-auto space-y-8 pb-20">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 flex items-center gap-3">
+                    <i data-lucide="book-open" class="w-8 h-8 text-blue-600"></i>
+                    AI 名詞解釋小百科
+                </h2>
+                <p class="text-slate-600 mt-2 text-lg">快速了解本教學與 AI 領域中常見的重要專業術語。</p>
+            </div>
+
+            <!-- Category 1: 核心概念 -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-slate-700 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="brain-circuit" class="w-5 h-5 text-indigo-500"></i> 核心概念
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-indigo-500">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">AI (人工智慧)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">電腦科學的一個分支，致力於創造能模擬人類智能行為（如學習、推理、解決問題、語言理解）的系統與技術總稱。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-indigo-400">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">機械學習 (Machine Learning)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">AI 的一個重要子集。指不透過明確編寫指令，而是透過演算法讓電腦從「大量資料」中自動學習規律，並做出預測或決策的技術。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-indigo-300">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">深度學習 (Deep Learning)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">機械學習的進階分支。它建構了多層的「人工神經網路」（靈感來自人腦結構），能處理極其複雜的非結構化資料，如圖像辨識與自然語言處理。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-indigo-600">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">LLM (大型語言模型)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">Large Language Model。指參數規模極大、使用海量文本訓練出來的深度學習模型。它們能夠理解上下文、進行對話、翻譯和生成極具邏輯的人類文章（例如 ChatGPT 背後的模型）。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-purple-500 md:col-span-2">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <i data-lucide="bot" class="w-5 h-5 text-purple-600"></i> AI Agent (AI 代理)
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">具備「自主行動能力」的進階 AI 系統。它不僅是被動回答問題，還能根據使用者給予的目標，<strong class="text-slate-800">自主規劃步驟、拆解任務，並呼叫外部工具</strong>（如搜尋網路、執行程式碼、操作軟體）來自動完成複雜的工作。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 2: 模型與工具 -->
+            <div class="space-y-4 pt-4">
+                <h3 class="text-xl font-bold text-slate-700 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5 text-emerald-500"></i> 模型與工具
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-emerald-500">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">Ollama</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">一個廣受歡迎的開源工具，讓開發者與一般使用者能透過簡單的指令，輕鬆在本地端電腦上下載、管理並執行各種大型語言模型。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-emerald-400">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">Llama (常拼作 Lama)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">由 Meta (前 Facebook) 開源發布的大型語言模型系列。因其效能強大且開放原始碼，帶動了全球開源 AI 社群的爆炸性成長。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-emerald-600">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">Gemma (常拼作 Gamma)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">由 Google 推出的輕量級開源模型。它與強大的 Gemini 共享相同的底層技術，專為在一般筆電或工作站上高效運行而設計。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-teal-500">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">Codex (Code dex)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">由 OpenAI 訓練的特殊模型，專精於解析和生成程式碼。它能將自然語言直接轉換為可執行的程式，是 GitHub Copilot 等寫程式輔助工具背後的基礎核心技術。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-orange-500 md:col-span-2">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <i data-lucide="crab" class="w-5 h-5 text-orange-600"></i> 龍蝦 OpenClaw
+                        </h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            這是一個有趣的名詞！在硬體與機器人領域，<strong>OpenClaw</strong> 是一個知名的開源 3D 列印機械爪專案；在 AI 軟體界，這類名稱常被社群用來代稱結合了「視覺辨識 AI」與「機器手臂控制」的開源夾取計畫，或是指代某種網頁資料抓取 (Crawling) 結合 AI 分析的工具暱稱。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 3: 環境與架構 -->
+            <div class="space-y-4 pt-4">
+                <h3 class="text-xl font-bold text-slate-700 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="server-cog" class="w-5 h-5 text-blue-500"></i> 環境與架構
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-blue-500">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">地端 AI (Local AI)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">相對於「雲端 AI (如網頁版 ChatGPT)」。指將 AI 模型直接安裝並運行在自己的實體電腦上。優點是<strong>資料絕對隱私、不需網路連線、免費且可高度客製化</strong>。</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl term-card border-l-4 border-l-sky-500">
+                        <h4 class="text-lg font-bold text-slate-800 mb-2">WSL (Windows Subsystem for Linux)</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">微軟開發的「Windows 內建 Linux 子系統」。它讓 Windows 使用者無需安裝笨重的虛擬機，就能直接且流暢地運行原生的 Linux 系統（如 Ubuntu），是目前在 Windows 開發 AI 應用的最佳捷徑。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom MessageBox (Replaces alert) -->
+    <div id="message-box" class="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl transform transition-all duration-300 translate-y-20 opacity-0 flex items-center gap-3 z-50">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span id="message-text" class="text-sm font-medium">提示訊息</span>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // ----------------------------------------------------
+        // Tab Switching Logic
+        // ----------------------------------------------------
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Show target tab
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // Update Desktop Tab Buttons
+            document.querySelectorAll('.desktop-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+                    btn.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                } else {
+                    btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                    btn.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+                }
+            });
+
+            // Update Mobile Tab Buttons
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('border-blue-600', 'text-blue-600');
+                    btn.classList.remove('border-transparent', 'text-slate-500');
+                } else {
+                    btn.classList.remove('border-blue-600', 'text-blue-600');
+                    btn.classList.add('border-transparent', 'text-slate-500');
+                }
+            });
+
+            // Toggle sidebar/mobile progress and nav menu visibility
+            const navMenu = document.getElementById('nav-menu-container');
+            const progressTracker = document.getElementById('progress-tracker');
+            const mobileProgress = document.getElementById('mobile-progress-container');
+            
+            if (tabId === 'guide') {
+                if(navMenu) navMenu.style.display = 'block';
+                if(progressTracker) progressTracker.style.display = 'block';
+                if(mobileProgress) mobileProgress.style.display = 'block';
+            } else {
+                if(navMenu) navMenu.style.display = 'none';
+                if(progressTracker) progressTracker.style.display = 'none';
+                if(mobileProgress) mobileProgress.style.display = 'none';
+            }
+            // Reset scroll position
+            document.getElementById('main-content').scrollTo(0, 0);
+        }
+
+        // ----------------------------------------------------
+        // Copy to Clipboard Functionality
+        // ----------------------------------------------------
+        function showMessage(text) {
+            const msgBox = document.getElementById('message-box');
+            const msgText = document.getElementById('message-text');
+            msgText.textContent = text;
+            msgBox.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                msgBox.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        const fallbackCopyTextToClipboard = (text) => {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                return true;
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                return false;
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        };
+
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const textToCopy = this.getAttribute('data-copy');
+                let success = false;
+                
+                if (!navigator.clipboard) {
+                    success = fallbackCopyTextToClipboard(textToCopy);
+                } else {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        success = true;
+                        updateButtonUI();
+                    }).catch(err => {
+                        console.error('Async: Could not copy text: ', err);
+                        success = fallbackCopyTextToClipboard(textToCopy);
+                        if(success) updateButtonUI();
+                    });
+                    return; // exit early, handled by promise
+                }
+                
+                if(success) updateButtonUI.call(this);
+                
+                function updateButtonUI() {
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-green-400"></i> <span class="text-green-400">已複製</span>';
+                    lucide.createIcons();
+                    showMessage('指令已複製到剪貼簿！');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                        lucide.createIcons();
+                    }, 2000);
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // Progress Tracking Logic
+        // ----------------------------------------------------
+        const checkboxes = document.querySelectorAll('.step-checkbox');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const mobileProgressBar = document.getElementById('mobile-progress-bar');
+        const mobileProgressText = document.getElementById('mobile-progress-text');
+        const successBanner = document.getElementById('success-banner');
+
+        function updateProgress() {
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('.step-checkbox:checked').length;
+            const percentage = (checked / total) * 100;
+            
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = checked;
+            mobileProgressBar.style.width = `${percentage}%`;
+            mobileProgressText.textContent = checked;
+
+            if (checked === total) {
+                successBanner.classList.remove('hidden');
+                successBanner.classList.add('animate-pulse');
+                setTimeout(() => successBanner.classList.remove('animate-pulse'), 1000);
+            } else {
+                successBanner.classList.add('hidden');
+            }
+        }
+
+        checkboxes.forEach(box => {
+            box.addEventListener('change', function() {
+                // visual style for completed section
+                const section = this.closest('.glass-panel');
+                if (this.checked) {
+                    section.classList.add('ring-2', 'ring-green-400', 'bg-green-50/10');
+                } else {
+                    section.classList.remove('ring-2', 'ring-green-400', 'bg-green-50/10');
+                }
+                updateProgress();
+            });
+        });
+
+        // ----------------------------------------------------
+        // ScrollSpy (Active Navigation Link)
+        // ----------------------------------------------------
+        const sections = document.querySelectorAll('.step-section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mainContent = document.getElementById('main-content');
+
+        mainContent.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (mainContent.scrollTop >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('step-active');
+                if (link.getAttribute('data-target') === current) {
+                    link.classList.add('step-active');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

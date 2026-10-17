@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIATC TCL 素養認證模擬測驗系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white shadow-md py-4 px-6 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-600 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wider">AIATC™ 素養級認證 (AIATCL)</h1>
+                    <p class="text-xs text-indigo-200">台灣人工智慧學校 (AIA) 考前衝刺模擬系統</p>
+                </div>
+            </div>
+            
+            <!-- Timer & Actions -->
+            <div id="quiz-timer-container" class="hidden flex items-center gap-4">
+                <div class="bg-indigo-900/60 px-4 py-2 rounded-full border border-indigo-700/50 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-xs text-indigo-200 font-medium">剩餘時間：</span>
+                    <span id="quiz-timer" class="font-mono text-lg font-bold text-emerald-400">50:00</span>
+                </div>
+                <button onclick="openSubmitConfirmModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg font-semibold text-sm transition-all shadow-md shadow-emerald-900/20">
+                    送出試卷
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+        
+        <!-- Welcome Screen -->
+        <section id="welcome-screen" class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-3xl mx-auto w-full p-6 md:p-10 transition-all duration-300 transform">
+            <div class="text-center mb-8">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">AIA 授權備考教材對應</span>
+                <h2 class="text-2xl md:text-3xl font-black text-slate-800 mt-3">素養級學術模擬評測</h2>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">本測驗針對 AI ATC 知識大綱（ Module 01 ~ 08 ）全面覆蓋，幫助您快速檢驗學習成效。</p>
+            </div>
+
+            <!-- Exam Guidelines -->
+            <div class="grid md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-150 flex flex-col items-center text-center">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mb-2">
+                        <span class="font-bold text-lg">30</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400">總題數</span>
+                    <span class="text-sm font-semibold text-slate-700 mt-1">單選10+多選5+題組15</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-150 flex flex-col items-center text-center">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mb-2">
+                        <span class="font-bold text-lg">50</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 font-mono">分鐘</span>
+                    <span class="text-sm font-semibold text-slate-700 mt-1">限時關卷模擬</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-150 flex flex-col items-center text-center">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mb-2">
+                        <span class="font-bold text-lg">80</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400">%</span>
+                    <span class="text-sm font-semibold text-slate-700 mt-1">通過標準 (錯小於6題)</span>
+                </div>
+            </div>
+
+            <!-- Syllabuses Included -->
+            <div class="mb-8">
+                <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider mb-3">涵蓋核心單元：</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 01 人工智慧概念
+                    </div>
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 02 機器學習
+                    </div>
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 03 深度學習
+                    </div>
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 04 遷移學習
+                    </div>
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 05 雲端與邊緣運算
+                    </div>
+                    <div class="text-xs bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 p-2.5 rounded-lg border border-slate-200 transition-colors flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 06 生成式 AI 與 安全
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start Exam Form -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">考生姓名 (非必填)</label>
+                        <input id="student-name" type="text" placeholder="例如：林大華" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">學校/公司名稱 (非必填)</label>
+                        <input id="student-company" type="text" placeholder="例如：台灣人工智慧大學" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                    </div>
+                </div>
+                <button onclick="startQuiz()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-600/20 text-base flex items-center justify-center gap-2">
+                    開始模擬評測
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Quiz Screen -->
+        <section id="quiz-screen" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl mx-auto items-start">
+            
+            <!-- Left Side: Scenario Text (Conditional Rendering) -->
+            <div id="scenario-panel" class="hidden lg:block lg:col-span-4 bg-amber-50 rounded-2xl p-5 border border-amber-200 shadow-sm sticky top-24 max-h-[70vh] overflow-y-auto">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="p-1 bg-amber-100 rounded-lg text-amber-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </span>
+                    <h3 class="text-sm font-bold text-amber-900">題組情境說明 (題 16~30)</h3>
+                </div>
+                <div id="scenario-title" class="font-bold text-slate-800 text-base mb-2"></div>
+                <hr class="border-amber-200 my-2">
+                <p id="scenario-content" class="text-xs text-slate-600 leading-relaxed text-justify"></p>
+            </div>
+
+            <!-- Middle: Question Area -->
+            <div id="question-panel" class="lg:col-span-8 bg-white rounded-2xl shadow-md border border-slate-200 p-5 md:p-8 flex flex-col min-h-[500px]">
+                
+                <!-- Question Title & Metadata -->
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span id="question-type-badge" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-1 rounded-full"></span>
+                        <span id="question-module-badge" class="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full"></span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400">問題 <span id="current-index">1</span>/30</span>
+                </div>
+
+                <!-- Scenario Block for Mobile -->
+                <div id="scenario-panel-mobile" class="lg:hidden mb-4 p-4 bg-amber-50 rounded-xl border border-amber-200 hidden">
+                    <h4 class="text-xs font-bold text-amber-900 mb-1">【題組情境說明】</h4>
+                    <p id="scenario-content-mobile" class="text-xs text-slate-600 leading-relaxed"></p>
+                </div>
+
+                <!-- Question Text -->
+                <div class="flex-grow">
+                    <h3 id="question-text" class="text-base md:text-lg font-bold text-slate-800 mb-6 leading-relaxed"></h3>
+                    
+                    <!-- Alert for Multiple-Choice Selection constraint -->
+                    <p id="multi-choice-hint" class="hidden text-xs text-amber-600 font-bold mb-4 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        提醒：本題為多重選擇題，請選出所有合適的選項，答錯或漏選依比例計分。
+                    </p>
+
+                    <!-- Options Container -->
+                    <div id="options-container" class="space-y-3"></div>
+                </div>
+
+                <!-- Next/Prev Buttons -->
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                    <button onclick="prevQuestion()" id="btn-prev" class="flex items-center gap-1 px-4 py-2.5 rounded-lg border border-slate-300 text-sm text-slate-600 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:pointer-events-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        上一題
+                    </button>
+                    
+                    <button onclick="toggleFlag()" id="btn-flag" class="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold transition-colors">
+                        <svg id="flag-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h1.364a1 1 0 01.734.327l1.414 1.414a1 1 0 00.707.293H18a2 2 0 012 2v6a2 2 0 01-2 2h-2.586a1 1 0 00-.707.293l-1.414 1.414a1 1 0 01-.734.327H7a2 2 0 01-2-2V5z"></path>
+                        </svg>
+                        <span id="flag-text">標記此題</span>
+                    </button>
+
+                    <button onclick="nextQuestion()" id="btn-next" class="flex items-center gap-1 bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-500 transition-colors">
+                        下一題
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Question Navigation Matrix -->
+            <div class="lg:col-span-4 bg-white rounded-2xl shadow-md border border-slate-200 p-5 sticky top-24">
+                <h3 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">答題看板</h3>
+                
+                <div class="grid grid-cols-5 gap-2" id="grid-navigation"></div>
+
+                <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+                    <div class="flex items-center gap-1.5 text-slate-500">
+                        <span class="w-3 h-3 bg-slate-100 border border-slate-200 rounded-sm"></span>未作答
+                    </div>
+                    <div class="flex items-center gap-1.5 text-indigo-700">
+                        <span class="w-3 h-3 bg-indigo-100 border border-indigo-300 rounded-sm"></span>已作答
+                    </div>
+                    <div class="flex items-center gap-1.5 text-amber-700">
+                        <span class="w-3 h-3 bg-amber-100 border border-amber-300 rounded-sm"></span>已標記
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result-screen" class="hidden max-w-5xl mx-auto w-full transition-all duration-300">
+            
+            <!-- Result Overview Card -->
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-8 mb-6 overflow-hidden relative">
+                <div id="passing-ribbon" class="absolute top-0 right-0 py-1.5 px-10 transform translate-x-1/4 translate-y-1/2 rotate-45 text-xs font-bold text-white uppercase tracking-widest text-center shadow-sm w-44"></div>
+                
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <!-- Left stats -->
+                    <div class="md:col-span-4 text-center md:border-r border-slate-150 pb-6 md:pb-0">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">認證模擬總分</h3>
+                        <div class="text-5xl md:text-6xl font-black text-slate-800 mt-2 mb-1" id="final-score"></div>
+                        <p class="text-xs text-slate-500" id="final-stats"></p>
+                        <div id="status-badge" class="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold"></div>
+                    </div>
+
+                    <!-- Right Feedback -->
+                    <div class="md:col-span-8 space-y-4">
+                        <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100/50">
+                            <h4 class="text-sm font-bold text-indigo-900 mb-1" id="greeting-name">考生，您好：</h4>
+                            <p id="result-evaluation" class="text-xs text-slate-600 leading-relaxed"></p>
+                        </div>
+
+                        <!-- Progress Bar / Domain Mastering -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">核心知識點分析 (答對率)</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="domain-mastery-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-150 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <button onclick="startOver()" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.212 9H18"></path>
+                        </svg>
+                        重啟本份試卷模擬測驗
+                    </button>
+                    
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="filterReview('wrong')" id="btn-review-wrong" class="flex-1 sm:flex-initial text-xs bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-lg font-bold border border-red-200 transition-all">
+                            只看錯題
+                        </button>
+                        <button onclick="filterReview('all')" id="btn-review-all" class="flex-1 sm:flex-initial text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg font-bold border border-slate-300 transition-all">
+                            看全部題目與解析
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Review Panel -->
+            <div class="space-y-4" id="review-list"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 py-6 text-center text-xs mt-10 border-t border-slate-700">
+        <p class="max-w-xl mx-auto px-4 leading-relaxed">本系統僅供備考學習使用。測驗內容、解答與教材著作權均歸屬台灣人工智慧學校所有，使用者請勿將內容分發、轉售或進行其他商业用途。</p>
+        <p class="mt-2 text-slate-500">© 台灣人工智慧學校考前衝刺教材輔助系統 | 互動式網頁設計專案</p>
+    </footer>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            <div id="modal-icon-container" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"></div>
+            <h3 id="modal-title" class="text-base font-bold text-slate-800 text-center mb-2"></h3>
+            <p id="modal-content" class="text-xs text-slate-500 text-center leading-relaxed mb-6"></p>
+            <div id="modal-actions" class="flex gap-2 justify-end"></div>
+        </div>
+    </div>
+
+    <!-- Question Bank JS -->
+    <script>
+        const scenarioA = {
+            title: "題組A：智慧農業與土壤分析",
+            content: "智慧農業是近年來政府極力推動的科技轉型項目。某農業科技公司研發了一套 AI 智慧作物管理系統。這套系統利用無人機與衛星影像，定期對南部廣大的芒果園進行影像分析與辨識。系統能夠根據作物葉片顏色的細微變化，在初期識別芒果植株是否感染了潛在的疾病並發出早期警報。此外，該系統還可以收集當地的氣象預報資料與降雨量等特徵，來預測下一季度的芒果產量，以利果農進行產銷規劃。最後，為了最佳化肥料的使用與農田管理，該系統對多個農田所採集到的土壤樣本物理特性與酸鹼度等特徵進行了土壤品質分析。系統會將性質接近的農田分在同一個群落，以利提供一致性的優化種植處方。"
+        };
+
+        const scenarioB = {
+            title: "題組B：智慧城市與自駕車技術",
+            content: "新創自駕車科技團隊正在為新一代智慧巡邏車研發多功能 AI 辨識系統。該系統需在各種複雜的市區路況、氣候條件（如下大雨或大霧）與夜間光線不足的環境下，安全、可靠地運作。系統透過車頂的多鏡頭攝影裝置，能即時識別並定位出道路上所有的交通號誌、斑馬線、障礙物、行人以及周邊的其他車輛，進而確保行駛安全，並且需要區分特定行人以便進行巡邏任務。為了使自駕車能與一般用路人與車上乘客進行更人性化的語意互動，系統亦引入了進階的語意分析功能，透過車載對話裝置聆聽並即時回應乘客所下達的行車與環境監控指令。"
+        };
+
+        const scenarioC = {
+            title: "題組C：金融客服系統與生成式 AI 應用",
+            content: "隨著數位化時代的推進，某金融控股集團為了提升客服中心的回應速度與資料庫搜尋效率，決定在客服系統中引入 RAG（檢索增強生成）技術。當客戶透過官方 App 進行問題查詢時，RAG 的「檢索」模組會自動去金控集團內部的 QA 知識庫（IQ-KB）中，比對並檢索出與客戶提問高度相似的「理財方案」、「信用卡申辦規則」等內部標準文本，接著由金控私有部署的大語言模型結合檢索出的標準文本，生成出高度客製化、準確、且語意通順的完整回答。此舉大幅減少了過去客服人員查閱規章的時間，並提升了客戶滿意度。"
+        };
+
+        const questionBank = [
+            // Module 01 (10 Questions - Single Choice)
+            {
+                id: 1,
+                module: "01 人工智慧概念",
+                type: "單選題",
+                question: "在人工智慧的歷史演進中，1950年代與1980年代分別發展的「第一波：符號邏輯」與「第二波：專家系統」，最後皆面臨失敗的主因為何？",
+                options: [
+                    "計算機硬體運算速度過快、發熱量過高",
+                    "許多現實問題極其複雜，人類無法全部寫成確定性的邏輯规则或程式碼",
+                    "當時的社會大眾完全不相信人工智慧的發展潛力",
+                    "演算法完全缺乏數學理論基礎"
+                ],
+                answer: 1, // index 1
+                rationale: "前兩波人工智慧主要是依靠人類專家寫下明確的經驗規則，但人類本身常常無法解釋自己的思考過程，且許多問題過於繁複，無法用有限的规则穷盡，導致程式無法處理未知或模糊的情況。"
+            },
+            {
+                id: 2,
+                module: "01 人工智慧概念",
+                type: "單選題",
+                question: "由艾倫·圖靈 (Alan Turing) 於1950年提出的「圖靈測試 (Turing Test)」，其核心理念是如何定義「機器會思考」？",
+                options: [
+                    "機器必須擁有和人類一模一樣的生物大腦結構",
+                    "機器可以在西洋棋或圍棋中打敗人類的世界冠軍",
+                    "在雙盲測試的問答過程中，人類詢問者無法有效區分出機器與人類的身份",
+                    "機器能夠通過嚴格的國家級智力測驗與邏輯推理評估"
+                ],
+                answer: 2,
+                rationale: "圖靈測試定義：在看不見對方的狀況下，測試者向人類與機器進行若干問答，若測試者無法辨別哪一個是機器，即可判定機器通過測試，表現出類似人類思維的智慧。"
+            },
+            {
+                id: 3,
+                module: "01 人工智慧概念",
+                type: "單選題",
+                question: "在強人工智慧與弱人工智慧的分野中，下列關於「通用人工智慧 (AGI / Strong AI)」的敘述何者正確？",
+                options: [
+                    "只要模型在特定任務（如圖像辨識）中準確率達到99%以上，即屬於強人工智慧",
+                    "現今的 ChatGPT 與各種大語言模型已經徹底實現了 AGI / 強人工智慧",
+                    "AGI 係指在不設限的各領域中，具有如人類般廣泛的主動式智慧，能真正進行思考與意識判斷，目前仍是發展目標",
+                    "強人工智慧就是指執行「機器學習」和「深度學習」的演算法"
+                ],
+                answer: 2,
+                rationale: "強人工智慧 (通用人工智慧 AGI) 指的是機器可以像人類一樣具備廣泛的、跨領域的適應性與思考能力，目前現有的 AI 依然屬於弱人工智慧 (或稱狹隘人工智慧 ANI)，僅能在特定條件和任務下表現出色。"
+            },
+            {
+                id: 4,
+                module: "02 機器學習",
+                type: "單選題",
+                question: "機器學習（ML）與傳統程式設計（Rule-based System）在邏輯設計上的本質區別是什麼？",
+                options: [
+                    "傳統程式設計極度依賴高品質的非結構化資料，而機器學習則不依賴資料",
+                    "傳統程式是人工制定規律與程式碼，而機器學習則是從資料中透過演算法自行歸納並發現規律",
+                    "機器學習只能解決迴歸任務，而傳統程式則用來解決分類任務",
+                    "傳統程式無法處理結構化資料，只有機器學習可以處理"
+                ],
+                answer: 1,
+                rationale: "傳統程式設計是由人類專家將規則與邏輯寫死在程式碼中，程式依照既定路徑產出結果；機器學習則是給予系統大量歷史資料（輸入與輸出），讓演算法自己尋求與歸納出其中的映射關係與規則。"
+            },
+            {
+                id: 5,
+                module: "02 機器學習",
+                type: "單選題",
+                question: "機器學習領域有一句名言叫作「Garbage in, Garbage out」，這主要強調了何種觀念？",
+                options: [
+                    "只要演算法足夠精巧複雜，再差的垃圾數據也能訓練出頂尖的模型",
+                    "模型的品質和性能高度取決於訓練資料的品質，資料收集與清理非常關鍵",
+                    "模型運行時的硬體設備如果太過老舊，輸出結果就會像垃圾一樣",
+                    "只有生成式 AI 會產生幻覺垃圾，傳統機器學習模型不會"
+                ],
+                answer: 1,
+                rationale: "「Garbage in, Garbage out (GIGO)」意指如果輸入的訓練數據不準確、有偏見、不完整或是充滿噪音，不論使用的演算法多麼強大，最終輸出的模型預測效果也會極差。"
+            },
+            {
+                id: 6,
+                module: "02 機器學習",
+                type: "單選題",
+                question: "在資料倫理與安全管理中，「去識別化 (De-identification)」最核心的作法是什麼？",
+                options: [
+                    "將所有收集到的資料完整公佈給大眾，以確保完全透明",
+                    "將資料進行高度壓縮，只留給有特殊金鑰的人閱讀",
+                    "將資料中能夠辨識個人身分的敏感資訊（如姓名、身分證字號、臉部細節等）移除或修改",
+                    "在資料庫建立強大的防火牆，防止駭客入侵"
+                ],
+                answer: 2,
+                rationale: "去識別化是保護個人隱私的重要道德與法律規範，旨在防止在分析數據時洩露個人身份資訊，讓分析資料可以安全共享。"
+            },
+            {
+                id: 7,
+                module: "02 機器學習",
+                type: "單選題",
+                question: "在機器學習訓練流程中，將資料切割成「訓練集」、「驗證集」與「測試集」，下列關於「驗證集 (Validation Set)」的描述何者正確？",
+                options: [
+                    "驗證集是模型在開發完成後，給最終用戶在生產環境上做測試用的資料",
+                    "驗證集主要是用來直接訓練模型的參數權重",
+                    "驗證集是在訓練過程中，做為「模擬考」來進行超參數調整，以選出表現最佳的模型結構",
+                    "驗證集可以完全不包含標籤，專門進行降維與資料前處理"
+                ],
+                answer: 2,
+                rationale: "驗證集如同模擬考，它不參與底層權重訓練，但被用於在開發期間動態評估多組模型的性能，以調校超參數（Hyperparameters）並防止模型在訓練集上產生過度擬合。"
+            },
+            {
+                id: 8,
+                module: "02 機器學習",
+                type: "單選題",
+                question: "下列哪一個指標常用於評估「預測明天溫度」這種「迴歸任務 (Regression)」，而不是用於「分類任務」？",
+                options: [
+                    "分類準確率 (Accuracy)",
+                    "精確率 (Precision Rate)",
+                    "均方誤差 (MSE / Mean Squared Error)",
+                    "召回率 (Recall Rate)"
+                ],
+                answer: 2,
+                rationale: "迴歸任務的目標是預測一個連續的數值（如溫度、股價），所以要計算預測值與真實數值的實際差異平方，即均方誤差 (MSE) 或平均絕對誤差 (MAE)；而 Accuracy、Precision、Recall 等則是評估離散類別預測（如是/否）的分類指標。"
+            },
+            {
+                id: 9,
+                module: "03 深度學習",
+                type: "單選題",
+                question: "卷積神經網路 (CNN) 是電腦視覺 (CV) 領域中不可或缺的基石。其奠基人、被譽為「卷積網絡之父」，並榮獲 2018 年圖靈獎的科學家是誰？",
+                options: [
+                    "李飛飛 (Fei-Fei Li)",
+                    "楊立昆 (Yann LeCun)",
+                    "艾倫·圖靈 (Alan Turing)",
+                    "吳恩達 (Andrew Ng)"
+                ],
+                answer: 1,
+                rationale: "楊立昆（Yann LeCun）發明了卷積神經網路 (CNN)，大幅改善了電腦視覺的影像分類效能，並與 Geoffrey Hinton、Yoshua Bengio 共同獲頒2018年圖靈獎。"
+            },
+            {
+                id: 10,
+                module: "05 雲端與邊緣運算",
+                type: "單選題",
+                question: "下列關於「邊緣運算 (Edge Computing)」與「雲端運算 (Cloud Computing)」的比較，何者為邊緣運算最顯著之優勢？",
+                options: [
+                    "邊緣運算擁有近乎無限的運算儲存空間與擴展能力",
+                    "邊緣運算在本地機器上進行運算，具有「極低延遲性」且大幅降低網路傳輸頻寬需求",
+                    "邊緣運算非常適合用來訓練需要數兆參數的大語言基礎模型",
+                    "邊緣運算的硬體與資源成本通常高於大規模雲端資料中心"
+                ],
+                answer: 1,
+                rationale: "邊緣運算是在本地端（如手機、感測器、單板電腦）直接就近處理數據，因此不需要將龐大資料來回傳輸至遙遠的雲端伺服器，提供了極高的反應速度（低延遲）並能節省頻寬。"
+            },
+
+            // Module 02 (5 Questions - Multiple Choice)
+            {
+                id: 11,
+                module: "02 機器學習",
+                type: "多重選擇題",
+                question: "機器學習依據「數據是否具有標籤（Label / 標準答案）」，主要可以分為哪些基本學習型態？【複選】",
+                options: [
+                    "監督式學習 (Supervised Learning)",
+                    "非監督式學習 (Unsupervised Learning)",
+                    "半監督式學習 (Semi-supervised Learning)",
+                    "強化學習 (Reinforcement Learning)"
+                ],
+                answer: [0, 1, 2, 3], // All 4 are correct
+                rationale: "依標籤狀態，資料有標籤為監督式，無標籤為非監督式，部分有標籤為半監督式；而強化學習則是透過與環境互動的「獎勵/懲罰」回饋機制進行試誤學習，這四種是機器學習的最核心運作型態。"
+            },
+            {
+                id: 12,
+                module: "02 機器學習",
+                type: "多重選擇題",
+                question: "在機器學習與深度學習的模型訓練過程中，為了避免模型產生「過度擬合 (Overfitting，即考古題考滿分，新題目零分)」的策略有哪些？【複選】",
+                options: [
+                    "收集並引入更多元且足夠數量的訓練資料",
+                    "簡化模型的複雜度（如減少神經網路層數或決策樹深度）",
+                    "提高模型複雜度，拼命增加參數，直到訓練集損失降為0",
+                    "使用適當的正則化、丟棄法 (Dropout) 或提早停止訓練 (Early Stopping) 技術"
+                ],
+                answer: [0, 1, 3],
+                rationale: "過度擬合是因為模型把訓練集中的「隨機噪音」也當作規則記了下來。增加資料量、簡化模型結構或使用 Dropout 等限制，可以防止模型學得太過複雜，提高模型在未知資料上的泛化能力。"
+            },
+            {
+                id: 13,
+                module: "03 深度學習",
+                type: "多重選擇題",
+                question: "在教材大綱中，「深度學習 (Deep Learning)」與「傳統機器學習 (Traditional Machine Learning)」的核心區別主要有哪些？【複選】",
+                options: [
+                    "深度學習可以自動進行複雜的特徵提取與萃取，通常不需要人工高度介入設計特徵",
+                    "深度學習完全不能解決迴歸任務，只有傳統機器學習可以",
+                    "深度學習主要採用「深層人工神經網路 (DNN)」架構，需要大量的運算能力 (如 GPU)",
+                    "深度學習在處理圖片、聲音與文本等「非結構化資料」時，通常展現出更強大的泛化能力"
+                ],
+                answer: [0, 2, 3],
+                rationale: "深度學習是機器學習的子集。它最主要的變革是「特徵自我學習」，省去了機器學習中耗費人力的「特徵工程」，並且藉由多層神經網路極佳地配適圖片和文字等複雜的非結構化數據。"
+            },
+            {
+                id: 14,
+                module: "06 生成式 AI",
+                type: "多重選擇題",
+                question: "目前各企業在導入和使用「大型語言模型 (LLM)」時，普遍面臨的技術瓶頸與安全限制有哪些？【複選】",
+                options: [
+                    "幻覺 (Hallucination)：模型會一本正經地生成不符事實、憑空捏造的內容",
+                    "偏見 (Bias)：模型可能學到訓練資料中既存的歧視、偏誤，輸出不當言論",
+                    "知識斷點 (Knowledge Cutoff)：無法回答其資料庫截止更新日期之後發生的事件",
+                    "資料隱私疑慮：將機密商務數據透過外部 API 傳給未開源模型時，有資料洩漏的風險"
+                ],
+                answer: [0, 1, 2, 3],
+                rationale: "這些是大型語言模型 (LLM) 目前最棘手的問題。包括幻覺、學習數據偏誤、知識截止以及資料傳輸過程中的資安疑慮，也是企業推動 RAG、私有化部署的主要動力。"
+            },
+            {
+                id: 15,
+                module: "03 深度學習",
+                type: "多重選擇題",
+                question: "在電腦視覺（CV）領域，下列哪些任務涉及對影像中「目標的位置框出 (Bounding Box)」或「像素級別的精密分割」？【複選】",
+                options: [
+                    "影像分類 (Image Classification)",
+                    "物件偵測 (Object Detection)",
+                    "語意分割 (Semantic Segmentation)",
+                    "實例分割 (Instance Segmentation)"
+                ],
+                answer: [1, 2, 3],
+                rationale: "物件偵測會在偵測到目標時使用方框（Bounding Box）定位；而語意分割和實例分割則是更高精度的像素（Pixel）等級標籤標註，區分不同類別或實例的邊緣。影像分類則只判斷整張影像屬於什麼，不涉及畫框或像素分割。"
+            },
+
+            // Scenario-Based Questions (題組題 16~30)
+            // Scenario 1: 智慧農業 (題組 16-20)
+            {
+                id: 16,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioA,
+                question: "【智慧農業與土壤分析】根據情境描述，無人機與衛星影像「初期識別芒果植株是否感染潛在疾病並分類」的任務類型屬於：",
+                options: [
+                    "迴歸任務 (Regression)",
+                    "分群任務 (Clustering)",
+                    "降維任務 (Dimension Reduction)",
+                    "分類任務 (Classification)"
+                ],
+                answer: 3,
+                rationale: "判斷植株是否得病（例如：得病 / 正常），其輸出是離散、不連續的類別標籤，在機器學習中這屬於典型的「分類任務」。"
+            },
+            {
+                id: 17,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioA,
+                question: "【智慧農業與土壤分析】如果農業科技公司想利用芒果葉片圖片來辨識病害，且其圖片均有由植病專家手動標記好的病害名稱。這最適合使用何種機器學習方法？",
+                options: [
+                    "監督式學習 (Supervised Learning)",
+                    "非監督式學習 (Unsupervised Learning)",
+                    "降維技術 (Dimension Reduction)",
+                    "強化學習 (Reinforcement Learning)"
+                ],
+                answer: 0,
+                rationale: "因為每張芒果葉片的圖片都有明確的「標準答案（標籤）」，所以演算法可以透過輸入葉片圖片與輸出病害名稱的對照進行學習，這完全符合「監督式學習」的定義。"
+            },
+            {
+                id: 18,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioA,
+                question: "【智慧農業與土壤分析】情境中提到「對不同農田土壤樣本進行分析，並將土壤品質相似的農田分在同一群（群落）」，這最適合使用何種演算法？",
+                options: [
+                    "線性迴歸分析 (Linear Regression)",
+                    "K-means 聚類分析 (Clustering)",
+                    "卷積神經網路 (CNN)",
+                    "對抗式生成網路 (GAN)"
+                ],
+                answer: 1,
+                rationale: "「將土壤性質相似的農田分在同一群」是一種無監督的分群（Clustering）任務。演算法依據特徵相似度將樣本劃分為數個集群，而無須事先定義好每一群的標準答案。K-means 是最經典的分群演算法。"
+            },
+            {
+                id: 19,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioA,
+                question: "【智慧農業與土壤分析】如果該金控或科技公司在收集土壤與芒果圖像數據時，發現部分資料存在「人為標記嚴重錯誤（例如把病斑葉片標記成健康葉片）」，這將會造成什麼影響？",
+                options: [
+                    "完全沒有影響，深度學習能自動改正所有人為錯誤",
+                    "導致模型過度自信，預測準確度反而會大幅上升",
+                    "導致模型產生『垃圾進，垃圾出（GIGO）』效應，大幅降低模型預測準確度",
+                    "導致系統自動轉換為半監督式學習"
+                ],
+                answer: 2,
+                rationale: "訓練資料的品質是機器學習的生命。當錯誤的標籤（噪音）被餵給模型學習，會嚴重誤導模型的映射規則，產生 Garbage In, Garbage Out，使預測率雪崩式下滑。"
+            },
+            {
+                id: 20,
+                module: "05 雲端與邊緣運算",
+                type: "題組單選題",
+                scenario: scenarioA,
+                question: "【智慧農業與土壤分析】芒果園通常地處偏遠山區，4G/5G 網路信號可能極不穩定。如果希望果農在巡田時，即便手機「處於斷網狀態」下仍能以相機即時識別芒果疾病，這套系統最應該採取什麼架構部署？",
+                options: [
+                    "雲端運算 (Cloud-Based AI)",
+                    "完全依靠聯邦學習中央服務器即時運算",
+                    "邊緣 AI (Edge-Based AI) 部署至果農手機本地端運作",
+                    "大語言模型雲端 API 串接"
+                ],
+                answer: 2,
+                rationale: "邊緣 AI 係將訓練好的輕量化模型直接部署在終端設備（如手機、邊緣裝置）上。這使得系統在本地端即可完成推論運算，完全不需要網路通訊，解決了偏遠農區通訊不穩的問題。"
+            },
+
+            // Scenario 2: 自駕車 (題組 21-25)
+            {
+                id: 21,
+                module: "03 深度學習",
+                type: "題組單選題",
+                scenario: scenarioB,
+                question: "【智慧城市與自駕車技術】根據情境描述，自駕車系統需要「即時在攝影畫面中，將道路上所有行人、車輛定位，並以方形邊框框出」，這屬於下列哪一種電腦視覺 (CV) 任務？",
+                options: [
+                    "影像分類 (Image Classification)",
+                    "物件偵測 (Object Detection)",
+                    "語意分割 (Semantic Segmentation)",
+                    "影像生成 (Image Generation)"
+                ],
+                answer: 1,
+                rationale: "「定位物體並用方框（Bounding Box）將其框出」是典型的「物件偵測（Object Detection）」任務。除了要辨識目標是什麼之外，還需要精確標出該目標在畫面上的空間位置。"
+            },
+            {
+                id: 22,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioB,
+                question: "【智慧城市與自駕車技術】情境中提到自駕車會跟環境產生高頻率互動。自駕車系統在學習控制油門、煞車與轉向時，會透過與物理/模擬環境的互動，獲得「成功前進 (正回饋)」或「撞車 (負回饋)」等獎懲機制。這屬於何種類型的機器學習？",
+                options: [
+                    "非監督式學習 (Unsupervised Learning)",
+                    "強化學習 (Reinforcement Learning)",
+                    "決策樹分類 (Decision Tree)",
+                    "自動化特徵選擇"
+                ],
+                answer: 1,
+                rationale: "強化學習（Reinforcement Learning）的核心就是「觀察-行動-獎勵/懲罰」的試誤機制。它不依賴一對一的標籤數據，而是讓智慧體（Agent）透過與環境的交互回饋，自主學習如何採取行動以達到最佳化長期目標。"
+            },
+            {
+                id: 23,
+                module: "03 深度學習",
+                type: "題組單選題",
+                scenario: scenarioB,
+                question: "【智慧城市與自駕車技術】為自駕車選用處理語意對話的演算法時，由於乘客下達的「聲音指令」具有前後連貫的時間特徵，下列哪一種神經網路架構最適合用來處理這類「序列型資料 (Sequential Data)」？",
+                options: [
+                    "卷積神經網路 (CNN)",
+                    "循環神經網路 (RNN) 或長短期記憶網路 (LSTM)",
+                    "生成對抗網路 (GAN)",
+                    "DBSCAN 分群模型"
+                ],
+                answer: 1,
+                rationale: "聲音、文本與時間序列等資料具有強烈的前後文時間關聯性。循環神經網路（RNN）及其延伸出的 LSTM、GRU 神經網路架構，設計有內部記憶機制，是處理此類「序列型資料」的標準工具。"
+            },
+            {
+                id: 24,
+                module: "03 深度學習",
+                type: "題組單選題",
+                scenario: scenarioB,
+                question: "【智慧城市與自駕車技術】如果自駕巡邏車在追蹤可疑對象時，不只想要辨識出畫面上「人（類別）」的位置，還需要將「特定目標人 A 先生、B 先生」的個別像素輪廓精密分離開來（不同實例標記不同顏色）。這屬於哪一種影像分割任務？",
+                options: [
+                    "語意分割 (Semantic Segmentation)",
+                    "實例分割 (Instance Segmentation)",
+                    "物件降維 (Dimension Reduction)",
+                    "單純影像分類"
+                ],
+                answer: 1,
+                rationale: "實例分割（Instance Segmentation）結合了物件偵測與語意分割。它不只要在像素級別區分類別（如知道那些是人），還要能區分出相同類別中「不同的個體實例」（區分人 A、人 B、人 C）。"
+            },
+            {
+                id: 25,
+                module: "02 機器學習",
+                type: "題組單選題",
+                scenario: scenarioB,
+                question: "【智慧城市與自駕車技術】智慧交通系統在收集道路攝影機與監視器資訊時，為符合資訊倫理與個人隱私保護，應該在影像儲存或傳輸前，先主動進行何種處理？",
+                options: [
+                    "將所有收集到的未處理高解析度原始資料完全公開，以求公開透明",
+                    "對影像中的車牌、路人臉部等可辨識資訊進行『去識別化』模糊或遮罩處理",
+                    "將資料進行高度壓縮，僅使用最高強度的防毒軟體防範即可",
+                    "改變攝影機的基本解析度至極低畫質，使其看不清任何人"
+                ],
+                answer: 1,
+                rationale: "「去識別化」是保護個人資訊隱私的核心手段，對臉部、車牌等特徵進行高斯模糊或遮蔽，可在保留交通流量分析價值的同時，確保不侵害個人資安隱私。"
+            },
+
+            // Scenario 3: 金融客服系統 (題組 26-30)
+            {
+                id: 26,
+                module: "06 生成式 AI",
+                type: "題組單選題",
+                scenario: scenarioC,
+                question: "【金融客服系統與生成式 AI】情境中提到在大型語言模型中，有時會發生模型生成出「邏輯錯誤、無中生有、看似通順但完全不符事實」的回答，此現象在學術上被稱為什麼？",
+                options: [
+                    "梯度消失 (Gradient Vanishing)",
+                    "過度配適 (Overfitting)",
+                    "幻覺 (Hallucination)",
+                    "去識別化失效"
+                ],
+                answer: 2,
+                rationale: "「幻覺 (Hallucination)」是大語言模型 (LLM) 目前最大的技術障礙之一，指模型基於概率生成的文本雖然語意極度流暢，但內容卻完全與真實世界的事實相悖。"
+            },
+            {
+                id: 27,
+                module: "06 生成式 AI",
+                type: "題組單選題",
+                scenario: scenarioC,
+                question: "【金融客服系統與生成式 AI】該金控導入的 RAG（檢索增強生成，Retrieval-Augmented Generation）技術，主要如何解決客服模型回答不準確的問題？",
+                options: [
+                    "在每次回答前，將大語言模型的全部參數權重重新更新一遍",
+                    "在生成回答前，先在企業知識庫中檢索出與問題相關的精確规章，並將其餵給模型作為參考答案生成依據",
+                    "將模型直接部署到邊緣裝置以加速運算",
+                    "完全依靠強化學習，每次答錯就給模型負回饋"
+                ],
+                answer: 1,
+                rationale: "RAG 就像是給模型一場「開卷考試」。它先在本地知識庫（IQ-KB）中檢索出準確的業務规章，再叫模型「根據這段规章重新整理成回答」，這大幅降低了模型因幻覺或知識過期而答錯的機率。"
+            },
+            {
+                id: 28,
+                module: "06 生成式 AI",
+                type: "題組單選題",
+                scenario: scenarioC,
+                question: "【金融客服系統與生成式 AI】在 RAG 的「檢索 (Retrieval)」階段，系統主要不會涉及下列哪一項技術動作？",
+                options: [
+                    "進行自然語言處理與文字向量比對",
+                    "進行文本相似度比對與分析",
+                    "影像中的多角度水果特徵圖像識別與對照",
+                    "對 IQ-KB 企業知識庫進行高速查詢"
+                ],
+                answer: 2,
+                rationale: "RAG 的檢索是處理「文本與文字資料」，不涉及圖像識別（圖像識別是屬於芒果自動選果等電腦視覺任務的範圍）。"
+            },
+            {
+                id: 29,
+                module: "06 生成式 AI",
+                type: "題組單選題",
+                scenario: scenarioC,
+                question: "【金融客服系統與生成式 AI】若金控集團極度擔心客戶的「信用卡卡號與機敏個人財產隱私資料」在經由 API 傳送給第三方大型科技公司的雲端 LLM 時產生外洩，最安全且符合法律規章的作法是：",
+                options: [
+                    "直接不使用大語言模型，回歸全人工客服",
+                    "使用如 Llama 3 等「開源大語言模型 (Open-source LLM)」並配合金控私有伺服器進行地端安全部署",
+                    "在公有雲端上運行模型，但要求員工不能輸入客戶真實姓名",
+                    "直接要求第三方大型科技公司保證絕對不看傳輸的資料即可"
+                ],
+                answer: 1,
+                rationale: "對於金融、政府等對資料安全敏感度極高的行業，使用「開源模型（如 Llama、Mistral 系列）」並於「企業地端私有部署」，可以確保機密數據不流出企業防火牆，是最佳的資安解決方案。"
+            },
+            {
+                id: 30,
+                module: "06 生成式 AI",
+                type: "題組單選題",
+                scenario: scenarioC,
+                question: "【金融客服系統與生成式 AI】依據吳恩達 (Andrew Ng) 在 AI 轉型指南（AI Transformation Playbook）中針對企業導入 AI 的規畫，金控集團第一步應該做什麼以獲得轉型動力？",
+                options: [
+                    "直接投資數十億台幣建設龐大的 GPU 資料中心",
+                    "對全金控數萬名員工進行為期一整年的進階演算法程式培訓",
+                    "選定一個「試點專案 (Pilot Project，如 RAG 客服小助理)」快速上線，以取得實際成效並凝聚團隊信心",
+                    "立刻制定包山包海的宏大 AI 轉型十戰略"
+                ],
+                answer: 2,
+                rationale: "吳恩達建議企業在起步時，應選擇「成功率高、範圍適中」的試點專案。這可以讓團隊在實戰中快速磨合、建立信心並驗證流程，進而更容易推動後續更大規模的轉型策略。"
+            }
+        ];
+
+        // State variables
+        let studentAnswers = {}; // Keeps user responses. structure: { questionId: [selectedIndices] } or [selectedIndex]
+        let flaggedQuestions = {}; // Tracks marked/flagged questions
+        let currentIdx = 0; // Starts from 0
+        let timerInterval = null;
+        let timeLeft = 50 * 60; // 50 minutes in seconds
+        let isQuizSubmitted = false;
+
+        // Dom Elements
+        const welcomeScreen = document.getElementById("welcome-screen");
+        const quizScreen = document.getElementById("quiz-screen");
+        const resultScreen = document.getElementById("result-screen");
+        const scenarioPanel = document.getElementById("scenario-panel");
+        const scenarioPanelMobile = document.getElementById("scenario-panel-mobile");
+        const timerContainer = document.getElementById("quiz-timer-container");
+        
+        // Init Navigation Matrix on boot
+        function renderNavigationGrid() {
+            const grid = document.getElementById("grid-navigation");
+            grid.innerHTML = "";
+            for (let i = 0; i < questionBank.length; i++) {
+                const btn = document.createElement("button");
+                btn.id = `nav-btn-${i}`;
+                btn.className = `h-10 text-xs font-bold rounded-lg border transition-all flex items-center justify-center ${getNavBtnClass(i)}`;
+                btn.textContent = i + 1;
+                btn.onclick = () => jumpToQuestion(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        function getNavBtnClass(i) {
+            const qId = questionBank[i].id;
+            const isAnswered = studentAnswers[qId] !== undefined && (Array.isArray(studentAnswers[qId]) ? studentAnswers[qId].length > 0 : studentAnswers[qId] !== null);
+            const isFlagged = flaggedQuestions[qId] === true;
+
+            if (currentIdx === i) {
+                return "bg-indigo-600 border-indigo-600 text-white ring-2 ring-indigo-200 shadow-md";
+            }
+            if (isFlagged) {
+                return "bg-amber-100 border-amber-300 text-amber-800";
+            }
+            if (isAnswered) {
+                return "bg-indigo-50 border-indigo-200 text-indigo-700";
+            }
+            return "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200";
+        }
+
+        // Timer controller
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerContainer.innerHTML = `<span class="text-red-500 font-bold text-sm">時間結束</span>`;
+                    autoSubmitQuiz();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("quiz-timer").textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    if (timeLeft < 5 * 60) {
+                        document.getElementById("quiz-timer").className = "font-mono text-lg font-bold text-red-500 animate-pulse";
+                    }
+                }
+            }, 1000);
+        }
+
+        // Navigation controls
+        function jumpToQuestion(idx) {
+            if (idx < 0 || idx >= questionBank.length) return;
+            currentIdx = idx;
+            renderQuestion();
+            renderNavigationGrid();
+        }
+
+        function nextQuestion() {
+            if (currentIdx < questionBank.length - 1) {
+                jumpToQuestion(currentIdx + 1);
+            } else {
+                openSubmitConfirmModal();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                jumpToQuestion(currentIdx - 1);
+            }
+        }
+
+        function toggleFlag() {
+            const qId = questionBank[currentIdx].id;
+            flaggedQuestions[qId] = !flaggedQuestions[qId];
+            renderQuestion();
+            renderNavigationGrid();
+        }
+
+        // Render current question
+        function renderQuestion() {
+            const q = questionBank[currentIdx];
+            
+            // Text updating
+            document.getElementById("current-index").textContent = currentIdx + 1;
+            document.getElementById("question-type-badge").textContent = q.type;
+            document.getElementById("question-module-badge").textContent = q.module;
+            document.getElementById("question-text").textContent = q.question;
+
+            // Scenario Setup
+            if (q.scenario) {
+                scenarioPanel.classList.remove("hidden");
+                scenarioPanelMobile.classList.remove("hidden");
+                document.getElementById("scenario-title").textContent = q.scenario.title;
+                document.getElementById("scenario-content").textContent = q.scenario.content;
+                document.getElementById("scenario-content-mobile").textContent = q.scenario.content;
+            } else {
+                scenarioPanel.classList.add("hidden");
+                scenarioPanelMobile.classList.add("hidden");
+            }
+
+            // Flag styling update
+            const isFlagged = flaggedQuestions[q.id] === true;
+            const btnFlag = document.getElementById("btn-flag");
+            const flagIcon = document.getElementById("flag-icon");
+            if (isFlagged) {
+                btnFlag.className = "flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-amber-300 text-sm font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors";
+                flagIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path>`;
+                document.getElementById("flag-text").textContent = "取消標記";
+            } else {
+                btnFlag.className = "flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-500 font-semibold hover:bg-slate-50 transition-colors";
+                flagIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h1.364a1 1 0 01.734.327l1.414 1.414a1 1 0 00.707.293H18a2 2 0 012 2v6a2 2 0 01-2 2h-2.586a1 1 0 00-.707.293l-1.414 1.414a1 1 0 01-.734.327H7a2 2 0 01-2-2V5z"></path>`;
+                document.getElementById("flag-text").textContent = "標記此題";
+            }
+
+            // Options Renderer
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+            const isMulti = q.type === "多重選擇題";
+
+            if (isMulti) {
+                document.getElementById("multi-choice-hint").classList.remove("hidden");
+            } else {
+                document.getElementById("multi-choice-hint").classList.add("hidden");
+            }
+
+            q.options.forEach((optStr, index) => {
+                const isSelected = isMulti 
+                    ? (studentAnswers[q.id] || []).includes(index)
+                    : studentAnswers[q.id] === index;
+
+                const wrapper = document.createElement("div");
+                wrapper.onclick = () => selectOption(index, isMulti);
+                wrapper.className = `group flex items-center gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                    isSelected 
+                        ? 'border-indigo-600 bg-indigo-50/50 shadow-sm' 
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`;
+
+                // Alphabet index prefix (A, B, C, D)
+                const charCode = String.fromCharCode(65 + index); // A, B, C, D...
+                wrapper.innerHTML = `
+                    <div class="w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
+                        isSelected 
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20' 
+                            : 'bg-slate-100 group-hover:bg-slate-200 text-slate-500'
+                    }">${charCode}</div>
+                    <p class="text-xs md:text-sm font-medium ${isSelected ? 'text-indigo-900 font-semibold' : 'text-slate-700'}">${optStr}</p>
+                `;
+                container.appendChild(wrapper);
+            });
+
+            // Prevent previous on first page, update next label on last page
+            document.getElementById("btn-prev").disabled = currentIdx === 0;
+            document.getElementById("btn-next").innerHTML = currentIdx === questionBank.length - 1 
+                ? `送出答案 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`
+                : `下一題 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+        }
+
+        // Handle answer selection
+        function selectOption(index, isMulti) {
+            const q = questionBank[currentIdx];
+            if (isMulti) {
+                if (!studentAnswers[q.id]) {
+                    studentAnswers[q.id] = [];
+                }
+                const idxInArr = studentAnswers[q.id].indexOf(index);
+                if (idxInArr > -1) {
+                    studentAnswers[q.id].splice(idxInArr, 1); // Deselect
+                } else {
+                    studentAnswers[q.id].push(index); // Select
+                }
+            } else {
+                studentAnswers[q.id] = index;
+            }
+            renderQuestion();
+            renderNavigationGrid();
+        }
+
+        // Start Quiz Trigger
+        function startQuiz() {
+            welcomeScreen.classList.add("hidden");
+            quizScreen.classList.remove("hidden");
+            timerContainer.classList.remove("hidden");
+            startTimer();
+            jumpToQuestion(0);
+        }
+
+        // Restart Quiz
+        function startOver() {
+            studentAnswers = {};
+            flaggedQuestions = {};
+            timeLeft = 50 * 60;
+            isQuizSubmitted = false;
+            resultScreen.classList.add("hidden");
+            welcomeScreen.classList.remove("hidden");
+        }
+
+        // Open submit confirmation modal
+        function openSubmitConfirmModal() {
+            // Check unanswered count
+            let unansweredCount = 0;
+            questionBank.forEach((q) => {
+                const ans = studentAnswers[q.id];
+                const isEmpty = ans === undefined || (Array.isArray(ans) && ans.length === 0) || ans === null;
+                if (isEmpty) unansweredCount++;
+            });
+
+            const iconContainer = document.getElementById("modal-icon-container");
+            iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-indigo-100 text-indigo-600";
+            iconContainer.innerHTML = `
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            `;
+
+            document.getElementById("modal-title").textContent = "確定要提交試卷嗎？";
+            document.getElementById("modal-content").innerHTML = unansweredCount > 0 
+                ? `您還有 <strong class="text-red-500">${unansweredCount} 題尚未作答</strong>！送出後將無法再次修改答案。`
+                : "您已填寫所有問題！送出後即可立刻查看答對題數、精準答題率分析以及各考題的獨家解析。";
+
+            const actions = document.getElementById("modal-actions");
+            actions.innerHTML = `
+                <button onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">取消</button>
+                <button onclick="submitQuiz()" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition-colors">確認送出</button>
+            `;
+            document.getElementById("custom-modal").classList.remove("hidden");
+        }
+
+        // Open modal helpers
+        function openCustomAlert(title, message, isSuccess = false) {
+            const iconContainer = document.getElementById("modal-icon-container");
+            if (isSuccess) {
+                iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-emerald-100 text-emerald-600";
+                iconContainer.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else {
+                iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100 text-amber-600";
+                iconContainer.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            }
+            document.getElementById("modal-title").textContent = title;
+            document.getElementById("modal-content").textContent = message;
+            document.getElementById("modal-actions").innerHTML = `
+                <button onclick="closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700 transition-colors">好</button>
+            `;
+            document.getElementById("custom-modal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("custom-modal").classList.add("hidden");
+        }
+
+        // Auto submit on time out
+        function autoSubmitQuiz() {
+            submitQuiz(true);
+        }
+
+        // Score logic and show results
+        function submitQuiz(forced = false) {
+            closeModal();
+            clearInterval(timerInterval);
+            isQuizSubmitted = true;
+            timerContainer.classList.add("hidden");
+            quizScreen.classList.add("hidden");
+            resultScreen.classList.remove("hidden");
+
+            // Compute score
+            // For multiple choice, score is partial. Let's make scoring easy and explicit:
+            // Single choice correct = 100% value
+            // Multi-choice: correct options must match exactly or award proportional score. Let's strictly require matching exactly for full point, or reward partial as in pre-exam: 錯一選項1.5分, 錯二得0.5, 錯三以上0分.
+            // Let's assume equal weights per question (each question = 2.5 points, 30 questions = 75 points. Let's scale it to 100 max score for clarity: each question = 3.33 points)
+            
+            let totalWeightedScore = 0;
+            const ptsPerQuestion = 100 / questionBank.length; // 3.33 points
+            let correctCount = 0;
+
+            const domainStats = {}; // { domainName: { correct: 0, total: 0 } }
+
+            questionBank.forEach((q) => {
+                if (!domainStats[q.module]) {
+                    domainStats[q.module] = { correct: 0, total: 0 };
+                }
+                domainStats[q.module].total++;
+
+                const ans = studentAnswers[q.id];
+                if (q.type === "多重選擇題") {
+                    // Pre-exam rule: ans is array of selected indices. Correct answer is array of correct indices.
+                    const userSelected = ans || [];
+                    const correctIndices = q.answer; // array of indices
+                    
+                    // Count false positives and false negatives
+                    let mismatchCount = 0;
+                    const maxOptions = q.options.length;
+                    for (let optIdx = 0; optIdx < maxOptions; optIdx++) {
+                        const userHas = userSelected.includes(optIdx);
+                        const isCorrectOpt = correctIndices.includes(optIdx);
+                        if (userHas !== isCorrectOpt) {
+                            mismatchCount++;
+                        }
+                    }
+
+                    let factor = 0;
+                    if (mismatchCount === 0) {
+                        factor = 1.0;
+                        correctCount++;
+                        domainStats[q.module].correct++;
+                    } else if (mismatchCount === 1) {
+                        factor = 0.6; // Part score (错一选项)
+                    } else if (mismatchCount === 2) {
+                        factor = 0.2; // Part score (错二選項)
+                    } else {
+                        factor = 0;
+                    }
+                    totalWeightedScore += ptsPerQuestion * factor;
+
+                } else {
+                    // Single choice
+                    if (ans === q.answer) {
+                        correctCount++;
+                        totalWeightedScore += ptsPerQuestion;
+                        domainStats[q.module].correct++;
+                    }
+                }
+            });
+
+            // Format final outputs
+            const displayScore = Math.min(100, Math.round(totalWeightedScore * 10) / 10);
+            document.getElementById("final-score").textContent = displayScore;
+            document.getElementById("final-stats").textContent = `答對：${correctCount} / 30 題 (平均答對率 ${Math.round((correctCount/30)*100)}%)`;
+
+            const name = document.getElementById("student-name").value.trim() || "優秀學者";
+            document.getElementById("greeting-name").textContent = `${name}，您好：`;
+
+            const isPassed = displayScore >= 80;
+            const statusBadge = document.getElementById("status-badge");
+            const ribbon = document.getElementById("passing-ribbon");
+            const resultEvaluation = document.getElementById("result-evaluation");
+
+            if (isPassed) {
+                statusBadge.textContent = "評測通過";
+                statusBadge.className = "mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm";
+                ribbon.textContent = "合格";
+                ribbon.className = "absolute top-0 right-0 py-1.5 px-10 transform translate-x-1/4 translate-y-1/2 rotate-45 text-xs font-bold text-white uppercase tracking-widest text-center shadow-sm w-44 bg-emerald-600";
+                resultEvaluation.textContent = forced 
+                    ? "測驗因時間終止自動送出。恭喜！您的答對率已達到 80% (素養級 TCL 標準)，代表您對講義中的人工智慧基礎概念與應用場景均有非常扎實的掌握。歡迎再次模擬挑戰，並多加利用下方解析複習錯題！"
+                    : "恭喜！您的答對率已順利達到 80% (素養級 TCL 標準) 的合格標準！這代表您對講義中的人工智慧基礎演進、機器學習型態、深度學習框架以及資料隱私與資訊安全等單元均有非常扎實的掌握。以下為您整理了詳細題目的解析，建議您針對仍有疑惑的題目進行複習與加強。";
+            } else {
+                statusBadge.textContent = "未達通過標準";
+                statusBadge.className = "mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 shadow-sm";
+                ribbon.textContent = "尚待加強";
+                ribbon.className = "absolute top-0 right-0 py-1.5 px-10 transform translate-x-1/4 translate-y-1/2 rotate-45 text-xs font-bold text-white uppercase tracking-widest text-center shadow-sm w-44 bg-rose-600";
+                resultEvaluation.textContent = forced
+                    ? "測驗因時間終止自動送出。很遺憾，您目前的得分低於 80 分。請不用灰心，下方我們為您整理了『錯題複習機制』，您可以直接篩選出錯誤題目、對照講義中對應模組的解析進行強化，重整旗鼓後再次發起挑戰！"
+                    : "差一點點就合格了！AIA TCL 證照考試的合格門檻較高（須答對 24 題 / 80 分以上）。不用灰心，這正是加強弱點的絕佳機會！建議您直接點擊下方「只看錯題」按鈕，對照教材解析與對應單元進行重點式複習，相信下一次挑戰您一定能高分合格！";
+            }
+
+            // Populate Domain Mastery List
+            const domainContainer = document.getElementById("domain-mastery-list");
+            domainContainer.innerHTML = "";
+            Object.keys(domainStats).forEach((domainName) => {
+                const stat = domainStats[domainName];
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                
+                const card = document.createElement("div");
+                card.className = "p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-xs font-bold text-slate-700 truncate max-w-[180px]">${domainName}</span>
+                        <span class="text-xs font-black ${pct >= 80 ? 'text-emerald-600' : 'text-slate-500'}">${pct}%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500 ${pct >= 80 ? 'bg-emerald-500' : 'bg-indigo-500'}" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                domainContainer.appendChild(card);
+            });
+
+            // Render all reviews initially
+            filterReview('all');
+        }
+
+        // Filter and Render Review list
+        function filterReview(mode) {
+            const btnAll = document.getElementById("btn-review-all");
+            const btnWrong = document.getElementById("btn-review-wrong");
+
+            if (mode === 'wrong') {
+                btnWrong.className = "flex-1 sm:flex-initial text-xs bg-red-600 text-white px-4 py-2.5 rounded-lg font-bold shadow-md shadow-red-900/10 transition-all";
+                btnAll.className = "flex-1 sm:flex-initial text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg font-bold border border-slate-300 transition-all";
+            } else {
+                btnAll.className = "flex-1 sm:flex-initial text-xs bg-indigo-600 text-white px-4 py-2.5 rounded-lg font-bold shadow-md shadow-indigo-900/10 transition-all";
+                btnWrong.className = "flex-1 sm:flex-initial text-xs bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2.5 rounded-lg font-bold border border-red-200 transition-all";
+            }
+
+            const listContainer = document.getElementById("review-list");
+            listContainer.innerHTML = "";
+
+            let indexForReview = 1;
+            questionBank.forEach((q) => {
+                const ans = studentAnswers[q.id];
+                const isMulti = q.type === "多重選擇題";
+                
+                let isCorrect = false;
+                if (isMulti) {
+                    const userSelected = ans || [];
+                    const correctIndices = q.answer;
+                    let mismatchCount = 0;
+                    for (let optIdx = 0; optIdx < q.options.length; optIdx++) {
+                        if (userSelected.includes(optIdx) !== correctIndices.includes(optIdx)) mismatchCount++;
+                    }
+                    isCorrect = mismatchCount === 0;
+                } else {
+                    isCorrect = ans === q.answer;
+                }
+
+                // If mode is 'wrong' and we are correct, skip rendering
+                if (mode === 'wrong' && isCorrect) return;
+
+                const wrapper = document.createElement("div");
+                wrapper.className = `p-5 bg-white rounded-2xl border transition-all ${
+                    isCorrect ? 'border-slate-200' : 'border-rose-200 ring-1 ring-rose-100'
+                }`;
+
+                // Header info
+                let correctnessBadge = isCorrect 
+                    ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>答對</span>`
+                    : `<span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>答錯 / 部分答對</span>`;
+
+                // Answers summary strings
+                let userAnsStr = "";
+                let correctAnsStr = "";
+
+                if (isMulti) {
+                    const userArr = ans || [];
+                    userAnsStr = userArr.length > 0 
+                        ? userArr.map(idx => String.fromCharCode(65 + idx)).sort().join(", ")
+                        : "未作答";
+                    correctAnsStr = q.answer.map(idx => String.fromCharCode(65 + idx)).sort().join(", ");
+                } else {
+                    userAnsStr = ans !== undefined ? String.fromCharCode(65 + ans) : "未作答";
+                    correctAnsStr = String.fromCharCode(65 + q.answer);
+                }
+
+                // Build Options review content
+                let optionsHtml = "";
+                q.options.forEach((optStr, index) => {
+                    const optChar = String.fromCharCode(65 + index);
+                    const isSelected = isMulti ? (ans || []).includes(index) : ans === index;
+                    const isCorrectOpt = isMulti ? q.answer.includes(index) : q.answer === index;
+                    
+                    let bgClass = "bg-slate-50 border-slate-200 text-slate-700";
+                    let icon = "";
+
+                    if (isSelected && isCorrectOpt) {
+                        bgClass = "bg-emerald-50 border-emerald-300 text-emerald-900";
+                        icon = `<span class="text-emerald-600 font-bold">✓</span>`;
+                    } else if (isSelected && !isCorrectOpt) {
+                        bgClass = "bg-rose-50 border-rose-300 text-rose-900";
+                        icon = `<span class="text-rose-600 font-bold">✗</span>`;
+                    } else if (!isSelected && isCorrectOpt) {
+                        bgClass = "bg-emerald-50/40 border-emerald-200 text-emerald-800 border-dashed";
+                        icon = `<span class="text-emerald-500 text-xs">應選</span>`;
+                    }
+
+                    optionsHtml += `
+                        <div class="flex items-start gap-2.5 p-2.5 rounded-lg border text-xs font-medium ${bgClass}">
+                            <span class="w-5 h-5 flex-shrink-0 rounded bg-white border border-slate-300 flex items-center justify-center font-bold text-[10px]">${optChar}</span>
+                            <span class="flex-grow">${optStr}</span>
+                            ${icon}
+                        </div>
+                    `;
+                });
+
+                // Conditional rendering of scenario hint in the review card
+                let scenarioIndicator = "";
+                if (q.scenario) {
+                    scenarioIndicator = `
+                        <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3 mb-3 text-slate-600 text-[11px] leading-relaxed">
+                            <span class="font-bold text-amber-900 mb-1 block">【題組情境】${q.scenario.title}</span>
+                            ${q.scenario.content.substring(0, 100)}... (可於作答區檢閱完整情境)
+                        </div>
+                    `;
+                }
+
+                wrapper.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-100">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-black text-slate-800 text-sm">第 ${q.id} 題</span>
+                            <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">${q.module}</span>
+                            <span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded">${q.type}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${correctnessBadge}
+                        </div>
+                    </div>
+
+                    ${scenarioIndicator}
+
+                    <p class="text-xs md:text-sm font-bold text-slate-800 mb-4 leading-relaxed">${q.question}</p>
+
+                    <div class="grid sm:grid-cols-2 gap-2.5 mb-4">
+                        ${optionsHtml}
+                    </div>
+
+                    <!-- Answers summary block -->
+                    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs">
+                        <div class="flex flex-wrap gap-4 font-bold text-slate-600 mb-2">
+                            <span>您的答案：<span class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${userAnsStr}</span></span>
+                            <span>正確答案：<span class="text-emerald-600">${correctAnsStr}</span></span>
+                        </div>
+                        <div class="text-slate-500 leading-relaxed font-medium">
+                            <strong class="text-slate-700 font-bold block mb-1">精闢解析與延伸複習：</strong>
+                            ${q.rationale}
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(wrapper);
+                indexForReview++;
+            });
+
+            if (listContainer.innerHTML === "") {
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm font-semibold">
+                        沒有任何需要加強的錯題！您真是太棒了！
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion 筆記軟體特色一頁通</title>
+    <!-- 引入 Tailwind CSS 進行快速排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Google Fonts (Noto Sans TC) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        notion: {
+                            bg: '#ffffff',
+                            text: '#37352f',
+                            gray_bg: '#f7f7f5',
+                            gray_text: '#787774',
+                            border: '#e9e9e7',
+                            quote_border: '#0f172a',
+                            hover: '#efefed',
+                            blue_bg: '#e9f3f7',
+                            blue_text: '#0b6e99',
+                            orange_bg: '#faebdd',
+                            orange_text: '#d9730d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            color: #37352f;
+            background-color: #ffffff;
+            scroll-behavior: smooth;
+        }
+
+        /* 捲動出現的動畫過渡設定 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Notion 風格引言區塊 */
+        .notion-quote {
+            border-left: 4px solid #37352f;
+            padding-left: 1rem;
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: #37352f;
+        }
+
+        /* Notion 風格呼叫區塊 (Callout) */
+        .notion-callout {
+            display: flex;
+            padding: 16px;
+            border-radius: 4px;
+            background-color: #f7f7f5;
+            border: 1px solid rgba(223, 223, 220, 0.5);
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        /* 隱藏原生捲軸，美化頁面 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+
+        /* 勾選清單動畫 */
+        .checklist-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .checklist-item.checked .check-icon {
+            background-color: #2383e2;
+            border-color: #2383e2;
+            color: white;
+        }
+        .checklist-item.checked .item-text {
+            text-decoration: line-through;
+            color: #787774;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans">
+
+    <!-- 頂部進度條 -->
+    <div class="fixed top-0 left-0 h-1 bg-blue-500 z-50 transition-all duration-300" id="progressBar" style="width: 0%;"></div>
+
+    <!-- 標題與 Hero 區塊 -->
+    <header class="pt-24 pb-16 px-6 max-w-4xl mx-auto reveal">
+        <div class="flex items-center gap-4 mb-6">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png" alt="Notion Logo" class="w-12 h-12">
+            <h1 class="text-4xl md:text-5xl font-black text-notion-text tracking-tight">Notion 筆記軟體特色一頁通</h1>
+        </div>
+        
+        <div class="notion-quote mt-8 bg-notion-gray_bg p-6 rounded-r-lg">
+            <p class="font-medium">
+                <span class="text-xl font-bold mr-2">💡 一句話：</span><br>
+                Notion 把文件、資料庫、行事曆、表單、AI 整合在同一個工作區，所有東西都是「可連結的積木」。<br><br>
+                對教學而言，它最大的價值是 <span class="bg-yellow-200 px-1 rounded">把學生看不見的思考過程，變成可記錄、可檢核、可分析的結構化軌跡。</span>
+            </p>
+        </div>
+    </header>
+
+    <!-- 一、核心特色 (Grid Cards) -->
+    <section class="py-16 px-6 bg-white reveal">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-shapes text-gray-400"></i> 一、核心特色
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-cubes text-xl text-gray-600 group-hover:text-blue-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">積木式編輯（Block-based）</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">每一段文字、圖片、待辦、表格都是一個可拖曳重組的「區塊」。一頁筆記可以隨需求自由變形，不被固定版型綁住。</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-green-50 transition">
+                        <i class="fa-solid fa-layer-group text-xl text-gray-600 group-hover:text-green-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">頁面可無限巢狀</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">頁面裡可以開子頁面，適合「課程 → 單元 → 每位學生的歷程」這種層層展開的結構，保持版面乾淨。</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-purple-50 transition">
+                        <i class="fa-solid fa-table-list text-xl text-gray-600 group-hover:text-purple-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">一份資料、多種檢視（Database）</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">同一筆資料可切換成表格、看板、行事曆、相簿、清單、時間軸等視圖。這是 Notion 最強的功能，也是團隊採用它的主因。</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-orange-50 transition">
+                        <i class="fa-solid fa-link text-xl text-gray-600 group-hover:text-orange-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">關聯與彙整（Relation / Rollup）</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">資料庫之間可互相連結。例如「學生資料庫」連到「Sprint 繳交資料庫」，自動帶出每位學生的繳交狀態與進度。</p>
+                </div>
+                <!-- Card 5 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-red-50 transition">
+                        <i class="fa-regular fa-file-code text-xl text-gray-600 group-hover:text-red-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">範本與表單（Templates / Forms）</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">把「AI 協作反思紀錄表」做成範本，學生一鍵套用；或用表單收集作業繳交，資料直接落進後台資料庫。</p>
+                </div>
+                <!-- Card 6 -->
+                <div class="border border-notion-border p-6 rounded-xl hover:shadow-lg hover:-translate-y-1 transition duration-300 bg-white group cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-notion-gray_bg flex items-center justify-center mb-4 group-hover:bg-teal-50 transition">
+                        <i class="fa-solid fa-clock-rotate-left text-xl text-gray-600 group-hover:text-teal-500"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">版本歷史</h3>
+                    <p class="text-notion-gray_text text-sm leading-relaxed">免費版保留 7 天、Plus 30 天、Business 90 天的編輯紀錄。學生誤刪可還原，老師也可藉此查核編輯軌跡。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 二、2026 年的 AI 與整合功能 (Accordion) -->
+    <section class="py-16 px-6 bg-notion-gray_bg reveal">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 border-b border-gray-300 pb-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i> 二、2026 年的 AI 與整合功能
+            </h2>
+            
+            <div class="space-y-3">
+                <!-- Accordion Item 1 -->
+                <div class="bg-white border border-notion-border rounded-lg overflow-hidden">
+                    <button class="accordion-btn w-full px-6 py-4 flex justify-between items-center focus:outline-none hover:bg-gray-50 transition">
+                        <span class="font-bold text-lg flex items-center gap-3">
+                            <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-bold">New</span>
+                            Notion Agent（會「執行」的 AI）
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-5 pt-1 text-notion-gray_text border-t border-gray-50">
+                        3.0 版起，AI 從「給建議」升級為「能執行多步驟任務」——可自動建資料庫、建表單、跨頁面整理資料，單次最長可連續工作約 20 分鐘，猶如專屬數位助理。
+                    </div>
+                </div>
+
+                <!-- Accordion Item 2 -->
+                <div class="bg-white border border-notion-border rounded-lg overflow-hidden">
+                    <button class="accordion-btn w-full px-6 py-4 flex justify-between items-center focus:outline-none hover:bg-gray-50 transition">
+                        <span class="font-bold text-lg">跨工具搜尋與問答</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-5 pt-1 text-notion-gray_text border-t border-gray-50">
+                        用自然語言問「上週那份行動方案在哪」，AI 會跨頁面、資料庫，以及連接的 Slack、Gmail、Google Drive、GitHub 等外部工具找出來，並清楚標出來源連結。
+                    </div>
+                </div>
+
+                <!-- Accordion Item 3 -->
+                <div class="bg-white border border-notion-border rounded-lg overflow-hidden">
+                    <button class="accordion-btn w-full px-6 py-4 flex justify-between items-center focus:outline-none hover:bg-gray-50 transition">
+                        <span class="font-bold text-lg">AI 會議筆記 & 多模型切換</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-5 pt-1 text-notion-gray_text border-t border-gray-50">
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>會議筆記：</strong>可錄音轉錄(支援多語言)，筆記自動摘要並附在對應的會議頁面中。</li>
+                            <li><strong>多模型可選：</strong>2026 年起可在 GPT、Claude、Gemini 之間切換，或用「Auto」讓系統依任務特性自動挑選最佳模型。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Accordion Item 4 -->
+                <div class="bg-white border border-notion-border rounded-lg overflow-hidden">
+                    <button class="accordion-btn w-full px-6 py-4 flex justify-between items-center focus:outline-none hover:bg-gray-50 transition">
+                        <span class="font-bold text-lg">生態系整合：一站式工作區</span>
+                        <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300 accordion-icon"></i>
+                    </button>
+                    <div class="accordion-content hidden px-6 pb-5 pt-1 text-notion-gray_text border-t border-gray-50">
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>手機全功能：</strong>2026 年 1 月（v3.2）起，桌面能做的(建資料庫、建表單、搜尋工作區)手機都能無縫操作。</li>
+                            <li><strong>整合套件：</strong>透過併購陸續補齊了 Mail（信箱）、Calendar（行事曆）、Automate（自動化流程）等，逐步完成「文件＋資料庫＋信箱＋行事曆＋表單＋網站＋AI」的超級整合。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 隱私宣告 Callout -->
+            <div class="notion-callout mt-6">
+                <div class="text-xl">🛡️</div>
+                <div>
+                    <h4 class="font-bold text-sm mb-1">隱私註記</h4>
+                    <p class="text-sm text-notion-gray_text">Notion 官方表明預設 <strong class="text-notion-text">不以使用者內容訓練 AI 模型</strong>；Enterprise 方案採零資料保留 (處理後即刪除)，並具備 SOC 2 / ISO 27001 等企業級安全認證。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 三、放到教學現場：Notion 能幫什麼? (Interactive Tabs) -->
+    <section class="py-16 px-6 bg-white reveal">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-chalkboard-user text-blue-500"></i> 三、放到教學現場：Notion 能幫什麼?
+            </h2>
+            
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Tabs Menu -->
+                <div class="w-full md:w-1/3 flex flex-col gap-2" id="tab-menu">
+                    <button class="tab-btn active text-left px-4 py-3 rounded-lg bg-notion-blue_bg text-notion-blue_text font-bold border border-blue-200 transition" data-target="tab1">
+                        記錄 AI 協作歷程
+                    </button>
+                    <button class="tab-btn text-left px-4 py-3 rounded-lg hover:bg-gray-50 text-notion-gray_text border border-transparent hover:border-gray-200 transition" data-target="tab2">
+                        小碎步繳交與檢核
+                    </button>
+                    <button class="tab-btn text-left px-4 py-3 rounded-lg hover:bg-gray-50 text-notion-gray_text border border-transparent hover:border-gray-200 transition" data-target="tab3">
+                        看見思考而非只看成品
+                    </button>
+                    <button class="tab-btn text-left px-4 py-3 rounded-lg hover:bg-gray-50 text-notion-gray_text border border-transparent hover:border-gray-200 transition" data-target="tab4">
+                        轉成教學研究素材 (SoTL)
+                    </button>
+                </div>
+
+                <!-- Tabs Content -->
+                <div class="w-full md:w-2/3 bg-white border border-notion-border rounded-xl p-8 shadow-sm relative min-h-[200px]">
+                    
+                    <div id="tab1" class="tab-pane">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-nib text-blue-500"></i> Notion 怎麼做？
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            運用「範本 (Templates)」功能，建置標準化的 <strong>「Before AI 起點 → Ping-Pong Log → 採納/拒絕決策」</strong> 紀錄表。學生每次作業只需點擊「新增」，就能載入完整的反思填寫框架。
+                        </p>
+                    </div>
+
+                    <div id="tab2" class="tab-pane hidden">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-blue-500"></i> Notion 怎麼做？
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            建立一個「作業追蹤資料庫」。每個 Sprint 就是一個資料庫項目（Row）。學生將自己的歷程頁面網址貼入對應欄位，老師只需打開「看板視圖 (Board View)」，就能一目了然全班的繳交進度與狀態。
+                        </p>
+                    </div>
+
+                    <div id="tab3" class="tab-pane hidden">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-brain text-blue-500"></i> Notion 怎麼做？
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            透過結構化的欄位設計（例如必填的 Toggle List：為何拒絕 AI 這項建議？），強制學生外顯化他們的價值判斷。這能有效防止「大腦外包」，讓老師評分時有具體的思考軌跡可循。
+                        </p>
+                    </div>
+
+                    <div id="tab4" class="tab-pane hidden">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-microscope text-blue-500"></i> Notion 怎麼做？
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            學生整學期累積下來的歷程資料庫，即是現成且高度結構化的「質性分析文本」。教師可直接匯出成 CSV 進行編碼與分析，作為撰寫教學實踐研究（SoTL）論文的堅實數據。
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 四、方案差異 -->
+    <section class="py-16 px-6 bg-notion-gray_bg reveal">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 border-b border-gray-300 pb-2">
+                <i class="fa-solid fa-tags text-green-600"></i> 四、方案差異（重點摘要）
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Free -->
+                <div class="bg-white p-5 rounded-lg border-2 border-transparent hover:border-gray-200 shadow-sm transition">
+                    <h3 class="font-bold text-lg mb-2">Free <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-1 font-normal">免費版</span></h3>
+                    <ul class="text-sm text-notion-gray_text space-y-2">
+                        <li>• 個人使用為主</li>
+                        <li>• 基本所有編輯功能</li>
+                        <li>• 7 天版本歷史紀錄</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 font-medium">多數教學歷程紀錄已夠用</div>
+                </div>
+                
+                <!-- Plus -->
+                <div class="bg-white p-5 rounded-lg border-2 border-blue-500 shadow-md relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow">教育推薦</div>
+                    <h3 class="font-bold text-lg mb-2">Plus <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded ml-1 font-normal">進階版</span></h3>
+                    <ul class="text-sm text-notion-gray_text space-y-2">
+                        <li>• 支援團隊協作功能</li>
+                        <li>• 不限區塊與檔案上傳</li>
+                        <li>• 30 天版本歷史紀錄</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-blue-600 font-medium">師生教育信箱常有專屬優惠</div>
+                </div>
+
+                <!-- Business -->
+                <div class="bg-white p-5 rounded-lg border-2 border-transparent hover:border-gray-200 shadow-sm transition">
+                    <h3 class="font-bold text-lg mb-2">Business <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-1 font-normal">商業版</span></h3>
+                    <ul class="text-sm text-notion-gray_text space-y-2">
+                        <li>• SAML SSO 登入</li>
+                        <li>• 進階 AI / Agent 功能</li>
+                        <li>• 90 天版本歷史紀錄</li>
+                        <li>• 進階頁面分析數據</li>
+                    </ul>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="bg-white p-5 rounded-lg border-2 border-transparent hover:border-gray-200 shadow-sm transition">
+                    <h3 class="font-bold text-lg mb-2">Enterprise <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-1 font-normal">企業版</span></h3>
+                    <ul class="text-sm text-notion-gray_text space-y-2">
+                        <li>• 零資料保留承諾</li>
+                        <li>• 進階安全(DLP、匯出控管)</li>
+                        <li>• 資料駐留地選項</li>
+                        <li>• 無限制版本歷史</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500 mt-6 italic text-center">
+                * 註：AI/Agent 的進階功能與額度方案仍在演進，導入前建議先以「單一工作流程、30 天試行」評估再全校擴大。
+            </p>
+        </div>
+    </section>
+
+    <!-- 五、給老師的快速上手 (Interactive Checklist) -->
+    <section class="py-16 px-6 bg-white reveal mb-10">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-rocket text-orange-500"></i> 五、給老師的快速上手任務清單
+            </h2>
+            <p class="text-gray-600 mb-6">點擊下方任務打勾，完成您的第一堂 Notion 結合 AI 評量課程準備：</p>
+            
+            <div class="space-y-4">
+                
+                <!-- Task 1 -->
+                <div class="checklist-item flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100">
+                    <div class="check-icon flex-shrink-0 w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center mt-0.5 transition-colors">
+                        <i class="fa-solid fa-check text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                    <input type="checkbox" class="hidden">
+                    <div class="item-text text-lg">
+                        <strong class="text-notion-text">建立課程主頁：</strong>先建一個「課程首頁」，並在底下為每一個教學單元開啟專屬的子頁面，建立清晰架構。
+                    </div>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="checklist-item flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100">
+                    <div class="check-icon flex-shrink-0 w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center mt-0.5 transition-colors">
+                        <i class="fa-solid fa-check text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                    <input type="checkbox" class="hidden">
+                    <div class="item-text text-lg">
+                        <strong class="text-notion-text">製作反思範本：</strong>將設計好的「AI 協作反思紀錄表」設定為 <strong>Template（範本）按鈕</strong>，讓學生每次做作業只需一鍵複製。
+                    </div>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="checklist-item flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100">
+                    <div class="check-icon flex-shrink-0 w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center mt-0.5 transition-colors">
+                        <i class="fa-solid fa-check text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                    <input type="checkbox" class="hidden">
+                    <div class="item-text text-lg">
+                        <strong class="text-notion-text">建置繳交資料庫：</strong>為專題建一個 Database，設定欄位包含「姓名、進度、Notion 連結」。使用 <strong>看板檢視 (Board View)</strong> 追蹤每階段 Sprint 繳交狀況。
+                    </div>
+                </div>
+
+                <!-- Task 4 -->
+                <div class="checklist-item flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100">
+                    <div class="check-icon flex-shrink-0 w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center mt-0.5 transition-colors">
+                        <i class="fa-solid fa-check text-xs opacity-0 transition-opacity"></i>
+                    </div>
+                    <input type="checkbox" class="hidden">
+                    <div class="item-text text-lg">
+                        <strong class="text-notion-text">善用版本歷史查核：</strong>若對學生繳交的內容產生 AI 代筆疑慮，點擊右上角檢視 <strong>版本歷史 (Page History)</strong>，核對學生是否在最後一刻才複製貼上，或是否有循序漸進的思考基線。
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-10 text-gray-400 text-sm border-t border-gray-200">
+        <p>本頁可直接複製、改作，帶回各自課堂使用。</p>
+        <p class="mt-1">內容含 2026 年版本資訊，功能與方案請以 Notion 官方最新公告為準。</p>
+    </footer>
+
+    <!-- 互動邏輯腳本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. 頂部進度條
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById('progressBar').style.width = scrolled + '%';
+            });
+
+            // 2. 捲動浮現動畫 (Intersection Observer)
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealOptions = {
+                threshold: 0.15,
+                rootMargin: "0px 0px -50px 0px"
+            };
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, revealOptions);
+            
+            revealElements.forEach(el => revealObserver.observe(el));
+
+            // 3. 手風琴互動 (Accordion)
+            const accordions = document.querySelectorAll('.accordion-btn');
+            accordions.forEach(acc => {
+                acc.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('.accordion-icon');
+                    
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-180');
+                    }
+                });
+            });
+
+            // 4. 動態標籤切換 (Tabs)
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 移除所有按鈕的 active 狀態
+                    tabBtns.forEach(b => {
+                        b.classList.remove('bg-notion-blue_bg', 'text-notion-blue_text', 'border-blue-200', 'active');
+                        b.classList.add('hover:bg-gray-50', 'text-notion-gray_text', 'border-transparent');
+                    });
+                    
+                    // 隱藏所有內容
+                    tabPanes.forEach(p => p.classList.add('hidden'));
+                    
+                    // 啟動點擊的按鈕與內容
+                    const targetId = btn.getAttribute('data-target');
+                    btn.classList.remove('hover:bg-gray-50', 'text-notion-gray_text', 'border-transparent');
+                    btn.classList.add('bg-notion-blue_bg', 'text-notion-blue_text', 'border-blue-200', 'active');
+                    
+                    const targetPane = document.getElementById(targetId);
+                    targetPane.classList.remove('hidden');
+                    // 加入簡單淡入效果
+                    targetPane.style.opacity = 0;
+                    setTimeout(() => targetPane.style.opacity = 1, 50);
+                    targetPane.style.transition = 'opacity 0.3s ease';
+                });
+            });
+
+            // 5. 互動式待辦清單 (Checklist)
+            const checkItems = document.querySelectorAll('.checklist-item');
+            checkItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('checked');
+                    const icon = this.querySelector('.fa-check');
+                    if (this.classList.contains('checked')) {
+                        icon.classList.remove('opacity-0');
+                    } else {
+                        icon.classList.add('opacity-0');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

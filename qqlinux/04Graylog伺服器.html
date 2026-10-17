@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graylog 資安戰情中心 - 互動體驗模擬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 深色戰情室主題設定 */
+        body {
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* 動畫與過渡效果 */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .slide-in { animation: slideIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 自訂捲軸 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* 互動元件發光效果 */
+        .glow-border:hover {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            border-color: #38bdf8;
+        }
+        
+        /* 側邊欄導航啟用狀態 */
+        .nav-item.active {
+            background-color: #1e293b; /* slate-800 */
+            border-left: 4px solid #38bdf8; /* sky-400 */
+            color: #38bdf8;
+        }
+
+        /* 架構圖連接線動畫 */
+        .flow-line {
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6 50%, transparent 50%);
+            background-size: 100% 20px;
+            animation: flow 1s linear infinite;
+        }
+        .flow-line-h {
+            height: 2px;
+            background: linear-gradient(to right, #3b82f6 50%, transparent 50%);
+            background-size: 20px 100%;
+            animation: flow-h 1s linear infinite;
+        }
+        @keyframes flow { 0% { background-position: 0 0; } 100% { background-position: 0 20px; } }
+        @keyframes flow-h { 0% { background-position: 0 0; } 100% { background-position: 20px 0; } }
+
+        /* 告警節點啟用狀態 */
+        .alert-node.active {
+            border-color: #ef4444 !important; /* red-500 */
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+
+    <!-- 側邊導覽列 -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-sky-400 text-2xl"></i>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-wider">SOC<span class="text-sky-400">Center</span></h1>
+                <p class="text-xs text-slate-400">Powered by Graylog Open</p>
+            </div>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">互動體驗模組</div>
+            <ul class="space-y-1">
+                <li>
+                    <button onclick="switchView('arch-view')" id="btn-arch-view" class="nav-item active w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-sitemap w-5 text-center"></i> 系統運作架構
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('parser-view')" id="btn-parser-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-filter w-5 text-center"></i> 日誌解析模擬器
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('dash-view')" id="btn-dash-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i> 實務應用戰情板
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('alert-view')" id="btn-alert-view" class="nav-item w-full flex items-center gap-3 px-6 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors text-left">
+                        <i class="fa-solid fa-bell w-5 text-center"></i> API 自動化告警
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+            Graylog 經驗分享筆記轉化
+        </div>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="flex-1 bg-slate-950 overflow-y-auto relative">
+        
+        <!-- ==================== 模組 1: 系統架構 ==================== -->
+        <div id="arch-view" class="view-section p-8 fade-in h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">Graylog 系統運作架構</h2>
+                <p class="text-slate-400">點擊各元件查看詳細說明。了解 Graylog、MongoDB 與 OpenSearch 的真實分工。</p>
+            </header>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 mt-12 relative">
+                
+                <!-- 來源端 -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 w-40 text-center glow-border cursor-pointer" onclick="showInfo('info-endpoints')">
+                        <i class="fa-brands fa-linux text-2xl text-slate-300 mb-2"></i>
+                        <div class="font-bold">伺服器 (Syslog)</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 w-40 text-center glow-border cursor-pointer" onclick="showInfo('info-nxlog')">
+                        <i class="fa-brands fa-windows text-2xl text-blue-400 mb-2"></i>
+                        <div class="font-bold">Windows (NXLog)</div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 w-40 text-center glow-border cursor-pointer" onclick="showInfo('info-fw')">
+                        <i class="fa-solid fa-wall-brick text-2xl text-orange-400 mb-2"></i>
+                        <div class="font-bold">防火牆 (CEF)</div>
+                    </div>
+                </div>
+
+                <!-- 橫向資料流 -->
+                <div class="w-16 flex items-center justify-center relative">
+                    <div class="flow-line-h w-full absolute"></div>
+                    <i class="fa-solid fa-chevron-right text-blue-500 z-10 bg-slate-950"></i>
+                </div>
+
+                <!-- 核心伺服器區 -->
+                <div class="relative p-6 border-2 border-dashed border-sky-500/30 rounded-xl bg-sky-900/10">
+                    <div class="absolute -top-3 left-4 bg-slate-950 px-2 text-sky-400 font-bold text-sm">Graylog 核心節點</div>
+                    
+                    <!-- Graylog Server -->
+                    <div class="bg-sky-900 border border-sky-400 p-6 rounded-lg w-64 text-center glow-border cursor-pointer mb-8 relative shadow-[0_0_15px_rgba(56,189,248,0.2)]" onclick="showInfo('info-graylog')">
+                        <i class="fa-solid fa-server text-4xl text-white mb-3"></i>
+                        <h3 class="text-xl font-bold text-white">Graylog Server</h3>
+                        <p class="text-xs text-sky-200 mt-1">處理解析 / Web UI / 告警</p>
+                        
+                        <!-- Journal 緩衝區標示 -->
+                        <div class="absolute -bottom-3 right-4 bg-yellow-600 text-white text-xs px-2 py-1 rounded-full font-bold cursor-help" title="緩衝區：若磁碟太慢，日誌會暫存於此(預設5G)">
+                            Message Journal
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between relative px-4">
+                        <!-- 資料流向 DB -->
+                        <div class="absolute top-0 left-[20%] flow-line h-8 -mt-8"></div>
+                        <div class="absolute top-0 right-[20%] flow-line h-8 -mt-8"></div>
+
+                        <!-- MongoDB -->
+                        <div class="bg-slate-800 border border-slate-600 p-4 rounded-lg w-28 text-center glow-border cursor-pointer" onclick="showInfo('info-mongo')">
+                            <i class="fa-solid fa-leaf text-2xl text-green-500 mb-2"></i>
+                            <div class="font-bold text-sm">MongoDB</div>
+                        </div>
+
+                        <!-- OpenSearch -->
+                        <div class="bg-slate-800 border border-slate-600 p-4 rounded-lg w-28 text-center glow-border cursor-pointer" onclick="showInfo('info-opensearch')">
+                            <i class="fa-solid fa-magnifying-glass text-2xl text-sky-300 mb-2"></i>
+                            <div class="font-bold text-sm">OpenSearch</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 資訊說明面板 -->
+            <div id="arch-info-panel" class="mt-12 bg-slate-800/50 border border-slate-700 rounded-lg p-6 min-h-[120px]">
+                <div class="text-slate-400 text-center italic mt-4"><i class="fa-solid fa-hand-pointer mr-2"></i>請點擊上方架構圖中的元件以查看詳細說明。</div>
+            </div>
+            
+        </div>
+
+        <!-- ==================== 模組 2: 日誌解析模擬 ==================== -->
+        <div id="parser-view" class="view-section p-8 hidden h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">日誌解析與情資豐富化 (Enrichment)</h2>
+                <p class="text-slate-400">原始日誌只是文字垃圾，透過解析與對照表，才能變成戰情板上的數據。</p>
+            </header>
+
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- 原始日誌 -->
+                <div class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden shadow-lg">
+                    <div class="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-300">步驟一：接收原始日誌 (Raw Log)</span>
+                        <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Port: 514</span>
+                    </div>
+                    <div class="p-4 font-mono text-sm text-slate-400 break-all">
+                        &lt;86&gt;Jun 02 08:15:32 fw-core-01 sshd[12345]: Failed password for invalid user root from <span class="text-red-400 font-bold bg-red-900/30 px-1">185.220.101.14</span> port 38192 ssh2
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-4">
+                    <button onclick="runSimStep(1)" id="sim-btn-1" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold transition-colors shadow-[0_0_10px_rgba(37,99,235,0.5)]">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> 執行欄位解析 (Extractors)
+                    </button>
+                    <button onclick="runSimStep(2)" id="sim-btn-2" class="bg-slate-700 text-slate-400 px-6 py-2 rounded font-bold cursor-not-allowed transition-colors" disabled>
+                        <i class="fa-solid fa-globe mr-2"></i> 加上情資 (GeoIP & 威脅清單)
+                    </button>
+                    <button onclick="runSimStep(0)" class="text-slate-500 hover:text-slate-300 px-4 py-2"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+                </div>
+
+                <!-- 解析後結果區 (動態呈現) -->
+                <div id="sim-result" class="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden shadow-lg min-h-[250px] opacity-0 transition-opacity duration-500">
+                    <div class="bg-slate-800 px-4 py-2 border-b border-slate-700">
+                        <span class="text-sm font-bold text-sky-400" id="sim-result-title">解析結果</span>
+                    </div>
+                    <div class="p-4">
+                        <table class="w-full text-sm text-left">
+                            <tbody id="sim-table-body" class="divide-y divide-slate-800">
+                                <!-- 內容由 JS 產生 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 模組 3: 實務應用戰情板 ==================== -->
+        <div id="dash-view" class="view-section hidden h-full flex flex-col">
+            <header class="p-8 pb-4">
+                <h2 class="text-2xl font-bold text-white mb-2">實務應用戰情板 (Dashboards)</h2>
+                <p class="text-slate-400">點擊左側情境，模擬 Graylog 面板如何將資料視覺化，供掌官與工程師查閱。</p>
+            </header>
+
+            <div class="flex flex-1 overflow-hidden px-8 pb-8 gap-6">
+                <!-- 情境選單 -->
+                <div class="w-64 bg-slate-900 border border-slate-700 rounded-lg overflow-hidden flex flex-col h-full">
+                    <div class="bg-slate-800 px-4 py-3 font-bold text-white border-b border-slate-700">選擇監控場景</div>
+                    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+                        <button onclick="loadDash('ad')" class="dash-btn active w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-300 hover:bg-slate-800 transition">
+                            <i class="fa-brands fa-windows text-blue-400 w-5"></i> AD 異常登入分析
+                        </button>
+                        <button onclick="loadDash('vpn')" class="dash-btn w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-300 hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-network-wired text-green-400 w-5"></i> VPN 跨境連線監控
+                        </button>
+                        <button onclick="loadDash('file')" class="dash-btn w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-300 hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-folder-minus text-orange-400 w-5"></i> NAS 機密檔案刪除
+                        </button>
+                        <button onclick="loadDash('dns')" class="dash-btn w-full text-left px-4 py-3 rounded text-sm font-medium text-slate-300 hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-globe text-purple-400 w-5"></i> DNS 惡意網域查詢
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 面板展示區 -->
+                <div class="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-6 overflow-y-auto" id="dash-display">
+                    <!-- 內容由 JS 動態載入 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 模組 4: 自動化告警 ==================== -->
+        <div id="alert-view" class="view-section p-8 hidden h-full">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-2">告警與自動化防禦 (Alert & HTTP API)</h2>
+                <p class="text-slate-400">Open 版雖內建選項較少，但透過 HTTP API 串接自製 Python 腳本，即可實現無限可能 (如 Line 通知、聯防封鎖)。</p>
+            </header>
+
+            <div class="max-w-5xl mx-auto mt-12">
+                <div class="flex justify-center mb-12">
+                    <button onclick="triggerAlertFlow()" id="btn-trigger" class="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i> 模擬觸發告警：偵測到暴力破解
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between gap-4">
+                    
+                    <!-- Node 1 -->
+                    <div id="anode-1" class="alert-node w-1/4 bg-slate-800 border-2 border-slate-600 rounded-lg p-4 text-center">
+                        <i class="fa-solid fa-filter text-3xl text-sky-400 mb-3"></i>
+                        <h4 class="font-bold text-white mb-1">Graylog 條件觸發</h4>
+                        <p class="text-xs text-slate-400">10分鐘內同IP登入失敗>5次</p>
+                    </div>
+
+                    <i class="fa-solid fa-arrow-right text-2xl text-slate-600" id="arr-1"></i>
+
+                    <!-- Node 2 -->
+                    <div id="anode-2" class="alert-node w-1/4 bg-slate-800 border-2 border-slate-600 rounded-lg p-4 text-center relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white text-[10px] px-2 py-0.5 rounded">HTTP API</div>
+                        <i class="fa-brands fa-python text-3xl text-yellow-400 mb-3"></i>
+                        <h4 class="font-bold text-white mb-1">自訂中介腳本</h4>
+                        <p class="text-xs text-slate-400">接收 JSON 並解析內容</p>
+                    </div>
+
+                    <div class="flex flex-col gap-6 w-12 items-center">
+                        <i class="fa-solid fa-arrow-up-right text-2xl text-slate-600" id="arr-2a"></i>
+                        <i class="fa-solid fa-arrow-down-right text-2xl text-slate-600" id="arr-2b"></i>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="w-1/4 flex flex-col gap-6">
+                        <div id="anode-3a" class="alert-node bg-slate-800 border-2 border-slate-600 rounded-lg p-4 text-center">
+                            <i class="fa-brands fa-line text-3xl text-green-500 mb-3"></i>
+                            <h4 class="font-bold text-white mb-1">Line Notify</h4>
+                            <p class="text-xs text-slate-400">傳送圖文告警至戰情群組</p>
+                        </div>
+                        <div id="anode-3b" class="alert-node bg-slate-800 border-2 border-slate-600 rounded-lg p-4 text-center">
+                            <i class="fa-solid fa-wall-brick text-3xl text-orange-500 mb-3"></i>
+                            <h4 class="font-bold text-white mb-1">自動阻擋</h4>
+                            <p class="text-xs text-slate-400">呼叫防火牆 API 封鎖來源</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 流程終端訊息 -->
+                <div id="alert-msg" class="mt-12 text-center text-green-400 font-mono text-lg opacity-0 transition-opacity h-8">
+                    > 防禦措施已啟動，威脅已排除。
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // ================= 切換視圖 =================
+        function switchView(viewId) {
+            // 隱藏所有視圖
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            // 移除選單 active
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            // 顯示目標
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            // 找到對應按鈕並 active
+            const btnId = 'btn-' + viewId;
+            const btn = document.getElementById(btnId);
+            if(btn) btn.classList.add('active');
+
+            // 載入預設 dashboard
+            if(viewId === 'dash-view' && !document.getElementById('dash-display').innerHTML.trim()) {
+                loadDash('ad');
+            }
+        }
+
+        // ================= 架構圖互動 =================
+        const archInfo = {
+            'info-endpoints': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-brands fa-linux text-slate-300"></i> 端點日誌來源</h3>
+                               <p class="text-slate-300">各種設備透過 <b>Syslog, CEF, GELF</b> 等協定將日誌送出。<br><span class="text-sky-400 font-bold">小提示：</span>同類型協定只需在 Graylog 開啟一個 Input Port，後續再用條件過濾即可，以節省系統資源。</p>`,
+            'info-nxlog': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-brands fa-windows text-blue-400"></i> NXLog (社群版)</h3>
+                           <p class="text-slate-300">針對 Windows Event Log 或寫入資料庫/文字檔的特殊日誌，強烈建議使用 NXLog 收集，因為它<b>原生支援 GELF 格式</b>，送出前就幫你切好欄位，大大減輕 Graylog 的負擔。</p>`,
+            'info-fw': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-wall-brick text-orange-400"></i> 防火牆 (CEF 格式)</h3>
+                        <p class="text-slate-300">防毒或防火牆設備送出的日誌，可透過標準 Syslog 或 CEF 格式傳送。Graylog 的 Marketplace 上有許多現成的 Extractors (解析包) 可直接套用。</p>`,
+            'info-graylog': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-server text-sky-400"></i> Graylog Server 本體</h3>
+                             <p class="text-slate-300">核心引擎，負責接收日誌、套用 Pipelines 處理、提供 Web UI 以及發送告警。<br>
+                             <span class="text-yellow-500 font-bold">★ Message Journal：</span> 當底層硬碟(IO)太慢寫不進 OpenSearch 時，日誌會先暫存於此(預設5G)。若塞滿則會遺失日誌。</p>`,
+            'info-mongo': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-leaf text-green-500"></i> MongoDB</h3>
+                           <p class="text-slate-300"><b>常見迷思破解：</b> 很多人以為日誌存在 MongoDB，所以查詢很快？<span class="text-red-400 font-bold">錯！</span><br>
+                           在 Graylog 架構中，MongoDB <b>絕對不存任何日誌資料</b>，它只用來存放系統設定值、使用者帳號與看版設定。</p>`,
+            'info-opensearch': `<h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-magnifying-glass text-sky-300"></i> OpenSearch (日誌儲存引擎)</h3>
+                                <p class="text-slate-300">Graylog 所有的 <b>日誌資料 (Log Data)</b> 都存放在這裡！<br>
+                                它是維護日誌伺服器的重中之重。實務上只要伺服器規格不差 (SSD、大記憶體)，單台即可輕鬆扛下每天 260GB 的日誌量。</p>`
+        };
+
+        function showInfo(key) {
+            const panel = document.getElementById('arch-info-panel');
+            panel.innerHTML = archInfo[key];
+            panel.classList.remove('fade-in');
+            void panel.offsetWidth; // trigger reflow
+            panel.classList.add('fade-in');
+        }
+
+        // ================= 日誌解析模擬器 =================
+        const simData = {
+            step1: `
+                <tr><td class="py-2 px-3 font-bold text-slate-300 w-1/3">timestamp</td><td class="py-2 px-3 text-sky-300 font-mono">2026-06-02 08:15:32</td></tr>
+                <tr><td class="py-2 px-3 font-bold text-slate-300">source</td><td class="py-2 px-3 text-sky-300 font-mono">fw-core-01</td></tr>
+                <tr><td class="py-2 px-3 font-bold text-slate-300">application</td><td class="py-2 px-3 text-sky-300 font-mono">sshd</td></tr>
+                <tr><td class="py-2 px-3 font-bold text-slate-300">action</td><td class="py-2 px-3 text-red-400 font-mono">Failed password</td></tr>
+                <tr><td class="py-2 px-3 font-bold text-slate-300">src_ip</td><td class="py-2 px-3 text-orange-400 font-mono">185.220.101.14</td></tr>
+                <tr><td class="py-2 px-3 font-bold text-slate-300">user</td><td class="py-2 px-3 text-sky-300 font-mono">root</td></tr>
+            `,
+            step2: `
+                <tr><td class="py-2 px-3 font-bold text-slate-300">src_ip</td><td class="py-2 px-3 text-orange-400 font-mono">185.220.101.14</td></tr>
+                <tr class="bg-blue-900/20"><td class="py-2 px-3 font-bold text-blue-300">↳ geoip_country</td><td class="py-2 px-3 text-blue-300 font-mono"><i class="fa-solid fa-flag mr-1"></i> RU (Russia) <span class="text-xs text-slate-500 ml-2">※ 掌官最愛的地圖資料來源</span></td></tr>
+                <tr class="bg-blue-900/20"><td class="py-2 px-3 font-bold text-blue-300">↳ geoip_city</td><td class="py-2 px-3 text-blue-300 font-mono">Moscow</td></tr>
+                <tr class="bg-red-900/20"><td class="py-2 px-3 font-bold text-red-400">↳ threat_intel (OTX)</td><td class="py-2 px-3 text-red-400 font-mono font-bold"><i class="fa-solid fa-skull mr-1"></i> Malicious IP (Brute-forcer)</td></tr>
+            `
+        };
+
+        function runSimStep(step) {
+            const resultBox = document.getElementById('sim-result');
+            const tbody = document.getElementById('sim-table-body');
+            const title = document.getElementById('sim-result-title');
+            
+            const btn1 = document.getElementById('sim-btn-1');
+            const btn2 = document.getElementById('sim-btn-2');
+
+            if (step === 0) {
+                // 重置
+                resultBox.style.opacity = '0';
+                btn1.classList.replace('bg-slate-700', 'bg-blue-600');
+                btn1.classList.replace('text-slate-400', 'text-white');
+                btn1.classList.add('hover:bg-blue-500', 'shadow-[0_0_10px_rgba(37,99,235,0.5)]');
+                btn1.disabled = false;
+                
+                btn2.classList.replace('bg-green-600', 'bg-slate-700');
+                btn2.classList.replace('text-white', 'text-slate-400');
+                btn2.classList.remove('hover:bg-green-500', 'shadow-[0_0_10px_rgba(22,163,74,0.5)]');
+                btn2.disabled = true;
+                return;
+            }
+
+            resultBox.style.opacity = '1';
+
+            if (step === 1) {
+                title.innerText = "提取結構化欄位 (Extracted Fields)";
+                title.className = "text-sm font-bold text-sky-400";
+                tbody.innerHTML = simData.step1;
+                
+                // 按鈕狀態切換
+                btn1.classList.replace('bg-blue-600', 'bg-slate-700');
+                btn1.classList.replace('text-white', 'text-slate-400');
+                btn1.classList.remove('hover:bg-blue-500', 'shadow-[0_0_10px_rgba(37,99,235,0.5)]');
+                btn1.disabled = true;
+
+                btn2.classList.replace('bg-slate-700', 'bg-green-600');
+                btn2.classList.replace('text-slate-400', 'text-white');
+                btn2.classList.add('hover:bg-green-500', 'shadow-[0_0_10px_rgba(22,163,74,0.5)]');
+                btn2.disabled = false;
+                btn2.classList.remove('cursor-not-allowed');
+            } else if (step === 2) {
+                title.innerText = "豐富化結果：利用 Lookup Tables / OTX 比對";
+                title.className = "text-sm font-bold text-green-400";
+                // 保留原本的，加上新的
+                tbody.innerHTML = simData.step1 + simData.step2;
+                
+                btn2.classList.replace('bg-green-600', 'bg-slate-700');
+                btn2.classList.replace('text-white', 'text-slate-400');
+                btn2.classList.remove('hover:bg-green-500', 'shadow-[0_0_10px_rgba(22,163,74,0.5)]');
+                btn2.disabled = true;
+            }
+        }
+
+        // ================= 戰情版切換 =================
+        const dashData = {
+            'ad': {
+                title: 'AD (Active Directory) 異常登入分析',
+                desc: '經典案例：監控特定時間帶（如清晨5點）的橫向移動嘗試，或找出單週手動解鎖超過一萬次的異常帳號。',
+                html: `
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+                            <div class="text-slate-400 text-sm mb-1">今日登入失敗總數</div>
+                            <div class="text-3xl font-bold text-red-400">1,284</div>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+                            <div class="text-slate-400 text-sm mb-1">鎖定帳號數量</div>
+                            <div class="text-3xl font-bold text-orange-400">15</div>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+                            <div class="text-slate-400 text-sm mb-1">成功解鎖次數</div>
+                            <div class="text-3xl font-bold text-sky-400">42</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded p-4">
+                        <div class="text-white font-bold mb-4">登入失敗時間分佈 (抓出清晨 5 點的暗中嘗試)</div>
+                        <div class="h-32 flex items-end gap-2">
+                            <div class="w-full bg-slate-700 h-[10%] rounded-t" title="00:00"></div>
+                            <div class="w-full bg-slate-700 h-[15%] rounded-t" title="01:00"></div>
+                            <div class="w-full bg-slate-700 h-[5%] rounded-t" title="02:00"></div>
+                            <div class="w-full bg-slate-700 h-[8%] rounded-t" title="03:00"></div>
+                            <div class="w-full bg-slate-700 h-[20%] rounded-t" title="04:00"></div>
+                            <div class="w-full bg-red-500 h-[90%] rounded-t glow-border cursor-help" title="05:00 - 異常高峰！"></div>
+                            <div class="w-full bg-slate-700 h-[30%] rounded-t" title="06:00"></div>
+                            <div class="w-full bg-slate-700 h-[10%] rounded-t" title="07:00"></div>
+                            <div class="w-full bg-sky-500 h-[60%] rounded-t" title="08:00 (正常上班)"></div>
+                            <div class="w-full bg-sky-500 h-[85%] rounded-t" title="09:00"></div>
+                        </div>
+                    </div>
+                `
+            },
+            'vpn': {
+                title: 'VPN 跨境連線監控 (長官最愛)',
+                desc: '疫情期間應用延伸：高階主管通常在國內，若其帳號從海外 IP (非 TW) 登入 VPN，立刻發出告警，防止帳號盜用。',
+                html: `
+                    <div class="flex gap-6">
+                        <div class="w-1/2 bg-slate-800 border border-slate-700 rounded p-4 text-center">
+                            <i class="fa-solid fa-earth-asia text-6xl text-slate-600 mb-4 mt-2"></i>
+                            <div class="text-white font-bold mb-2">VPN 來源地圖 (GeoIP)</div>
+                            <p class="text-sm text-slate-400">這就是報告中長官最愛看、有助於申請經費的「世界地圖戰情版」。</p>
+                            <div class="mt-4 flex justify-center gap-4">
+                                <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded text-sm"><i class="fa-solid fa-location-dot"></i> TW (85%)</span>
+                                <span class="bg-red-900/50 text-red-400 px-3 py-1 rounded text-sm font-bold animate-pulse"><i class="fa-solid fa-location-dot"></i> CN (15%) - 異常</span>
+                            </div>
+                        </div>
+                        <div class="w-1/2 flex flex-col gap-4">
+                            <div class="bg-slate-800 border border-red-900/50 rounded p-4 flex items-center gap-4 border-l-4 border-l-red-500">
+                                <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                                <div>
+                                    <div class="text-white font-bold">高階主管異常登入告警</div>
+                                    <div class="text-sm text-slate-400">User: <span class="text-white">CEO_Chen</span> | 從 <span class="text-red-400">RU (俄羅斯)</span> 登入</div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded p-4">
+                                <div class="text-white font-bold mb-2">委外廠商登入排行</div>
+                                <ul class="space-y-2 text-sm text-slate-300">
+                                    <li class="flex justify-between border-b border-slate-700 pb-1"><span>Vendor_A</span> <span>142 次</span></li>
+                                    <li class="flex justify-between border-b border-slate-700 pb-1"><span>Vendor_B</span> <span>89 次</span></li>
+                                    <li class="flex justify-between"><span>Vendor_C</span> <span>12 次</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'file': {
+                title: 'NAS 機密檔案刪除監控',
+                desc: '防範內部威脅：上市櫃公司常遇到員工離職前惡意大量刪除檔案，平時若無收集日誌將缺乏法律證據。',
+                html: `
+                    <div class="bg-slate-800 border border-slate-700 rounded p-4 mb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-white font-bold text-lg"><i class="fa-solid fa-trash-can text-orange-400 mr-2"></i> 檔案刪除事件 (近 24 小時)</div>
+                            <div class="bg-orange-900/30 text-orange-400 px-3 py-1 rounded text-sm border border-orange-700">總計: 4,502 件</div>
+                        </div>
+                        <table class="w-full text-sm text-left text-slate-300">
+                            <thead class="text-xs uppercase bg-slate-700 text-slate-400">
+                                <tr><th class="px-4 py-2">時間</th><th class="px-4 py-2">操作者 (User)</th><th class="px-4 py-2">檔案路徑</th><th class="px-4 py-2">設備IP</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700 font-mono">
+                                <tr class="bg-red-900/20"><td class="px-4 py-2 text-slate-400">14:22:05</td><td class="px-4 py-2 text-red-400 font-bold">emp_jason</td><td class="px-4 py-2 truncate max-w-[200px]" title="/Sales/2026_Customer_List.xlsx">/Sales/2026_Customer_List.xlsx</td><td class="px-4 py-2">10.1.5.88</td></tr>
+                                <tr class="bg-red-900/20"><td class="px-4 py-2 text-slate-400">14:22:06</td><td class="px-4 py-2 text-red-400 font-bold">emp_jason</td><td class="px-4 py-2 truncate max-w-[200px]" title="/Sales/Q1_Revenue_Report.pdf">/Sales/Q1_Revenue_Report.pdf</td><td class="px-4 py-2">10.1.5.88</td></tr>
+                                <tr><td class="px-4 py-2 text-slate-400">14:15:10</td><td class="px-4 py-2 text-sky-300">admin</td><td class="px-4 py-2 truncate max-w-[200px]">/IT/temp_logs.zip</td><td class="px-4 py-2">10.0.0.5</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="mt-4 text-xs text-slate-500"><i class="fa-solid fa-circle-info"></i> 注意：emp_jason 短時間內出現大量刪除行為。</div>
+                    </div>
+                `
+            },
+            'dns': {
+                title: 'DNS 查詢日誌與惡意網域',
+                desc: '過濾內部威脅：透過收容 Bind9 或內部 DNS 的 log，結合熱度圖，找出是否有內部主機不斷連線至博弈網站或釣魚連結。',
+                html: `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-800 border border-slate-700 rounded p-4">
+                            <div class="text-white font-bold mb-4">Top 10 解析網域 (含熱度圖概念)</div>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">google.com</span><span class="text-sky-400">45,120</span></div>
+                                    <div class="w-full bg-slate-700 rounded h-2"><div class="bg-sky-500 h-2 rounded" style="width: 100%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">microsoft.com</span><span class="text-sky-400">38,500</span></div>
+                                    <div class="w-full bg-slate-700 rounded h-2"><div class="bg-sky-500 h-2 rounded" style="width: 85%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><span class="text-red-400 font-bold">casino-vip888.net (博弈)</span><span class="text-red-400">12,400</span></div>
+                                    <div class="w-full bg-slate-700 rounded h-2"><div class="bg-red-500 h-2 rounded" style="width: 40%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1"><span class="text-red-400 font-bold">malware-download.xyz</span><span class="text-red-400">5,200</span></div>
+                                    <div class="w-full bg-slate-700 rounded h-2"><div class="bg-red-600 h-2 rounded shadow-[0_0_8px_red]" style="width: 15%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 border border-slate-700 rounded p-4 flex flex-col justify-center items-center text-center">
+                            <i class="fa-solid fa-shield-virus text-5xl text-purple-400 mb-4"></i>
+                            <h4 class="text-white font-bold text-lg mb-2">威脅獵捕 (Threat Hunting)</h4>
+                            <p class="text-sm text-slate-400">內部本應封鎖的網站，居然在 DNS 查詢量排進前十名。這代表防火牆規則可能有漏洞，或者有特定主機已中毒正在大量嘗試連線外網。</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        function loadDash(key) {
+            // 更新選單樣式
+            document.querySelectorAll('.dash-btn').forEach(el => el.classList.remove('active', 'bg-slate-800', 'border-l-4', 'border-sky-400'));
+            const clickedBtn = Array.from(document.querySelectorAll('.dash-btn')).find(b => b.getAttribute('onclick').includes(key));
+            if (clickedBtn) {
+                clickedBtn.classList.add('active', 'bg-slate-800', 'border-l-4', 'border-sky-400');
+            }
+
+            const display = document.getElementById('dash-display');
+            display.innerHTML = `
+                <div class="slide-in">
+                    <h3 class="text-xl font-bold text-white mb-1">${dashData[key].title}</h3>
+                    <p class="text-sm text-slate-400 mb-6 pb-4 border-b border-slate-700">${dashData[key].desc}</p>
+                    ${dashData[key].html}
+                </div>
+            `;
+        }
+
+        // ================= 告警流程模擬 =================
+        function triggerAlertFlow() {
+            const btn = document.getElementById('btn-trigger');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            // Reset
+            document.querySelectorAll('.alert-node').forEach(el => el.classList.remove('active'));
+            document.getElementById('arr-1').classList.replace('text-sky-400', 'text-slate-600');
+            document.getElementById('arr-2a').classList.replace('text-yellow-400', 'text-slate-600');
+            document.getElementById('arr-2b').classList.replace('text-yellow-400', 'text-slate-600');
+            document.getElementById('alert-msg').style.opacity = '0';
+
+            // Flow Animation
+            setTimeout(() => {
+                document.getElementById('anode-1').classList.add('active');
+            }, 500);
+
+            setTimeout(() => {
+                document.getElementById('arr-1').classList.replace('text-slate-600', 'text-sky-400');
+                document.getElementById('anode-2').classList.add('active');
+            }, 1500);
+
+            setTimeout(() => {
+                document.getElementById('arr-2a').classList.replace('text-slate-600', 'text-yellow-400');
+                document.getElementById('arr-2b').classList.replace('text-slate-600', 'text-yellow-400');
+                document.getElementById('anode-3a').classList.add('active');
+                document.getElementById('anode-3b').classList.add('active');
+            }, 2500);
+
+            setTimeout(() => {
+                document.getElementById('alert-msg').style.opacity = '1';
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }, 3500);
+        }
+
+    </script>
+</body>
+</html>

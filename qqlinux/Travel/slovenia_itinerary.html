@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>斯洛維尼亞自駕行程 8/6–8/11</title>
+<style>
+  :root{
+    --bg:#f6f7f4; --card:#ffffff; --ink:#1f2a30; --muted:#5f6f78;
+    --line:#e4e8e4; --accent:#2f7d68; --accent2:#c2532a; --warn:#b8860b;
+    --soft:#eef4f1; --soft2:#fbeee6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    line-height:1.6;}
+  .wrap{max-width:820px;margin:0 auto;padding:22px 16px 60px;}
+  header{background:linear-gradient(135deg,#2f7d68,#22615a);color:#fff;border-radius:16px;
+    padding:22px 22px 20px;box-shadow:0 6px 20px rgba(34,97,90,.18);}
+  header h1{margin:0 0 4px;font-size:22px;letter-spacing:.5px;}
+  header .sub{opacity:.9;font-size:14px;}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+    padding:5px 10px;border-radius:999px;font-size:12.5px;}
+  .day{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    margin-top:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.03);}
+  .day-head{display:flex;align-items:center;gap:12px;padding:14px 18px;
+    border-bottom:1px solid var(--line);background:var(--soft);}
+  .day-num{background:var(--accent);color:#fff;width:44px;height:44px;border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto;line-height:1.1;}
+  .day-num b{font-size:16px;} .day-num span{font-size:10px;opacity:.9;}
+  .day-title{font-size:16px;font-weight:700;}
+  .day-route{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .stay{margin-left:auto;font-size:12px;color:var(--accent);background:var(--soft);
+    border:1px solid #d6e6df;padding:4px 9px;border-radius:8px;white-space:nowrap;}
+  .body{padding:6px 18px 16px;}
+  .row{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .row:last-child{border-bottom:none;}
+  .time{flex:0 0 62px;font-weight:700;font-size:13px;color:var(--accent2);padding-top:1px;}
+  .what{font-size:14px;}
+  .what .n{color:var(--muted);font-size:12.5px;}
+  .drive{color:var(--muted);font-size:12.5px;font-style:italic;}
+  .box{border-radius:14px;padding:16px 18px;margin-top:16px;border:1px solid var(--line);}
+  .box h3{margin:0 0 10px;font-size:15px;}
+  .box.train{background:var(--soft);border-color:#cfe3db;}
+  .box.warn{background:#fff8ea;border-color:#f0dfb0;}
+  .box.info{background:var(--card);}
+  .tt{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;}
+  .tt th,.tt td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;}
+  .tt th{color:var(--muted);font-weight:600;}
+  .pill{display:inline-block;background:var(--accent);color:#fff;font-size:11px;
+    padding:2px 8px;border-radius:6px;margin-left:6px;}
+  ul.clean{margin:6px 0 0;padding-left:18px;} ul.clean li{margin:5px 0;font-size:13.5px;}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:22px;}
+  a{color:var(--accent);}
+  .hl{background:#fdf3d6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🇸🇮 斯洛維尼亞自駕行程</h1>
+    <div class="sub">2026/8/3（一）抵達 ～ 8/11（二）賦歸・研討會 + 自駕環線</div>
+    <div class="facts">
+      <span class="chip">🎓 研討會 8/4–8/5（ICITL）</span>
+      <span class="chip">🚗 取車 8/6 Ljubljana</span>
+      <span class="chip">🔑 還車 8/11 Ljubljana</span>
+      <span class="chip">🛏 Ljubljana（前）×3</span>
+      <span class="chip">🛏 Bled ×2</span>
+      <span class="chip">🛏 Most na Soči ×2</span>
+      <span class="chip">🛏 Ljubljana（末）×1</span>
+      <span class="chip">✈️ 8/11 20:15 TK1064 LJU→IST→TPE</span>
+    </div>
+  </header>
+
+  <!-- DAY 8/3 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/3</b><span>一</span></div>
+      <div>
+        <div class="day-title">抵達盧比安那・老城採購散步</div>
+        <div class="day-route">中午抵達 Ljubljana → 市區</div>
+      </div>
+      <div class="stay">🛏 Ljubljana</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">中午</div><div class="what">抵達 <b>Ljubljana</b>、入住飯店、放行李</div></div>
+      <div class="row"><div class="time">下午</div><div class="what">老城散步：<b>三重橋・龍橋・中央市場・Prešeren 廣場</b>，搭纜車上 <b>Ljubljana 城堡</b>俯瞰全城</div></div>
+      <div class="row"><div class="time">傍晚</div><div class="what">先探路 <b>Cukrček 巧克力店</b>（心型巧克力，可先看款式、比價，最後幾天再大量買）＋河畔晚餐</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 8/4 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/4</b><span>二</span></div>
+      <div>
+        <div class="day-title">研討會開場</div>
+        <div class="day-route">Conference Opening・Ljubljana</div>
+      </div>
+      <div class="stay">🛏 Ljubljana</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">全天</div><div class="what">🎓 <b>研討會開場</b>（依大會議程）</div></div>
+      <div class="row"><div class="time">晚上</div><div class="what">會後自由時間，可再逛老城／Tivoli 公園</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 8/5 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/5</b><span>三</span></div>
+      <div>
+        <div class="day-title">ICITL 研討會・晚宴</div>
+        <div class="day-route">ICITL Conference + Gala Dinner</div>
+      </div>
+      <div class="stay">🛏 Ljubljana</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">全天</div><div class="what">🎓 <b>ICITL 研討會</b>（依大會議程）</div></div>
+      <div class="row"><div class="time">晚上</div><div class="what">🍽 <b>研討會晚宴（Gala Dinner）</b></div></div>
+    </div>
+  </div>
+
+  <!-- DAY 1 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/6</b><span>四</span></div>
+      <div>
+        <div class="day-title">取車 → 波斯托伊納鐘乳石洞 → Bled</div>
+        <div class="day-route">Ljubljana → Postojna → Bled</div>
+      </div>
+      <div class="stay">🛏 Bled</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">10:00</div><div class="what">Ljubljana 租車行<b>取車</b>（原訂 10:00；<span class="hl">若能提前到 9:00 更從容</span>）、檢查車況與導航</div></div>
+      <div class="row"><div class="time">10:45</div><div class="what"><span class="drive">開車 Ljubljana → Postojna 約 45 分（53 km）</span></div></div>
+      <div class="row"><div class="time">12:00</div><div class="what"><b>Postojna Cave 鐘乳石洞</b>・訂 <b>12:00 場</b>（搭電動小火車 + 步行，全程約 90 分）<span class="n"> ・提早 30 分到、發車前 15 分上小火車。若 9 點取車可改訂 11:00 場</span></div></div>
+      <div class="row"><div class="time">13:45</div><div class="what">洞口附近午餐</div></div>
+      <div class="row"><div class="time">14:45</div><div class="what"><b>Predjama Castle 洞穴城堡</b>（開車 10 分、可買洞穴+城堡套票，逛約 1 小時）</div></div>
+      <div class="row"><div class="time">15:45</div><div class="what"><span class="drive">開車 Postojna → Bled 約 1.5 小時（95 km）</span></div></div>
+      <div class="row"><div class="time">17:15</div><div class="what">抵達 <b>Bled</b>、入住，湖邊散步、看夕陽，晚餐嚐 Bled 奶油蛋糕（Kremšnita）</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/7</b><span>五</span></div>
+      <div>
+        <div class="day-title">Bled 湖一日：峽谷・湖島・城堡</div>
+        <div class="day-route">Vintgar Gorge → Lake Bled → Bled Island → Bled Castle</div>
+      </div>
+      <div class="stay">🛏 Bled</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">08:30</div><div class="what"><b>Vintgar Gorge 溫特加峽谷</b>（木棧道、翡翠溪水，約 1.5 小時）<span class="n"> ・夏季需線上預約指定時段、開車 15 分</span></div></div>
+      <div class="row"><div class="time">11:00</div><div class="what"><b>Lake Bled 湖畔</b> + 搭傳統 <b>Pletna 船</b>上湖心島、敲許願鐘</div></div>
+      <div class="row"><div class="time">13:00</div><div class="what">湖邊午餐</div></div>
+      <div class="row"><div class="time">14:30</div><div class="what"><b>Bled Castle 布萊德城堡</b>（懸崖上的城堡、俯瞰全湖最佳視角）</div></div>
+      <div class="row"><div class="time">16:30</div><div class="what">機動：<b>Radovljica</b> 中世紀小鎮或 <b>Ojstrica／Mala Osojnica</b> 觀景步道拍全湖<span class="n"> ・傍晚湖景最美</span></div></div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/8</b><span>六</span></div>
+      <div>
+        <div class="day-title">翻山進索查河谷：Monte Lussari 纜車 + Lago del Predil</div>
+        <div class="day-route">Bled → Camporosso（義大利）→ Predil 山口 → Bovec → Most na Soči</div>
+      </div>
+      <div class="stay">🛏 Most na Soči</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">08:00</div><div class="what"><span class="drive">Bled → Kranjska Gora → 過 Rateče 邊界 → Camporosso 約 1 小時（55 km）</span></div></div>
+      <div class="row"><div class="time">09:15</div><div class="what"><b>Telecabina Monte Lussari 纜車</b>（Via Lussari 41, Tarvisio）上山<span class="pill">來回 €18</span><br><span class="n">山頂朝聖小村＋朱利安阿爾卑斯全景，含上下山約 2–2.5 小時。週六營運 9:00–17:15，早班上山避開人潮</span></div></div>
+      <div class="row"><div class="time">12:00</div><div class="what">Tarvisio 午餐</div></div>
+      <div class="row"><div class="time">13:30</div><div class="what"><span class="drive">開車 → Cave del Predil / Lago del Predil 約 25 分（18 km）</span></div></div>
+      <div class="row"><div class="time">14:00</div><div class="what"><b>Lago del Predil 碧綠湖</b>（義大利側，湖邊散步、拍照、可玩水）</div></div>
+      <div class="row"><div class="time">15:15</div><div class="what"><span class="drive">翻 Predil 山口回斯洛維尼亞 → Bovec 約 40 分（30 km）</span></div></div>
+      <div class="row"><div class="time">16:00</div><div class="what"><b>Bovec</b> 稍作停留、看上游 Soča 河</div></div>
+      <div class="row"><div class="time">16:45</div><div class="what"><span class="drive">Bovec → Kobarid → Most na Soči 約 1 小時</span></div></div>
+      <div class="row"><div class="time">18:00</div><div class="what">抵達 <b>Most na Soči</b>、入住、晚餐</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/9</b><span>日</span></div>
+      <div>
+        <div class="day-title">索查河谷輕鬆玩（住處附近）</div>
+        <div class="day-route">Tolmin 峽谷 → Kobarid → Kozjak 瀑布 → Soča 河</div>
+      </div>
+      <div class="stay">🛏 Most na Soči</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">09:30</div><div class="what"><b>Tolmin Gorges 托爾敏峽谷</b>（Triglav 國家公園最南端峽谷、魔鬼橋、熊頭岩，開車 15 分）</div></div>
+      <div class="row"><div class="time">12:00</div><div class="what"><b>Kobarid 科巴里德</b>午餐（美食小鎮）</div></div>
+      <div class="row"><div class="time">13:30</div><div class="what"><b>Slap Kozjak 科札克瀑布</b>（森林中夢幻瀑布，來回步行約 1 小時）</div></div>
+      <div class="row"><div class="time">15:30</div><div class="what">機動：<b>Kobarid 一戰博物館</b>、Napoleon 橋、Soča 河翡翠水灣戲水／拍照</div></div>
+      <div class="row"><div class="time">18:00</div><div class="what">回 Most na Soči，收拾行李準備明天上火車</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/10</b><span>一</span></div>
+      <div>
+        <div class="day-title">汽車火車穿隧道 → Bohinj 湖 → 小鎮 → Ljubljana</div>
+        <div class="day-route">Most na Soči 🚃 Bohinjska Bistrica → Lake Bohinj → Škofja Loka → Ljubljana</div>
+      </div>
+      <div class="stay">🛏 Ljubljana</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">10:10</div><div class="what">到 <b>Most na Soči</b> 車站排隊上車<span class="n"> ・提早 20–30 分，開車直接上平板車廂</span></div></div>
+      <div class="row"><div class="time">10:40</div><div class="what"><b>汽車火車 AVT 854 發車</b> 🚃 穿越 Bohinj 隧道<span class="pill">小車約 €16.20</span></div></div>
+      <div class="row"><div class="time">11:24</div><div class="what">抵 <b>Bohinjska Bistrica</b>、開車下火車</div></div>
+      <div class="row"><div class="time">11:40</div><div class="what"><b>Lake Bohinj 博興湖</b>（車站旁 10 分鐘、比 Bled 更原始寧靜，湖邊走走、教堂、可玩水）</div></div>
+      <div class="row"><div class="time">13:30</div><div class="what"><span class="drive">Bohinjska Bistrica → Škofja Loka 約 50 分</span></div></div>
+      <div class="row"><div class="time">14:20</div><div class="what"><b>Škofja Loka 什科菲亞洛卡</b>：斯洛維尼亞保存最好的中世紀老城，午餐＋逛老城、石橋、城堡<span class="n"> ・回 Ljubljana 前最順路的小鎮</span></div></div>
+      <div class="row"><div class="time">16:30</div><div class="what"><span class="drive">Škofja Loka → Ljubljana 約 25 分</span></div></div>
+      <div class="row"><div class="time">17:00</div><div class="what">抵 <b>Ljubljana</b>、入住，傍晚逛老城、龍橋、三重橋、河畔晚餐<span class="n"> ・🍫 到 Cukrček 大量採買心型巧克力（見下方攻略）</span></div></div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="day">
+    <div class="day-head">
+      <div class="day-num"><b>8/11</b><span>二</span></div>
+      <div>
+        <div class="day-title">還車 → 工作（改論文/簡報）→ 機場賦歸</div>
+        <div class="day-route">Ljubljana → LJU 機場 → Istanbul → Taipei</div>
+      </div>
+      <div class="stay">✈️ 20:15 起飛</div>
+    </div>
+    <div class="body">
+      <div class="row"><div class="time">07:30</div><div class="what">早餐、退房、<b>行李寄放</b>於飯店櫃檯</div></div>
+      <div class="row"><div class="time">09:00</div><div class="what"><b>還車</b>（市區租車行）<span class="n"> ・還車前加滿油、確認無 Italy 過境問題、拍照存證</span></div></div>
+      <div class="row"><div class="time">09:30</div><div class="what">🧑‍💻 <b>找地方改論文 / 做簡報</b>（共享空間或筆電友善咖啡館，見下方清單）<span class="n"> ・中途可順道最後採買心型巧克力</span></div></div>
+      <div class="row"><div class="time">14:30</div><div class="what">回飯店<b>取行李</b></div></div>
+      <div class="row"><div class="time">15:00</div><div class="what"><span class="drive">前往 LJU 機場：車程約 30 分（26 km）・可搭 GoOpti 接駁／機場巴士／計程車</span></div></div>
+      <div class="row"><div class="time">16:15</div><div class="what">抵達 <b>LJU 機場</b>（提前約 4 小時）<span class="n"> ・機場不大，可繼續在候機區做簡報；國際線建議至少提前 3 小時</span></div></div>
+      <div class="row"><div class="time">20:15</div><div class="what">✈️ <b>TK1064 起飛</b></div></div>
+    </div>
+  </div>
+
+  <!-- FLIGHT BOX -->
+  <div class="box" style="background:#eef3f8;border-color:#cdddec;">
+    <h3>✈️ 8/11 返程航班・Turkish Airlines</h3>
+    <p style="margin:2px 0 8px;font-size:13px;color:var(--muted)">確認編號 <b>SJFDNH</b>・經濟艙</p>
+    <table class="tt">
+      <tr><th>航班</th><th>出發</th><th>抵達</th><th>時間</th></tr>
+      <tr><td><b>TK1064</b></td><td>Ljubljana LJU<br>20:15（8/11 二）</td><td>Istanbul IST<br>23:40（8/11 二）</td><td>2h25</td></tr>
+      <tr><td colspan="4" style="color:var(--muted);font-size:12.5px">↕ 伊斯坦堡轉機 1 小時 50 分</td></tr>
+      <tr><td><b>TK24</b></td><td>Istanbul IST<br>01:30（8/12 三）</td><td>Taipei TPE<br>17:55（8/12 三）</td><td>11h25</td></tr>
+    </table>
+  </div>
+
+  <!-- WORK SPOTS -->
+  <div class="box info">
+    <h3>🧑‍💻 8/11 改論文 / 做簡報：推薦地點</h3>
+    <ul class="clean">
+      <li><b>Poligon Creative Centre</b>（共享工作空間，Tobačna 一帶）— 安靜、插座多、有日票，最適合專心趕簡報。</li>
+      <li><b>Ljubljana City Library — Knjižnica Otona Župančiča</b>（Kersnikova）— 免費、安靜、有桌椅與 wifi。</li>
+      <li>筆電友善咖啡館：<b>TOZD</b>（河邊 Trubarjeva 街）、<b>Čokl</b>（大教堂／中央市場旁）— 邊喝咖啡邊工作。</li>
+      <li>備案：<b>飯店大廳</b>（退房後多半可續用 wifi + 寄物），或<b>提早到機場</b>在候機區工作（你提前 3–4 小時，時間很充裕）。</li>
+    </ul>
+  </div>
+
+  <!-- CAR TRAIN BOX -->
+  <div class="box train">
+    <h3>🚃 8/10 汽車火車（AVT）班次・Most na Soči → Bohinjska Bistrica</h3>
+    <p style="margin:2px 0 8px;font-size:13px;color:var(--muted)">
+      ⚠️ 時刻表上<b>只有標「AVT」的才能開車上去</b>；LP／RG 是純載客火車、不載車。以下為 2026/8/10 實際 AVT 班次：</p>
+    <table class="tt">
+      <tr><th>車次</th><th>Most na Soči 發</th><th>Bohinjska Bistrica 到</th><th>車程</th></tr>
+      <tr><td>AVT 850</td><td>07:44</td><td>08:28</td><td>44 分</td></tr>
+      <tr style="background:#fdf3d6"><td>AVT 854 ⭐建議</td><td>10:40</td><td>11:24</td><td>44 分</td></tr>
+      <tr><td>AVT 858</td><td>14:42</td><td>15:27</td><td>45 分</td></tr>
+      <tr><td>AVT 860</td><td>18:40</td><td>19:23</td><td>43 分</td></tr>
+    </table>
+    <p style="margin:8px 0 0;font-size:12.5px;color:var(--muted)">
+      小車含駕駛約 €16.20，每多一名乘客 €3.60；<b>車上向車掌買票（可刷卡）、不能預訂</b>，先到先上、發車前 10 分鐘停止上車。</p>
+  </div>
+
+  <!-- REMINDERS -->
+  <div class="box warn">
+    <h3>✅ 出發前 & 訂票提醒</h3>
+    <ul class="clean">
+      <li><b>租車跨境義大利：</b>8/8 大半天在義大利，務必先跟租車公司確認合約允許進 Italy、保險（Green Card 綠卡）有涵蓋，有些需事先登記或加費。</li>
+      <li><b>Postojna Cave（8/6）：</b>旺季必須<b>線上預訂指定入洞時段</b>，建議上午場；可買 洞穴＋Predjama 城堡套票。</li>
+      <li><b>Vintgar Gorge（8/7）：</b>夏季採<b>線上預約制指定時段</b>，請提前訂。</li>
+      <li><b>Monte Lussari 纜車（8/8）：</b>認明 <b>Telecabina Monte Lussari</b>（那些 Seggiovia 吊椅是滑雪／登山用、不用搭）。週六 8 月人多，早班上山。</li>
+      <li><b>Lago del Predil：</b>在義大利境內，Schengen 免檢查但<b>帶護照</b>備查。</li>
+      <li><b>斯洛維尼亞高速公路 Vignette：</b>租車通常已含電子票證，取車時跟租車行確認一下。</li>
+    </ul>
+  </div>
+
+  <!-- DRIVE TIMES -->
+  <div class="box info">
+    <h3>🚗 主要車程參考</h3>
+    <table class="tt">
+      <tr><td>Ljubljana → Postojna</td><td>~45 分（53 km）</td></tr>
+      <tr><td>Postojna → Bled</td><td>~1.5 小時（95 km）</td></tr>
+      <tr><td>Bled → Camporosso（Monte Lussari）</td><td>~1 小時（55 km）</td></tr>
+      <tr><td>Camporosso → Lago del Predil</td><td>~25 分（18 km）</td></tr>
+      <tr><td>Lago del Predil → Bovec（翻 Predil 山口）</td><td>~40 分（30 km）</td></tr>
+      <tr><td>Bovec → Most na Soči</td><td>~1 小時</td></tr>
+      <tr><td>Most na Soči 🚃 Bohinjska Bistrica</td><td>~44 分（汽車火車）</td></tr>
+      <tr><td>Bohinjska Bistrica → Škofja Loka</td><td>~50 分</td></tr>
+      <tr><td>Škofja Loka → Ljubljana</td><td>~25 分</td></tr>
+    </table>
+  </div>
+
+  <!-- SHOPPING -->
+  <div class="box" style="background:#fbeee6;border-color:#f0d3bf;">
+    <h3>🍫 盧比安那採購・心型巧克力攻略</h3>
+    <ul class="clean">
+      <li><b>最經典（推薦當伴手禮）：Čokoladnica Cukrček</b> — 盧比安那心型巧克力的招牌店，紅色包裝、印龍與「Ljubljana」圖案。老城 <b>Mestni trg</b>（市政廳一帶）有店。要買很多可直接問<b>整盒／量販價</b>，通常有折扣。這是「正宗盧比安那心」，價位屬紀念品等級（單顆大約 €2–4，依大小）。</li>
+      <li><b>其他選擇：</b>Čokoladnica Ljubljana、Slaščičarna Lolita（也有心型巧克力與甜點）。</li>
+      <li><b>想便宜、量大：</b>超市的斯洛維尼亞國產巧克力 <b>Gorenjka</b>（Bled 附近工廠出品）最划算，Mercator／Spar／Lidl 都有，一片約 €1–2 —— 但<b>不是心型、也沒有盧比安那圖案</b>。</li>
+      <li><b>Lidl 有嗎？</b>Lidl 斯洛維尼亞的一般巧克力很便宜，但<b>通常沒有「盧比安那心型」這種紀念品巧克力</b>（心型多在情人節檔期才有）。想要「盧比安那心」還是得去 Cukrček 等專賣店；Lidl 適合買便宜的一般巧克力湊數。</li>
+      <li>⏰ <b>買的時機：</b>建議<b>最後在 8/10 傍晚回到盧比安那、或 8/11 出發前</b>再大量採買，才不用一路帶著跑、也避免夏天在車上融化。</li>
+    </ul>
+  </div>
+
+  <div class="foot">路線與時刻依 2026 年資料整理，實際請以現場與官方公告為準・祝旅途愉快 🌄</div>
+
+</div>
+</body>
+</html>
