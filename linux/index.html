@@ -110,7 +110,16 @@
     {% assign lp = 'linux/' %}
     {% assign lsp = '/linux/' %}
     {% assign l_pages = site.pages | sort: 'path' %}
-    {% assign l_files = site.static_files | sort: 'path' %}
+    {% assign l_static = site.static_files | sort: 'path' %}
+    {% comment %} 有些 .md 檔會同時產生「網頁版」和「原始檔」兩份，這裡只保留網頁版 {% endcomment %}
+    {% assign page_paths = '|' %}
+    {% for page in l_pages %}{% assign page_paths = page_paths | append: page.path | append: '|' %}{% endfor %}
+    {% assign sp = '' %}
+    {% for file in l_static %}
+      {% assign skey = file.path | remove_first: '/' | prepend: '|' | append: '|' %}
+      {% unless page_paths contains skey %}{% assign sp = sp | append: file.path | append: '|' %}{% endunless %}
+    {% endfor %}
+    {% assign l_files = sp | split: '|' %}
 
     <div class="file-list-box">
       <h3>📚 教學頁面與檔案</h3>
@@ -127,12 +136,12 @@
         {% endfor %}
 
         {% for file in l_files %}
-          {% assign pre = file.path | slice: 0, 7 %}
-          {% if pre == lsp and file.extname != '.md' %}
-            {% assign rel = file.path | remove_first: lsp %}
+          {% assign pre = file | slice: 0, 7 %}
+          {% if pre == lsp %}
+            {% assign rel = file | remove_first: lsp %}
             {% assign parts = rel | split: '/' %}
             {% if parts.size == 1 %}
-              <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
+              <li>📄 <a href="{{ site.baseurl }}{{ file }}">{{ file | split: '/' | last }}</a></li>
             {% endif %}
           {% endif %}
         {% endfor %}
@@ -155,9 +164,9 @@
         {% endif %}
       {% endfor %}
       {% for file in l_files %}
-        {% assign pre = file.path | slice: 0, 7 %}
-        {% if pre == lsp and file.extname != '.md' %}
-          {% assign parts = file.path | remove_first: lsp | split: '/' %}
+        {% assign pre = file | slice: 0, 7 %}
+        {% if pre == lsp %}
+          {% assign parts = file | remove_first: lsp | split: '/' %}
           {% if parts.size > 1 %}
             {% assign key = parts[0] | prepend: '|' | append: '|' %}
             {% unless seen contains key %}
@@ -187,8 +196,8 @@
         {% assign fsprefix = '/' | append: fprefix %}
         {% assign fsplen = fsprefix | size %}
         {% for file in l_files %}
-          {% assign pre = file.path | slice: 0, fsplen %}
-          {% if pre == fsprefix and file.extname != '.md' %}{% assign fcount = fcount | plus: 1 %}{% if file.path == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
+          {% assign pre = file | slice: 0, fsplen %}
+          {% if pre == fsprefix %}{% assign fcount = fcount | plus: 1 %}{% if file == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
         {% endfor %}
         <details class="folder">
           <summary>📁 {{ fname }}/ <span class="cnt">{{ fcount }} 個檔案</span>{% if has_index %} <a class="open" href="{{ site.baseurl }}/{{ fprefix }}">開啟 ↗</a>{% endif %}</summary>
@@ -200,9 +209,9 @@
               {% endif %}
             {% endfor %}
             {% for file in l_files %}
-              {% assign pre = file.path | slice: 0, fsplen %}
-              {% if pre == fsprefix and file.extname != '.md' %}
-                <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.path | remove_first: fsprefix }}</a></li>
+              {% assign pre = file | slice: 0, fsplen %}
+              {% if pre == fsprefix %}
+                <li>📄 <a href="{{ site.baseurl }}{{ file }}">{{ file | remove_first: fsprefix }}</a></li>
               {% endif %}
             {% endfor %}
           </ul>
