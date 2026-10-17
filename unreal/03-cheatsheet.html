@@ -1,0 +1,108 @@
+---
+title: 速查表：快捷鍵、除錯與常見問題
+description: 視埠與 Blueprint 快捷鍵、除錯方法、常見狀況排解與官方文件連結
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unreal 速查表</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-unreal">
+  <div class="container">
+    <nav class="crumb"><a href="../">首頁</a> › <a href="./">Unreal 教學專區</a> › 速查表</nav>
+
+    <h1>速查表：快捷鍵、除錯與常見問題</h1>
+    <p class="lead">放在手邊隨時查。快捷鍵依 Epic 官方文件整理，若你在編輯器偏好設定中改過快捷鍵，實際操作可能不同。</p>
+
+    <h2>1. 視埠（Level Editor）</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>操作</th><th>快捷鍵</th></tr></thead>
+      <tbody>
+        <tr><td>環視</td><td>按住右鍵拖曳</td></tr>
+        <tr><td>前後左右飛行</td><td>按住右鍵 + <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td></tr>
+        <tr><td>上升／下降</td><td>按住右鍵 + <kbd>E</kbd> ／ <kbd>Q</kbd></td></tr>
+        <tr><td>調整飛行速度</td><td>按住右鍵 + 滾輪</td></tr>
+        <tr><td>聚焦選取物件</td><td><kbd>F</kbd></td></tr>
+        <tr><td>環繞物件</td><td><kbd>Alt</kbd> + 左鍵拖曳</td></tr>
+        <tr><td>推近／拉遠</td><td><kbd>Alt</kbd> + 右鍵拖曳</td></tr>
+        <tr><td>平移</td><td>中鍵拖曳</td></tr>
+        <tr><td>選取／移動／旋轉／縮放工具</td><td><kbd>Q</kbd> ／ <kbd>W</kbd> ／ <kbd>E</kbd> ／ <kbd>R</kbd></td></tr>
+        <tr><td>在移動、旋轉、縮放間切換</td><td><kbd>Space</kbd></td></tr>
+        <tr><td>切換遊戲檢視（隱藏編輯器輔助圖示）</td><td><kbd>G</kbd></td></tr>
+        <tr><td>存檔</td><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>2. Blueprint 編輯器</h2>
+    <p><strong>按住字母鍵再用左鍵點擊圖表</strong>，可以快速放出節點：</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>按鍵</th><th>節點</th><th>按鍵</th><th>節點</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>B</kbd></td><td>Branch</td><td><kbd>G</kbd></td><td>Gate</td></tr>
+        <tr><td><kbd>S</kbd></td><td>Sequence</td><td><kbd>M</kbd></td><td>Multi-gate</td></tr>
+        <tr><td><kbd>D</kbd></td><td>Delay</td><td><kbd>N</kbd></td><td>Do N Times</td></tr>
+        <tr><td><kbd>F</kbd></td><td>For Each Loop</td><td><kbd>O</kbd></td><td>Do Once</td></tr>
+        <tr><td><kbd>P</kbd></td><td>Event BeginPlay</td><td><kbd>C</kbd></td><td>註解框（Comment）</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>操作</th><th>快捷鍵</th></tr></thead>
+      <tbody>
+        <tr><td>編譯 Blueprint</td><td><kbd>F7</kbd></td></tr>
+        <tr><td>儲存</td><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td></tr>
+        <tr><td>對選取的節點加註解</td><td><kbd>C</kbd></td></tr>
+        <tr><td>切換斷點</td><td><kbd>F9</kbd></td></tr>
+        <tr><td>清除所有斷點</td><td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F9</kbd></td></tr>
+        <tr><td>從 My Blueprint 拖入變數 → 取值（Get）</td><td><kbd>Ctrl</kbd> + 左鍵拖曳</td></tr>
+        <tr><td>從 My Blueprint 拖入變數 → 設值（Set）</td><td><kbd>Alt</kbd> + 左鍵拖曳</td></tr>
+        <tr><td>重新命名節點／註解</td><td><kbd>F2</kbd></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>3. 除錯方法</h2>
+    <ul>
+      <li><strong>Print String：</strong>最簡單的除錯工具。在可疑的位置接一個 Print String，把變數值或「走到這裡了」印出來。訊息可以顯示在畫面上，也會寫進 Output Log。</li>
+      <li><strong>Output Log：</strong>從選單 Window → Developer Tools → Output Log 開啟，查看執行時的訊息與警告。</li>
+      <li><strong>Compile 訊息：</strong>Blueprint 編譯有錯誤時，錯誤節點會標示出來，先修掉再試玩。</li>
+      <li><strong>斷點：</strong>選取節點按 <kbd>F9</kbd> 設斷點，試玩時執行到那裡會暫停，可以在暫停時檢視變數數值。</li>
+      <li><strong>觀察數值：</strong>在腳位上按右鍵，可以選擇監看（Watch）該數值，執行時就能即時看到它的變化。</li>
+    </ul>
+
+    <h2>4. 常見狀況</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>狀況</th><th>可以檢查</th></tr></thead>
+      <tbody>
+        <tr><td>按 Play 之後我的 Blueprint 沒反應</td><td>Blueprint 是否有放進這個關卡？事件節點是否有接上白色執行線？是否已 Compile？</td></tr>
+        <tr><td>兩個節點連不起來</td><td>資料型別不相容（例如把文字接到數值）。從腳位拖出連線後，搜尋視窗只會列出可以接的節點，可善用它。</td></tr>
+        <tr><td>改了 Blueprint 的預設值，場景中的實例卻沒變</td><td>該實例的 Details 可能已經手動覆寫了那個值；數值旁會出現可還原成預設值的箭頭，按下即可。</td></tr>
+        <tr><td>同一個事件被重複觸發</td><td>Overlap 事件可能因為物件有多個碰撞元件而觸發多次，可用 Do Once 或檢查是哪個 Actor 觸發的。</td></tr>
+        <tr><td>忘記存檔就當機</td><td>到專案資料夾的 <code>Saved/Autosaves</code> 看看有沒有自動存檔可以救回。</td></tr>
+        <tr><td>編輯器很慢／專案資料夾很大</td><td><code>Saved</code>、<code>Intermediate</code>、<code>DerivedDataCache</code> 是可重建的快取；備份或傳送專案時可以不帶。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>5. 官方文件</h2>
+    <ul class="sources">
+      <li><a href="https://dev.epicgames.com/documentation/unreal-engine/viewport-controls-in-unreal-engine">Viewport Controls in Unreal Engine</a>：視埠操作與變換工具快捷鍵</li>
+      <li><a href="https://dev.epicgames.com/documentation/unreal-engine/blueprint-editor-cheat-sheet-in-unreal-engine">Blueprint Editor Cheat Sheet in Unreal Engine</a>：Blueprint 編輯器快捷鍵</li>
+      <li><a href="https://dev.epicgames.com/documentation/unreal-engine/enhanced-input-in-unreal-engine">Enhanced Input in Unreal Engine</a>：UE5 輸入系統的概念</li>
+    </ul>
+
+    <div class="pager">
+      <a href="02-blueprint-basics.html">← 上一頁：Blueprint 基礎</a>
+      <a href="./">Unreal 專區首頁 →</a>
+    </div>
+  </div>
+</body>
+</html>

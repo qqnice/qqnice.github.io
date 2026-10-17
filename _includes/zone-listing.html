@@ -1,0 +1,81 @@
+{% comment %}
+  專區目錄清單（自動產生，GitHub Pages 建置時由 Jekyll 展開）。
+  用法：在各專區自己的 index.html 內，用 include 載入本檔，並傳入 folder 參數（例如 unreal 或 tpr）。
+  - 「教學頁面」：該資料夾第一層、開頭有 front matter 的 .html，顯示 title 與 description
+  - 「資料夾與檔案」：子資料夾（只列一層，連到該資料夾）與第一層的其他檔案
+  連結一律用相對路徑，因此必須放在該專區自己的 index.html 裡使用。
+{% endcomment %}
+{% assign prefix = include.folder | append: '/' %}
+{% assign plen = prefix | size %}
+{% assign sprefix = '/' | append: prefix %}
+{% assign splen = sprefix | size %}
+{% assign zone_pages = site.pages | sort: 'path' %}
+{% assign zone_files = site.static_files | sort: 'path' %}
+{% assign seen = '|' %}
+{% assign n_pages = 0 %}
+{% assign n_other = 0 %}
+
+<div class="file-list-box">
+  <h3>📚 教學頁面</h3>
+  <ul>
+    {% for p in zone_pages %}
+      {% assign pre = p.path | slice: 0, plen %}
+      {% if pre == prefix and p.name != 'index.html' %}
+        {% assign rel = p.path | remove_first: prefix %}
+        {% assign parts = rel | split: '/' %}
+        {% if parts.size == 1 %}
+          {% assign n_pages = n_pages | plus: 1 %}
+          <li>📄 <a href="{{ rel }}">{{ p.title | default: p.name }}</a>{% if p.description %}<span class="desc">{{ p.description }}</span>{% endif %}</li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if n_pages == 0 %}<li class="empty">目前還沒有教學頁面。</li>{% endif %}
+  </ul>
+
+  <h3>📁 資料夾與檔案</h3>
+  <ul>
+    {% for p in zone_pages %}
+      {% assign pre = p.path | slice: 0, plen %}
+      {% if pre == prefix %}
+        {% assign rel = p.path | remove_first: prefix %}
+        {% assign parts = rel | split: '/' %}
+        {% if parts.size > 1 %}
+          {% assign key = parts[0] | prepend: '|' | append: '|' %}
+          {% unless seen contains key %}
+            {% assign seen = seen | append: parts[0] | append: '|' %}
+            {% assign n_other = n_other | plus: 1 %}
+            <li>📁 <a href="{{ parts[0] }}/">{{ parts[0] }}/</a></li>
+          {% endunless %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% for f in zone_files %}
+      {% assign pre = f.path | slice: 0, splen %}
+      {% if pre == sprefix %}
+        {% assign rel = f.path | remove_first: sprefix %}
+        {% assign parts = rel | split: '/' %}
+        {% if parts.size > 1 %}
+          {% assign key = parts[0] | prepend: '|' | append: '|' %}
+          {% unless seen contains key %}
+            {% assign seen = seen | append: parts[0] | append: '|' %}
+            {% assign n_other = n_other | plus: 1 %}
+            <li>📁 <a href="{{ parts[0] }}/">{{ parts[0] }}/</a></li>
+          {% endunless %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% for f in zone_files %}
+      {% assign pre = f.path | slice: 0, splen %}
+      {% if pre == sprefix %}
+        {% assign rel = f.path | remove_first: sprefix %}
+        {% assign parts = rel | split: '/' %}
+        {% if parts.size == 1 %}
+          {% assign n_other = n_other | plus: 1 %}
+          {% assign ext = f.extname | downcase %}
+          <li>{% case ext %}{% when '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg' %}🖼️{% when '.pdf' %}📕{% when '.md', '.txt' %}📝{% else %}📄{% endcase %} <a href="{{ rel }}">{{ f.name }}</a></li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if n_other == 0 %}<li class="empty">目前沒有其他資料夾或檔案。</li>{% endif %}
+  </ul>
+</div>

@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ElevatorKit 學生操作手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: single reading column (~46rem) with a sticky step index on wide screens; figures break out slightly wider than the text. */
+:root {
+  --bg: #f5f6f4;
+  --paper: #ffffff;
+  --ink: #1d2226;
+  --muted: #5b646b;
+  --line: #d9ddd9;
+  --accent: #b77800;      /* elevator-call-button amber */
+  --accent-soft: #fff3d6;
+  --node: #23292e;        /* graph-node chip */
+  --node-ink: #e9eef1;
+  --ok: #2f7d4a;
+  --warn: #b3412e;
+  --warn-soft: #fbe9e5;
+  --font-body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  --font-display: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15191c; --paper: #1c2125; --ink: #e6e9e7; --muted: #9aa4aa; --line: #30373c;
+    --accent: #f0b13a; --accent-soft: #3a2f17; --node: #0e1113; --node-ink: #e9eef1;
+    --ok: #6cc28a; --warn: #f08a76; --warn-soft: #3b211c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15191c; --paper: #1c2125; --ink: #e6e9e7; --muted: #9aa4aa; --line: #30373c;
+  --accent: #f0b13a; --accent-soft: #3a2f17; --node: #0e1113; --node-ink: #e9eef1;
+  --ok: #6cc28a; --warn: #f08a76; --warn-soft: #3b211c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.75; padding-inline: 16px; padding-block: 0 4rem; }
+.wrap { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; } nav.toc { display: none; } }
+nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; padding-top: 2.5rem; font-size: 0.85rem; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; counter-reset: s; }
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 0.2rem 0.5rem; border-left: 2px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; max-width: 50rem; }
+header.cover { padding-block: 2.5rem 1.5rem; border-bottom: 1px solid var(--line); margin-bottom: 1rem; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.25; margin: 0.4rem 0 0.8rem; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; line-height: 1.35; margin: 0 0 0.6rem; text-wrap: balance; display: flex; gap: 0.7rem; align-items: baseline; }
+h2 .no { font-family: var(--font-mono); font-size: 0.95rem; color: var(--paper); background: var(--accent); border-radius: 4px; padding: 0.05rem 0.45rem; flex: none; }
+h3 { font-size: 1.1rem; margin: 1.6rem 0 0.4rem; }
+section { padding-block: 2.2rem; border-bottom: 1px solid var(--line); scroll-margin-top: 1rem; }
+p { margin: 0.6rem 0; }
+.lead { color: var(--muted); font-size: 1.05rem; max-width: 40rem; }
+figure { margin: 1.2rem 0; }
+figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--node); }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; align-items: start; }
+.pair > * { min-width: 0; }
+ol.steps { padding-left: 1.4rem; margin: 0.6rem 0; display: grid; gap: 0.35rem; }
+ol.steps li::marker { font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+code, .n { font-family: var(--font-mono); font-size: 0.88em; }
+.n { background: var(--node); color: var(--node-ink); padding: 0.05rem 0.4rem; border-radius: 4px; white-space: nowrap; }
+kbd { font-family: var(--font-mono); font-size: 0.85em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 0.35rem; background: var(--paper); }
+.table { overflow-x: auto; margin: 0.8rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; background: var(--paper); }
+th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; }
+.note, .stop { padding: 0.8rem 1rem; border-radius: 6px; margin: 1rem 0; font-size: 0.95rem; }
+.note { background: var(--accent-soft); }
+.stop { background: var(--warn-soft); }
+.note b, .stop b { display: block; margin-bottom: 0.15rem; }
+.stop b { color: var(--warn); }
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem 1rem; margin: 0.8rem 0; }
+details summary { cursor: pointer; font-weight: 500; color: var(--accent); }
+details[open] summary { margin-bottom: 0.4rem; }
+.check { list-style: none; padding: 0; display: grid; gap: 0.3rem; }
+.check li::before { content: "☐ "; color: var(--ok); font-weight: 700; }
+.map { font-family: var(--font-mono); font-size: 0.85rem; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.8rem 1rem; overflow-x: auto; line-height: 1.6; white-space: pre; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media print { nav.toc { display: none; } .wrap { display: block; } section { break-inside: auto; } figure { break-inside: avoid; } details { border: none; padding: 0; } }
+
+/* layer-architecture figures (關卡 1～4) */
+:root { --soft: #eef0ed; --s0: #6b7780; --s1: #2f7d4a; --s2: #1f6f8b; --s3: #a35d14; --s4: #7a3fa0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --soft: #22282c; --s0: #9aa6ae; --s1: #6cc28a; --s2: #5db7d6; --s3: #e39a4f; --s4: #c08ae0; } }
+:root[data-theme="dark"] { --soft: #22282c; --s0: #9aa6ae; --s1: #6cc28a; --s2: #5db7d6; --s3: #e39a4f; --s4: #c08ae0; }
+.archwrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem; }
+svg.arch { display: block; width: 100%; min-width: 1000px; height: auto; }
+svg.arch text { font-family: var(--font-body); }
+svg.arch .div { stroke: var(--line); stroke-width: 1; }
+svg.arch .bn { font-family: var(--font-mono); font-size: 12px; fill: var(--accent); font-weight: 600; }
+svg.arch .bt { font-size: 15px; font-weight: 700; fill: var(--ink); }
+svg.arch .bs { font-size: 11.5px; fill: var(--muted); }
+svg.arch .kit { fill: var(--node); }
+svg.arch .kt { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; fill: var(--node-ink); }
+svg.arch .ks { font-size: 11.5px; fill: var(--node-ink); opacity: 0.78; }
+svg.arch .stu { fill: var(--paper); stroke: var(--accent); stroke-width: 2; }
+svg.arch .shl { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 5 4; }
+svg.arch .stt { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+svg.arch .sts { font-size: 11.5px; fill: var(--muted); }
+svg.arch .ply { fill: var(--soft); stroke: var(--line); stroke-width: 1; }
+svg.arch .pt { font-size: 13px; fill: var(--ink); }
+svg.arch .scn { fill: var(--paper); stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5 4; }
+svg.arch .grp { fill: var(--soft); stroke: var(--line); stroke-width: 1; }
+svg.arch .gt { font-size: 12.5px; font-weight: 700; fill: var(--ink); }
+svg.arch .gs { font-size: 11px; fill: var(--muted); }
+svg.arch .chip { fill: var(--paper); stroke: var(--accent); stroke-width: 1.4; }
+svg.arch .chip2 { fill: var(--node); }
+svg.arch .ct { font-family: var(--font-mono); font-size: 12px; fill: var(--ink); }
+svg.arch .ct2 { font-family: var(--font-mono); font-size: 12px; fill: var(--node-ink); }
+svg.arch .cl { font-family: var(--font-mono); font-size: 10.5px; fill: var(--accent); font-weight: 600; }
+svg.arch .card { fill: var(--paper); stroke: var(--accent); stroke-width: 1.6; }
+svg.arch .ch { font-size: 13px; font-weight: 700; fill: var(--paper); }
+svg.arch .cline { font-size: 11.5px; fill: var(--ink); }
+svg.arch .cline.m { font-family: var(--font-mono); }
+svg.arch .nw { stroke: var(--accent); stroke-width: 3.2; }
+svg.arch .kit.nw, svg.arch .chip2.nw { stroke: var(--accent); stroke-width: 3; }
+svg.arch .tagb { fill: var(--accent); }
+svg.arch .tagt { font-size: 11.5px; font-weight: 700; fill: var(--paper); }
+svg.arch .edge { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+svg.arch .edge.en { stroke: var(--accent); stroke-width: 2.4; }
+svg.arch .edge.ed { stroke-dasharray: 6 4; }
+svg.arch .halo { stroke: var(--paper); stroke-width: 7; fill: none; }
+svg.arch .ah { fill: var(--muted); }
+svg.arch .ahn { fill: var(--accent); }
+svg.arch .el { font-size: 11.5px; fill: var(--muted); }
+svg.arch .el.eln { fill: var(--accent); font-weight: 700; }
+svg.arch .elb { fill: var(--paper); }
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="目錄">
+  <ol>
+    <li><a href="#s1">1 拿到哪些檔案</a></li>
+    <li><a href="#s2">2 打開練習地圖</a></li>
+    <li><a href="#s3">3 打開 BP_ElevatorKit</a></li>
+    <li><a href="#s4">4 認識 BP 編輯器</a></li>
+    <li><a href="#s5">5 EventGraph（不要改）</a></li>
+    <li><a href="#s6">6 設定值與自己的變數</a></li>
+    <li><a href="#s7">7 打開要寫的函數</a></li>
+    <li><a href="#s8">8 放入 Kit 節點</a></li>
+    <li><a href="#s9">9 關卡 1：會動</a></li>
+    <li><a href="#s10">10 關卡 2：門</a></li>
+    <li><a href="#s11">11 關卡 3：燈與顯示器</a></li>
+    <li><a href="#s12">12 關卡 4：請求排隊與擋門</a></li>
+    <li><a href="#s13">13 測試與除錯</a></li>
+    <li><a href="#s14">14 搬到自己的場景</a></li>
+    <li><a href="#s15">15 常見問題</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="cover">
+  <div class="eyebrow">Unreal Engine 5 · Blueprint 編輯器 · 兩層電梯</div>
+  <h1>電梯套件 ElevatorKit<br>學生操作手冊</h1>
+  <p class="lead">電梯的外觀、按鈕偵測、門板、顯示器都已經做好。你要在 <span class="n">BP_ElevatorKit</span> 裡寫出「電梯什麼時候該做什麼」。這份手冊一步一步告訴你要開哪個檔案、點哪裡、用哪些節點。</p>
+  <div class="note"><b>整份作業只需要編輯一個檔案</b><span class="n">Content/ElevatorKit/BP_ElevatorKit</span>。地圖、材質、名稱開頭是 <code>Kit_</code> 的函數，都不要修改。</div>
+</header>
+
+<section id="s1">
+  <h2><span class="no">1</span>拿到哪些檔案</h2>
+  <div class="map">Content/
+└─ ElevatorKit/
+   ├─ BP_ElevatorKit            ← 你唯一要編輯的 Blueprint
+   ├─ Materials/                電梯與樓梯的材質（不要動）
+   └─ Maps/
+      └─ Lvl_ElevatorKit_Demo   練習地圖：兩層樓空殼房子 + 樓梯 + 電梯井</div>
+  <p>練習地圖本身沒有任何程式。電梯的所有程式都在 <span class="n">BP_ElevatorKit</span> 裡，所以寫完之後，只要把這個 BP 放進你自己的場景就能用（第 14 節）。</p>
+</section>
+
+<section id="s2">
+  <h2><span class="no">2</span>打開練習地圖，先試玩一次</h2>
+  <ol class="steps">
+    <li>在 Content Browser 依序點進 <code>Content</code> → <code>ElevatorKit</code> → <code>Maps</code>。</li>
+    <li>雙擊 <span class="n">Lvl_ElevatorKit_Demo</span>。如果跳出「要不要存檔」的對話框，存你自己原本開著的地圖即可。</li>
+    <li>按工具列上的綠色 ▶ <b>Play</b>。</li>
+    <li>你會出生在房子正面外側。往前走進房子，電梯在最裡面；旋轉樓梯可以走上 2F。</li>
+    <li>走到電梯門前（約 2.5 公尺內），按 <kbd>E</kbd>。</li>
+  </ol>
+  <figure><img src="img/02_maps.png" alt="Content Browser 中的 Maps 資料夾，選取 Lvl_ElevatorKit_Demo"><figcaption>Content › ElevatorKit › Maps，雙擊地圖打開。</figcaption></figure>
+  <figure><img src="img/03_house.png" alt="練習地圖：兩層樓空殼房子，右後方是電梯井與旋轉樓梯"><figcaption>練習地圖：兩層樓的空殼房子。電梯在最裡面，旁邊是旋轉樓梯。</figcaption></figure>
+  <p>畫面左上角會出現 <code>TODO: OnCallButtonPressed，樓層 1</code>。這代表按鈕偵測正常，接下來要由你寫程式。按 <kbd>Esc</kbd> 結束試玩。</p>
+</section>
+
+<section id="s3">
+  <h2><span class="no">3</span>打開 BP_ElevatorKit</h2>
+  <ol class="steps">
+    <li>Content Browser 回到 <code>Content</code> → <code>ElevatorKit</code>。</li>
+    <li>雙擊 <span class="n">BP_ElevatorKit</span>（縮圖是一個小電梯，下方寫 Blueprint Class）。</li>
+    <li>Blueprint 編輯器會在新視窗打開。視窗太小的話，按右上角的「最大化」。</li>
+  </ol>
+  <figure><img src="img/01_content_browser.png" alt="Content Browser 的 ElevatorKit 資料夾，選取 BP_ElevatorKit"><figcaption>Content › ElevatorKit：雙擊 BP_ElevatorKit。</figcaption></figure>
+  <div class="stop"><b>不要雙擊場景裡的電梯</b>在關卡裡選到電梯 <code>EV</code> 再點 Details 的「Edit BP_ElevatorKit」也會開到同一個 BP，但新手容易改到關卡裡那一台的設定值。請一律從 Content Browser 打開。</div>
+</section>
+
+<section id="s4">
+  <h2><span class="no">4</span>認識 BP 編輯器</h2>
+  <figure><img src="img/04_bp_overview.png" alt="BP_ElevatorKit 編輯器畫面，標示六個區域"><figcaption>BP_ElevatorKit 打開後的畫面。</figcaption></figure>
+  <div class="table"><table>
+    <thead><tr><th>編號</th><th>區域</th><th>這次會用來做什麼</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td>Components</td><td>電梯的零件（車廂、門板、按鈕、顯示器）。只看不改。</td></tr>
+      <tr><td>②</td><td>My Blueprint</td><td><b>最常用。</b>Graphs、Functions（函數）、Variables（變數）都在這裡。雙擊函數名稱就會打開它。</td></tr>
+      <tr><td>③</td><td>圖表區</td><td>拉節點、接線的地方。上方的分頁可以切換已打開的函數。</td></tr>
+      <tr><td>④</td><td>Details</td><td>選到什麼就顯示什麼的設定：變數的型別與預設值、函數的輸入參數。</td></tr>
+      <tr><td>⑤</td><td>Compile</td><td>每次改完都要按。圖示變成綠色勾勾才代表沒有錯誤。</td></tr>
+      <tr><td>⑥</td><td>Save</td><td>存檔（<kbd>Ctrl</kbd>+<kbd>S</kbd>）。Compile 不等於存檔。</td></tr>
+    </tbody>
+  </table></div>
+  <p>圖表區操作：按住滑鼠<b>右鍵拖曳</b>移動畫面，<b>滾輪</b>縮放，按 <kbd>Home</kbd> 把所有節點縮放到畫面內。</p>
+</section>
+
+<section id="s5">
+  <h2><span class="no">5</span>EventGraph：已經接好，不要改</h2>
+  <p>在 My Blueprint 的 GRAPHS 底下雙擊 <span class="n">EventGraph</span>，看看套件幫你接好了什麼。這一頁的接線決定了「玩家做了什麼動作，就呼叫哪個函數」。</p>
+  <div class="pair">
+    <figure><img src="img/05_eventgraph_top.png" alt="EventGraph 上半：BeginPlay 接 Kit Setup，按鍵 1、2 接 Kit Cabin Key，按鍵 E 接 Kit Try Press Button"><figcaption>上半部：開始遊戲與按鍵。</figcaption></figure>
+    <figure><img src="img/06_eventgraph_bottom.png" alt="EventGraph 下半：TriggerBox 進出接 Kit Refresh Cabin Light，Timeline Update 接 Update Lift"><figcaption>下半部：車廂感應區與每幀更新。</figcaption></figure>
+  </div>
+  <div class="table"><table>
+    <thead><tr><th>事件</th><th>接到</th><th>最後會呼叫到你寫的</th></tr></thead>
+    <tbody>
+      <tr><td>Event BeginPlay</td><td><span class="n">Kit Setup</span></td><td>（初始化，不用管）</td></tr>
+      <tr><td>按 <kbd>1</kbd> / <kbd>2</kbd></td><td><span class="n">Kit Cabin Key</span></td><td><span class="n">OnCabinButtonPressed</span>（只有在車廂裡才會呼叫）</td></tr>
+      <tr><td>按 <kbd>E</kbd></td><td><span class="n">Kit Try Press Button</span></td><td>站在某層門外 → <span class="n">OnCallButtonPressed</span>（在車廂裡按 <kbd>E</kbd> 不會有反應）</td></tr>
+      <tr><td>進入／離開 TriggerBox</td><td><span class="n">Kit Refresh Cabin Light</span></td><td>（車廂燈，不用管）</td></tr>
+      <tr><td>Timeline 的 Update</td><td><span class="n">Update Lift</span></td><td><span class="n">UpdateLift</span>，<b>每一幀都會執行一次</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>看到「This node is disabled and will not be called」是正常的</b>那是 Unreal 預設放的灰色事件節點（ActorBeginOverlap、Tick），沒有接線所以不會執行。不用刪，也不用接。</div>
+</section>
+
+<section id="s6">
+  <h2><span class="no">6</span>設定值與你自己的變數</h2>
+  <p>在 My Blueprint 展開 <b>VARIABLES</b>，會看到兩個分類：</p>
+  <div class="pair">
+    <figure><img src="img/07_variables.png" alt="My Blueprint 的 VARIABLES：電梯設定與套件內部兩個分類"><figcaption>My Blueprint › VARIABLES。</figcaption></figure>
+    <div>
+      <h3>電梯設定（可以讀，也可以調）</h3>
+      <div class="table"><table>
+        <thead><tr><th>變數</th><th>預設值</th><th>意思</th></tr></thead>
+        <tbody>
+          <tr><td><code>FloorHeights</code></td><td>[0, 500]</td><td>每層車廂的高度（cm）。<b>索引從 0 開始</b>：1F 是索引 0，2F 是索引 1</td></tr>
+          <tr><td><code>MoveSpeed</code></td><td>200</td><td>移動速度，cm／秒</td></tr>
+          <tr><td><code>DoorOpenTime</code></td><td>1.2</td><td>開或關一次門要幾秒</td></tr>
+          <tr><td><code>DwellTime</code></td><td>3.0</td><td>門全開後停留幾秒</td></tr>
+        </tbody>
+      </table></div>
+      <h3>套件內部（不用改）</h3>
+      <p>給 <code>Kit_</code> 函數用的。不要讀也不要寫。</p>
+    </div>
+  </div>
+  <figure><img src="img/08_class_defaults.png" alt="Class Defaults 的 Details 面板，顯示電梯設定的四個值"><figcaption>按工具列的 <b>Class Defaults</b>，Details 會顯示這些設定值，可以在這裡修改。</figcaption></figure>
+
+  <h3>你要新增的 7 個變數</h3>
+  <p>電梯「現在在第幾層」、「正在做什麼」、「門開了多少」這些資料，套件沒有提供。下表列出整份作業會用到的全部變數，請照表<b>自己新增</b>。名稱、型別、預設值都要和表上一致，之後看手冊和問老師才對得起來。</p>
+  <div class="table"><table>
+    <thead><tr><th>名稱</th><th>型別</th><th>預設值</th><th>意思</th><th>從第幾關開始用</th></tr></thead>
+    <tbody>
+      <tr><td><code>State</code></td><td>Integer</td><td>0</td><td>電梯現在在做什麼（見下方的狀態編號）</td><td>關卡 1</td></tr>
+      <tr><td><code>CurrentFloor</code></td><td>Integer</td><td>1</td><td>電梯停靠（或剛離開）的樓層，1 或 2</td><td>關卡 1</td></tr>
+      <tr><td><code>TargetFloor</code></td><td>Integer</td><td>1</td><td>正在前往的樓層，1 或 2</td><td>關卡 1</td></tr>
+      <tr><td><code>DoorAlpha</code></td><td>Float</td><td>0.0</td><td>門開了多少：0 = 全關，1 = 全開</td><td>關卡 2</td></tr>
+      <tr><td><code>DwellRemaining</code></td><td>Float</td><td>0.0</td><td>門全開後，還要再停幾秒</td><td>關卡 2</td></tr>
+      <tr><td><code>Direction</code></td><td>Integer</td><td>0</td><td>移動方向：1 = 上，−1 = 下，0 = 停</td><td>關卡 3</td></tr>
+      <tr><td><code>Requests</code></td><td>Boolean <b>陣列</b></td><td>[false, false]（兩格）</td><td>每一層有沒有人在等：第 0 格 = 1F，第 1 格 = 2F</td><td>關卡 4</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>State 的編號</b>（請照這個約定使用）：</p>
+  <div class="table"><table>
+    <thead><tr><th>值</th><th>狀態</th><th>門</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>待命</td><td>關著</td></tr>
+      <tr><td>1</td><td>開門中</td><td>從 0 開到 1</td></tr>
+      <tr><td>2</td><td>停留</td><td>全開，倒數 DwellRemaining</td></tr>
+      <tr><td>3</td><td>關門中</td><td>從 1 關到 0</td></tr>
+      <tr><td>4</td><td>移動中</td><td>關著</td></tr>
+    </tbody>
+  </table></div>
+  <p>關卡 1 只會用到 0（待命）和 4（移動中），其他狀態到關卡 2 才用。</p>
+  <p class="lead">這些變數什麼時候該改成什麼值、在哪個函數裡改，才是這份作業要你想的部分。</p>
+
+  <h3>新增變數的方法</h3>
+  <ol class="steps">
+    <li>在 My Blueprint 的 VARIABLES 那一列按右邊的 <b>⊕</b>。</li>
+    <li>輸入名稱後按 <kbd>Enter</kbd>。名稱用英文，看名字就要知道用途。</li>
+    <li>在 Details 的 <b>Variable Type</b> 選型別：整數用 Integer，小數用 Float，是／否用 Boolean。需要陣列的話，點型別右邊的圖示改成 Array。</li>
+    <li>在 Details 的 <b>Category</b> 輸入 <code>我的變數</code>，方便和套件的變數分開。</li>
+    <li>按 <b>Compile</b>，Details 下方才會出現 <b>Default Value</b>，在那裡填初始值。</li>
+    <li><code>Requests</code> 是陣列：Compile 後在 Default Value 按兩次 <b>⊕</b> 加入兩格，兩格都不要打勾。</li>
+  </ol>
+  <p>預設值是 0 的 Integer、0.0 的 Float 不用另外填，新增時就已經是 0。</p>
+  <p>在圖表裡使用變數：從 My Blueprint 把變數拖進圖表區，放開時選 <b>Get</b>（讀取）或 <b>Set</b>（寫入）。快捷鍵是按住 <kbd>Ctrl</kbd> 拖曳為 Get，按住 <kbd>Alt</kbd> 拖曳為 Set。</p>
+</section>
+
+<section id="s7">
+  <h2><span class="no">7</span>打開你要寫的函數</h2>
+  <div class="note"><b>7 個函數都已經建好了</b>名稱和輸入參數也都設好了。你不用新增這 7 個函數，只要在 My Blueprint 雙擊打開，<b>把裡面的內容補上</b>。唯一要你自己新增的是關卡 4 的 <span class="n">FindRequest</span>（第 12 節）。</div>
+  <div class="note"><b>這一節只要做兩件事，還不用拉節點</b>① 把下面每個函數打開看一次，認識它的入口節點和輸入參數。② 看一下 OnCallButtonPressed、OnCabinButtonPressed 裡的 TODO 訊息，它可以保留當除錯用（本節最後）。參數不用輸入，已經建好了。真正開始拉節點、接線，是從第 9 節關卡 1 開始。</div>
+  <p>在 My Blueprint 的 <b>FUNCTIONS</b> 底下雙擊函數名稱，圖表區就會打開那個函數，上方多一個分頁。也可以在 My Blueprint 的搜尋框輸入名稱，比較快找到。</p>
+  <h3>每個函數目前的內容與你要做的事</h3>
+  <div class="table"><table>
+    <thead><tr><th>函數</th><th>輸入參數（已建好）</th><th>打開時的內容</th><th>之後要做的</th><th>份量（約幾個節點）</th></tr></thead>
+    <tbody>
+      <tr><td><span class="n">OnCallButtonPressed</span></td><td>Floor</td><td>印出 TODO 訊息</td><td>TODO 可保留當除錯訊息；之後從 Print String 後面接節點</td><td>很少（約 2）</td></tr>
+      <tr><td><span class="n">OnCabinButtonPressed</span></td><td>Floor</td><td>印出 TODO 訊息</td><td>TODO 可保留當除錯訊息；之後從 Print String 後面接節點</td><td>很少（約 2）</td></tr>
+      <tr><td><span class="n">CallElevator</span></td><td>Floor</td><td>空的</td><td>拉節點、接線</td><td>中（約 12）</td></tr>
+      <tr><td><span class="n">UpdateLift</span></td><td>無</td><td>空的（每幀呼叫已經接好）</td><td>拉節點、接線，分關卡逐步加</td><td><b>最多（約 40～50）</b></td></tr>
+      <tr><td><span class="n">StartMove</span></td><td>Floor</td><td>空的</td><td>拉節點、接線</td><td>少（約 6）</td></tr>
+      <tr><td><span class="n">OnArrived</span></td><td>無</td><td>空的</td><td>拉節點、接線</td><td>少（約 8）</td></tr>
+      <tr><td><span class="n">Dispatch</span></td><td>無</td><td>空的</td><td>拉節點、接線（關卡 4）</td><td>中（約 8）</td></tr>
+      <tr><td><span class="n">FindRequest</span></td><td>無（輸出 Result）</td><td><b>不存在</b></td><td>關卡 4 自己新增，再拉節點、接線</td><td>中（約 6～8）</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>輸入參數在哪裡看得到：</b>打開函數後，紫色入口節點右邊的綠色接腳（例如 <b>Floor</b>），以及右側 Details 的 <b>Inputs</b> 區。它代表「別人呼叫這個函數時帶進來的樓層號碼」，你不用輸入，寫內容時拿 Floor 接腳去接其他節點就好。</p>
+  <p><b>「拉節點、接線」是什麼意思：</b>從入口節點的白色箭頭 ▷ 往右拉，放進 Branch、Set 變數、Kit 函數、數學運算等節點，把線接起來組成判斷。大部分不是填數字，只有少數地方要填值（例如 Set State 填 4）。節點數是依參考寫法估計，你的寫法多一點或少一點都沒關係。</p>
+  <h3>每一關要寫或修改的函數</h3>
+  <div class="table"><table>
+    <thead><tr><th>關卡</th><th>函數</th></tr></thead>
+    <tbody>
+      <tr><td>1 會動</td><td>OnCabinButtonPressed、StartMove、UpdateLift、OnArrived</td></tr>
+      <tr><td>2 門</td><td>UpdateLift（加入開門、停留、關門）、OnArrived（改成開門）、CallElevator、OnCallButtonPressed，OnCabinButtonPressed 改成呼叫 CallElevator</td></tr>
+      <tr><td>3 燈與顯示器</td><td>OnCallButtonPressed、OnCabinButtonPressed（亮燈）、OnArrived（熄燈）、StartMove（記方向）、UpdateLift（更新顯示器）</td></tr>
+      <tr><td>4 請求排隊與擋門</td><td><b>新增 FindRequest</b>、Dispatch、CallElevator（登記請求）、OnArrived（清除登記）、UpdateLift（出口 0 改呼叫 Dispatch；出口 2、3 擋門）</td></tr>
+    </tbody>
+  </table></div>
+  <h3>每個函數什麼時候被呼叫</h3>
+  <div class="table"><table>
+    <thead><tr><th>函數</th><th>輸入</th><th>什麼時候會被呼叫</th><th>要做什麼</th></tr></thead>
+    <tbody>
+      <tr><td><span class="n">OnCallButtonPressed</span></td><td>Floor</td><td>玩家在第 Floor 層門外按 <kbd>E</kbd></td><td>按鈕亮燈，然後叫電梯</td></tr>
+      <tr><td><span class="n">OnCabinButtonPressed</span></td><td>Floor</td><td>玩家在車廂裡按 <kbd>1</kbd>／<kbd>2</kbd></td><td>同上</td></tr>
+      <tr><td><span class="n">CallElevator</span></td><td>Floor</td><td>由上面兩個函數呼叫</td><td>電梯就在這層：開門。不在：把請求記下來</td></tr>
+      <tr><td><span class="n">UpdateLift</span></td><td>無</td><td><b>每一幀</b>（EventGraph 已接好）</td><td>電梯的大腦：依目前狀態決定這一幀做什麼</td></tr>
+      <tr><td><span class="n">StartMove</span></td><td>Floor</td><td>你自己決定</td><td>開始往第 Floor 層移動</td></tr>
+      <tr><td><span class="n">OnArrived</span></td><td>無</td><td>你自己決定</td><td>到站：更新所在樓層、熄燈、開門</td></tr>
+      <tr><td><span class="n">Dispatch</span></td><td>無</td><td>你自己決定（進階）</td><td>門關好後，決定下一站去哪</td></tr>
+      <tr><td><span class="n">FindRequest</span></td><td>無</td><td>由 Dispatch 呼叫（關卡 4，自己新增）</td><td>回傳第一個有人在等的樓層，沒有就回傳 0</td></tr>
+    </tbody>
+  </table></div>
+  <p class="lead">樓層編號一律是 <b>1 和 2</b>（1F = 1，2F = 2）。只有 <code>FloorHeights</code> 陣列的索引是從 0 開始。</p>
+
+  <h3>OnCallButtonPressed 與 OnCabinButtonPressed：TODO 訊息可以保留當除錯用</h3>
+  <figure><img src="img/09_func_oncall.png" alt="OnCallButtonPressed 函數：入口節點接 Append 和 Print String，印出 TODO 訊息"><figcaption>OnCallButtonPressed 打開時的樣子。OnCabinButtonPressed 也一樣。</figcaption></figure>
+  <ol class="steps">
+    <li>這組節點只會在畫面上印一行字，不影響電梯運作。<b>建議保留</b>：每次按按鈕都能確認「這個函數有被呼叫、樓層是幾」。</li>
+    <li>可以把 <span class="n">Append</span> 的 A 欄文字改成你自己的訊息，例如 <code>按了呼叫鈕，樓層 </code>，避免以為還沒做完。</li>
+    <li>到關卡 1、2 寫內容時，新節點要從 <span class="n">Print String</span> 右邊的白色箭頭 ▷ <b>繼續往後接</b>，不要從入口節點另外拉一條線（一個 ▷ 只能接一條）。</li>
+    <li>綠色的 <b>Floor</b> 接腳就是被按的樓層，拖曳它就能接到其他節點的 Floor 輸入。同一個接腳可以拉出好幾條線。</li>
+    <li>全部完成、不再需要除錯時，再框選 <span class="n">Append</span>、<span class="n">Print String</span> 和中間的轉換節點刪掉，並把入口節點直接接到後面的節點。</li>
+  </ol>
+
+  <h3>其他空殼函數</h3>
+  <div class="pair">
+    <figure><img src="img/10_func_callelevator.png" alt="CallElevator 函數：只有入口節點，有一個 Integer 輸入 Floor"><figcaption>CallElevator：入口節點上有輸入參數 <code>Floor</code>（Integer）。</figcaption></figure>
+    <figure><img src="img/11_func_updatelift.png" alt="UpdateLift 函數：只有入口節點，沒有輸入參數"><figcaption>UpdateLift：沒有輸入參數，每一幀執行一次。</figcaption></figure>
+  </div>
+  <p>空殼函數只有入口節點，從入口的 ▷ 往右接就可以了。函數沒有回傳值，不需要 Return 節點。</p>
+  <div class="note"><b>在一個函數裡呼叫另一個函數</b>從 My Blueprint 把函數名稱拖進圖表區，或在圖表區按右鍵搜尋名稱，例如在 OnCallButtonPressed 裡放一個 <span class="n">Call Elevator</span> 節點。</div>
+</section>
+
+<section id="s8">
+  <h2><span class="no">8</span>放入 Kit 節點</h2>
+  <div class="note"><b>Kit 是什麼？</b>Unreal 原本沒有這些函數。它們是電梯套件（Elevator<b>Kit</b>）另外寫好、提供給你用的普通 Blueprint 函數。名稱前面統一加上 <code>Kit_</code> 有三個用處：① 一眼分出誰寫的：Kit 開頭的是套件寫好的，沒有 Kit 的（OnCallButtonPressed、UpdateLift……）是你要寫的；② 好找：右鍵搜尋時打 <code>Kit</code> 就會一起列出來；③ 提醒不要改：拿來呼叫就好，不要打開修改。這跟 Unreal 專案常見的命名習慣一樣，例如 Blueprint 用 <code>BP_</code> 開頭、材質實例用 <code>MI_</code> 開頭。</div>
+  <div class="note"><b>這一節只是說明，還不用真的放節點</b>這一節教你怎麼找到 Kit 節點、看懂它們的接腳。真正要放哪些節點、放在哪個函數，第 9～12 節每一關的「要編輯的地方」會寫清楚。例如關卡 1 才會在 UpdateLift 裡放 Kit Get Lift Z、Kit Set Lift Z、Get World Delta Seconds。想先試試看，可以放一個再按 <kbd>Delete</kbd> 刪掉。</div>
+  <div class="stop"><b>先打開你要寫的函數，再按右鍵</b>節點要放在你正在寫的函數裡。例如寫關卡 1 時，先在 My Blueprint 雙擊 <span class="n">UpdateLift</span>，在 UpdateLift 的分頁裡按右鍵。<b>不要放在 EventGraph</b>：EventGraph 是套件接好的（第 5 節），放在那裡的節點沒有接在任何事件後面，永遠不會執行。</div>
+  <p>在函數分頁的空白處按<b>右鍵</b>，搜尋框輸入 <code>Kit</code>，就會列出所有套件函數。點一下就會放進圖表。</p>
+  <div class="pair">
+    <figure><img src="img/12_menu_kit.png" alt="右鍵選單搜尋 Kit_ 列出所有套件函數"><figcaption>右鍵 → 搜尋 <code>Kit</code>。選單裡名稱的底線會顯示成空格。</figcaption></figure>
+    <div>
+      <p><b>你會用到的只有這幾個：</b></p>
+      <ul>
+        <li><span class="n">Kit Get Lift Z</span></li>
+        <li><span class="n">Kit Set Lift Z</span></li>
+        <li><span class="n">Kit Apply Doors</span></li>
+        <li><span class="n">Kit Is Door Blocked</span></li>
+        <li><span class="n">Kit Is Player in Cabin</span></li>
+        <li><span class="n">Kit Set Button Light</span></li>
+        <li><span class="n">Kit Update Displays</span></li>
+      </ul>
+      <p>其他 Kit 函數（Setup、Cabin Key、Try Press Button、Find Call Button Floor、Display Floor、Refresh Cabin Light）是套件內部或 EventGraph 在用的（開始遊戲、按 1/2、按 E 時自動呼叫），整份作業都不會用到，不要放進你的程式。</p>
+    </div>
+  </div>
+  <figure><img src="img/13_kit_nodes.png" alt="各種 Kit 節點、Get World Delta Seconds 與電梯設定變數放進圖表後的樣子"><figcaption>節點放進圖表後的樣子。左：會改變電梯的 Kit 函數。中：查詢用的 Kit 函數與 Get World Delta Seconds。右：電梯設定的變數。（此圖取自練習用的複本，你的畫面上「Target is」會寫 BP Elevator Kit。）</figcaption></figure>
+  <div class="table"><table>
+    <thead><tr><th>節點</th><th>輸入</th><th>輸出</th><th>做什麼</th></tr></thead>
+    <tbody>
+      <tr><td><span class="n">Kit Get Lift Z</span></td><td></td><td>Z（Float）</td><td>車廂目前高度。0 = 1F，500 = 2F</td></tr>
+      <tr><td><span class="n">Kit Set Lift Z</span></td><td>Z</td><td></td><td>把車廂移到高度 Z。每幀呼叫、每次移一點，看起來就是在動</td></tr>
+      <tr><td><span class="n">Kit Apply Doors</span></td><td>Alpha, Floor</td><td></td><td>擺好門的位置。Alpha 0 = 全關，1 = 全開，0.5 = 開一半。車廂門和第 Floor 層的井口門一起動</td></tr>
+      <tr><td><span class="n">Kit Is Door Blocked</span></td><td>Floor</td><td>Blocked（Boolean）</td><td>玩家是否站在第 Floor 層門口</td></tr>
+      <tr><td><span class="n">Kit Is Player in Cabin</span></td><td></td><td>In Cabin（Boolean）</td><td>玩家是否在車廂裡</td></tr>
+      <tr><td><span class="n">Kit Set Button Light</span></td><td>Floor, On</td><td></td><td>開關第 Floor 層按鈕的燈（車廂內和門外的一起）</td></tr>
+      <tr><td><span class="n">Kit Update Displays</span></td><td>Dir</td><td></td><td>更新所有顯示器。數字自動算；Dir = 1 上箭頭，−1 下箭頭，0 不顯示。<b>每幀呼叫一次</b></td></tr>
+      <tr><td><span class="n">Get World Delta Seconds</span></td><td></td><td>Return Value</td><td>這一幀經過了幾秒（Unreal 內建）</td></tr>
+    </tbody>
+  </table></div>
+  <div class="stop"><b>Kit 節點都有白色執行箭頭</b>連 Kit Get Lift Z、Kit Is Door Blocked 這種查詢用的節點也有 ▷。它們一定要串在白色執行線上，否則不會執行，輸出的值也不對。</div>
+  <h3>常用的內建節點</h3>
+  <p>按右鍵搜尋名稱即可放入：</p>
+  <div class="table"><table>
+    <thead><tr><th>搜尋</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>Branch</code>（或按住 <kbd>B</kbd> 點左鍵）</td><td>如果……就……否則……</td></tr>
+      <tr><td><code>Switch on Int</code></td><td>依整數走不同的路，適合「依狀態做不同的事」。出口不夠時按節點上的 Add pin</td></tr>
+      <tr><td><code>Sequence</code></td><td>依序做好幾件事</td></tr>
+      <tr><td><code>Get (a copy)</code></td><td>從陣列取值，例如從 FloorHeights 取某一層的高度</td></tr>
+      <tr><td><code>+</code> <code>-</code> <code>*</code> <code>/</code>、<code>Abs</code>、<code>Clamp</code>、<code>Min</code>、<code>Max</code></td><td>數學運算</td></tr>
+      <tr><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code>、<code>AND</code>、<code>OR</code>、<code>NOT</code></td><td>比較與邏輯</td></tr>
+      <tr><td><code>Print String</code></td><td>在畫面上印字，除錯用</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s9">
+  <h2><span class="no">9</span>關卡 1：會動</h2>
+  <p><b>目標：</b>在車廂裡按 <kbd>2</kbd>，電梯從 1F 移到 2F 停住；按 <kbd>1</kbd> 回到 1F。這一關不用管門和燈。</p>
+  <h3>先在紙上回答</h3>
+  <ul>
+    <li>按下 <kbd>2</kbd> 之後，<code>State</code>、<code>TargetFloor</code>、<code>CurrentFloor</code> 各在什麼時候、被哪個函數改成什麼值？</li>
+    <li>每一幀車廂要移動多少距離？跟 MoveSpeed 和這一幀的秒數有什麼關係？</li>
+    <li>怎麼判斷「到了」？</li>
+  </ul>
+  <h3>架構：這一關做完後，各層之間的關係</h3>
+  <p>關卡 1 只有一條路：在車廂按 1／2，OnCabinButtonPressed 直接呼叫 StartMove 記下目標；之後每一幀 UpdateLift 只要判斷「是不是移動中」，是就把車廂移一步，到站呼叫 OnArrived。</p>
+  <figure><div class="archwrap"><svg class="arch" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="關卡 1 完成時的七層架構"><defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker><marker id="an1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahn" d="M0,0 L10,5 L0,10 z"/></marker></defs><text class="bn" x="16" y="34">1</text><text class="bt" x="16" y="56">玩家操作</text><text class="bs" x="16" y="74">鍵盤與走位</text><line class="div" x1="0" y1="100" x2="1200" y2="100"/><text class="bn" x="16" y="134">2</text><text class="bt" x="16" y="156">套件偵測</text><text class="bs" x="16" y="174">EventGraph · 不要改</text><line class="div" x1="0" y1="216" x2="1200" y2="216"/><text class="bn" x="16" y="250">3</text><text class="bt" x="16" y="272">事件函數</text><text class="bs" x="16" y="290">按一次執行一次</text><line class="div" x1="0" y1="372" x2="1200" y2="372"/><text class="bn" x="16" y="406">4</text><text class="bt" x="16" y="428">狀態資料</text><text class="bs" x="16" y="446">兩條路的交會點</text><line class="div" x1="0" y1="560" x2="1200" y2="560"/><text class="bn" x="16" y="594">5</text><text class="bt" x="16" y="616">每幀決策</text><text class="bs" x="16" y="634">UpdateLift 狀態機</text><line class="div" x1="0" y1="862" x2="1200" y2="862"/><text class="bn" x="16" y="896">6</text><text class="bt" x="16" y="918">套件輸出</text><text class="bs" x="16" y="936">Kit 函數 · 直接呼叫</text><line class="div" x1="0" y1="1000" x2="1200" y2="1000"/><text class="bn" x="16" y="1034">7</text><text class="bt" x="16" y="1056">場景元件</text><text class="bs" x="16" y="1074">玩家看到的結果</text><polyline class="edge" points="250,74 250,124" marker-end="url(#ah1)"/><polyline class="edge" points="455,74 455,124" marker-end="url(#ah1)"/><polyline class="edge" points="660,74 660,124" marker-end="url(#ah1)"/><polyline class="edge" points="865,74 865,124" marker-end="url(#ah1)"/><polyline class="edge" points="1070,74 1070,124" marker-end="url(#ah1)"/><polyline class="edge" points="455,194 455,240" marker-end="url(#ah1)"/><polyline class="edge" points="660,194 660,240" marker-end="url(#ah1)"/><polyline class="edge en" points="660,288 660,640 250,640 250,668" marker-end="url(#an1)"/><polyline class="edge" points="865,194 865,580" marker-end="url(#ah1)"/><polyline class="edge en" points="200,516 200,668" marker-end="url(#an1)" marker-start="url(#an1)"/><polyline class="edge en" points="865,628 455,668" marker-end="url(#an1)"/><polyline class="edge en" points="455,818 455,900" marker-end="url(#an1)"/><polyline class="edge en" points="455,960 455,1024" marker-end="url(#an1)"/><rect class="ply" x="160" y="30" width="180" height="44" rx="8"/><text class="pt" x="250" y="57" text-anchor="middle">按 Play 開始</text><rect class="ply" x="365" y="30" width="180" height="44" rx="8"/><text class="pt" x="455" y="57" text-anchor="middle">門外按 E</text><rect class="ply" x="570" y="30" width="180" height="44" rx="8"/><text class="pt" x="660" y="57" text-anchor="middle">車廂裡按 1／2</text><rect class="ply" x="775" y="30" width="180" height="44" rx="8"/><text class="pt" x="865" y="57" text-anchor="middle">時間經過</text><rect class="ply" x="980" y="30" width="180" height="44" rx="8"/><text class="pt" x="1070" y="57" text-anchor="middle">走進／走出車廂</text><rect class="kit" x="160" y="124" width="180" height="70" rx="8"/><text class="kt" x="250" y="154" text-anchor="middle">Kit_Setup</text><text class="ks" x="250" y="175" text-anchor="middle">BeginPlay：初始化門與顯示器</text><rect class="kit" x="365" y="124" width="180" height="70" rx="8"/><text class="kt" x="455" y="154" text-anchor="middle">Kit_TryPressButton</text><text class="ks" x="455" y="175" text-anchor="middle">找出按的是哪層呼叫鈕</text><rect class="kit" x="570" y="124" width="180" height="70" rx="8"/><text class="kt" x="660" y="154" text-anchor="middle">Kit_CabinKey</text><text class="ks" x="660" y="175" text-anchor="middle">確認玩家在車廂裡</text><rect class="kit" x="775" y="124" width="180" height="70" rx="8"/><text class="kt" x="865" y="154" text-anchor="middle">Timeline Update</text><text class="ks" x="865" y="175" text-anchor="middle">每一幀觸發一次</text><rect class="kit" x="980" y="124" width="180" height="70" rx="8"/><text class="kt" x="1070" y="154" text-anchor="middle">Kit_RefreshCabinLight</text><text class="ks" x="1070" y="175" text-anchor="middle">車廂燈亮／暗</text><rect class="shl" x="365" y="240" width="180" height="48" rx="8"/><text class="stt" x="455" y="261" text-anchor="middle">OnCallButtonPressed</text><text class="sts" x="455" y="279" text-anchor="middle">還是空殼（印 TODO）</text><rect class="stu nw" x="570" y="240" width="180" height="48" rx="8"/><text class="stt" x="660" y="261" text-anchor="middle">OnCabinButtonPressed</text><text class="sts" x="660" y="279" text-anchor="middle">呼叫 StartMove · L1</text><rect class="tagb" x="716" y="230" width="30" height="18" rx="9"/><text class="tagt" x="731" y="243" text-anchor="middle">新</text><rect class="grp" x="160" y="392" width="590" height="124" rx="8"/><text class="gt" x="174" y="414">我的變數</text><text class="gs" x="240" y="414">學生自己新增</text><rect class="chip nw" x="176" y="428" width="134" height="30" rx="6"/><text class="ct" x="186" y="448">State</text><text class="cl" x="300" y="448" text-anchor="end">L1</text><rect class="tagb" x="276" y="418" width="30" height="18" rx="9"/><text class="tagt" x="291" y="431" text-anchor="middle">新</text><rect class="chip nw" x="318" y="428" width="134" height="30" rx="6"/><text class="ct" x="328" y="448">CurrentFloor</text><text class="cl" x="442" y="448" text-anchor="end">L1</text><rect class="tagb" x="418" y="418" width="30" height="18" rx="9"/><text class="tagt" x="433" y="431" text-anchor="middle">新</text><rect class="chip nw" x="460" y="428" width="134" height="30" rx="6"/><text class="ct" x="470" y="448">TargetFloor</text><text class="cl" x="584" y="448" text-anchor="end">L1</text><rect class="tagb" x="560" y="418" width="30" height="18" rx="9"/><text class="tagt" x="575" y="431" text-anchor="middle">新</text><rect class="grp" x="980" y="392" width="180" height="158" rx="8"/><text class="gt" x="994" y="414">套件設定值</text><text class="gs" x="994" y="430">UpdateLift、CallElevator 讀取</text><rect class="chip2" x="994" y="440" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="456">FloorHeights</text><rect class="chip2" x="994" y="467" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="483">MoveSpeed</text><rect class="stu nw" x="775" y="580" width="180" height="48" rx="8"/><text class="stt" x="865" y="601" text-anchor="middle">UpdateLift</text><text class="sts" x="865" y="619" text-anchor="middle">Branch：State == 4 · L1</text><rect class="tagb" x="921" y="570" width="30" height="18" rx="9"/><text class="tagt" x="936" y="583" text-anchor="middle">新</text><rect class="stu nw" x="160" y="668" width="180" height="60" rx="8"/><text class="stt" x="250" y="693" text-anchor="middle">StartMove(Floor)</text><text class="sts" x="250" y="714" text-anchor="middle">記 TargetFloor、State = 4</text><rect class="tagb" x="306" y="658" width="30" height="18" rx="9"/><text class="tagt" x="321" y="671" text-anchor="middle">新</text><rect class="card nw" x="365" y="668" width="180" height="150" rx="8"/><path d="M373,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s4)"/><text class="ch" x="377" y="687">4 移動中</text><text class="ch" x="533" y="687" text-anchor="end">L1</text><text class="cline m" x="377" y="718">Kit_GetLiftZ</text><text class="cline m" x="377" y="737">Kit_SetLiftZ</text><text class="cline" x="377" y="756">到站：OnArrived()</text><text class="cline" x="377" y="775">→ 0（還沒有門）</text><rect class="tagb" x="511" y="658" width="30" height="18" rx="9"/><text class="tagt" x="526" y="671" text-anchor="middle">新</text><rect class="kit nw" x="365" y="900" width="180" height="60" rx="8"/><text class="kt" x="455" y="925" text-anchor="middle">Kit_Get／SetLiftZ</text><text class="ks" x="455" y="946" text-anchor="middle">車廂高度 · L1</text><rect class="tagb" x="511" y="890" width="30" height="18" rx="9"/><text class="tagt" x="526" y="903" text-anchor="middle">新</text><rect class="scn nw" x="365" y="1024" width="180" height="52" rx="8"/><text class="pt" x="455" y="1045" text-anchor="middle">車廂</text><text class="bs" x="455" y="1063" text-anchor="middle">玩家站在上面一起移動</text><rect class="tagb" x="511" y="1014" width="30" height="18" rx="9"/><text class="tagt" x="526" y="1027" text-anchor="middle">新</text><rect class="elb" x="462" y="206" width="41" height="18" rx="3"/><text class="el" x="466" y="219">Floor</text><rect class="elb" x="667" y="206" width="41" height="18" rx="3"/><text class="el" x="671" y="219">Floor</text><rect class="elb" x="667" y="300" width="41" height="18" rx="3"/><text class="el eln" x="671" y="313">Floor</text><rect class="elb" x="872" y="270" width="42.5" height="18" rx="3"/><text class="el" x="876" y="283">每一幀</text><rect class="elb" x="208" y="584" width="54" height="18" rx="3"/><text class="el eln" x="212" y="597">每幀讀寫</text><rect class="elb" x="600" y="636" width="74" height="18" rx="3"/><text class="el eln" x="604" y="649">State == 4</text></svg></div><figcaption>黃色粗框標「新」的是這一關要新增的，標「改」的是要修改的；深色方塊是套件提供、不用改的；黃色箭頭是這一關新增的連線。圖比較寬，手機上可以左右滑動。</figcaption></figure>
+
+  <h3>要編輯的地方</h3>
+  <ol class="steps">
+    <li>照第 6 節的表，先新增 <code>State</code>、<code>CurrentFloor</code>、<code>TargetFloor</code>（也可以一次把 7 個都建好）。</li>
+    <li>打開 <span class="n">OnCabinButtonPressed</span>，在 Print String 後面呼叫 <span class="n">Start Move</span> 並把 Floor 接過去。（之後的關卡會改成呼叫 CallElevator。）</li>
+    <li>打開 <span class="n">StartMove</span>：把傳進來的 <code>Floor</code> 存進 <code>TargetFloor</code>，再把 <code>State</code> 設成 4（移動中）。做法：按住 <kbd>Alt</kbd> 把變數拖進圖表得到 Set 節點，白線依序接 入口 ▷ → Set TargetFloor → Set State；Floor 接腳拉到 Set TargetFloor 的輸入，Set State 填 4。StartMove 只負責下指令，真正讓車廂動的是 UpdateLift。</li>
+    <li>打開 <span class="n">UpdateLift</span>：如果 <code>State</code> 是 4（移動中），就讀目前高度（Kit Get Lift Z）、算這一幀要移多少、寫回新高度（Kit Set Lift Z）。到了就呼叫 <span class="n">On Arrived</span>。State 不是 4 時什麼都不做。</li>
+    <li>打開 <span class="n">OnArrived</span>：把 <code>TargetFloor</code> 存進 <code>CurrentFloor</code>（現在停在這一層了），再把 <code>State</code> 設回 0（待命）。OnArrived <b>沒有 Floor 輸入</b>，這是刻意的：目的地早就被 StartMove 存在 <code>TargetFloor</code> 裡，按住 <kbd>Ctrl</kbd> 拖出 Get TargetFloor 讀出來就好。函數之間就是這樣靠變數傳遞資料。</li>
+    <li>Compile → Save → 回主視窗按 Play 測試。</li>
+  </ol>
+  <p>步驟 2～5 是照程式執行的順序排（按下按鈕 → 出發 → 每幀移動 → 到站），方便理解。實際上<b>先寫哪一個都可以</b>：函數都已經存在，呼叫一個還是空的函數也能 Compile。覺得 UpdateLift 太難，可以先把 StartMove、OnArrived 這兩個簡單的做完。四個都寫好後，按 Play 才看得到電梯動。</p>
+
+  <h3>UpdateLift 詳細做法（關卡 1）</h3>
+  <p>關卡 1 的 UpdateLift 只處理「移動中」這一種狀態，約 20 個節點。先看懂邏輯，再照下面的表放節點、接線。</p>
+  <pre class="map">如果 State 不是 4 → 什麼都不做
+如果 State 是 4（移動中）：
+    Z      = 車廂目前高度                 （Kit Get Lift Z）
+    Target = 目標樓層的高度               （FloorHeights[TargetFloor − 1]）
+    Step   = 這一幀可以走的距離           （MoveSpeed × Get World Delta Seconds）
+    如果 |Target − Z| ≤ Step  → 到了：車廂設到 Target，呼叫 OnArrived
+    否則如果 Target > Z      → 往上：車廂設到 Z + Step
+    否則                     → 往下：車廂設到 Z − Step</pre>
+  <figure><img src="img/15_updatelift_lv1.png" alt="關卡 1 完成後的 UpdateLift：三個 Branch、Kit Get Lift Z、三個 Kit Set Lift Z、On Arrived 與計算 Target、Step 的節點"><figcaption>關卡 1 完成後的 UpdateLift。①～⑤ 對應下面白線表的順序，Target 與 Step 是兩組計算數值的節點。（節點位置可以和圖不同，線接對就好。）</figcaption></figure>
+
+  <h3>白線上的節點（依序執行）</h3>
+  <div class="table"><table>
+    <thead><tr><th>圖中</th><th>節點</th><th>做什麼</th><th>怎麼放</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td><span class="n">Branch</span>，Condition 接 <code>State == 4</code></td><td>是不是移動中</td><td>右鍵搜尋 <code>Branch</code>，或按住 <kbd>B</kbd> 點左鍵</td></tr>
+      <tr><td>②</td><td><span class="n">Kit Get Lift Z</span></td><td>取得目前高度 Z</td><td>右鍵搜尋 <code>Kit Get Lift Z</code></td></tr>
+      <tr><td>③</td><td><span class="n">Branch</span>，Condition 接 <code>Abs(Target − Z) &lt;= Step</code></td><td>到了沒</td><td>同 ①</td></tr>
+      <tr><td>④</td><td><span class="n">Kit Set Lift Z</span>（Z 接 Target）→ <span class="n">On Arrived</span></td><td>到了：對齊目標、通知到站</td><td>右鍵搜尋 <code>Kit Set Lift Z</code>；On Arrived 從 My Blueprint 拖進來</td></tr>
+      <tr><td>⑤</td><td><span class="n">Branch</span>，Condition 接 <code>Target &gt; Z</code>；True → <span class="n">Kit Set Lift Z</span>（Z + Step），False → <span class="n">Kit Set Lift Z</span>（Z − Step）</td><td>還沒到：往上或往下移一步</td><td>Kit Set Lift Z 可以用 <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>Ctrl</kbd>+<kbd>V</kbd> 複製</td></tr>
+    </tbody>
+  </table></div>
+  <pre class="map">[UpdateLift] ▷ → [① Branch：State == 4]
+                    True ▷ → [② Kit Get Lift Z] ▷ → [③ Branch：Abs(Target − Z) &lt;= Step]
+                                                     True  ▷ → [④ Kit Set Lift Z = Target] ▷ → [On Arrived]
+                                                     False ▷ → [⑤ Branch：Target &gt; Z]
+                                                                 True  ▷ → [Kit Set Lift Z = Z + Step]
+                                                                 False ▷ → [Kit Set Lift Z = Z − Step]
+                    False → （不接）</pre>
+
+  <h3>計算數值的節點（沒有白線）</h3>
+  <div class="table"><table>
+    <thead><tr><th>要算的值</th><th>節點</th><th>怎麼放</th></tr></thead>
+    <tbody>
+      <tr><td><code>State == 4</code></td><td>Get State → <span class="n">==</span>，下面的格子填 4</td><td><kbd>Ctrl</kbd> 拖 State；從它的輸出拉線，搜尋 <code>==</code></td></tr>
+      <tr><td><b>Target</b></td><td>Get FloorHeights → <span class="n">Get (a copy)</span>；索引接 Get TargetFloor <span class="n">−</span> 1</td><td><kbd>Ctrl</kbd> 拖 FloorHeights，從輸出拉線搜尋 <code>Get (a copy)</code>；<kbd>Ctrl</kbd> 拖 TargetFloor，拉線搜尋 <code>-</code>，下面填 1</td></tr>
+      <tr><td><b>Step</b></td><td>Get MoveSpeed <span class="n">×</span> Get World Delta Seconds</td><td><kbd>Ctrl</kbd> 拖 MoveSpeed，拉線搜尋 <code>*</code>；右鍵搜尋 <code>Get World Delta Seconds</code> 接到下面</td></tr>
+      <tr><td>剩下的距離</td><td>Target <span class="n">−</span> Z → <span class="n">Abs</span></td><td>從 Target 拉線搜尋 <code>-</code>，下面接 Z；再拉線搜尋 <code>Abs</code></td></tr>
+      <tr><td>到了沒</td><td>剩下的距離 <span class="n">&lt;=</span> Step</td><td>從 Abs 拉線搜尋 <code>&lt;=</code>，下面接 Step，輸出接 ③ 的 Condition</td></tr>
+      <tr><td>往上嗎</td><td>Target <span class="n">&gt;</span> Z</td><td>從 Target 拉線搜尋 <code>&gt;</code>，下面接 Z，輸出接 ⑤ 的 Condition</td></tr>
+      <tr><td>Z + Step、Z − Step</td><td><span class="n">+</span>、<span class="n">−</span></td><td>從 Z 拉線搜尋 <code>+</code>、<code>-</code>，下面接 Step，輸出接兩個 Kit Set Lift Z 的 Z</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="stop"><b>四個容易錯的地方</b>① <b>Kit Get Lift Z 要接在白線上，而且在 ③ 前面</b>：Z 是它執行後才有的值。② <b>索引要用 TargetFloor − 1</b>：2F 是索引 1，忘了減會出現陣列越界。③ <b>③ 要用 &lt;=，不要用 ==</b>：高度是小數，幾乎不會剛好等於 500，用 == 會衝過頭。④ <b>同一個輸出可以接很多條線</b>：Z、Target、Step 各只要一份，從同一個接腳拉多條線就好。</div>
+  <details><summary>提示（卡住再打開）</summary>
+    <p>目標高度可以用 <span class="n">Get (a copy)</span> 從 <code>FloorHeights</code> 取出，索引要用 <code>Floor − 1</code>。</p>
+    <p>每一幀的移動量 = <code>MoveSpeed × Get World Delta Seconds</code>。</p>
+    <p>不要只判斷「目前高度 == 目標高度」。小數幾乎不會剛好相等，電梯會衝過頭。改成判斷「剩下的距離是不是已經小於等於這一步」，是的話直接把高度設成目標再呼叫 OnArrived。</p>
+  </details>
+  <h3>驗收</h3>
+  <ul class="check">
+    <li>進車廂按 <kbd>2</kbd>，電梯上到 2F 並停住，玩家跟著上去</li>
+    <li>按 <kbd>1</kbd> 回到 1F</li>
+    <li>停下的位置剛好在樓板高度，不會抖、不會衝過頭</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <h2><span class="no">10</span>關卡 2：門</h2>
+  <p><b>目標：</b>到站後門打開，停留 <code>DwellTime</code> 秒（3 秒），再關上。<b>門沒關好之前電梯不能動。</b>在門外按 <kbd>E</kbd> 也要能叫電梯：電梯就在這層就開門，在別層就先開過來再開門。</p>
+  <h3>先在紙上回答</h3>
+  <ul>
+    <li>對照第 6 節的 State 編號表（0 待命、1 開門中、2 停留、3 關門中、4 移動中）：到站之後，State 會依序經過哪些值？</li>
+    <li>每種狀態在 UpdateLift 裡各要做什麼？什麼條件會切到下一個狀態？</li>
+    <li>門開著的時候按了別層，電梯要記住「要去哪」。這一關用哪個變數記？</li>
+  </ul>
+
+  <h3>邏輯架構：關卡 2 的狀態圖</h3>
+  <div class="diagram" role="img" aria-label="關卡 2 狀態圖：待命、移動中、開門中、停留、關門中與切換條件">
+    <svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:600px">
+      <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path style="fill:var(--muted)" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <g style="stroke:var(--muted);stroke-width:1.6;fill:none">
+        <line x1="160" y1="178" x2="322" y2="104" marker-end="url(#ah2)"/>
+        <line x1="440" y1="104" x2="602" y2="178" marker-end="url(#ah2)"/>
+        <line x1="185" y1="210" x2="573" y2="210" marker-end="url(#ah2)"/>
+        <line x1="640" y1="242" x2="565" y2="326" marker-end="url(#ah2)"/>
+        <line x1="445" y1="360" x2="317" y2="360" marker-end="url(#ah2)"/>
+        <path d="M240,392 C240,450 690,450 690,244" marker-end="url(#ah2)"/>
+        <line x1="175" y1="330" x2="120" y2="244" marker-end="url(#ah2)"/>
+        <path d="M595,348 C640,330 640,392 597,374" marker-end="url(#ah2)"/>
+      </g>
+      <g style="font-size:12.5px;fill:var(--muted)" font-family="sans-serif">
+        <rect x="118" y="118" width="170" height="36" rx="3" style="fill:var(--paper)"/><text x="203" y="132" text-anchor="middle">出口 0：TargetFloor ≠ CurrentFloor</text><text x="203" y="149" text-anchor="middle">→ Start Move</text>
+        <rect x="478" y="118" width="130" height="36" rx="3" style="fill:var(--paper)"/><text x="543" y="132" text-anchor="middle">剩餘距離 ≤ 這一步</text><text x="543" y="149" text-anchor="middle">→ On Arrived</text>
+        <rect x="270" y="200" width="220" height="20" rx="3" style="fill:var(--paper)"/><text x="380" y="215" text-anchor="middle">CallElevator：在本層呼叫</text>
+        <rect x="608" y="272" width="110" height="20" rx="3" style="fill:var(--paper)"/><text x="663" y="287" text-anchor="middle">DoorAlpha ≥ 1</text>
+        <rect x="320" y="326" width="122" height="20" rx="3" style="fill:var(--paper)"/><text x="381" y="341" text-anchor="middle">DwellRemaining ≤ 0</text>
+        <rect x="380" y="420" width="200" height="20" rx="3" style="fill:var(--paper)"/><text x="480" y="435" text-anchor="middle">關門中在本層再按 → 重新開門</text>
+        <text x="140" y="292" text-anchor="end">DoorAlpha ≤ 0</text>
+        <text x="648" y="362">本層再按：重新計時</text>
+      </g>
+      <g font-family="sans-serif">
+        <rect x="35" y="178" width="150" height="64" rx="10" style="fill:#6b7780"/><text x="110" y="206" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:15px">待命</text><text x="110" y="226" text-anchor="middle" style="fill:#fff;font-size:11.5px">State 0 · 出口 0</text>
+        <rect x="305" y="40" width="150" height="64" rx="10" style="fill:#7a3fa0"/><text x="380" y="68" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:15px">移動中</text><text x="380" y="88" text-anchor="middle" style="fill:#fff;font-size:11.5px">State 4 · 出口 4</text>
+        <rect x="575" y="178" width="150" height="64" rx="10" style="fill:#2f7d4a"/><text x="650" y="206" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:15px">開門中</text><text x="650" y="226" text-anchor="middle" style="fill:#fff;font-size:11.5px">State 1 · 出口 1</text>
+        <rect x="445" y="328" width="150" height="64" rx="10" style="fill:#1f6f8b"/><text x="520" y="356" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:15px">停留</text><text x="520" y="376" text-anchor="middle" style="fill:#fff;font-size:11.5px">State 2 · 出口 2</text>
+        <rect x="165" y="328" width="150" height="64" rx="10" style="fill:#a35d14"/><text x="240" y="356" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:15px">關門中</text><text x="240" y="376" text-anchor="middle" style="fill:#fff;font-size:11.5px">State 3 · 出口 3</text>
+      </g>
+    </svg>
+  </div>
+  <p>每個圓角方塊就是 UpdateLift 裡 Switch on Int 的一個出口，箭頭上寫的是「切到下一個狀態」的條件。</p>
+
+  <h3>架構：這一關做完後，各層之間的關係</h3>
+  <p>兩個按鈕都改成呼叫 CallElevator，由它決定開門或記下目的地。UpdateLift 從只看一個狀態，變成用 Switch 分成五個狀態，出發只在待命時發生。</p>
+  <figure><div class="archwrap"><svg class="arch" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="關卡 2 完成時的七層架構"><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker><marker id="an2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahn" d="M0,0 L10,5 L0,10 z"/></marker></defs><text class="bn" x="16" y="34">1</text><text class="bt" x="16" y="56">玩家操作</text><text class="bs" x="16" y="74">鍵盤與走位</text><line class="div" x1="0" y1="100" x2="1200" y2="100"/><text class="bn" x="16" y="134">2</text><text class="bt" x="16" y="156">套件偵測</text><text class="bs" x="16" y="174">EventGraph · 不要改</text><line class="div" x1="0" y1="216" x2="1200" y2="216"/><text class="bn" x="16" y="250">3</text><text class="bt" x="16" y="272">事件函數</text><text class="bs" x="16" y="290">按一次執行一次</text><line class="div" x1="0" y1="372" x2="1200" y2="372"/><text class="bn" x="16" y="406">4</text><text class="bt" x="16" y="428">狀態資料</text><text class="bs" x="16" y="446">兩條路的交會點</text><line class="div" x1="0" y1="560" x2="1200" y2="560"/><text class="bn" x="16" y="594">5</text><text class="bt" x="16" y="616">每幀決策</text><text class="bs" x="16" y="634">UpdateLift 狀態機</text><line class="div" x1="0" y1="862" x2="1200" y2="862"/><text class="bn" x="16" y="896">6</text><text class="bt" x="16" y="918">套件輸出</text><text class="bs" x="16" y="936">Kit 函數 · 直接呼叫</text><line class="div" x1="0" y1="1000" x2="1200" y2="1000"/><text class="bn" x="16" y="1034">7</text><text class="bt" x="16" y="1056">場景元件</text><text class="bs" x="16" y="1074">玩家看到的結果</text><polyline class="edge" points="250,74 250,124" marker-end="url(#ah2)"/><polyline class="edge" points="455,74 455,124" marker-end="url(#ah2)"/><polyline class="edge" points="660,74 660,124" marker-end="url(#ah2)"/><polyline class="edge" points="865,74 865,124" marker-end="url(#ah2)"/><polyline class="edge" points="1070,74 1070,124" marker-end="url(#ah2)"/><polyline class="edge" points="455,194 455,240" marker-end="url(#ah2)"/><polyline class="edge" points="660,194 660,240" marker-end="url(#ah2)"/><polyline class="edge en" points="455,288 512,312" marker-end="url(#an2)"/><polyline class="edge en" points="660,288 603,312" marker-end="url(#an2)"/><polyline class="edge en" points="557,360 557,392" marker-end="url(#an2)"/><polyline class="edge" points="865,194 865,580" marker-end="url(#ah2)"/><polyline class="edge" points="200,516 200,668" marker-end="url(#ah2)" marker-start="url(#ah2)"/><polyline class="edge" points="865,628 455,668" marker-end="url(#ah2)"/><polyline class="edge en" points="865,628 250,668" marker-end="url(#an2)"/><polyline class="edge en" points="865,628 660,668" marker-end="url(#an2)"/><polyline class="edge en" points="865,628 865,668" marker-end="url(#an2)"/><polyline class="edge en" points="865,628 1070,668" marker-end="url(#an2)"/><polyline class="edge" points="455,818 455,900" marker-end="url(#ah2)"/><polyline class="edge en" points="660,818 660,900" marker-end="url(#an2)"/><polyline class="edge en" points="990,818 990,852 700,852 700,900" marker-end="url(#an2)"/><polyline class="edge" points="455,960 455,1024" marker-end="url(#ah2)"/><polyline class="edge en" points="660,960 660,1024" marker-end="url(#an2)"/><rect class="ply" x="160" y="30" width="180" height="44" rx="8"/><text class="pt" x="250" y="57" text-anchor="middle">按 Play 開始</text><rect class="ply" x="365" y="30" width="180" height="44" rx="8"/><text class="pt" x="455" y="57" text-anchor="middle">門外按 E</text><rect class="ply" x="570" y="30" width="180" height="44" rx="8"/><text class="pt" x="660" y="57" text-anchor="middle">車廂裡按 1／2</text><rect class="ply" x="775" y="30" width="180" height="44" rx="8"/><text class="pt" x="865" y="57" text-anchor="middle">時間經過</text><rect class="ply" x="980" y="30" width="180" height="44" rx="8"/><text class="pt" x="1070" y="57" text-anchor="middle">走進／走出車廂</text><rect class="kit" x="160" y="124" width="180" height="70" rx="8"/><text class="kt" x="250" y="154" text-anchor="middle">Kit_Setup</text><text class="ks" x="250" y="175" text-anchor="middle">BeginPlay：初始化門與顯示器</text><rect class="kit" x="365" y="124" width="180" height="70" rx="8"/><text class="kt" x="455" y="154" text-anchor="middle">Kit_TryPressButton</text><text class="ks" x="455" y="175" text-anchor="middle">找出按的是哪層呼叫鈕</text><rect class="kit" x="570" y="124" width="180" height="70" rx="8"/><text class="kt" x="660" y="154" text-anchor="middle">Kit_CabinKey</text><text class="ks" x="660" y="175" text-anchor="middle">確認玩家在車廂裡</text><rect class="kit" x="775" y="124" width="180" height="70" rx="8"/><text class="kt" x="865" y="154" text-anchor="middle">Timeline Update</text><text class="ks" x="865" y="175" text-anchor="middle">每一幀觸發一次</text><rect class="kit" x="980" y="124" width="180" height="70" rx="8"/><text class="kt" x="1070" y="154" text-anchor="middle">Kit_RefreshCabinLight</text><text class="ks" x="1070" y="175" text-anchor="middle">車廂燈亮／暗</text><rect class="stu nw" x="365" y="240" width="180" height="48" rx="8"/><text class="stt" x="455" y="261" text-anchor="middle">OnCallButtonPressed</text><text class="sts" x="455" y="279" text-anchor="middle">門外呼叫 · L2</text><rect class="tagb" x="511" y="230" width="30" height="18" rx="9"/><text class="tagt" x="526" y="243" text-anchor="middle">改</text><rect class="stu nw" x="570" y="240" width="180" height="48" rx="8"/><text class="stt" x="660" y="261" text-anchor="middle">OnCabinButtonPressed</text><text class="sts" x="660" y="279" text-anchor="middle">改呼叫 CallElevator</text><rect class="tagb" x="716" y="230" width="30" height="18" rx="9"/><text class="tagt" x="731" y="243" text-anchor="middle">改</text><rect class="stu nw" x="467" y="312" width="180" height="48" rx="8"/><text class="stt" x="557" y="333" text-anchor="middle">CallElevator</text><text class="sts" x="557" y="351" text-anchor="middle">開門、重新計時或記目的地</text><rect class="tagb" x="613" y="302" width="30" height="18" rx="9"/><text class="tagt" x="628" y="315" text-anchor="middle">新</text><rect class="grp" x="160" y="392" width="590" height="124" rx="8"/><text class="gt" x="174" y="414">我的變數</text><text class="gs" x="240" y="414">學生自己新增</text><rect class="chip" x="176" y="428" width="134" height="30" rx="6"/><text class="ct" x="186" y="448">State</text><text class="cl" x="300" y="448" text-anchor="end">L1</text><rect class="chip" x="318" y="428" width="134" height="30" rx="6"/><text class="ct" x="328" y="448">CurrentFloor</text><text class="cl" x="442" y="448" text-anchor="end">L1</text><rect class="chip" x="460" y="428" width="134" height="30" rx="6"/><text class="ct" x="470" y="448">TargetFloor</text><text class="cl" x="584" y="448" text-anchor="end">L1</text><rect class="chip nw" x="176" y="470" width="134" height="30" rx="6"/><text class="ct" x="186" y="490">DoorAlpha</text><text class="cl" x="300" y="490" text-anchor="end">L2</text><rect class="tagb" x="276" y="460" width="30" height="18" rx="9"/><text class="tagt" x="291" y="473" text-anchor="middle">新</text><rect class="chip nw" x="318" y="470" width="134" height="30" rx="6"/><text class="ct" x="328" y="490">DwellRemaining</text><text class="cl" x="442" y="490" text-anchor="end">L2</text><rect class="tagb" x="418" y="460" width="30" height="18" rx="9"/><text class="tagt" x="433" y="473" text-anchor="middle">新</text><rect class="grp" x="980" y="392" width="180" height="158" rx="8"/><text class="gt" x="994" y="414">套件設定值</text><text class="gs" x="994" y="430">UpdateLift、CallElevator 讀取</text><rect class="chip2" x="994" y="440" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="456">FloorHeights</text><rect class="chip2" x="994" y="467" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="483">MoveSpeed</text><rect class="chip2" x="994" y="494" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="510">DoorOpenTime</text><rect class="chip2" x="994" y="521" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="537">DwellTime</text><rect class="stu nw" x="775" y="580" width="180" height="48" rx="8"/><text class="stt" x="865" y="601" text-anchor="middle">UpdateLift</text><text class="sts" x="865" y="619" text-anchor="middle">依 State 分支（Switch）</text><rect class="tagb" x="921" y="570" width="30" height="18" rx="9"/><text class="tagt" x="936" y="583" text-anchor="middle">改</text><rect class="card nw" x="160" y="668" width="180" height="150" rx="8"/><path d="M168,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s0)"/><text class="ch" x="172" y="687">0 待命</text><text class="ch" x="328" y="687" text-anchor="end">L2</text><text class="cline" x="172" y="718">TargetFloor ≠ 現在樓層？</text><text class="cline" x="172" y="737">是 → StartMove</text><text class="cline" x="172" y="756">→ 4 移動中</text><rect class="tagb" x="306" y="658" width="30" height="18" rx="9"/><text class="tagt" x="321" y="671" text-anchor="middle">新</text><rect class="card nw" x="365" y="668" width="180" height="150" rx="8"/><path d="M373,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s4)"/><text class="ch" x="377" y="687">4 移動中</text><text class="ch" x="533" y="687" text-anchor="end">L1</text><text class="cline m" x="377" y="718">Kit_GetLiftZ</text><text class="cline m" x="377" y="737">Kit_SetLiftZ</text><text class="cline" x="377" y="756">到站：OnArrived()</text><text class="cline" x="377" y="775">→ 1 開門中</text><rect class="tagb" x="511" y="658" width="30" height="18" rx="9"/><text class="tagt" x="526" y="671" text-anchor="middle">改</text><rect class="card nw" x="570" y="668" width="180" height="150" rx="8"/><path d="M578,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s1)"/><text class="ch" x="582" y="687">1 開門中</text><text class="ch" x="738" y="687" text-anchor="end">L2</text><text class="cline" x="582" y="718">DoorAlpha 加大</text><text class="cline m" x="582" y="737">Kit_ApplyDoors</text><text class="cline" x="582" y="756">全開 → 2 停留</text><rect class="tagb" x="716" y="658" width="30" height="18" rx="9"/><text class="tagt" x="731" y="671" text-anchor="middle">新</text><rect class="card nw" x="775" y="668" width="180" height="150" rx="8"/><path d="M783,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s2)"/><text class="ch" x="787" y="687">2 停留</text><text class="ch" x="943" y="687" text-anchor="end">L2</text><text class="cline" x="787" y="718">DwellRemaining 倒數</text><text class="cline" x="787" y="737">到 0 → 3 關門中</text><rect class="tagb" x="921" y="658" width="30" height="18" rx="9"/><text class="tagt" x="936" y="671" text-anchor="middle">新</text><rect class="card nw" x="980" y="668" width="180" height="150" rx="8"/><path d="M988,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s3)"/><text class="ch" x="992" y="687">3 關門中</text><text class="ch" x="1148" y="687" text-anchor="end">L2</text><text class="cline" x="992" y="718">DoorAlpha 縮小</text><text class="cline m" x="992" y="737">Kit_ApplyDoors</text><text class="cline" x="992" y="756">全關 → 0 待命</text><rect class="tagb" x="1126" y="658" width="30" height="18" rx="9"/><text class="tagt" x="1141" y="671" text-anchor="middle">新</text><rect class="kit" x="365" y="900" width="180" height="60" rx="8"/><text class="kt" x="455" y="925" text-anchor="middle">Kit_Get／SetLiftZ</text><text class="ks" x="455" y="946" text-anchor="middle">車廂高度 · L1</text><rect class="kit nw" x="570" y="900" width="180" height="60" rx="8"/><text class="kt" x="660" y="925" text-anchor="middle">Kit_ApplyDoors</text><text class="ks" x="660" y="946" text-anchor="middle">門開到幾成 · L2</text><rect class="tagb" x="716" y="890" width="30" height="18" rx="9"/><text class="tagt" x="731" y="903" text-anchor="middle">新</text><rect class="scn" x="365" y="1024" width="180" height="52" rx="8"/><text class="pt" x="455" y="1045" text-anchor="middle">車廂</text><text class="bs" x="455" y="1063" text-anchor="middle">玩家站在上面一起移動</text><rect class="scn nw" x="570" y="1024" width="180" height="52" rx="8"/><text class="pt" x="660" y="1045" text-anchor="middle">門板</text><text class="bs" x="660" y="1063" text-anchor="middle">車廂門＋井口門</text><rect class="tagb" x="716" y="1014" width="30" height="18" rx="9"/><text class="tagt" x="731" y="1027" text-anchor="middle">新</text><rect class="elb" x="462" y="206" width="41" height="18" rx="3"/><text class="el" x="466" y="219">Floor</text><rect class="elb" x="667" y="206" width="41" height="18" rx="3"/><text class="el" x="671" y="219">Floor</text><rect class="elb" x="566" y="366" width="199.19999999999993" height="18" rx="3"/><text class="el eln" x="570" y="379">寫入 TargetFloor、State、Dwell</text><rect class="elb" x="872" y="270" width="42.5" height="18" rx="3"/><text class="el" x="876" y="283">每一幀</text><rect class="elb" x="208" y="584" width="54" height="18" rx="3"/><text class="el" x="212" y="597">每幀讀寫</text><rect class="elb" x="600" y="636" width="74" height="18" rx="3"/><text class="el" x="604" y="649">State == 4</text></svg></div><figcaption>黃色粗框標「新」的是這一關要新增的，標「改」的是要修改的；深色方塊是套件提供、不用改的；黃色箭頭是這一關新增的連線。圖比較寬，手機上可以左右滑動。</figcaption></figure>
+
+  <h3>這一關要改的函數</h3>
+  <div class="table"><table>
+    <thead><tr><th>順序</th><th>函數</th><th>改什麼</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td><span class="n">OnCallButtonPressed</span>、<span class="n">OnCabinButtonPressed</span></td><td>Print String 後面改成呼叫 <span class="n">Call Elevator</span>（OnCabinButtonPressed 原本的 Start Move 刪掉）</td></tr>
+      <tr><td>B</td><td><span class="n">CallElevator</span></td><td>新寫：決定開門、重新計時，或記下目的地</td></tr>
+      <tr><td>C</td><td><span class="n">OnArrived</span></td><td>到站後改成「開門」</td></tr>
+      <tr><td>D</td><td><span class="n">UpdateLift</span></td><td>最外層的 Branch 換成 <span class="n">Switch on Int</span>，加上出口 1、2、3、0</td></tr>
+      <tr><td>—</td><td><span class="n">StartMove</span></td><td>不用改</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>怎麼看成果圖</b>黃色圓圈的數字是<b>白線（執行線）上的節點順序</b>，照 1、2、3 依序放、依序接白線。<b>S</b> 是 Switch on Int。沒有編號的小節點是計算數值用的（Get 變數、+、−、比較），照表格接到有編號節點的輸入。節點位置可以和圖不同，線接對就好。做完後拿自己的圖和成果圖逐條比對白線和資料線。</div>
+
+  <h3>A. OnCallButtonPressed 與 OnCabinButtonPressed</h3>
+  <pre class="map">邏輯：按了某層 → 印出除錯訊息 → 交給 CallElevator 決定怎麼處理
+[入口] ▷ → ① Print String ▷ → ② Call Elevator（Floor ← 入口的 Floor）</pre>
+  <figure><img src="img/L2_01_oncall.png" alt="關卡 2 OnCallButtonPressed 成果圖：Print String 後接 Call Elevator"><figcaption>OnCallButtonPressed 成果圖。OnCabinButtonPressed 完全一樣（只有 TODO 文字不同）。</figcaption></figure>
+  <ol class="steps">
+    <li>打開 <span class="n">OnCabinButtonPressed</span>，點選關卡 1 放的 <span class="n">Start Move</span>，按 <kbd>Delete</kbd>。</li>
+    <li>從 My Blueprint 把 <span class="n">CallElevator</span> 拖進來（②），Print String（①）的 ▷ 接到它，入口的 <b>Floor</b> 接到它的 Floor。</li>
+    <li><span class="n">OnCallButtonPressed</span> 做一樣的事。</li>
+  </ol>
+
+  <h3>B. CallElevator</h3>
+  <pre class="map">邏輯：
+如果 Floor == CurrentFloor 而且 State != 4      （電梯就停在這一層）
+    如果 State == 2（停留中）  → DwellRemaining = DwellTime（門多開一會兒）
+    否則如果 State != 1        → State = 1（待命或關門中都重新開門）
+否則如果 State != 4                                （要去別層，電梯沒在移動）
+    TargetFloor = Floor        → 記下目的地，等回到待命才出發
+
+[入口] ▷ → ① Branch（Floor == CurrentFloor AND State != 4）
+             True  ▷ → ② Branch（State == 2）
+                         True  ▷ → ③ Set DwellRemaining ← DwellTime
+                         False ▷ → ④ Branch（State != 1） True ▷ → ⑤ Set State = 1
+             False ▷ → ⑥ Branch（State != 4） True ▷ → ⑦ Set TargetFloor ← Floor</pre>
+  <figure><img src="img/L2_02_callelevator.png" alt="關卡 2 CallElevator 成果圖，標示 1 到 7"><figcaption>CallElevator 成果圖。① 的條件用 <span class="n">==</span>、<span class="n">!=</span>、<span class="n">AND</span> 組成。</figcaption></figure>
+  <div class="table"><table>
+    <thead><tr><th>圖中</th><th>節點</th><th>條件／輸入怎麼接</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td><span class="n">Branch</span></td><td>Condition ← <span class="n">AND</span>：A ← 入口 Floor <span class="n">==</span> Get CurrentFloor；B ← Get State <span class="n">!=</span> 4</td></tr>
+      <tr><td>②</td><td><span class="n">Branch</span>（接 ① 的 True）</td><td>Get State <span class="n">==</span> 2</td></tr>
+      <tr><td>③</td><td><span class="n">Set DwellRemaining</span>（接 ② 的 True）</td><td>輸入 ← Get DwellTime</td></tr>
+      <tr><td>④</td><td><span class="n">Branch</span>（接 ② 的 False）</td><td>Get State <span class="n">!=</span> 1</td></tr>
+      <tr><td>⑤</td><td><span class="n">Set State</span>（接 ④ 的 True）</td><td>填 1</td></tr>
+      <tr><td>⑥</td><td><span class="n">Branch</span>（接 ① 的 False）</td><td>Get State <span class="n">!=</span> 4</td></tr>
+      <tr><td>⑦</td><td><span class="n">Set TargetFloor</span>（接 ⑥ 的 True）</td><td>輸入 ← 入口 Floor</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>C. OnArrived</h3>
+  <pre class="map">邏輯：到站 → 記下現在在哪一層 → 門從全關開始 → 進入開門中
+[入口] ▷ → ① Set CurrentFloor ← Get TargetFloor ▷ → ② Set DoorAlpha = 0 ▷ → ③ Set State = 1</pre>
+  <figure><img src="img/L2_03_onarrived.png" alt="關卡 2 OnArrived 成果圖：三個 Set 節點"><figcaption>OnArrived 成果圖。和關卡 1 比，多了 ②，③ 的值從 0 改成 1。</figcaption></figure>
+
+  <h3>D. UpdateLift</h3>
+  <p><b>第一步：把最外層的 Branch 換成 Switch on Int。</b></p>
+  <ol class="steps">
+    <li>刪掉關卡 1 的 <span class="n">Branch</span>（State == 4 那個）和它的 <span class="n">==</span> 節點。Get State 留著。</li>
+    <li>右鍵搜尋 <code>Switch on Int</code> 放進來（S）。Get State 接到它的 <b>Selection</b>。</li>
+    <li>按節點下方的 <b>Add pin ⊕</b>，直到出口有 <b>0、1、2、3、4</b>。</li>
+    <li>入口 ▷ 接到 S。出口 <b>4</b> 接到原本的 <span class="n">Kit Get Lift Z</span>，關卡 1 後面整串都不用改。</li>
+  </ol>
+  <figure><img src="img/L2_04_ul_switch.png" alt="UpdateLift 第一步：Switch on Int，出口 4 接 Kit Get Lift Z"><figcaption>第一步完成的樣子。出口 4 後面接的就是關卡 1 的移動節點（圖中只畫出第一個 Kit Get Lift Z）。</figcaption></figure>
+
+  <p><b>第二步：接上出口 1、2、3、0。</b>下面每張圖都只畫一個出口，實際上四個出口的節點都放在同一個 UpdateLift 裡。<span class="n">Get World Delta Seconds</span>（Δt）只要一個，從它的輸出拉多條線。</p>
+
+  <h3>出口 1：開門中</h3>
+  <pre class="map">邏輯：門開大一點 → 擺好門 → 全開了就進入停留，開始倒數
+S 的 1 ▷ → ① Set DoorAlpha ← Min( DoorAlpha + Δt ÷ DoorOpenTime , 1 )
+        ▷ → ② Kit Apply Doors（Alpha ← DoorAlpha，Floor ← CurrentFloor）
+        ▷ → ③ Branch（DoorAlpha >= 1）
+               True ▷ → ④ Set State = 2 ▷ → ⑤ Set DwellRemaining ← DwellTime</pre>
+  <figure><img src="img/L2_05_ul_state1.png" alt="UpdateLift 出口 1 成果圖，標示 1 到 5"><figcaption>出口 1 成果圖。</figcaption></figure>
+  <div class="table"><table>
+    <thead><tr><th>圖中</th><th>節點</th><th>輸入怎麼接</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td><span class="n">Set DoorAlpha</span></td><td><span class="n">Min (Float)</span>：A ← Get DoorAlpha <span class="n">+</span>（Δt <span class="n">÷</span> Get DoorOpenTime），B 填 1</td></tr>
+      <tr><td>②</td><td><span class="n">Kit Apply Doors</span></td><td>Alpha ← Get DoorAlpha；Floor ← Get CurrentFloor</td></tr>
+      <tr><td>③</td><td><span class="n">Branch</span></td><td>Get DoorAlpha <span class="n">&gt;=</span> 1</td></tr>
+      <tr><td>④</td><td><span class="n">Set State</span>（接 ③ 的 True）</td><td>填 2</td></tr>
+      <tr><td>⑤</td><td><span class="n">Set DwellRemaining</span></td><td>輸入 ← Get DwellTime</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>出口 2：停留</h3>
+  <pre class="map">邏輯：倒數 → 數完了就開始關門
+S 的 2 ▷ → ① Set DwellRemaining ← DwellRemaining − Δt
+        ▷ → ② Branch（DwellRemaining <= 0） True ▷ → ③ Set State = 3</pre>
+  <figure><img src="img/L2_06_ul_state2.png" alt="UpdateLift 出口 2 成果圖，標示 1 到 3"><figcaption>出口 2 成果圖。</figcaption></figure>
+
+  <h3>出口 3：關門中</h3>
+  <pre class="map">邏輯：門關小一點 → 擺好門 → 全關了就回到待命
+S 的 3 ▷ → ① Set DoorAlpha ← Max( DoorAlpha − Δt ÷ DoorOpenTime , 0 )
+        ▷ → ② Kit Apply Doors（Alpha ← DoorAlpha，Floor ← CurrentFloor）
+        ▷ → ③ Branch（DoorAlpha <= 0） True ▷ → ④ Set State = 0</pre>
+  <figure><img src="img/L2_07_ul_state3.png" alt="UpdateLift 出口 3 成果圖，標示 1 到 4"><figcaption>出口 3 成果圖。可以把出口 1 的 ①～③ 框選起來 <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>Ctrl</kbd>+<kbd>V</kbd> 再改：<span class="n">+</span> 改 <span class="n">−</span>、Min 改 Max、1 改 0、&gt;= 1 改 &lt;= 0。</figcaption></figure>
+
+  <h3>出口 0：待命</h3>
+  <pre class="map">邏輯：有記下別的目的地，就出發
+S 的 0 ▷ → ① Branch（TargetFloor != CurrentFloor） True ▷ → ② Start Move（Floor ← TargetFloor）</pre>
+  <figure><img src="img/L2_08_ul_state0.png" alt="UpdateLift 出口 0 成果圖，標示 1 到 2"><figcaption>出口 0 成果圖。（左邊那個 Get World Delta Seconds 是給出口 1～4 用的，出口 0 不需要。）</figcaption></figure>
+  <p>這就是「門沒關好之前電梯不能動」的做法：CallElevator 只負責把目的地記在 TargetFloor，<b>只有待命（門已經全關）時</b>才會呼叫 Start Move 出發，所以不用在 StartMove 裡檢查門。</p>
+
+  <div class="stop"><b>容易錯的地方</b>① Switch on Int 的出口不夠：要按 Add pin 加到 4。② OnArrived 忘了把 DoorAlpha 設成 0，門會從上一次的位置開始動。③ Kit Apply Doors 要接在白線上，否則門不會動。④ 開門、關門的比較要用 &gt;= 1、&lt;= 0，不要用 ==。⑤ 門開了就不關：檢查出口 1 的 ⑤ 有沒有把 DwellRemaining 設成 DwellTime。⑥ 按了別層沒反應：檢查 CallElevator 的 ⑦ 和 UpdateLift 出口 0。</div>
+
+  <h3>驗收</h3>
+  <ul class="check">
+    <li>在 1F 門外按 <kbd>E</kbd>：門打開，停 3 秒，關上</li>
+    <li>門開著時走進電梯按 <kbd>2</kbd>：門照常關好才出發，到 2F 開門、停留、關門</li>
+    <li>電梯在 1F 時，走樓梯上 2F 在門外按 <kbd>E</kbd>：電梯上來再開門</li>
+    <li>門正在關的時候，在門外再按一次 <kbd>E</kbd>：門重新打開</li>
+  </ul>
+</section>
+<section id="s11">
+  <h2><span class="no">11</span>關卡 3：燈和顯示器</h2>
+  <p><b>目標：</b>按下的按鈕要亮，電梯到那一層才熄；在本層按下的立刻熄。移動時顯示器出現方向箭頭，停下來就消失。樓層數字由套件自動顯示。</p>
+  <h3>先在紙上回答</h3>
+  <ul>
+    <li>按鈕什麼時候亮？什麼時候熄？熄燈要寫在哪兩個函數？</li>
+    <li>方向（上／下）在什麼時候就能決定？存在哪個變數？什麼時候要歸零？</li>
+  </ul>
+
+  <h3>邏輯架構：燈與顯示器何時變化</h3>
+  <pre class="map">按下按鈕 ─→ OnCallButtonPressed／OnCabinButtonPressed：亮燈 ─→ CallElevator
+                                                              │
+                         電梯就在這層（① 成立）：立刻熄燈 ←─────┤
+                                                              └→ 記下 TargetFloor
+出發 ─→ StartMove：Direction = 目標比現在高 ? 1 : −1
+每一幀 ─→ UpdateLift：Kit Update Displays（移動中顯示 Direction，其他狀態顯示 0）
+到站 ─→ OnArrived：熄掉這一層的燈，Direction = 0</pre>
+
+  <h3>架構：這一關做完後，各層之間的關係</h3>
+  <p>這一關的狀態機沒有變，只是在原本的路上多呼叫兩個 Kit 函數：按下時亮燈、到站或在本層按時熄燈，以及每一幀先更新顯示器。</p>
+  <figure><div class="archwrap"><svg class="arch" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="關卡 3 完成時的七層架構"><defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker><marker id="an3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahn" d="M0,0 L10,5 L0,10 z"/></marker></defs><text class="bn" x="16" y="34">1</text><text class="bt" x="16" y="56">玩家操作</text><text class="bs" x="16" y="74">鍵盤與走位</text><line class="div" x1="0" y1="100" x2="1200" y2="100"/><text class="bn" x="16" y="134">2</text><text class="bt" x="16" y="156">套件偵測</text><text class="bs" x="16" y="174">EventGraph · 不要改</text><line class="div" x1="0" y1="216" x2="1200" y2="216"/><text class="bn" x="16" y="250">3</text><text class="bt" x="16" y="272">事件函數</text><text class="bs" x="16" y="290">按一次執行一次</text><line class="div" x1="0" y1="372" x2="1200" y2="372"/><text class="bn" x="16" y="406">4</text><text class="bt" x="16" y="428">狀態資料</text><text class="bs" x="16" y="446">兩條路的交會點</text><line class="div" x1="0" y1="560" x2="1200" y2="560"/><text class="bn" x="16" y="594">5</text><text class="bt" x="16" y="616">每幀決策</text><text class="bs" x="16" y="634">UpdateLift 狀態機</text><line class="div" x1="0" y1="862" x2="1200" y2="862"/><text class="bn" x="16" y="896">6</text><text class="bt" x="16" y="918">套件輸出</text><text class="bs" x="16" y="936">Kit 函數 · 直接呼叫</text><line class="div" x1="0" y1="1000" x2="1200" y2="1000"/><text class="bn" x="16" y="1034">7</text><text class="bt" x="16" y="1056">場景元件</text><text class="bs" x="16" y="1074">玩家看到的結果</text><polyline class="edge" points="250,74 250,124" marker-end="url(#ah3)"/><polyline class="edge" points="455,74 455,124" marker-end="url(#ah3)"/><polyline class="edge" points="660,74 660,124" marker-end="url(#ah3)"/><polyline class="edge" points="865,74 865,124" marker-end="url(#ah3)"/><polyline class="edge" points="1070,74 1070,124" marker-end="url(#ah3)"/><polyline class="edge" points="455,194 455,240" marker-end="url(#ah3)"/><polyline class="edge" points="660,194 660,240" marker-end="url(#ah3)"/><polyline class="edge" points="455,288 512,312" marker-end="url(#ah3)"/><polyline class="edge" points="660,288 603,312" marker-end="url(#ah3)"/><polyline class="edge" points="557,360 557,392" marker-end="url(#ah3)"/><polyline class="edge" points="865,194 865,580" marker-end="url(#ah3)"/><polyline class="edge" points="200,516 200,668" marker-end="url(#ah3)" marker-start="url(#ah3)"/><polyline class="edge" points="865,628 455,668" marker-end="url(#ah3)"/><polyline class="edge" points="865,628 250,668" marker-end="url(#ah3)"/><polyline class="edge" points="865,628 660,668" marker-end="url(#ah3)"/><polyline class="edge" points="865,628 865,668" marker-end="url(#ah3)"/><polyline class="edge" points="865,628 1070,668" marker-end="url(#ah3)"/><polyline class="edge en" points="955,604 1188,604 1188,930 1164,930" marker-end="url(#an3)"/><polyline class="edge en ed" points="365,264 150,264 150,930 158,930" marker-end="url(#an3)"/><polyline class="edge en ed" points="467,336 150,336"/><polyline class="edge" points="455,818 455,900" marker-end="url(#ah3)"/><polyline class="edge en" points="410,818 300,900" marker-end="url(#an3)"/><polyline class="edge" points="660,818 660,900" marker-end="url(#ah3)"/><polyline class="edge" points="990,818 990,852 700,852 700,900" marker-end="url(#ah3)"/><polyline class="edge en" points="250,960 250,1024" marker-end="url(#an3)"/><polyline class="edge" points="455,960 455,1024" marker-end="url(#ah3)"/><polyline class="edge" points="660,960 660,1024" marker-end="url(#ah3)"/><polyline class="edge en" points="1070,960 1070,1024" marker-end="url(#an3)"/><rect class="ply" x="160" y="30" width="180" height="44" rx="8"/><text class="pt" x="250" y="57" text-anchor="middle">按 Play 開始</text><rect class="ply" x="365" y="30" width="180" height="44" rx="8"/><text class="pt" x="455" y="57" text-anchor="middle">門外按 E</text><rect class="ply" x="570" y="30" width="180" height="44" rx="8"/><text class="pt" x="660" y="57" text-anchor="middle">車廂裡按 1／2</text><rect class="ply" x="775" y="30" width="180" height="44" rx="8"/><text class="pt" x="865" y="57" text-anchor="middle">時間經過</text><rect class="ply" x="980" y="30" width="180" height="44" rx="8"/><text class="pt" x="1070" y="57" text-anchor="middle">走進／走出車廂</text><rect class="kit" x="160" y="124" width="180" height="70" rx="8"/><text class="kt" x="250" y="154" text-anchor="middle">Kit_Setup</text><text class="ks" x="250" y="175" text-anchor="middle">BeginPlay：初始化門與顯示器</text><rect class="kit" x="365" y="124" width="180" height="70" rx="8"/><text class="kt" x="455" y="154" text-anchor="middle">Kit_TryPressButton</text><text class="ks" x="455" y="175" text-anchor="middle">找出按的是哪層呼叫鈕</text><rect class="kit" x="570" y="124" width="180" height="70" rx="8"/><text class="kt" x="660" y="154" text-anchor="middle">Kit_CabinKey</text><text class="ks" x="660" y="175" text-anchor="middle">確認玩家在車廂裡</text><rect class="kit" x="775" y="124" width="180" height="70" rx="8"/><text class="kt" x="865" y="154" text-anchor="middle">Timeline Update</text><text class="ks" x="865" y="175" text-anchor="middle">每一幀觸發一次</text><rect class="kit" x="980" y="124" width="180" height="70" rx="8"/><text class="kt" x="1070" y="154" text-anchor="middle">Kit_RefreshCabinLight</text><text class="ks" x="1070" y="175" text-anchor="middle">車廂燈亮／暗</text><rect class="stu nw" x="365" y="240" width="180" height="48" rx="8"/><text class="stt" x="455" y="261" text-anchor="middle">OnCallButtonPressed</text><text class="sts" x="455" y="279" text-anchor="middle">亮燈 → CallElevator</text><rect class="tagb" x="511" y="230" width="30" height="18" rx="9"/><text class="tagt" x="526" y="243" text-anchor="middle">改</text><rect class="stu nw" x="570" y="240" width="180" height="48" rx="8"/><text class="stt" x="660" y="261" text-anchor="middle">OnCabinButtonPressed</text><text class="sts" x="660" y="279" text-anchor="middle">亮燈 → CallElevator</text><rect class="tagb" x="716" y="230" width="30" height="18" rx="9"/><text class="tagt" x="731" y="243" text-anchor="middle">改</text><rect class="stu nw" x="467" y="312" width="180" height="48" rx="8"/><text class="stt" x="557" y="333" text-anchor="middle">CallElevator</text><text class="sts" x="557" y="351" text-anchor="middle">本層熄燈、開門或記目的地</text><rect class="tagb" x="613" y="302" width="30" height="18" rx="9"/><text class="tagt" x="628" y="315" text-anchor="middle">改</text><rect class="grp" x="160" y="392" width="590" height="124" rx="8"/><text class="gt" x="174" y="414">我的變數</text><text class="gs" x="240" y="414">學生自己新增</text><rect class="chip" x="176" y="428" width="134" height="30" rx="6"/><text class="ct" x="186" y="448">State</text><text class="cl" x="300" y="448" text-anchor="end">L1</text><rect class="chip" x="318" y="428" width="134" height="30" rx="6"/><text class="ct" x="328" y="448">CurrentFloor</text><text class="cl" x="442" y="448" text-anchor="end">L1</text><rect class="chip" x="460" y="428" width="134" height="30" rx="6"/><text class="ct" x="470" y="448">TargetFloor</text><text class="cl" x="584" y="448" text-anchor="end">L1</text><rect class="chip nw" x="602" y="428" width="134" height="30" rx="6"/><text class="ct" x="612" y="448">Direction</text><text class="cl" x="726" y="448" text-anchor="end">L3</text><rect class="tagb" x="702" y="418" width="30" height="18" rx="9"/><text class="tagt" x="717" y="431" text-anchor="middle">新</text><rect class="chip" x="176" y="470" width="134" height="30" rx="6"/><text class="ct" x="186" y="490">DoorAlpha</text><text class="cl" x="300" y="490" text-anchor="end">L2</text><rect class="chip" x="318" y="470" width="134" height="30" rx="6"/><text class="ct" x="328" y="490">DwellRemaining</text><text class="cl" x="442" y="490" text-anchor="end">L2</text><rect class="grp" x="980" y="392" width="180" height="158" rx="8"/><text class="gt" x="994" y="414">套件設定值</text><text class="gs" x="994" y="430">UpdateLift、CallElevator 讀取</text><rect class="chip2" x="994" y="440" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="456">FloorHeights</text><rect class="chip2" x="994" y="467" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="483">MoveSpeed</text><rect class="chip2" x="994" y="494" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="510">DoorOpenTime</text><rect class="chip2" x="994" y="521" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="537">DwellTime</text><rect class="stu nw" x="775" y="580" width="180" height="48" rx="8"/><text class="stt" x="865" y="601" text-anchor="middle">UpdateLift</text><text class="sts" x="865" y="619" text-anchor="middle">先更新顯示器再分支</text><rect class="tagb" x="921" y="570" width="30" height="18" rx="9"/><text class="tagt" x="936" y="583" text-anchor="middle">改</text><rect class="card nw" x="160" y="668" width="180" height="150" rx="8"/><path d="M168,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s0)"/><text class="ch" x="172" y="687">0 待命</text><text class="ch" x="328" y="687" text-anchor="end">L2</text><text class="cline" x="172" y="718">TargetFloor ≠ 現在樓層？</text><text class="cline" x="172" y="737">是 → StartMove</text><text class="cline" x="172" y="756">（也記下 Direction）</text><text class="cline" x="172" y="775">→ 4 移動中</text><rect class="tagb" x="306" y="658" width="30" height="18" rx="9"/><text class="tagt" x="321" y="671" text-anchor="middle">改</text><rect class="card nw" x="365" y="668" width="180" height="150" rx="8"/><path d="M373,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s4)"/><text class="ch" x="377" y="687">4 移動中</text><text class="ch" x="533" y="687" text-anchor="end">L1</text><text class="cline m" x="377" y="718">Kit_GetLiftZ</text><text class="cline m" x="377" y="737">Kit_SetLiftZ</text><text class="cline" x="377" y="756">到站：OnArrived()</text><text class="cline" x="377" y="775">（熄燈、方向歸零）</text><text class="cline" x="377" y="794">→ 1 開門中</text><rect class="tagb" x="511" y="658" width="30" height="18" rx="9"/><text class="tagt" x="526" y="671" text-anchor="middle">改</text><rect class="card" x="570" y="668" width="180" height="150" rx="8"/><path d="M578,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s1)"/><text class="ch" x="582" y="687">1 開門中</text><text class="ch" x="738" y="687" text-anchor="end">L2</text><text class="cline" x="582" y="718">DoorAlpha 加大</text><text class="cline m" x="582" y="737">Kit_ApplyDoors</text><text class="cline" x="582" y="756">全開 → 2 停留</text><rect class="card" x="775" y="668" width="180" height="150" rx="8"/><path d="M783,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s2)"/><text class="ch" x="787" y="687">2 停留</text><text class="ch" x="943" y="687" text-anchor="end">L2</text><text class="cline" x="787" y="718">DwellRemaining 倒數</text><text class="cline" x="787" y="737">到 0 → 3 關門中</text><rect class="card" x="980" y="668" width="180" height="150" rx="8"/><path d="M988,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s3)"/><text class="ch" x="992" y="687">3 關門中</text><text class="ch" x="1148" y="687" text-anchor="end">L2</text><text class="cline" x="992" y="718">DoorAlpha 縮小</text><text class="cline m" x="992" y="737">Kit_ApplyDoors</text><text class="cline" x="992" y="756">全關 → 0 待命</text><rect class="kit nw" x="160" y="900" width="180" height="60" rx="8"/><text class="kt" x="250" y="925" text-anchor="middle">Kit_SetButtonLight</text><text class="ks" x="250" y="946" text-anchor="middle">按鈕燈亮／熄 · L3</text><rect class="tagb" x="306" y="890" width="30" height="18" rx="9"/><text class="tagt" x="321" y="903" text-anchor="middle">新</text><rect class="kit" x="365" y="900" width="180" height="60" rx="8"/><text class="kt" x="455" y="925" text-anchor="middle">Kit_Get／SetLiftZ</text><text class="ks" x="455" y="946" text-anchor="middle">車廂高度 · L1</text><rect class="kit" x="570" y="900" width="180" height="60" rx="8"/><text class="kt" x="660" y="925" text-anchor="middle">Kit_ApplyDoors</text><text class="ks" x="660" y="946" text-anchor="middle">門開到幾成 · L2</text><rect class="kit nw" x="980" y="900" width="180" height="60" rx="8"/><text class="kt" x="1070" y="925" text-anchor="middle">Kit_UpdateDisplays</text><text class="ks" x="1070" y="946" text-anchor="middle">數字與箭頭 · L3</text><rect class="tagb" x="1126" y="890" width="30" height="18" rx="9"/><text class="tagt" x="1141" y="903" text-anchor="middle">新</text><rect class="scn nw" x="160" y="1024" width="180" height="52" rx="8"/><text class="pt" x="250" y="1045" text-anchor="middle">按鈕燈</text><text class="bs" x="250" y="1063" text-anchor="middle">呼叫鈕、車廂樓層鈕</text><rect class="tagb" x="306" y="1014" width="30" height="18" rx="9"/><text class="tagt" x="321" y="1027" text-anchor="middle">新</text><rect class="scn" x="365" y="1024" width="180" height="52" rx="8"/><text class="pt" x="455" y="1045" text-anchor="middle">車廂</text><text class="bs" x="455" y="1063" text-anchor="middle">玩家站在上面一起移動</text><rect class="scn" x="570" y="1024" width="180" height="52" rx="8"/><text class="pt" x="660" y="1045" text-anchor="middle">門板</text><text class="bs" x="660" y="1063" text-anchor="middle">車廂門＋井口門</text><rect class="scn nw" x="980" y="1024" width="180" height="52" rx="8"/><text class="pt" x="1070" y="1045" text-anchor="middle">樓層顯示器</text><text class="bs" x="1070" y="1063" text-anchor="middle">井口與車廂上方</text><rect class="tagb" x="1126" y="1014" width="30" height="18" rx="9"/><text class="tagt" x="1141" y="1027" text-anchor="middle">新</text><rect class="elb" x="462" y="206" width="41" height="18" rx="3"/><text class="el" x="466" y="219">Floor</text><rect class="elb" x="667" y="206" width="41" height="18" rx="3"/><text class="el" x="671" y="219">Floor</text><rect class="elb" x="566" y="366" width="199.19999999999993" height="18" rx="3"/><text class="el" x="570" y="379">寫入 TargetFloor、State、Dwell</text><rect class="elb" x="872" y="270" width="42.5" height="18" rx="3"/><text class="el" x="876" y="283">每一幀</text><rect class="elb" x="208" y="584" width="54" height="18" rx="3"/><text class="el" x="212" y="597">每幀讀寫</text><rect class="elb" x="600" y="636" width="74" height="18" rx="3"/><text class="el" x="604" y="649">State == 4</text><rect class="elb" x="1080" y="586" width="77" height="18" rx="3"/><text class="el eln" x="1084" y="599">先更新顯示器</text><rect class="elb" x="178" y="246" width="31" height="18" rx="3"/><text class="el eln" x="182" y="259">亮燈</text><rect class="elb" x="178" y="318" width="54" height="18" rx="3"/><text class="el eln" x="182" y="331">本層熄燈</text><rect class="elb" x="292" y="840" width="97" height="18" rx="3"/><text class="el eln" x="296" y="853">OnArrived 熄燈</text></svg></div><figcaption>黃色粗框標「新」的是這一關要新增的，標「改」的是要修改的；深色方塊是套件提供、不用改的；黃色箭頭是這一關新增的連線。圖比較寬，手機上可以左右滑動。</figcaption></figure>
+
+  <h3>這一關要改的函數</h3>
+  <div class="table"><table>
+    <thead><tr><th>順序</th><th>函數</th><th>加什麼</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td><span class="n">OnCallButtonPressed</span>、<span class="n">OnCabinButtonPressed</span></td><td>Print String 和 Call Elevator 中間插入 <span class="n">Kit Set Button Light</span>（On 打勾）</td></tr>
+      <tr><td>B</td><td><span class="n">CallElevator</span></td><td>① 的 True 後面先插入 <span class="n">Kit Set Button Light</span>（On 不打勾）</td></tr>
+      <tr><td>C</td><td><span class="n">StartMove</span></td><td>最前面插入 <span class="n">Set Direction</span></td></tr>
+      <tr><td>D</td><td><span class="n">OnArrived</span></td><td>插入熄燈和 <span class="n">Set Direction</span> = 0</td></tr>
+      <tr><td>E</td><td><span class="n">UpdateLift</span></td><td>入口和 Switch 中間插入 <span class="n">Kit Update Displays</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>插入節點的方法</b>把原本的白線斷開（按住 <kbd>Alt</kbd> 點接腳），放入新節點，再把前後兩段白線接上。也可以直接從前一個節點的 ▷ 拉到新節點，Unreal 會自動把舊的線換掉，再把新節點的 ▷ 接到原本的下一個節點。</div>
+
+  <h3>A. OnCallButtonPressed 與 OnCabinButtonPressed</h3>
+  <pre class="map">[入口] ▷ → ① Print String ▷ → ② Kit Set Button Light（Floor ← 入口 Floor，On ✓）▷ → ③ Call Elevator（Floor ← 入口 Floor）</pre>
+  <figure><img src="img/L3_01_oncall.png" alt="關卡 3 OnCallButtonPressed 成果圖：Print String、Kit Set Button Light、Call Elevator"><figcaption>OnCallButtonPressed 成果圖。OnCabinButtonPressed 一樣。</figcaption></figure>
+
+  <h3>B. CallElevator</h3>
+  <pre class="map">[入口] ▷ → ① Branch（Floor == CurrentFloor AND State != 4）
+             True  ▷ → ② Kit Set Button Light（Floor ← 入口 Floor，On 不打勾）
+                     ▷ → ③ Branch（State == 2）
+                           True  ▷ → ④ Set DwellRemaining ← DwellTime
+                           False ▷ → ⑤ Branch（State != 1） True ▷ → ⑥ Set State = 1
+             False ▷ → ⑦ Branch（State != 4） True ▷ → ⑧ Set TargetFloor ← Floor</pre>
+  <figure><img src="img/L3_02_callelevator.png" alt="關卡 3 CallElevator 成果圖，標示 1 到 8"><figcaption>CallElevator 成果圖。和關卡 2 比只多了 ②，後面的編號往後移一號。</figcaption></figure>
+
+  <h3>C. StartMove</h3>
+  <pre class="map">邏輯：Direction = (Floor > CurrentFloor) ? 1 : −1
+[入口] ▷ → ① Set Direction ← Select Int（A = 1，B = −1，Pick A ← Floor <span>&gt;</span> CurrentFloor）
+        ▷ → ② Set TargetFloor ← Floor ▷ → ③ Set State = 4</pre>
+  <figure><img src="img/L3_03_startmove.png" alt="關卡 3 StartMove 成果圖：Set Direction 用 Select Int，再 Set TargetFloor、Set State"><figcaption>StartMove 成果圖。<span class="n">Select Int</span>：Pick A 是 true 就輸出 A，false 就輸出 B。右鍵搜尋 <code>Select Int</code>。</figcaption></figure>
+
+  <h3>D. OnArrived</h3>
+  <pre class="map">[入口] ▷ → ① Set CurrentFloor ← TargetFloor
+        ▷ → ② Kit Set Button Light（Floor ← Get CurrentFloor，On 不打勾）
+        ▷ → ③ Set DoorAlpha = 0 ▷ → ④ Set Direction = 0 ▷ → ⑤ Set State = 1</pre>
+  <figure><img src="img/L3_04_onarrived.png" alt="關卡 3 OnArrived 成果圖，標示 1 到 5"><figcaption>OnArrived 成果圖。② 的 Floor 要接 Get <b>CurrentFloor</b>（① 剛剛已經更新成到站的樓層）。</figcaption></figure>
+
+  <h3>E. UpdateLift</h3>
+  <pre class="map">邏輯：每一幀先更新顯示器，再依狀態做事
+[入口] ▷ → ① Kit Update Displays（Dir ← Select Int：A = Direction，B = 0，Pick A ← State == 4）
+        ▷ → S Switch on Int（出口 0～4 都不變）</pre>
+  <figure><img src="img/L3_05_updatelift.png" alt="關卡 3 UpdateLift 開頭：Kit Update Displays 接在 Switch on Int 前面"><figcaption>UpdateLift 開頭的成果圖。只畫出新增的部分，Switch 後面五個出口和關卡 2 一樣，不用改。</figcaption></figure>
+  <p>為什麼要用 Select Int：移動中才顯示箭頭（Dir = Direction），開門、停留、關門、待命時都傳 0，箭頭就會消失。</p>
+
+  <div class="stop"><b>容易錯的地方</b>① 燈一直不熄：OnArrived 的 ② Floor 接成 TargetFloor 以外的值，或 On 打了勾。② 在本層按按鈕燈不熄：CallElevator 漏了 ②。③ 箭頭方向相反：Select Int 的 A、B 填反了，或比較寫成 <code>&lt;</code>。④ 箭頭停下來還在：OnArrived 漏了 ④ Set Direction = 0，或 UpdateLift 的 Pick A 沒接 State == 4。</div>
+
+  <h3>驗收</h3>
+  <ul class="check">
+    <li>在車廂按 <kbd>2</kbd>：2 號按鈕亮起，到 2F 後熄燈</li>
+    <li>往上時顯示上箭頭，往下時顯示下箭頭，停下來箭頭消失</li>
+    <li>顯示器的數字會隨車廂位置變成 1 或 2</li>
+    <li>電梯停在 1F 時，在 1F 門外按 <kbd>E</kbd>：燈亮一下立刻熄，門打開</li>
+  </ul>
+</section>
+<section id="s12">
+  <h2><span class="no">12</span>關卡 4：請求排隊與擋門</h2>
+  <p><b>目標：</b>這一關做兩件事。</p>
+  <ul>
+    <li><b>請求排隊：</b>關卡 2、3 只用 <code>TargetFloor</code> 記一個目的地，<b>電梯移動中</b>按的按鈕會被忽略（CallElevator 的「State != 4」那一關擋掉了）。改成用 <code>Requests</code> 陣列記下「每一層有沒有人在等」，移動中按的也記下來，等電梯停好、關好門再一個一個去。</li>
+    <li><b>擋門：</b>有人站在門口時，門不能關。停留時間到了但門口有人，就再等一下；門正在關的時候有人走進門口，就重新打開。</li>
+  </ul>
+
+  <h3>先在紙上回答</h3>
+  <ul>
+    <li>Requests 的第幾格代表幾樓？Floor 要怎麼換算成索引？</li>
+    <li>哪個函數把 Requests 設成 true？哪個函數把它清回 false？</li>
+    <li>電梯什麼時候才可以「決定下一站」？為什麼不能在 CallElevator 裡直接出發？</li>
+    <li>擋門要在哪兩個狀態檢查？兩種狀態被擋住時，各要切到哪裡？</li>
+  </ul>
+
+  <h3>邏輯架構：請求從登記到清除</h3>
+  <pre class="map">按下按鈕 ─→ CallElevator
+              ├─ 電梯就在這層、沒在移動 → 熄燈、開門或重新計時（和關卡 3 一樣）
+              └─ 其他情況（包括移動中）  → Requests[Floor − 1] = true   ← 只登記，不出發
+
+待命（State 0）每一幀 ─→ Dispatch
+              ├─ 本層有登記 → 清掉、熄燈、State = 1 開門
+              └─ 否則 FindRequest → Result > 0 → Start Move(Result)
+
+到站 ─→ OnArrived：Requests[CurrentFloor − 1] = false（這一層的人接到了）</pre>
+
+  <h3>邏輯架構：加上擋門之後的狀態圖</h3>
+  <pre class="map">待命 0    ── Dispatch 找到別層      ──▶ 移動中 4
+待命 0    ── Dispatch 發現本層有人  ──▶ 開門中 1
+移動中 4  ── 到站                   ──▶ 開門中 1
+開門中 1  ── 全開                   ──▶ 停留 2
+停留 2    ── 倒數到 0，門口有人     ──▶ 停留 2（DwellRemaining = 0.5，再等一下）   ← 新增
+停留 2    ── 倒數到 0，門口沒人     ──▶ 關門中 3
+關門中 3  ── 門口有人               ──▶ 開門中 1（從目前的位置重新打開）            ← 新增
+關門中 3  ── 全關                   ──▶ 待命 0</pre>
+
+  <h3>架構：這一關做完後，各層之間的關係</h3>
+  <p>CallElevator 改成把請求登記在 Requests，待命時改由 Dispatch 用 FindRequest 決定下一站；停留和關門中都先問 Kit_IsDoorBlocked，門口有人就不關。</p>
+  <figure><div class="archwrap"><svg class="arch" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="關卡 4 完成時的七層架構"><defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker><marker id="an4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahn" d="M0,0 L10,5 L0,10 z"/></marker></defs><text class="bn" x="16" y="34">1</text><text class="bt" x="16" y="56">玩家操作</text><text class="bs" x="16" y="74">鍵盤與走位</text><line class="div" x1="0" y1="100" x2="1200" y2="100"/><text class="bn" x="16" y="134">2</text><text class="bt" x="16" y="156">套件偵測</text><text class="bs" x="16" y="174">EventGraph · 不要改</text><line class="div" x1="0" y1="216" x2="1200" y2="216"/><text class="bn" x="16" y="250">3</text><text class="bt" x="16" y="272">事件函數</text><text class="bs" x="16" y="290">按一次執行一次</text><line class="div" x1="0" y1="372" x2="1200" y2="372"/><text class="bn" x="16" y="406">4</text><text class="bt" x="16" y="428">狀態資料</text><text class="bs" x="16" y="446">兩條路的交會點</text><line class="div" x1="0" y1="560" x2="1200" y2="560"/><text class="bn" x="16" y="594">5</text><text class="bt" x="16" y="616">每幀決策</text><text class="bs" x="16" y="634">UpdateLift 狀態機</text><line class="div" x1="0" y1="862" x2="1200" y2="862"/><text class="bn" x="16" y="896">6</text><text class="bt" x="16" y="918">套件輸出</text><text class="bs" x="16" y="936">Kit 函數 · 直接呼叫</text><line class="div" x1="0" y1="1000" x2="1200" y2="1000"/><text class="bn" x="16" y="1034">7</text><text class="bt" x="16" y="1056">場景元件</text><text class="bs" x="16" y="1074">玩家看到的結果</text><polyline class="edge" points="250,74 250,124" marker-end="url(#ah4)"/><polyline class="edge" points="455,74 455,124" marker-end="url(#ah4)"/><polyline class="edge" points="660,74 660,124" marker-end="url(#ah4)"/><polyline class="edge" points="865,74 865,124" marker-end="url(#ah4)"/><polyline class="edge" points="1070,74 1070,124" marker-end="url(#ah4)"/><polyline class="edge" points="455,194 455,240" marker-end="url(#ah4)"/><polyline class="edge" points="660,194 660,240" marker-end="url(#ah4)"/><polyline class="edge" points="455,288 512,312" marker-end="url(#ah4)"/><polyline class="edge" points="660,288 603,312" marker-end="url(#ah4)"/><polyline class="edge en" points="557,360 557,392" marker-end="url(#an4)"/><polyline class="edge" points="865,194 865,580" marker-end="url(#ah4)"/><polyline class="edge" points="200,516 200,668" marker-end="url(#ah4)" marker-start="url(#ah4)"/><polyline class="edge" points="865,628 455,668" marker-end="url(#ah4)"/><polyline class="edge" points="865,628 250,668" marker-end="url(#ah4)"/><polyline class="edge" points="865,628 660,668" marker-end="url(#ah4)"/><polyline class="edge" points="865,628 865,668" marker-end="url(#ah4)"/><polyline class="edge" points="865,628 1070,668" marker-end="url(#ah4)"/><polyline class="edge" points="955,604 1188,604 1188,930 1164,930" marker-end="url(#ah4)"/><polyline class="edge ed" points="365,264 150,264 150,930 158,930" marker-end="url(#ah4)"/><polyline class="edge ed" points="467,336 150,336"/><polyline class="edge en" points="250,818 250,900" marker-end="url(#an4)"/><polyline class="edge" points="455,818 455,900" marker-end="url(#ah4)"/><polyline class="edge" points="410,818 300,900" marker-end="url(#ah4)"/><polyline class="edge" points="660,818 660,900" marker-end="url(#ah4)"/><polyline class="edge en" points="845,818 845,900" marker-end="url(#an4)"/><polyline class="edge en" points="1080,818 905,900" marker-end="url(#an4)"/><polyline class="halo" points="990,852 700,852"/><polyline class="edge" points="990,818 990,852 700,852 700,900" marker-end="url(#ah4)"/><polyline class="edge" points="250,960 250,1024" marker-end="url(#ah4)"/><polyline class="edge" points="455,960 455,1024" marker-end="url(#ah4)"/><polyline class="edge" points="660,960 660,1024" marker-end="url(#ah4)"/><polyline class="edge en" points="865,1024 865,960" marker-end="url(#an4)"/><polyline class="edge" points="1070,960 1070,1024" marker-end="url(#ah4)"/><rect class="ply" x="160" y="30" width="180" height="44" rx="8"/><text class="pt" x="250" y="57" text-anchor="middle">按 Play 開始</text><rect class="ply" x="365" y="30" width="180" height="44" rx="8"/><text class="pt" x="455" y="57" text-anchor="middle">門外按 E</text><rect class="ply" x="570" y="30" width="180" height="44" rx="8"/><text class="pt" x="660" y="57" text-anchor="middle">車廂裡按 1／2</text><rect class="ply" x="775" y="30" width="180" height="44" rx="8"/><text class="pt" x="865" y="57" text-anchor="middle">時間經過</text><rect class="ply" x="980" y="30" width="180" height="44" rx="8"/><text class="pt" x="1070" y="57" text-anchor="middle">走進／走出車廂</text><rect class="kit" x="160" y="124" width="180" height="70" rx="8"/><text class="kt" x="250" y="154" text-anchor="middle">Kit_Setup</text><text class="ks" x="250" y="175" text-anchor="middle">BeginPlay：初始化門與顯示器</text><rect class="kit" x="365" y="124" width="180" height="70" rx="8"/><text class="kt" x="455" y="154" text-anchor="middle">Kit_TryPressButton</text><text class="ks" x="455" y="175" text-anchor="middle">找出按的是哪層呼叫鈕</text><rect class="kit" x="570" y="124" width="180" height="70" rx="8"/><text class="kt" x="660" y="154" text-anchor="middle">Kit_CabinKey</text><text class="ks" x="660" y="175" text-anchor="middle">確認玩家在車廂裡</text><rect class="kit" x="775" y="124" width="180" height="70" rx="8"/><text class="kt" x="865" y="154" text-anchor="middle">Timeline Update</text><text class="ks" x="865" y="175" text-anchor="middle">每一幀觸發一次</text><rect class="kit" x="980" y="124" width="180" height="70" rx="8"/><text class="kt" x="1070" y="154" text-anchor="middle">Kit_RefreshCabinLight</text><text class="ks" x="1070" y="175" text-anchor="middle">車廂燈亮／暗</text><rect class="stu" x="365" y="240" width="180" height="48" rx="8"/><text class="stt" x="455" y="261" text-anchor="middle">OnCallButtonPressed</text><text class="sts" x="455" y="279" text-anchor="middle">亮燈 → CallElevator</text><rect class="stu" x="570" y="240" width="180" height="48" rx="8"/><text class="stt" x="660" y="261" text-anchor="middle">OnCabinButtonPressed</text><text class="sts" x="660" y="279" text-anchor="middle">亮燈 → CallElevator</text><rect class="stu nw" x="467" y="312" width="180" height="48" rx="8"/><text class="stt" x="557" y="333" text-anchor="middle">CallElevator</text><text class="sts" x="557" y="351" text-anchor="middle">本層熄燈、開門或登記請求</text><rect class="tagb" x="613" y="302" width="30" height="18" rx="9"/><text class="tagt" x="628" y="315" text-anchor="middle">改</text><rect class="grp" x="160" y="392" width="590" height="124" rx="8"/><text class="gt" x="174" y="414">我的變數</text><text class="gs" x="240" y="414">學生自己新增</text><rect class="chip" x="176" y="428" width="134" height="30" rx="6"/><text class="ct" x="186" y="448">State</text><text class="cl" x="300" y="448" text-anchor="end">L1</text><rect class="chip" x="318" y="428" width="134" height="30" rx="6"/><text class="ct" x="328" y="448">CurrentFloor</text><text class="cl" x="442" y="448" text-anchor="end">L1</text><rect class="chip" x="460" y="428" width="134" height="30" rx="6"/><text class="ct" x="470" y="448">TargetFloor</text><text class="cl" x="584" y="448" text-anchor="end">L1</text><rect class="chip" x="602" y="428" width="134" height="30" rx="6"/><text class="ct" x="612" y="448">Direction</text><text class="cl" x="726" y="448" text-anchor="end">L3</text><rect class="chip" x="176" y="470" width="134" height="30" rx="6"/><text class="ct" x="186" y="490">DoorAlpha</text><text class="cl" x="300" y="490" text-anchor="end">L2</text><rect class="chip" x="318" y="470" width="134" height="30" rx="6"/><text class="ct" x="328" y="490">DwellRemaining</text><text class="cl" x="442" y="490" text-anchor="end">L2</text><rect class="chip nw" x="460" y="470" width="134" height="30" rx="6"/><text class="ct" x="470" y="490">Requests[ ]</text><text class="cl" x="584" y="490" text-anchor="end">L4</text><rect class="tagb" x="560" y="460" width="30" height="18" rx="9"/><text class="tagt" x="575" y="473" text-anchor="middle">新</text><rect class="grp" x="980" y="392" width="180" height="158" rx="8"/><text class="gt" x="994" y="414">套件設定值</text><text class="gs" x="994" y="430">UpdateLift、CallElevator 讀取</text><rect class="chip2" x="994" y="440" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="456">FloorHeights</text><rect class="chip2" x="994" y="467" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="483">MoveSpeed</text><rect class="chip2" x="994" y="494" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="510">DoorOpenTime</text><rect class="chip2" x="994" y="521" width="152" height="22" rx="5"/><text class="ct2" x="1004" y="537">DwellTime</text><rect class="stu" x="775" y="580" width="180" height="48" rx="8"/><text class="stt" x="865" y="601" text-anchor="middle">UpdateLift</text><text class="sts" x="865" y="619" text-anchor="middle">先更新顯示器再分支</text><rect class="card nw" x="160" y="668" width="180" height="150" rx="8"/><path d="M168,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s0)"/><text class="ch" x="172" y="687">0 待命</text><text class="ch" x="328" y="687" text-anchor="end">L2 · L4</text><text class="cline m" x="172" y="718">Dispatch()</text><text class="cline m" x="172" y="737">├ FindRequest()</text><text class="cline m" x="172" y="756">└ StartMove(f)</text><text class="cline" x="172" y="775">→ 4 移動中</text><rect class="tagb" x="306" y="658" width="30" height="18" rx="9"/><text class="tagt" x="321" y="671" text-anchor="middle">改</text><rect class="card" x="365" y="668" width="180" height="150" rx="8"/><path d="M373,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s4)"/><text class="ch" x="377" y="687">4 移動中</text><text class="ch" x="533" y="687" text-anchor="end">L1</text><text class="cline m" x="377" y="718">Kit_GetLiftZ</text><text class="cline m" x="377" y="737">Kit_SetLiftZ</text><text class="cline" x="377" y="756">到站：OnArrived()</text><text class="cline" x="377" y="775">（熄燈、方向歸零）</text><text class="cline" x="377" y="794">→ 1 開門中</text><rect class="card" x="570" y="668" width="180" height="150" rx="8"/><path d="M578,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s1)"/><text class="ch" x="582" y="687">1 開門中</text><text class="ch" x="738" y="687" text-anchor="end">L2</text><text class="cline" x="582" y="718">DoorAlpha 加大</text><text class="cline m" x="582" y="737">Kit_ApplyDoors</text><text class="cline" x="582" y="756">全開 → 2 停留</text><rect class="card nw" x="775" y="668" width="180" height="150" rx="8"/><path d="M783,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s2)"/><text class="ch" x="787" y="687">2 停留</text><text class="ch" x="943" y="687" text-anchor="end">L2 · L4</text><text class="cline" x="787" y="718">DwellRemaining 倒數</text><text class="cline m" x="787" y="737">Kit_IsDoorBlocked</text><text class="cline" x="787" y="756">有人：再等 0.5 秒</text><text class="cline" x="787" y="775">沒人 → 3 關門中</text><rect class="tagb" x="921" y="658" width="30" height="18" rx="9"/><text class="tagt" x="936" y="671" text-anchor="middle">改</text><rect class="card nw" x="980" y="668" width="180" height="150" rx="8"/><path d="M988,668 h164 a8,8 0 0 1 8,8 v20 h-180 v-20 a8,8 0 0 1 8,-8 z" style="fill: var(--s3)"/><text class="ch" x="992" y="687">3 關門中</text><text class="ch" x="1148" y="687" text-anchor="end">L2 · L4</text><text class="cline m" x="992" y="718">Kit_IsDoorBlocked</text><text class="cline" x="992" y="737">有人 → 1 開門中</text><text class="cline" x="992" y="756">DoorAlpha 縮小</text><text class="cline m" x="992" y="775">Kit_ApplyDoors</text><text class="cline" x="992" y="794">全關 → 0 待命</text><rect class="tagb" x="1126" y="658" width="30" height="18" rx="9"/><text class="tagt" x="1141" y="671" text-anchor="middle">改</text><rect class="kit" x="160" y="900" width="180" height="60" rx="8"/><text class="kt" x="250" y="925" text-anchor="middle">Kit_SetButtonLight</text><text class="ks" x="250" y="946" text-anchor="middle">按鈕燈亮／熄 · L3</text><rect class="kit" x="365" y="900" width="180" height="60" rx="8"/><text class="kt" x="455" y="925" text-anchor="middle">Kit_Get／SetLiftZ</text><text class="ks" x="455" y="946" text-anchor="middle">車廂高度 · L1</text><rect class="kit" x="570" y="900" width="180" height="60" rx="8"/><text class="kt" x="660" y="925" text-anchor="middle">Kit_ApplyDoors</text><text class="ks" x="660" y="946" text-anchor="middle">門開到幾成 · L2</text><rect class="kit nw" x="775" y="900" width="180" height="60" rx="8"/><text class="kt" x="865" y="925" text-anchor="middle">Kit_IsDoorBlocked</text><text class="ks" x="865" y="946" text-anchor="middle">回傳門口有沒有人 · L4</text><rect class="tagb" x="921" y="890" width="30" height="18" rx="9"/><text class="tagt" x="936" y="903" text-anchor="middle">新</text><rect class="kit" x="980" y="900" width="180" height="60" rx="8"/><text class="kt" x="1070" y="925" text-anchor="middle">Kit_UpdateDisplays</text><text class="ks" x="1070" y="946" text-anchor="middle">數字與箭頭 · L3</text><rect class="scn" x="160" y="1024" width="180" height="52" rx="8"/><text class="pt" x="250" y="1045" text-anchor="middle">按鈕燈</text><text class="bs" x="250" y="1063" text-anchor="middle">呼叫鈕、車廂樓層鈕</text><rect class="scn" x="365" y="1024" width="180" height="52" rx="8"/><text class="pt" x="455" y="1045" text-anchor="middle">車廂</text><text class="bs" x="455" y="1063" text-anchor="middle">玩家站在上面一起移動</text><rect class="scn" x="570" y="1024" width="180" height="52" rx="8"/><text class="pt" x="660" y="1045" text-anchor="middle">門板</text><text class="bs" x="660" y="1063" text-anchor="middle">車廂門＋井口門</text><rect class="scn nw" x="775" y="1024" width="180" height="52" rx="8"/><text class="pt" x="865" y="1045" text-anchor="middle">門口區域</text><text class="bs" x="865" y="1063" text-anchor="middle">玩家站在哪裡</text><rect class="tagb" x="921" y="1014" width="30" height="18" rx="9"/><text class="tagt" x="936" y="1027" text-anchor="middle">新</text><rect class="scn" x="980" y="1024" width="180" height="52" rx="8"/><text class="pt" x="1070" y="1045" text-anchor="middle">樓層顯示器</text><text class="bs" x="1070" y="1063" text-anchor="middle">井口與車廂上方</text><rect class="elb" x="462" y="206" width="41" height="18" rx="3"/><text class="el" x="466" y="219">Floor</text><rect class="elb" x="667" y="206" width="41" height="18" rx="3"/><text class="el" x="671" y="219">Floor</text><rect class="elb" x="566" y="366" width="179.39999999999995" height="18" rx="3"/><text class="el eln" x="570" y="379">寫入 Requests、State、Dwell</text><rect class="elb" x="872" y="270" width="42.5" height="18" rx="3"/><text class="el" x="876" y="283">每一幀</text><rect class="elb" x="208" y="584" width="54" height="18" rx="3"/><text class="el" x="212" y="597">每幀讀寫</text><rect class="elb" x="600" y="636" width="74" height="18" rx="3"/><text class="el" x="604" y="649">State == 4</text><rect class="elb" x="1080" y="586" width="77" height="18" rx="3"/><text class="el" x="1084" y="599">先更新顯示器</text><rect class="elb" x="178" y="246" width="31" height="18" rx="3"/><text class="el" x="182" y="259">亮燈</text><rect class="elb" x="178" y="318" width="54" height="18" rx="3"/><text class="el" x="182" y="331">本層熄燈</text><rect class="elb" x="292" y="840" width="97" height="18" rx="3"/><text class="el" x="296" y="853">OnArrived 熄燈</text><rect class="elb" x="872" y="976" width="65.5" height="18" rx="3"/><text class="el eln" x="876" y="989">讀玩家位置</text></svg></div><figcaption>黃色粗框標「新」的是這一關要新增的，標「改」的是要修改的；深色方塊是套件提供、不用改的；黃色箭頭是這一關新增的連線。圖比較寬，手機上可以左右滑動。</figcaption></figure>
+
+  <h3>這一關要改的函數</h3>
+  <div class="table"><table>
+    <thead><tr><th>順序</th><th>函數</th><th>改什麼</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td><span class="n">CallElevator</span></td><td>① 的 False 後面：刪掉 Branch（State != 4）和 Set TargetFloor，改成 <span class="n">Set Array Elem</span>（Requests[Floor − 1] = true）</td></tr>
+      <tr><td>B</td><td><span class="n">OnArrived</span></td><td>① 後面插入 <span class="n">Set Array Elem</span>（Requests[CurrentFloor − 1] = false）</td></tr>
+      <tr><td>C</td><td><span class="n">FindRequest</span></td><td><b>自己新增</b>，回傳第一個有人在等的樓層</td></tr>
+      <tr><td>D</td><td><span class="n">Dispatch</span></td><td>新寫：本層有人就開門，否則用 FindRequest 找下一站並出發</td></tr>
+      <tr><td>E</td><td><span class="n">UpdateLift</span> 出口 0</td><td>原本的 Branch + Start Move 換成呼叫 <span class="n">Dispatch</span></td></tr>
+      <tr><td>F</td><td><span class="n">UpdateLift</span> 出口 2</td><td>倒數到 0 之後，先問 <span class="n">Kit Is Door Blocked</span> 再決定關門</td></tr>
+      <tr><td>G</td><td><span class="n">UpdateLift</span> 出口 3</td><td>最前面先問 <span class="n">Kit Is Door Blocked</span>，有人就切回開門</td></tr>
+      <tr><td>—</td><td>StartMove、按鈕函數、出口 1、出口 4</td><td>不用改</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>Set Array Elem 是什麼</b>改陣列裡某一格的值。右鍵搜尋 <code>Set Array Elem</code>，或從 Get Requests 的接腳拉出來搜尋。三個輸入：<b>Target Array</b> 接 Get Requests；<b>Index</b> 接「Floor − 1」；<b>Item</b> 打勾 = true、不打勾 = false。<b>Size to Fit</b> 不用勾。讀某一格則用 <span class="n">Get (a copy)</span>（從 Get Requests 拉出來搜尋 <code>Get</code>）。</div>
+
+  <h3>A. CallElevator</h3>
+  <pre class="map">[入口] ▷ → ① Branch（Floor == CurrentFloor AND State != 4）
+             True  ▷ → ② Kit Set Button Light（On 不打勾）▷ → ③ Branch（State == 2）
+                           True  ▷ → ④ Set DwellRemaining ← DwellTime
+                           False ▷ → ⑤ Branch（State != 1） True ▷ → ⑥ Set State = 1
+             False ▷ → ⑦ Set Array Elem（Target Array ← Requests，Index ← Floor − 1，Item ✓）</pre>
+  <figure><img src="img/L4_01_callelevator.png" alt="關卡 4 CallElevator 成果圖，標示 1 到 7，False 接 Set Array Elem"><figcaption>CallElevator 成果圖。①～⑥ 和關卡 3 一樣；⑦ 換成 Set Array Elem，Index 接入口 Floor − 1。</figcaption></figure>
+  <ol class="steps">
+    <li>點選 ① False 後面的 Branch（State != 4），連同它的 <code>!=</code> 節點和 Set TargetFloor 一起刪掉。</li>
+    <li>按住 <kbd>Ctrl</kbd> 把 <code>Requests</code> 拖進來（Get），從它的接腳拉出來搜尋 <code>Set Array Elem</code>。</li>
+    <li>放一個 <code>−</code> 節點：上面接入口的 Floor，下面填 1，輸出接到 Index。</li>
+    <li>Item 打勾。① 的 False ▷ 接到 Set Array Elem。</li>
+  </ol>
+  <p>為什麼拿掉「State != 4」：這一關就是要讓<b>移動中按的也記下來</b>。CallElevator 只負責登記，什麼時候出發交給 Dispatch。</p>
+
+  <h3>B. OnArrived</h3>
+  <pre class="map">[入口] ▷ → ① Set CurrentFloor ← TargetFloor
+        ▷ → ② Set Array Elem（Requests，Index ← CurrentFloor − 1，Item 不打勾）
+        ▷ → ③ Kit Set Button Light（Floor ← CurrentFloor，On 不打勾）
+        ▷ → ④ Set DoorAlpha = 0 ▷ → ⑤ Set Direction = 0 ▷ → ⑥ Set State = 1</pre>
+  <figure><img src="img/L4_02_onarrived.png" alt="關卡 4 OnArrived 成果圖，標示 1 到 6"><figcaption>OnArrived 成果圖。和關卡 3 比只多了 ②，把到站這一層的登記清掉。</figcaption></figure>
+
+  <h3>C. 練習：自己新增 FindRequest 函數</h3>
+  <p><span class="n">Dispatch</span> 需要知道「現在哪一層有人在等」。請把這個判斷寫成一個<b>獨立的函數</b> <span class="n">FindRequest</span>，再讓 Dispatch 呼叫它。這是整份作業裡唯一要你從零新增的函數，順便練習「有回傳值的函數」。</p>
+  <h3>函數規格</h3>
+  <div class="table"><table>
+    <thead><tr><th>項目</th><th>內容</th></tr></thead>
+    <tbody>
+      <tr><td>名稱</td><td><code>FindRequest</code></td></tr>
+      <tr><td>輸入</td><td>無</td></tr>
+      <tr><td>輸出</td><td><code>Result</code>（Integer）</td></tr>
+      <tr><td>要做的事</td><td>從 1F 開始檢查 <code>Requests</code>，回傳<b>第一個</b>有人在等的樓層號碼（1 或 2）；都沒有人在等就回傳 <b>0</b></td></tr>
+    </tbody>
+  </table></div>
+  <h3>建立步驟</h3>
+  <ol class="steps">
+    <li>在 My Blueprint 的 <b>FUNCTIONS</b> 那一列按右邊的 <b>⊕</b>，新增一個函數。</li>
+    <li>把名稱改成 <code>FindRequest</code>，按 <kbd>Enter</kbd>。</li>
+    <li>在 Details 的 <b>Outputs</b> 按 <b>⊕</b>，名稱改成 <code>Result</code>，型別選 <b>Integer</b>。圖表裡會自動出現一個 <span class="n">Return Node</span>。</li>
+    <li>在入口節點和 Return Node 之間寫判斷。每一條路最後都要接到 Return Node，並把 Result 接上要回傳的值。</li>
+    <li>Compile。之後在 Dispatch 裡就能放 <span class="n">Find Request</span> 節點，它的 Result 輸出就是答案。</li>
+  </ol>
+  <figure><img src="img/14_findrequest.png" alt="新增 FindRequest 函數後的畫面：入口節點與帶有 Result 輸出的 Return Node"><figcaption>建好、還沒寫內容時的 FindRequest：左邊是入口節點，右邊是 Return Node，Result 預設是 0。</figcaption></figure>
+  <h3>示意：輸入什麼、回傳什麼</h3>
+  <div class="table"><table>
+    <thead><tr><th>Requests[0]（1F）</th><th>Requests[1]（2F）</th><th>FindRequest 回傳</th></tr></thead>
+    <tbody>
+      <tr><td>false</td><td>false</td><td>0（沒有人在等）</td></tr>
+      <tr><td>true</td><td>false</td><td>1</td></tr>
+      <tr><td>false</td><td>true</td><td>2</td></tr>
+      <tr><td>true</td><td>true</td><td>1（從 1F 開始找，先找到的先回傳）</td></tr>
+    </tbody>
+  </table></div>
+  <div class="map">Dispatch 與 FindRequest 的關係（示意）
+
+  Dispatch ──呼叫──▶ FindRequest ──回傳 Result──▶ Dispatch
+                       │
+                       └─ 讀 Requests[0]、Requests[1]
+
+  Dispatch 拿到 Result 之後：
+    Result = 0  → 沒有人在等，什麼都不做
+    Result = 1 或 2 → 往那一層出發</div>
+  <p>函數內容要怎麼寫（用 Branch，或用 For Each Loop 跑整個陣列）由你決定。寫好後用 <span class="n">Print String</span> 印出 Result，對照上面的表測試。</p>
+  <details><summary>參考答案（先自己寫，寫不出來再打開）</summary>
+    <pre class="map">[入口] ▷ → ① Branch（Requests[0]）
+             True  ▷ → ② Return Node（Result = 1）
+             False ▷ → ③ Branch（Requests[1]）
+                           True  ▷ → ④ Return Node（Result = 2）
+                           False ▷ → ⑤ Return Node（Result = 0）</pre>
+    <figure><img src="img/L4_03_findrequest.png" alt="FindRequest 參考答案：兩個 Branch 讀 Requests 第 0、1 格，三個 Return Node 回傳 1、2、0"><figcaption>FindRequest 參考答案。三條路各接一個 Return Node（從 Branch 的 ▷ 拉出來搜尋 <code>Return Node</code> 就能多放幾個）。<span class="n">GET</span> 是從 Get Requests 拉出來搜尋 <code>Get (a copy)</code>，格子裡填 0 或 1。</figcaption></figure>
+  </details>
+
+  <h3>D. Dispatch</h3>
+  <pre class="map">邏輯：電梯待命時決定下一步
+如果 Requests[CurrentFloor − 1] 是 true（本層有人在等）
+    清掉這一格、熄燈、State = 1（直接開門，不用移動）
+否則
+    f = FindRequest()
+    如果 f > 0 → Start Move(f)
+    （f = 0 表示沒人在等，什麼都不做，下一幀再檢查）
+
+[入口] ▷ → ① Branch（Requests[CurrentFloor − 1]）
+             True  ▷ → ② Set Array Elem（Index ← CurrentFloor − 1，Item 不打勾）
+                     ▷ → ③ Kit Set Button Light（Floor ← CurrentFloor，On 不打勾）▷ → ④ Set State = 1
+             False ▷ → ⑤ Find Request ▷ → ⑥ Branch（Result &gt; 0） True ▷ → ⑦ Start Move（Floor ← Result）</pre>
+  <figure><img src="img/L4_04_dispatch.png" alt="Dispatch 成果圖，標示 1 到 7"><figcaption>Dispatch 成果圖。⑤ Find Request 的 Result 拉出兩條線：一條到 <code>&gt; 0</code> 給 ⑥，一條到 ⑦ 的 Floor。</figcaption></figure>
+  <p>為什麼先檢查本層：如果本層有登記卻直接交給 FindRequest，它可能回傳本層，電梯就會對自己 Start Move、原地「移動」一次才開門。先檢查本層，直接開門比較乾淨。</p>
+
+  <h3>E. UpdateLift 出口 0：交給 Dispatch</h3>
+  <pre class="map">S 的 0 ▷ → ① Dispatch</pre>
+  <figure><img src="img/L4_05_ul_state0.png" alt="UpdateLift 出口 0 只接 Dispatch"><figcaption>出口 0 成果圖。刪掉關卡 2 的 Branch（TargetFloor != CurrentFloor）和 Start Move，從 My Blueprint 把 Dispatch 拖進來接上。</figcaption></figure>
+
+  <h3>F、G. 擋門</h3>
+  <div class="note"><b>Kit Is Door Blocked 在問什麼</b>輸入 Floor，回傳 Blocked（Boolean）：玩家是不是站在第 Floor 層的門口（門外大約 1～2.3 公尺、左右 1 公尺內、同一層）。它是查詢用的 Kit 節點，<b>但一樣有白色 ▷，要串在白線上</b>，Blocked 才會是這一幀的結果。Floor 一律接 <code>Get CurrentFloor</code>。</div>
+  <p>只需要在兩個狀態檢查：<b>停留快結束時</b>（出口 2）和<b>門正在關的時候</b>（出口 3）。開門中、全開停留中，門本來就不會夾到人，不用檢查。</p>
+
+  <h3>F. UpdateLift 出口 2：停留時間到了，門口有人就再等</h3>
+  <pre class="map">邏輯：倒數 → 數完了 → 門口有人？ 有：再等 0.5 秒　沒有：開始關門
+S 的 2 ▷ → ① Set DwellRemaining ← DwellRemaining − Δt
+         ▷ → ② Branch（DwellRemaining &lt;= 0）
+               True ▷ → ③ Kit Is Door Blocked（Floor ← CurrentFloor）
+                       ▷ → ④ Branch（Blocked）
+                             True  ▷ → ⑤ Set DwellRemaining = 0.5
+                             False ▷ → ⑥ Set State = 3</pre>
+  <figure><img src="img/L4_06_ul_state2.png" alt="UpdateLift 出口 2 成果圖，標示 1 到 6，加入 Kit Is Door Blocked"><figcaption>出口 2 成果圖。①② 和關卡 2 一樣；原本 ② True 直接接 Set State = 3，現在中間插入 ③④，Set State = 3 改接到 ④ 的 False（圖中 ⑥）。</figcaption></figure>
+
+  <h3>G. UpdateLift 出口 3：門正在關，門口有人就重新打開</h3>
+  <pre class="map">邏輯：先問門口有沒有人 → 有：切回開門　沒有：照關卡 2 繼續關門
+S 的 3 ▷ → ① Kit Is Door Blocked（Floor ← CurrentFloor）
+         ▷ → ② Branch（Blocked）
+               True  ▷ → ③ Set State = 1
+               False ▷ → ④ Set DoorAlpha ← Max( DoorAlpha − Δt ÷ DoorOpenTime , 0 )
+                       ▷ → ⑤ Kit Apply Doors ▷ → ⑥ Branch（DoorAlpha &lt;= 0） True ▷ → ⑦ Set State = 0</pre>
+  <figure><img src="img/L4_07_ul_state3.png" alt="UpdateLift 出口 3 成果圖，標示 1 到 7，最前面是 Kit Is Door Blocked"><figcaption>出口 3 成果圖。④～⑦ 就是關卡 2 出口 3 原本的節點，只是改接到 ② 的 False 後面。</figcaption></figure>
+  <p>為什麼 ③ 只要 Set State = 1、不用改 DoorAlpha：DoorAlpha 停在關到一半的值，下一幀出口 1 會從這個值繼續 +，門就從目前的位置順順地打開，不會跳回全關。</p>
+
+  <div class="stop"><b>容易錯的地方</b>① Index 忘了減 1：按 1 會登記成 2F，按 2 寫到不存在的第 2 格（Output Log 出現陣列越界的警告）。② OnArrived 沒清掉登記：到站開門、關門之後，Dispatch 發現本層還有登記，門又再開一次。③ CallElevator 還留著 Branch（State != 4）：移動中按的還是被忽略。④ 出口 0 忘了換成 Dispatch：Requests 有登記但電梯不會動。⑤ Kit Is Door Blocked 沒接白線：Blocked 永遠是 false，擋門沒效果。⑥ FindRequest 有一條路沒接 Return Node：那條路會回傳預設的 0。</div>
+
+  <h3>驗收</h3>
+  <ul class="check">
+    <li>在車廂按 <kbd>2</kbd>，電梯往上時再按 <kbd>1</kbd>：1 號燈亮著，到 2F 開門、停留、關門後，自動回 1F</li>
+    <li>電梯在 2F 停留時，到 1F 門外按 <kbd>E</kbd>：2F 關好門才下來</li>
+    <li>停留時間到了但你站在門口：門不關，離開門口後約 0.5 秒開始關</li>
+    <li>門正在關時走進門口：門重新打開</li>
+    <li>沒有人按任何按鈕時：電梯停在原地，門關著不動</li>
+  </ul>
+
+  <h3>挑戰（選做）</h3>
+  <p>把出口 4 的等速移動改成先加速、再減速：多一個變數記目前速度，每一幀加一點，快到站時減一點。</p>
+</section>
+
+<section id="s13">
+  <h2><span class="no">13</span>測試與除錯</h2>
+  <h3>每次修改後的固定流程</h3>
+  <ol class="steps">
+    <li>按 <b>Compile</b>。下方 Compiler Results 出現紅字就點它，會跳到出錯的節點。</li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 存檔。</li>
+    <li>回到主視窗按 ▶ Play，在練習地圖裡實際走一次。</li>
+  </ol>
+  <h3>測試時的按鍵</h3>
+  <div class="table"><table>
+    <thead><tr><th>按鍵</th><th>位置</th><th>會呼叫</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>E</kbd></td><td>某層電梯門外約 2.5 m 內</td><td>OnCallButtonPressed(該層)</td></tr>
+      <tr><td><kbd>1</kbd> / <kbd>2</kbd></td><td>車廂裡</td><td>OnCabinButtonPressed(1 或 2)</td></tr>
+    </tbody>
+  </table></div>
+  <p>不在車廂裡按 <kbd>1</kbd>／<kbd>2</kbd>，畫面會顯示「EV: 請先進入電梯，或到門外按 CALL [E]」，這是正常的。</p>
+  <h3>除錯技巧</h3>
+  <ul>
+    <li><b>Print String：</b>狀態改變時印出來，例如「State 1 → 2」。用 <span class="n">Append</span> 把文字和數字接在一起。</li>
+    <li><b>即時看執行路線：</b>Play 時切到 BP 編輯器，工具列的 debug 下拉選單選 <code>EV</code>，正在執行的白線會發光。</li>
+    <li><b>中斷點：</b>選一個節點按 <kbd>F9</kbd>，執行到那裡會暫停，滑鼠移到接腳上可以看當時的值。再按 <kbd>F9</kbd> 取消。</li>
+  </ul>
+  <h3>常見症狀</h3>
+  <div class="table"><table>
+    <thead><tr><th>症狀</th><th>先檢查</th></tr></thead>
+    <tbody>
+      <tr><td>電梯衝過頭、停不下來</td><td>「到站」的判斷是不是寫成「等於」</td></tr>
+      <tr><td>按了沒反應</td><td>入口節點的 ▷ 有沒有接出去；Kit 節點有沒有串在白線上；有沒有 Compile</td></tr>
+      <tr><td>門一直開開關關</td><td>兩個切換條件是不是同時成立</td></tr>
+      <tr><td>電梯開著門就走了</td><td>StartMove 有沒有先檢查門關好</td></tr>
+      <tr><td>Accessed None 或陣列越界錯誤</td><td>從 FloorHeights 取值時索引是不是忘了 −1</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s14">
+  <h2><span class="no">14</span>寫好之後，搬到自己的場景</h2>
+  <p>程式全部在 <span class="n">BP_ElevatorKit</span> 裡，只要搬這個 BP。</p>
+  <h3>同一個專案的另一張地圖</h3>
+  <ol class="steps">
+    <li>打開你的地圖。</li>
+    <li>從 Content Browser 把 <span class="n">BP_ElevatorKit</span> 拖進關卡。</li>
+  </ol>
+  <h3>另一個專案</h3>
+  <ol class="steps">
+    <li>在 Content Browser 對 <span class="n">BP_ElevatorKit</span> 按右鍵 → <b>Asset Actions</b> → <b>Migrate…</b></li>
+    <li>清單會自動勾好它用到的材質，按 OK。</li>
+    <li>目的地選對方專案的 <code>Content</code> 資料夾。</li>
+  </ol>
+  <h3>擺放規則</h3>
+  <ul>
+    <li><b>Rotation 保持 0。</b>電梯門朝 −X 方向，玩家要站在電梯的 −X 側。</li>
+    <li><b>高度：</b>電梯 actor 的 Z = 1F 地板頂面 − 50。例如地板頂面是 10，就放在 Z = −40。</li>
+    <li><b>樓板要開孔：</b>2F 樓板在電梯位置要留約 3.2 m 的孔，車廂才上得去。</li>
+    <li><b>層高 500 cm。</b>如果你的房子層高不同，請找老師。</li>
+  </ul>
+</section>
+
+<section id="s15">
+  <h2><span class="no">15</span>常見問題</h2>
+  <h3>可以修改 Kit_ 函數嗎？</h3>
+  <p>不行。Kit 函數是給你用的工具，改了之後其他功能可能壞掉。如果覺得 Kit 函數有問題，先找老師。</p>
+  <h3>按了 Compile 還要存檔嗎？</h3>
+  <p>要。Compile 只是檢查並套用，<kbd>Ctrl</kbd>+<kbd>S</kbd> 才會寫進檔案。關閉 Unreal 前，右下角要顯示 All Saved。</p>
+  <h3>不小心把 EventGraph 的接線拉斷了</h3>
+  <p>先按 <kbd>Ctrl</kbd>+<kbd>Z</kbd> 復原。如果已經存檔了，對照第 5 節的截圖把線接回去。</p>
+  <h3>TODO 訊息還在畫面上出現</h3>
+  <p>那是 OnCallButtonPressed、OnCabinButtonPressed 裡保留的除錯訊息，正常。出現代表按鈕有呼叫到函數。如果訊息出現了但電梯沒動，檢查你的新節點是不是接在 Print String 的 ▷ 後面。不想看到時，可以改文字或刪掉（第 7 節）。</p>
+</section>
+</main>
+</div>
+
+</html>

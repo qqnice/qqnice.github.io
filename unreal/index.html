@@ -1,0 +1,60 @@
+---
+title: Unreal 教學專區
+description: Unreal Engine 5 入門、Blueprint 基礎、速查表與 ElevatorKit 實作演練
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unreal 教學專區</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-unreal">
+  <div class="container">
+    <nav class="crumb"><a href="../">QQ 教學分享區首頁</a> › Unreal 教學專區</nav>
+
+    <h1>🎮 Unreal 教學專區</h1>
+    <p class="lead">這裡整理 Unreal Engine 5 的入門與 Blueprint（視覺化腳本）教學，以及課堂使用的實作教材。內容以 Blueprint 為主，不需要先會寫 C++。</p>
+
+    <h2>🧭 建議的學習順序</h2>
+    <div class="cards">
+      <a class="card" href="01-getting-started.html">
+        <span class="tag">STEP 1</span>
+        <strong>入門：安裝、專案與介面</strong>
+        <span class="d">安裝引擎、建立第一個專案、認識編輯器各個面板與視埠操作。</span>
+      </a>
+      <a class="card" href="02-blueprint-basics.html">
+        <span class="tag">STEP 2</span>
+        <strong>Blueprint 基礎</strong>
+        <span class="d">事件、變數、函數、流程控制，以及 Actor 之間如何溝通。附一個可動手做的小練習。</span>
+      </a>
+      <a class="card" href="03-cheatsheet.html">
+        <span class="tag">速查</span>
+        <strong>快捷鍵、除錯與常見問題</strong>
+        <span class="d">視埠與 Blueprint 快捷鍵（依官方文件整理）、除錯方法與常見狀況排解。</span>
+      </a>
+      <a class="card" href="unrealev/">
+        <span class="tag">實作演練</span>
+        <strong>ElevatorKit 學生操作手冊</strong>
+        <span class="d">用 Blueprint 寫出兩層樓電梯的行為，分四個關卡：會動、門、燈與顯示器、請求排隊與擋門。手冊以課程提供的 ElevatorKit 檔案為前提。</span>
+      </a>
+    </div>
+
+    <h2>🚀 如何使用本專區</h2>
+    <ul>
+      <li>📄 <strong>點擊 <code>.html</code> 頁面：</strong>直接閱讀該單元。</li>
+      <li>📁 <strong>點擊資料夾：</strong>進入該主題的教材（例如 <code>unrealev/</code> 是 ElevatorKit 手冊）。</li>
+      <li>➕ <strong>新增內容：</strong>把新的 <code>.html</code> 放進 <code>unreal/</code> 資料夾，推送後下方目錄會自動更新。若檔案開頭加上 <code>title</code> 與 <code>description</code> 兩個欄位（front matter），目錄就會顯示標題與說明，而不是檔名。</li>
+    </ul>
+
+    <h2>📂 Unreal 專區檔案目錄</h2>
+    {% include zone-listing.html folder="unreal" %}
+
+    <div class="author-box">
+      <h3>👨‍🏫 關於作者</h3>
+      <p><strong>QQ 老師 (Wen-Yen Lin)</strong> 現任教於國立臺中科技大學資訊管理學系。</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+---
+title: 入門：安裝、建立專案與編輯器介面
+description: 從安裝引擎到建立第一個專案，認識編輯器面板、視埠操作與專案資料夾結構
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unreal 入門：安裝、專案與介面</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-unreal">
+  <div class="container">
+    <nav class="crumb"><a href="../">首頁</a> › <a href="./">Unreal 教學專區</a> › 入門</nav>
+
+    <h1>Unreal Engine 5 入門：安裝、專案與介面</h1>
+    <p class="lead">本頁帶你從零開始：把引擎裝起來、建立第一個專案、看懂編輯器的主要面板，並學會在場景裡移動視角與擺放物件。</p>
+
+    <h2>1. Unreal Engine 是什麼</h2>
+    <p>Unreal Engine 是即時 3D 引擎，常用於遊戲、互動體驗、建築與產品視覺化、影視製作，以及教學模擬。在引擎裡撰寫邏輯有兩種方式：</p>
+    <ul>
+      <li><strong>Blueprint：</strong>用節點與連線組成邏輯的視覺化腳本，不用寫程式碼，適合入門與快速試作。</li>
+      <li><strong>C++：</strong>傳統程式語言，適合底層系統與效能要求高的部分。</li>
+    </ul>
+    <p>兩者可以混用。本專區的教材以 Blueprint 為主。</p>
+
+    <h2>2. 安裝引擎（以 Windows 為例）</h2>
+    <ol>
+      <li>安裝並登入 <strong>Epic Games Launcher</strong>。</li>
+      <li>在 Launcher 的 <strong>Unreal Engine</strong> 分頁，進入 <strong>Library（資源庫）</strong>，新增並安裝你要使用的引擎版本。</li>
+      <li>安裝完成後，從同一頁啟動編輯器。</li>
+    </ol>
+    <div class="callout">
+      <p><strong>版本要統一。</strong>同一門課或同一個團隊請使用相同的引擎版本。專案被較新的版本開啟並存檔後，通常無法再用舊版開啟。</p>
+      <p>引擎與專案快取都相當佔空間，建議安裝在 SSD 並預留充足容量。介面文字可能因版本而略有不同，以你安裝的版本為準。</p>
+    </div>
+
+    <h2>3. 建立第一個專案</h2>
+    <ol>
+      <li>啟動編輯器，在專案瀏覽畫面選擇 <strong>Games</strong> 類別。</li>
+      <li>選一個範本。初學建議選 <strong>Third Person</strong>（第三人稱）或 <strong>First Person</strong>（第一人稱），範本已附可操控的角色，按下 Play 就能走動；也可以選 <strong>Blank</strong> 從空白開始。</li>
+      <li>專案類型選 <strong>Blueprint</strong>（若要寫 C++ 才選 C++）。</li>
+      <li>設定專案名稱與儲存位置，按下 Create。</li>
+    </ol>
+    <div class="callout warn">
+      <p><strong>路徑建議使用英文、不含空白與特殊符號，</strong>並避免路徑過長，可減少日後與外部工具、版本控制搭配時的問題。</p>
+    </div>
+
+    <h2>4. 編輯器介面：六個你最常用的區域</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>區域</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Viewport（視埠）</strong></td><td>中央的 3D 場景視窗，在這裡觀察與擺放物件。</td></tr>
+        <tr><td><strong>Outliner（大綱）</strong></td><td>列出目前關卡中所有的 Actor，可在這裡選取、改名、整理資料夾。</td></tr>
+        <tr><td><strong>Details（細節）</strong></td><td>顯示目前選取物件的所有屬性，例如位置、旋轉、縮放、材質。</td></tr>
+        <tr><td><strong>Content Drawer / Content Browser</strong></td><td>專案資產（模型、材質、Blueprint、地圖）的檔案總管。可用 <kbd>Ctrl</kbd> + <kbd>Space</kbd> 叫出或收起 Content Drawer。</td></tr>
+        <tr><td><strong>Place Actors（放置 Actor）</strong></td><td>從選單 Window → Place Actors 開啟，內有方塊、光源、攝影機等常用物件，可直接拖進場景。</td></tr>
+        <tr><td><strong>工具列</strong></td><td>存檔、<strong>Play（試玩）</strong>等常用按鈕。按 <kbd>Esc</kbd> 結束試玩。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>5. 視埠操作</h2>
+    <p>以下依 Epic 官方文件整理（透視視圖，預設快捷鍵）。如果你在編輯器偏好設定中改過快捷鍵，實際操作可能不同。</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>想做的事</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>環視場景</td><td>按住滑鼠<strong>右鍵</strong>拖曳</td></tr>
+        <tr><td>飛行移動</td><td>按住滑鼠右鍵，再按 <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>；<kbd>E</kbd> 上升、<kbd>Q</kbd> 下降</td></tr>
+        <tr><td>調整飛行速度</td><td>按住右鍵時轉動滾輪</td></tr>
+        <tr><td>聚焦到選取的物件</td><td><kbd>F</kbd></td></tr>
+        <tr><td>繞著物件旋轉觀察</td><td><kbd>Alt</kbd> + 按住左鍵拖曳</td></tr>
+        <tr><td>推近／拉遠</td><td><kbd>Alt</kbd> + 按住右鍵拖曳</td></tr>
+        <tr><td>平移視角</td><td>按住滑鼠中鍵拖曳</td></tr>
+        <tr><td>切換移動／旋轉／縮放工具</td><td><kbd>W</kbd> 移動、<kbd>E</kbd> 旋轉、<kbd>R</kbd> 縮放（沒有按住右鍵時）；<kbd>Q</kbd> 為選取工具</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="sources">來源：<a href="https://dev.epicgames.com/documentation/unreal-engine/viewport-controls-in-unreal-engine">Viewport Controls in Unreal Engine（Epic 官方文件）</a></p>
+
+    <h2>6. 幾個必懂的名詞</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>名詞</th><th>意思</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Level（關卡／地圖）</strong></td><td>一個場景，存成 <code>.umap</code> 檔。</td></tr>
+        <tr><td><strong>Actor</strong></td><td>可以放進關卡的物件，例如方塊、光源、攝影機、角色。</td></tr>
+        <tr><td><strong>Component（元件）</strong></td><td>組成 Actor 的零件，例如模型、碰撞區、燈光。Actor 本身就是一組元件的容器。</td></tr>
+        <tr><td><strong>Static Mesh</strong></td><td>不會變形的靜態 3D 模型。</td></tr>
+        <tr><td><strong>Material（材質）</strong></td><td>決定模型表面外觀（顏色、粗糙度等）。</td></tr>
+        <tr><td><strong>Blueprint Class</strong></td><td>用 Blueprint 定義的 Actor 範本：外觀（元件）加上行為（邏輯），可重複放進多個場景。</td></tr>
+        <tr><td><strong>Pawn / Character</strong></td><td>Pawn 是可以被玩家或 AI 控制的 Actor；Character 是帶有行走移動功能的 Pawn。</td></tr>
+        <tr><td><strong>Game Mode</strong></td><td>定義這個關卡的遊戲規則，包括玩家一開始控制哪一種 Pawn。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>7. 專案資料夾與版本控制</h2>
+    <pre><code>MyProject/
+├─ MyProject.uproject   ← 專案檔，雙擊即可開啟
+├─ Content/             ← 所有資產（.uasset、.umap），最重要
+├─ Config/              ← 專案設定
+├─ Saved/               ← 日誌、自動存檔（可重建）
+├─ Intermediate/        ← 暫存（可重建）
+├─ Binaries/            ← 編譯產物（可重建）
+└─ DerivedDataCache/    ← 快取（可重建）</code></pre>
+    <p>備份或放進 Git 時，一般只需要 <code>.uproject</code>、<code>Content/</code>、<code>Config/</code>（有 C++ 時再加 <code>Source/</code>）；<code>Saved</code>、<code>Intermediate</code>、<code>Binaries</code>、<code>DerivedDataCache</code> 通常列入忽略。<code>.uasset</code> 與 <code>.umap</code> 是二進位檔，常見做法是搭配 Git LFS。</p>
+    <div class="callout">
+      <p><strong>養成習慣：</strong>資產命名加上類型前綴，例如 <code>BP_</code>（Blueprint）、<code>SM_</code>（Static Mesh）、<code>M_</code>（Material），專案變大之後會很好找。這是社群常見的慣例，不是引擎強制規定。</p>
+    </div>
+
+    <h2>8. 動手做：第一次試玩與擺放物件</h2>
+    <ol>
+      <li>用 Third Person 範本建立專案，等編輯器開啟。</li>
+      <li>按工具列的 <strong>Play</strong> 試玩，用 <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 操控角色，按 <kbd>Esc</kbd> 結束。</li>
+      <li>在 Outliner 或視埠中點選場景裡的一個方塊，到 Details 看它的 <strong>Location / Rotation / Scale</strong>。</li>
+      <li>用 <kbd>W</kbd>、<kbd>E</kbd>、<kbd>R</kbd> 切換工具，拖曳座標軸移動、旋轉、縮放它；觀察 Details 的數值如何同步變化。</li>
+      <li>從 <strong>Place Actors</strong> 拖一個 Cube 進場景，再次試玩，確認角色會被它擋住。</li>
+      <li>按 <kbd>Ctrl</kbd> + <kbd>S</kbd> 存檔。</li>
+    </ol>
+
+    <div class="pager">
+      <a href="./">← Unreal 專區首頁</a>
+      <a href="02-blueprint-basics.html">下一頁：Blueprint 基礎 →</a>
+    </div>
+  </div>
+</body>
+</html>

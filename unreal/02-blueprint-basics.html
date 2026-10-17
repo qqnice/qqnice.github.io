@@ -1,0 +1,164 @@
+---
+title: Blueprint 基礎：事件、變數、函數與流程控制
+description: 認識 Blueprint 的編輯器、事件與節點，以及 Actor 之間如何溝通；附自動旋轉方塊的練習
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blueprint 基礎</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-unreal">
+  <div class="container">
+    <nav class="crumb"><a href="../">首頁</a> › <a href="./">Unreal 教學專區</a> › Blueprint 基礎</nav>
+
+    <h1>Blueprint 基礎：事件、變數、函數與流程控制</h1>
+    <p class="lead">Blueprint 用「節點」與「連線」表達邏輯。本頁說明它的基本組成，讓你讀得懂別人的 Blueprint，也能自己寫出第一個有行為的 Actor。</p>
+
+    <h2>1. Blueprint 有哪幾種</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>類型</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Blueprint Class</strong></td><td>最常用。定義一種 Actor（或 Pawn、Character 等）的外觀與行為，可重複放進場景。教材中的 <code>BP_ElevatorKit</code> 就是這一種。</td></tr>
+        <tr><td><strong>Level Blueprint</strong></td><td>附屬於單一關卡的腳本，適合只在該關卡才有的一次性邏輯。</td></tr>
+        <tr><td><strong>Blueprint Interface</strong></td><td>只定義「函數的名稱與參數」，讓不同類型的 Actor 用同一種方式被呼叫。</td></tr>
+        <tr><td><strong>Blueprint Function Library</strong></td><td>放不依附特定物件、可到處呼叫的共用函數。</td></tr>
+        <tr><td><strong>Macro Library</strong></td><td>放可重複使用的巨集（一段可展開的節點組合）。</td></tr>
+        <tr><td><strong>Widget Blueprint</strong></td><td>UMG 介面（按鈕、文字、血條等 UI）。</td></tr>
+        <tr><td><strong>Animation Blueprint</strong></td><td>控制角色動畫的狀態與混合。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>2. Blueprint 編輯器的主要區域</h2>
+    <p>雙擊 Content Browser 中的 Blueprint 即可開啟。幾個最常用的區域：</p>
+    <ul>
+      <li><strong>Components：</strong>這個 Blueprint 由哪些零件組成（模型、碰撞區、燈光等）。</li>
+      <li><strong>My Blueprint：</strong>變數、函數、巨集、事件分派器都在這裡建立與管理，雙擊就能開啟。</li>
+      <li><strong>圖表區（Event Graph / 函數圖表）：</strong>拉節點、接線的地方。</li>
+      <li><strong>Details：</strong>顯示選取項目的設定，例如變數的型別與預設值。</li>
+      <li><strong>Compile 與 Save：</strong>改完要按 <strong>Compile</strong>（<kbd>F7</kbd>）檢查錯誤，再用 <kbd>Ctrl</kbd> + <kbd>S</kbd> 存檔。<strong>編譯不等於存檔。</strong></li>
+    </ul>
+
+    <h2>3. 兩種線：執行線與資料線</h2>
+    <ul>
+      <li><strong>白色的執行線</strong>決定「先做什麼、再做什麼」，從事件節點開始，一個節點接著一個節點往下跑。</li>
+      <li><strong>彩色的資料線</strong>負責傳遞數值，顏色代表資料型別。沒有接白線的純計算節點，會在被需要時才計算。</li>
+    </ul>
+    <p>最小的範例：<code>Event BeginPlay</code> → <code>Print String</code>（文字填「Hello」）。試玩時畫面左上角會出現 Hello，這就是「遊戲開始時做一件事」。</p>
+
+    <h2>4. 變數</h2>
+    <p>在 My Blueprint 的 Variables 旁按 <strong>＋</strong> 新增變數，再到 Details 設定名稱、型別與預設值。常見型別：</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>型別</th><th>放什麼</th></tr></thead>
+      <tbody>
+        <tr><td>Boolean</td><td>真／假，例如「門是否開著」。</td></tr>
+        <tr><td>Integer</td><td>整數，例如樓層、分數。</td></tr>
+        <tr><td>Float</td><td>帶小數的數值，例如速度、時間。</td></tr>
+        <tr><td>String / Name / Text</td><td>文字。Text 用於要顯示給玩家看的內容，Name 用於內部識別。</td></tr>
+        <tr><td>Vector / Rotator / Transform</td><td>位置或方向（Vector）、旋轉（Rotator）、位置＋旋轉＋縮放（Transform）。</td></tr>
+        <tr><td>Object Reference</td><td>指向另一個 Actor 或物件的參照。</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>兩個常用的變數選項：</p>
+    <ul>
+      <li><strong>Instance Editable（眼睛圖示）：</strong>勾選後，放進關卡的每一個實例都能在 Details 中各自調整這個值。</li>
+      <li><strong>Expose on Spawn：</strong>勾選後，用程式動態產生這個 Actor 時，可以直接帶入初始值。</li>
+    </ul>
+    <p>把變數拖進圖表時：按住 <kbd>Ctrl</kbd> 拖曳是<strong>取值（Get）</strong>，按住 <kbd>Alt</kbd> 拖曳是<strong>設值（Set）</strong>。</p>
+
+    <h2>5. 事件：什麼時候開始執行</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>事件</th><th>何時觸發</th></tr></thead>
+      <tbody>
+        <tr><td><code>Event BeginPlay</code></td><td>Actor 開始存在於遊戲中時，執行一次。</td></tr>
+        <tr><td><code>Event Tick</code></td><td>每一個畫面更新都執行，並提供 <code>Delta Seconds</code>（距離上一幀經過的秒數）。</td></tr>
+        <tr><td><code>Event ActorBeginOverlap</code></td><td>有其他 Actor 與它的碰撞範圍重疊時（需要碰撞設定允許產生重疊事件）。</td></tr>
+        <tr><td>輸入事件</td><td>玩家按鍵或操作時。UE5 的輸入系統為 Enhanced Input，核心概念是 Input Action（玩家能做的動作）與 Input Mapping Context（哪些按鍵對應哪些動作）。</td></tr>
+        <tr><td><code>Custom Event</code></td><td>你自己定義的事件，可以從別處呼叫，也能搭配計時器使用。</td></tr>
+        <tr><td><code>Event Dispatcher</code></td><td>事件分派器：一個 Blueprint 對外「廣播」，其他 Blueprint 可以綁定並接收通知。</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="sources">Enhanced Input 的細節請見 <a href="https://dev.epicgames.com/documentation/unreal-engine/enhanced-input-in-unreal-engine">Enhanced Input in Unreal Engine（Epic 官方文件）</a>；預設啟用狀態與樣板專案的設定可能依引擎版本而異，請以你使用的版本為準。</p>
+
+    <h2>6. 函數、巨集與自訂事件怎麼選</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>種類</th><th>特點</th><th>適合</th></tr></thead>
+      <tbody>
+        <tr><td>Function（函數）</td><td>可以有輸入與輸出參數、區域變數；不能放 Delay 這類需要等待的節點。</td><td>可重複使用、有明確輸入輸出的計算或動作。</td></tr>
+        <tr><td>Macro（巨集）</td><td>可以有多個執行輸入與輸出腳位。</td><td>想要把一段節點組合收納起來重複使用。</td></tr>
+        <tr><td>Custom Event（自訂事件）</td><td>位於 Event Graph，可搭配 Delay、計時器等。</td><td>需要等待或分段執行的流程。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>7. 常用的流程控制節點</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>節點</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td>Branch</td><td>依條件（Boolean）走 True 或 False 兩條路。</td></tr>
+        <tr><td>Sequence</td><td>依序執行多條輸出線。</td></tr>
+        <tr><td>ForLoop / ForEachLoop</td><td>重複執行；ForEachLoop 逐一處理陣列中的每個元素。</td></tr>
+        <tr><td>Switch（如 Switch on Int）</td><td>依數值或列舉，分流到不同出口。適合表示「狀態」。</td></tr>
+        <tr><td>Select</td><td>依條件從多個值中挑一個出來，是資料節點，沒有執行線。</td></tr>
+        <tr><td>Do Once / Gate</td><td>只讓流程通過一次／可開關的閘門，常用來避免重複觸發。</td></tr>
+        <tr><td>Delay / Set Timer by Event</td><td>延遲一段時間再執行；或每隔固定時間重複執行。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>8. Actor 之間如何溝通</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>做法</th><th>說明</th><th>什麼時候用</th></tr></thead>
+      <tbody>
+        <tr><td>直接參照＋ Cast To</td><td>取得另一個 Actor 的參照，用 <code>Cast To</code> 確認它的類型後，呼叫它的變數或函數。</td><td>兩者關係固定、類型明確。</td></tr>
+        <tr><td>Blueprint Interface</td><td>不管對方是什麼類型，只要實作了介面就能用同一個函數呼叫。</td><td>要和多種不同類型的 Actor 溝通。</td></tr>
+        <tr><td>Event Dispatcher</td><td>發出者廣播，接收者自己綁定事件。發出者不必知道誰在聽。</td><td>一對多通知，例如「電梯到達」通知多個顯示器。</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout warn">
+      <p><strong>避免在 Tick 裡做重的事。</strong>像 <code>Get All Actors Of Class</code> 需要走訪關卡內所有 Actor，不適合每一幀都呼叫。能用事件或計時器解決的，就不要放在 Tick。</p>
+    </div>
+
+    <h2>9. 好習慣</h2>
+    <ul>
+      <li>邏輯變複雜時，選取節點按 <kbd>C</kbd> 加上註解框，並把長邏輯拆成函數。</li>
+      <li>變數、函數用有意義的名稱，例如 <code>IsDoorOpen</code> 而不是 <code>Bool1</code>。</li>
+      <li>每次大改完就 Compile，錯誤愈早發現愈好處理。</li>
+      <li>與時間相關的移動或旋轉，要乘上 <code>Delta Seconds</code>，速度才不會因為電腦快慢而不同。</li>
+    </ul>
+
+    <h2>10. 動手做：會自己旋轉的方塊</h2>
+    <p>目標：做一個每秒旋轉固定角度、而且每個實例都能自己調速度的方塊。</p>
+    <ol>
+      <li>在 Content Browser 按右鍵 → <strong>Blueprint Class</strong> → 選 <strong>Actor</strong>，命名為 <code>BP_RotatingCube</code>，雙擊開啟。</li>
+      <li>在 Components 按 <strong>Add</strong>，新增一個 <strong>Static Mesh</strong> 元件，到 Details 的 Static Mesh 欄位選 <code>Cube</code>。</li>
+      <li>在 My Blueprint 新增一個 <strong>Float</strong> 變數 <code>RotationSpeed</code>，勾選 <strong>Instance Editable</strong>，預設值設 <code>45</code>，代表每秒轉 45 度。</li>
+      <li>在 Event Graph 中，從 <code>Event Tick</code> 拉出白色執行線，接上 <code>Add Actor Local Rotation</code>。</li>
+      <li>把 <code>Delta Rotation</code> 展開（或拆開），在 <strong>Yaw</strong> 填入 <code>RotationSpeed × Delta Seconds</code>（用 <kbd>Ctrl</kbd> 拖入變數取值，再接乘法節點）。</li>
+      <li>按 <strong>Compile</strong>，再 <strong>Save</strong>。把 <code>BP_RotatingCube</code> 從 Content Browser 拖進關卡，按 Play 試玩。</li>
+      <li>放進第二個實例，在 Details 把它的 <code>RotationSpeed</code> 改成 <code>180</code>，觀察兩個方塊轉速不同。</li>
+    </ol>
+    <p><strong>想一想：</strong>如果不乘 <code>Delta Seconds</code>，在效能不同的電腦上旋轉速度會有什麼差別？</p>
+
+    <h2>11. 接下來</h2>
+    <p>學會變數、事件、函數與流程控制之後，可以挑戰 <a href="unrealev/">ElevatorKit 學生操作手冊</a>：用 Switch 表示電梯的狀態，用函數拆分「叫電梯、移動、到達」等行為。</p>
+
+    <div class="pager">
+      <a href="01-getting-started.html">← 上一頁：入門</a>
+      <a href="03-cheatsheet.html">下一頁：速查表 →</a>
+    </div>
+  </div>
+</body>
+</html>
