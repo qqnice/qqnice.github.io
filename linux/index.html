@@ -76,6 +76,12 @@
       border-left: 6px solid #2c3e50; 
     }
     .author-box p { margin: 10px 0 0 0; }
+    details.folder { margin: 8px 0; }
+    details.folder > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+    details.folder .cnt { font-weight: 400; color: #666; font-size: .85em; margin-left: 6px; }
+    details.folder .open { font-weight: 400; font-size: .85em; margin-left: 10px; }
+    details.folder ul { margin: 6px 0 10px; font-size: .95em; }
+    details.folder li { margin-bottom: 4px; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -101,22 +107,107 @@
     </ul>
 
     <h2>📂 QQ Linux 教學 檔案目錄</h2>
+    {% assign lp = 'linux/' %}
+    {% assign lsp = '/linux/' %}
+    {% assign l_pages = site.pages | sort: 'path' %}
+    {% assign l_files = site.static_files | sort: 'path' %}
+
     <div class="file-list-box">
+      <h3>📚 教學頁面與檔案</h3>
       <ul>
-        {% for page in site.pages %}
+        {% for page in l_pages %}
           {% assign pre = page.path | slice: 0, 6 %}
-          {% if pre == 'linux/' and page.name != 'index.html' and page.name != '404.html' %}
-            <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.name }}</a></li>
+          {% if pre == lp and page.name != 'index.html' and page.name != '404.html' %}
+            {% assign rel = page.path | remove_first: lp %}
+            {% assign parts = rel | split: '/' %}
+            {% if parts.size == 1 %}
+              <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.title | default: page.name }}</a></li>
+            {% endif %}
           {% endif %}
         {% endfor %}
 
-        {% for file in site.static_files %}
+        {% for file in l_files %}
           {% assign pre = file.path | slice: 0, 7 %}
-          {% if pre == '/linux/' %}
-            <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
+          {% if pre == lsp %}
+            {% assign rel = file.path | remove_first: lsp %}
+            {% assign parts = rel | split: '/' %}
+            {% if parts.size == 1 %}
+              <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.name }}</a></li>
+            {% endif %}
           {% endif %}
         {% endfor %}
       </ul>
+
+      <h3>📁 資料夾（點開看內容）</h3>
+      {% assign seen = '|' %}
+      {% assign folders = '' %}
+      {% for page in l_pages %}
+        {% assign pre = page.path | slice: 0, 6 %}
+        {% if pre == lp %}
+          {% assign parts = page.path | remove_first: lp | split: '/' %}
+          {% if parts.size > 1 %}
+            {% assign key = parts[0] | prepend: '|' | append: '|' %}
+            {% unless seen contains key %}
+              {% assign seen = seen | append: parts[0] | append: '|' %}
+              {% assign folders = folders | append: parts[0] | append: '|' %}
+            {% endunless %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      {% for file in l_files %}
+        {% assign pre = file.path | slice: 0, 7 %}
+        {% if pre == lsp %}
+          {% assign parts = file.path | remove_first: lsp | split: '/' %}
+          {% if parts.size > 1 %}
+            {% assign key = parts[0] | prepend: '|' | append: '|' %}
+            {% unless seen contains key %}
+              {% assign seen = seen | append: parts[0] | append: '|' %}
+              {% assign folders = folders | append: parts[0] | append: '|' %}
+            {% endunless %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      {% assign folder_names = folders | split: '|' | sort %}
+
+      {% for fname in folder_names %}
+        {% if fname == '' %}{% continue %}{% endif %}
+        {% assign fprefix = lp | append: fname | append: '/' %}
+        {% assign fplen = fprefix | size %}
+        {% assign fcount = 0 %}
+        {% assign has_index = false %}
+        {% assign idx_path = fprefix | append: 'index.html' %}
+        {% assign sidx_path = '/' | append: idx_path %}
+        {% for page in l_pages %}
+          {% assign pre = page.path | slice: 0, fplen %}
+          {% if pre == fprefix %}
+            {% assign fcount = fcount | plus: 1 %}
+            {% if page.path == idx_path %}{% assign has_index = true %}{% endif %}
+          {% endif %}
+        {% endfor %}
+        {% assign fsprefix = '/' | append: fprefix %}
+        {% assign fsplen = fsprefix | size %}
+        {% for file in l_files %}
+          {% assign pre = file.path | slice: 0, fsplen %}
+          {% if pre == fsprefix %}{% assign fcount = fcount | plus: 1 %}{% if file.path == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
+        {% endfor %}
+        <details class="folder">
+          <summary>📁 {{ fname }}/ <span class="cnt">{{ fcount }} 個檔案</span>{% if has_index %} <a class="open" href="{{ site.baseurl }}/{{ fprefix }}">開啟 ↗</a>{% endif %}</summary>
+          <ul>
+            {% for page in l_pages %}
+              {% assign pre = page.path | slice: 0, fplen %}
+              {% if pre == fprefix %}
+                <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.path | remove_first: fprefix }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% for file in l_files %}
+              {% assign pre = file.path | slice: 0, fsplen %}
+              {% if pre == fsprefix %}
+                <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.path | remove_first: fsprefix }}</a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </details>
+      {% endfor %}
     </div>
 
     <div class="author-box">
