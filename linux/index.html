@@ -76,6 +76,7 @@
       border-left: 6px solid #2c3e50; 
     }
     .author-box p { margin: 10px 0 0 0; }
+    .file-list-box .desc { display: block; font-size: .88em; color: #555; margin-top: 2px; }
     details.folder { margin: 8px 0; }
     details.folder > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
     details.folder .cnt { font-weight: 400; color: #666; font-size: .85em; margin-left: 6px; }
@@ -147,7 +148,14 @@
         {% endfor %}
       </ul>
 
-      <h3>📁 資料夾（點開看內容）</h3>
+      <h3>🔗 資料夾入口（直接開啟）</h3>
+      <ul>
+        <li>📘 <a href="week3/">week3/ → WEEK3 Docker Lab 實作工作台</a><span class="desc">入口檔：<code>index.html</code>。Docker 系統的備份、還原與主機安全的互動式操作手冊。</span></li>
+        <li>📘 <a href="week2-webstack/操作指令.html">week2-webstack/ → WEEK2 實際完成的操作指令</a><span class="desc">入口檔：<code>操作指令.md</code>。Nginx、WordPress 與兩個靜態網站的 Docker Compose 部署紀錄；其餘為 <code>compose.yml</code>、Nginx 設定與兩個範例網站。</span></li>
+        <li>📘 <a href="files/week3/檢查.html">files/week3/ → WEEK3 完成檢查表</a><span class="desc">入口檔：<code>檢查.md</code>（教師與助教核對用）。同資料夾的 <code>backup.sh</code>、<code>restore.sh</code>、<code>compose.yml</code> 是手冊中下載用的檔案。</span></li>
+      </ul>
+
+      <h3>📁 全部檔案（依資料夾展開）</h3>
       {% assign seen = '|' %}
       {% assign folders = '' %}
       {% for page in l_pages %}
