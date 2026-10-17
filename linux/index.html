@@ -128,7 +128,7 @@
 
         {% for file in l_files %}
           {% assign pre = file.path | slice: 0, 7 %}
-          {% if pre == lsp %}
+          {% if pre == lsp and file.extname != '.md' %}
             {% assign rel = file.path | remove_first: lsp %}
             {% assign parts = rel | split: '/' %}
             {% if parts.size == 1 %}
@@ -156,7 +156,7 @@
       {% endfor %}
       {% for file in l_files %}
         {% assign pre = file.path | slice: 0, 7 %}
-        {% if pre == lsp %}
+        {% if pre == lsp and file.extname != '.md' %}
           {% assign parts = file.path | remove_first: lsp | split: '/' %}
           {% if parts.size > 1 %}
             {% assign key = parts[0] | prepend: '|' | append: '|' %}
@@ -188,7 +188,7 @@
         {% assign fsplen = fsprefix | size %}
         {% for file in l_files %}
           {% assign pre = file.path | slice: 0, fsplen %}
-          {% if pre == fsprefix %}{% assign fcount = fcount | plus: 1 %}{% if file.path == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
+          {% if pre == fsprefix and file.extname != '.md' %}{% assign fcount = fcount | plus: 1 %}{% if file.path == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
         {% endfor %}
         <details class="folder">
           <summary>📁 {{ fname }}/ <span class="cnt">{{ fcount }} 個檔案</span>{% if has_index %} <a class="open" href="{{ site.baseurl }}/{{ fprefix }}">開啟 ↗</a>{% endif %}</summary>
@@ -201,7 +201,7 @@
             {% endfor %}
             {% for file in l_files %}
               {% assign pre = file.path | slice: 0, fsplen %}
-              {% if pre == fsprefix %}
+              {% if pre == fsprefix and file.extname != '.md' %}
                 <li>📄 <a href="{{ site.baseurl }}{{ file.path }}">{{ file.path | remove_first: fsprefix }}</a></li>
               {% endif %}
             {% endfor %}
