@@ -42,13 +42,21 @@ window.WORKFLOW_DATA = {
     {
       id: "prep-5",
       category: "校務與信箱權限",
-      title: "Google 表單 / 試算表權限 ＆ Gmail 連接核對",
-      desc: "確認 Google 帳號可建立 Google Form 與連結 Sheet，並核對 Gmail 工具實際連到哪一個信箱。",
+      title: "Google 表單 / 試算表權限 ＆ 核對 Gmail 連接信箱",
+      desc: "確認 Google 帳號可建立 Google Form 與連結回覆試算表（Sheet），並核對 AI 的 Gmail 連接工具實際連到哪一個 Gmail 信箱。",
       tag: "Google 生態系",
-      tip: "若學校信箱轉寄到 Gmail，僅代表可收信，不代表能以學校信箱作為 From 寄出！"
+      tip: "請先記下連接的這個 Gmail 帳號，下一步要將學校信箱轉寄過來！"
     },
     {
       id: "prep-6",
+      category: "校務與信箱權限",
+      title: "⭐ 先把「學校信箱」設定轉寄到 Gmail（並實測收件！）",
+      desc: "關鍵前置步驟！為了讓 AI（第 08 步 CollectEventResults）能自動幫你收到學校信箱的回信與成果附件，請先依學校允許的轉寄方式，把學校信箱設定自動轉寄到 Gmail，並實際寄信確認 Gmail 真的收得到！",
+      tag: "必做關鍵步驟",
+      tip: "重要觀念：轉寄到 Gmail 代表「能在 Gmail 收信」，但不代表能以學校信箱作為 From（寄件人）寄出！"
+    },
+    {
+      id: "prep-7",
       category: "瀏覽器與教材",
       title: "Chrome 官方連接入口（勿裝山寨外掛）",
       desc: "需要 Chrome 外掛操作表單或 ePortal 時，務必使用 App 提供的官方連接入口，並確認連對 Chrome 個人檔案。",
@@ -56,7 +64,7 @@ window.WORKFLOW_DATA = {
       tip: "千萬不要在商店亂裝名稱相近的第三方不明外掛！"
     },
     {
-      id: "prep-7",
+      id: "prep-8",
       category: "瀏覽器與教材",
       title: "下載課程招生版技能包 ZIP 與教材",
       desc: "從講師連結或 TronClass 取得招生版 10 個技能 ZIP 包（Notion 僅作教材記錄，非執行必要條件）。",
@@ -84,11 +92,11 @@ window.WORKFLOW_DATA = {
       trap: "建立表單前 AI 會先跟你確認使用哪個 Google 帳號，避免建在私人或錯誤帳號下。"
     },
     {
-      role: "身分 3：實際 Gmail 寄件帳號",
+      role: "身分 3：實際 Gmail 收寄件帳號（接收學校信箱轉寄）",
       icon: "📧",
       color: "amber",
-      meaning: "第 07 步寄發「行前通知」時，收件老師看到的 From 寄件信箱",
-      trap: "即使學校信箱有設轉寄到 Gmail，寄出時 From 仍是該 Gmail，送出前必展示完整帳號供你確認。"
+      meaning: "接收「學校信箱自動轉寄來信」以及第 07 步寄發「行前通知」的 Gmail 信箱",
+      trap: "務必先設定「學校信箱自動轉寄到此 Gmail」才能讓 AI 自動收信！但注意：轉寄僅代表可收信，寄出時 From 仍是此 Gmail，送出前必展示完整帳號供你確認。"
     },
     {
       role: "身分 4：活動承辦人（署名）",
@@ -103,6 +111,7 @@ window.WORKFLOW_DATA = {
   // 3. 工作區準備資料與檔案樹互動預覽 (對應手冊 2.3 & 第十五節)
   // --------------------------------------------------------------------------
   workspaceMaterials: [
+    { item: "⭐ 學校信箱設定自動轉寄至 Gmail", usage: "讓老師回傳至學校信箱的信件與成果自動進入 Gmail 供 AI 查收", fallback: "必做前置步驟！設定後請實測確認收得到信（轉寄僅供收信，寄出 From 仍為 Gmail）" },
     { item: "招生邀請信、公文或活動要約", usage: "活動事實唯一來源（時間、地點、對象）", fallback: "可先貼文字；缺項由 AI 集中向你確認，絕不自己亂編" },
     { item: "承辦人聯絡資訊", usage: "全部郵件底部署名、戰情表聯絡窗口", fallback: "第 01 步初始化時先收集並確認，之後全程沿用" },
     { item: "公文範本/", usage: "第 06 步製作 Word 上簽草稿的版型參考", fallback: "到製作公文階段再補也可以，不會擋住前面建檔與開表單！" },
@@ -227,7 +236,7 @@ window.WORKFLOW_DATA = {
       badge: "B 模式：表單完成後（第 03 步後）",
       title: "補齊雙連結 ＆ 首次發布私人戰情表",
       statusText: "🔒 已發布上線（預設 Owner-Private 僅自己可見）",
-      urlText: "https://kaohsiung-admissions-dashboard.example.chatgpt.site",
+      urlText: "https://kaohsiung-admissions-dashboard.nutcqqnice.chatgpt.site",
       when: "當第 03 步完成 Google 表單發布，且驗證「作答短網址」與「回覆 Sheet」兩個連結都可用後，立即補回原戰情表並首次發布！",
       highlights: [
         "戰情表正式具備點擊跳轉「Google 報名表」與「回覆 Sheet」的雙連結按鈕",
@@ -247,7 +256,7 @@ window.WORKFLOW_DATA = {
       badge: "C 模式：報名期間與後續追蹤（第 05~09 步）",
       title: "更新報名名單、教學單位對照 ＆ 檢核推進",
       statusText: "📊 動態追蹤中（已同步最新報名 XLSX 快照）",
-      urlText: "https://kaohsiung-admissions-dashboard.example.chatgpt.site",
+      urlText: "https://kaohsiung-admissions-dashboard.nutcqqnice.chatgpt.site",
       when: "第 05 步下載最新《報名資料最新.xlsx》後，自動將有效報名人員對應到「完整教學單位母表」，並隨進度推進 7 項行政檢核！",
       highlights: [
         "自動比對「完整教學單位母表」：清楚列出各單位報名人數、已報名單位 vs. 未報名單位（方便規劃催辦，但絕不會擅自亂寄催繳信）",
@@ -880,7 +889,7 @@ window.WORKFLOW_DATA = {
                 <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-[10px] font-bold">Draft 已建立・等待確認寄出</span>
               </div>
               <div class="space-y-1.5 text-[11px] text-slate-700">
-                <div><strong>From 實際寄件帳號：</strong><span class="font-mono-code text-blue-700">your-account@gmail.com</span></div>
+                <div><strong>From 實際寄件帳號：</strong><span class="font-mono-code text-blue-700">nutcqqnice@gmail.com</span></div>
                 <div><strong>To 已報名人員 (3位)：</strong>QQnice &lt;...&gt;, QQ2 &lt;...&gt;, QQ3 &lt;...&gt; <span class="text-slate-400">(同封 To 彼此可見)</span></div>
                 <div class="p-2 bg-slate-50 rounded border space-y-1">
                   <div class="font-bold text-slate-800">📌 信中三大明確指引：</div>
@@ -909,14 +918,14 @@ window.WORKFLOW_DATA = {
         "貼心幫你擬好給該位老師的「紙本繳交提醒信（交通證明與假單）」，讓你自由選擇寄或不寄"
       ],
       executionSteps: [
-        "【全方位搜尋回信】：先查原行前通知信串（Thread），再搜尋老師另外新開主旨寄來的回覆，完整處理分頁並交代檢查範圍。",
+        "【前置關鍵：學校信箱已轉寄至 Gmail】：因為前置作業已將學校信箱設定自動轉寄到 Gmail，不論老師是直接回覆 Gmail 行前通知信串（Thread），或另外寄回你的學校信箱，AI 都能在 Gmail 完整搜尋並交代檢查範圍。",
         "【過濾雜訊與辨識作者】：自動排除原寄出的空白範本、引述附件與簽名檔小圖；打開附件內文核對作者與報名名單。",
         "【經典代寄偵測（甲寄乙寫）】：例如寄件信箱是 `QQ2`，但 Word 成果檔案裡面寫作者是 `QQ3`！AI 會先安全保存原檔並詢問你；等你確認是「QQ2 代 QQ3 寄送」後，將成果正確歸檔給 `QQ3`，絕不盲目算在寄件人頭上！",
         "【雜湊防重與可選紙本提醒】：保存雜湊值（Hash），重跑時自動略過已收過的同一份附件；並為已交電子成果的老師準備「紙本交通證明與假單繳交提醒草稿」，由你決定是否寄出。"
       ],
       guardrails: {
-        aiDoes: "搜尋 Gmail 回信、過濾無關圖片與空白範本、比對文件內作者與寄件人、防覆蓋歸檔、準備紙本提醒信草稿。",
-        humanDoes: "當寄件人與文件內作者不同時裁定歸屬（如甲代乙寄）、決定是否寄出紙本提醒信、分開追蹤「收到電子檔 / 內容審核通過 / 紙本收訖」。",
+        aiDoes: "搜尋 Gmail 回信（含學校信箱轉寄來信）、過濾無關圖片與空白範本、比對文件內作者與寄件人、防覆蓋歸檔、準備紙本提醒信草稿。",
+        humanDoes: "確認前置作業已完成「學校信箱轉寄 Gmail」、當寄件人與文件內作者不同時裁定歸屬（如甲代乙寄）、決定是否寄出紙本提醒信。",
         neverDo: "交通證明與假單本來就是交紙本，絕不會把它們列為「電子缺件」；沒有你的要求，也絕不會自己排程亂發催交成果信！"
       },
       prompts: [
@@ -931,11 +940,12 @@ window.WORKFLOW_DATA = {
       ],
       diagramHtml: `
         <div class="bg-teal-50 p-5 rounded-xl border border-teal-200">
-          <div class="text-xs font-bold text-teal-900 mb-3">🕵️‍♂️ 智慧代寄辨識 ＆ 三軌分離追蹤機制</div>
+          <div class="text-xs font-bold text-teal-900 mb-3">🕵️‍♂️ 學校信箱轉寄 Gmail ➔ 智慧代寄辨識 ＆ 三軌分離追蹤機制</div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
             <div class="bg-white p-3.5 rounded-lg border border-teal-200 shadow-sm">
               <div class="font-bold text-teal-800 mb-1.5">1. 信箱打撈与雜訊過濾</div>
               <ul class="space-y-1 text-[11px] text-slate-600">
+                <li>📬 <strong>前置轉寄生效：</strong>學校信箱來信自動轉入 Gmail</li>
                 <li>🔎 查原通知信串 (Thread) ＋ 另開新信</li>
                 <li>🚫 自動踢除：原空白範本、簽名檔圖示</li>
                 <li>🔒 防覆蓋命名：<span class="font-mono-code text-[10px] text-teal-700">QQ3_活動成果_msg8f2_01.docx</span></li>
