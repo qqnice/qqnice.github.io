@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>考生聯絡半自動撥號｜3D 語音互動導覽劇場</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap');
+
+    :root {
+      --bg-dark: #070b14;
+      --card-dark: #0f172a;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    /* 3D 等距工作桌舞台 (Isometric 3D Stage) */
+    .stage-viewport {
+      perspective: 1400px;
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.16), transparent 60%),
+        radial-gradient(circle at 80% 75%, rgba(245, 158, 11, 0.12), transparent 55%),
+        linear-gradient(180deg, #0b1120 0%, #070b14 100%);
+    }
+
+    .iso-grid-floor {
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 36px 36px;
+      transform: rotateX(55deg) rotateZ(-12deg) scale(1.1);
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .stage-viewport:hover .iso-grid-floor {
+      transform: rotateX(52deg) rotateZ(-9deg) scale(1.12);
+    }
+
+    /* 3D 物件陰影與浮空動效 */
+    .float-slow {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+
+    /* 訊號流動動畫 */
+    .wire-flow {
+      stroke-dasharray: 10 8;
+      animation: dashFlow 0.8s linear infinite;
+    }
+    .wire-flow-reverse {
+      stroke-dasharray: 10 8;
+      animation: dashFlowRev 0.8s linear infinite;
+    }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -36; }
+    }
+    @keyframes dashFlowRev {
+      to { stroke-dashoffset: 36; }
+    }
+
+    /* 話機震動與抬起效果 */
+    .handset-ringing {
+      animation: phoneRing 0.35s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes phoneRing {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      25% { transform: rotate(-4deg) translateY(-4px); }
+      75% { transform: rotate(4deg) translateY(-4px); }
+    }
+
+    .handset-lifted {
+      transform: translate(-16px, -38px) rotate(-14deg) !important;
+    }
+
+    .handset-transition {
+      transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 聲波動畫 */
+    .sound-bar {
+      animation: soundWave 0.65s ease-in-out infinite alternate;
+    }
+    @keyframes soundWave {
+      0% { transform: scaleY(0.25); opacity: 0.5; }
+      100% { transform: scaleY(1); opacity: 1; }
+    }
+
+    /* 發光聚焦邊框 */
+    .glow-active-blue {
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.8), 0 0 35px rgba(56, 189, 248, 0.45);
+    }
+    .glow-active-amber {
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.85), 0 0 35px rgba(251, 191, 36, 0.45);
+    }
+    .glow-active-emerald {
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.85), 0 0 35px rgba(52, 211, 153, 0.45);
+    }
+    .glow-active-purple {
+      box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.85), 0 0 35px rgba(192, 132, 252, 0.45);
+    }
+
+    /* 3D 翻轉卡片效果 */
+    .card-3d {
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .card-3d:hover {
+      transform: translateY(-6px) rotateX(4deg);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-sky-500 selection:text-slate-950 min-h-screen flex flex-col">
+
+  <!-- =====================================================================
+       頂部精簡控制列：標題 ＋ 語音導覽開關 ＋ 自動劇場播放
+       ===================================================================== -->
+  <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- 品牌標題 -->
+      <div class="flex items-center gap-3">
+        <a href="../" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 transition-colors shrink-0" title="返回 AI 協助行政自動化專區">
+          ← 行政專區
+        </a>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 via-blue-600 to-indigo-600 flex items-center justify-center text-xl shadow-lg shadow-sky-500/20 shrink-0">
+          ☎️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-base sm:text-lg tracking-tight text-white">考生聯絡「半自動撥號」3D 互動劇場</h1>
+            <span class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              電腦撥號・真人對話
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">點選畫面號碼、或按右上角「語音導覽播放」，直接體驗整個桌上實體接線與通話流程</p>
+        </div>
+      </div>
+
+      <!-- 語音導覽與自動巡覽控制器 -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- 語音開關 -->
+        <button id="btn-voice-toggle" onclick="toggleVoiceEnabled()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-sky-300 transition-all">
+          <span id="voice-icon" class="text-base">🔊</span>
+          <span id="voice-label">語音導覽：開啟</span>
+        </button>
+
+        <!-- 重聽本步語音 -->
+        <button onclick="speakCurrentStep(true)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition-all" title="重聽目前步驟解說">
+          🗣️ 唸這一步
+        </button>
+
+        <!-- 全流程自動導覽 -->
+        <button id="btn-auto-tour" onclick="toggleAutoTour()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition-all">
+          <span id="tour-icon">▶️</span>
+          <span id="tour-label">一鍵語音導覽全流程</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       主視覺核心：7 步驟大圖釘導航列 (Visual Stepper)
+       ===================================================================== -->
+  <section class="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-5 pb-2">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl">
+      <div id="step-pills-container" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+        <!-- 由 JS 渲染 7 個超直覺圖示步驟按鈕 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       3D 互動主舞台：左「模擬電腦站勤表」＋ 中「3D 工位硬體與電話線」＋ 右「考生手機」
+       ===================================================================== -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 flex-1 flex flex-col gap-6">
+
+    <!-- 語音字幕與當前步驟極簡標題橫幅 -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900 border border-slate-700/80 p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div id="banner-step-badge" class="w-14 h-14 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex flex-col items-center justify-center shrink-0">
+          <span class="text-[10px] font-bold text-sky-300 uppercase tracking-wider">STEP</span>
+          <span id="banner-step-num" class="text-2xl font-black text-white leading-none">1</span>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 id="banner-step-title" class="text-xl sm:text-2xl font-black text-white tracking-tight">
+              打開名單，一鍵點選電話
+            </h2>
+            <span id="banner-step-tag" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              免按話機按鍵
+            </span>
+          </div>
+          <!-- 語音導覽即時字幕 -->
+          <div class="mt-1.5 flex items-center gap-2 text-sm sm:text-base text-amber-200 font-medium">
+            <span id="speaking-wave" class="hidden items-end gap-0.5 h-4 shrink-0">
+              <span class="w-1 h-3 bg-amber-400 rounded-full sound-bar"></span>
+              <span class="w-1 h-4 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+              <span class="w-1 h-2.5 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+            </span>
+            <p id="banner-voice-subtitle" class="leading-snug">
+              「同仁打開考生追蹤名單，直接用滑鼠點一下電話號碼，不用低頭按電話按鍵。」
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 上一步 / 下一步 大按鈕 -->
+      <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+        <button onclick="prevStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm border border-slate-700 transition-all">
+          ◀ 上一步
+        </button>
+        <button onclick="nextStep()" class="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-sky-500/20 transition-all">
+          下一步 ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- =================================================================
+         核心 3D 視覺劇場區 (12 欄設計：左 4 欄電腦螢幕操作、右 8 欄 3D 實體桌面與線路舞台)
+         ================================================================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+      <!-- ===============================================================
+           左欄 (4/12)：同仁電腦上的「站勤表／考生追蹤名單」真實可點選模擬器
+           =============================================================== -->
+      <div id="panel-pc-screen" class="lg:col-span-5 bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden transition-all duration-500">
+        <!-- 模擬視窗頂欄 -->
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="ml-2 text-xs font-bold text-slate-300">🖥️ 同仁電腦畫面｜考生聯絡站勤表</span>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-mono">Localhost: COM3</span>
+          </div>
+
+          <!-- 互動提示小條 -->
+          <div class="mb-3 px-3 py-2 rounded-xl bg-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
+            <span class="text-sky-200 font-bold">👇 直接點選下方任一考生電話，實測不同結果：</span>
+            <span class="text-[11px] text-amber-300 font-bold">可互動點擊</span>
+          </div>
+
+          <!-- 考生名單列表 -->
+          <div id="candidate-list" class="space-y-2.5">
+            <!-- JS 動態渲染 3 位考生（1.正常接通、2.忙線自動記錄、3.待聯絡） -->
+          </div>
+        </div>
+
+        <!-- 電腦即時狀態燈箱 / 彈出提示區 -->
+        <div class="mt-4 pt-3 border-t border-slate-800/90">
+          <div id="pc-status-toast" class="rounded-2xl p-3.5 bg-slate-950 border border-slate-800 transition-all duration-300">
+            <!-- 狀態顯示與第 7 步「點選通話結果」按鈕區 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ===============================================================
+           右欄 (8/12)：3D 立體工位硬體＆電話線路＆考生手機全景舞台
+           =============================================================== -->
+      <div class="lg:col-span-7 stage-viewport rounded-3xl border-2 border-slate-800 p-4 sm:p-6 flex flex-col justify-between min-h-[490px] overflow-hidden select-none">
+
+        <!-- 舞台頂部：圖例與硬體接線說明標籤 -->
+        <div class="relative z-20 flex flex-wrap items-center justify-between gap-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-bold text-slate-300">
+            <span>🔌 實體接線架構：</span>
+            <span class="text-sky-400">電腦</span>
+            <span>➔</span>
+            <span class="text-amber-400">Modem</span>
+            <span>＋</span>
+            <span class="text-emerald-400">桌機話機（並接同條學校電話線）</span>
+          </div>
+
+          <!-- 情境快捷切換：體驗「接通」vs「忙線自動記」 -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="simulateQuickScenario('answered')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 text-xs font-bold transition-all">
+              ✨ 模擬：對方接聽
+            </button>
+            <button onclick="simulateQuickScenario('busy')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-300 text-xs font-bold transition-all">
+              ⚡ 模擬：忙線自動登記
+            </button>
+          </div>
+        </div>
+
+        <!-- =============================================================
+             3D 等距透視 SVG 互動大場景 (Isometric 3D Hardware & Wire Stage)
+             ============================================================= -->
+        <div class="relative z-10 my-auto py-2 flex items-center justify-center">
+          <svg id="iso-stage-svg" viewBox="0 0 860 430" class="w-full h-auto max-h-[410px] drop-shadow-2xl">
+            <defs>
+              <!-- 3D 桌面漸層 -->
+              <linearGradient id="deskTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e293b" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+              <linearGradient id="deskSideGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#090d16" />
+                <stop offset="100%" stop-color="#1e293b" />
+              </linearGradient>
+              <!-- 電腦螢幕發光 -->
+              <linearGradient id="screenGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" />
+                <stop offset="100%" stop-color="#0f172a" />
+              </linearGradient>
+              <!-- 發光濾鏡 -->
+              <filter id="neonGlow" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- =========================================================
+                 1. 3D 辦公桌底座 (Isometric Desk Platform)
+                 ========================================================= -->
+            <g id="desk-3d">
+              <!-- 桌面厚度陰影 -->
+              <polygon points="35,255 470,95 660,210 225,375" fill="#020617" opacity="0.7" transform="translate(0, 18)" />
+              <!-- 桌面左側厚度 -->
+              <polygon points="35,255 225,375 225,390 35,270" fill="#0f172a" stroke="#334155" stroke-width="1" />
+              <!-- 桌面右側厚度 -->
+              <polygon points="225,375 660,210 660,225 225,390" fill="#1e293b" stroke="#334155" stroke-width="1" />
+              <!-- 桌面頂面 (等距菱形) -->
+              <polygon points="35,255 470,95 660,210 225,375" fill="url(#deskTopGrad)" stroke="#475569" stroke-width="2" />
+
+              <!-- 桌面格線裝飾 -->
+              <line x1="145" y1="215" x2="335" y2="333" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+              <line x1="275" y1="167" x2="465" y2="284" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+              <line x1="395" y1="122" x2="585" y2="238" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+
+              <!-- 桌面標牌 -->
+              <text x="195" y="348" fill="#94a3b8" font-size="12" font-weight="700" transform="rotate(-20 195,348)">
+                🏫 學校行政同仁工位（本地端零月租架構）
+              </text>
+            </g>
+
+            <!-- =========================================================
+                 2. 實體連接線路層 (Wires & Signal Animation)
+                 ========================================================= -->
+            <g id="wires-layer">
+              <!-- (A) USB / 序列埠線：電腦 (165,220) ➔ Modem (335,195) -->
+              <path d="M 185 215 Q 255 180 325 195" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+              <path id="wire-serial" d="M 185 215 Q 255 180 325 195" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+              <rect x="215" y="168" width="94" height="20" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+              <text x="262" y="182" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="700">序列埠 AT 指令</text>
+
+              <!-- (B) 電話分接盒 (Splitter Junction)：(445, 225) -->
+              <!-- Modem 到分接盒 -->
+              <path d="M 380 205 Q 415 210 445 225" fill="none" stroke="#475569" stroke-width="5" stroke-linecap="round" />
+              <path id="wire-modem-line" d="M 380 205 Q 415 210 445 225" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+
+              <!-- 實體話機 (290, 295) 並接到分接盒 (445, 225) -->
+              <path d="M 325 290 Q 395 275 445 225" fill="none" stroke="#475569" stroke-width="5" stroke-linecap="round" />
+              <path id="wire-phone-parallel" d="M 325 290 Q 395 275 445 225" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+              <rect x="345" y="256" width="88" height="20" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1" />
+              <text x="389" y="270" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="700">並接同條電話線</text>
+
+              <!-- 分接盒本體 (RJ11 一分二盒) -->
+              <g transform="translate(433, 213)">
+                <polygon points="0,10 14,3 28,10 14,17" fill="#cbd5e1" />
+                <polygon points="0,10 14,17 14,25 0,18" fill="#64748b" />
+                <polygon points="14,17 28,10 28,18 14,25" fill="#94a3b8" />
+              </g>
+
+              <!-- (C) 學校既有電話外線：分接盒 (458, 225) ➔ 牆壁電話孔 (555, 165) ➔ 考生手機 (730, 195) -->
+              <path d="M 458 225 Q 510 195 555 165 T 700 190" fill="none" stroke="#475569" stroke-width="6" stroke-linecap="round" />
+              <path id="wire-pstn" d="M 458 225 Q 510 195 555 165 T 700 190" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+
+              <!-- 牆上學校電話孔標示 -->
+              <g transform="translate(530, 128)">
+                <rect x="0" y="0" width="96" height="36" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5" />
+                <text x="48" y="15" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="900">🏫 學校既有市話線</text>
+                <text x="48" y="29" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="700">04-2219-XXXX</text>
+              </g>
+            </g>
+
+            <!-- =========================================================
+                 3. 工位硬體一：3D 桌上型電腦 (PC Monitor & Base)
+                 ========================================================= -->
+            <g id="node-pc" class="cursor-pointer" onclick="goToStep(1)" transform="translate(82, 115)">
+              <!-- 發光底盤 -->
+              <ellipse id="pc-halo" cx="75" cy="112" rx="62" ry="26" fill="#38bdf8" opacity="0.15" filter="url(#neonGlow)" />
+              <!-- 螢幕支架 3D -->
+              <polygon points="60,95 90,82 102,92 72,105" fill="#64748b" />
+              <polygon points="70,68 82,63 82,92 70,97" fill="#475569" />
+              <!-- 3D 螢幕外框 -->
+              <polygon points="10,20 120,-22 126,-18 16,24" fill="#94a3b8" />
+              <polygon points="16,24 126,-18 126,55 16,97" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5" />
+              <polygon points="10,20 16,24 16,97 10,93" fill="#334155" />
+              <!-- 螢幕內容 -->
+              <polygon points="22,28 120,-10 120,48 22,86" fill="url(#screenGlow)" />
+              <!-- 螢幕內微縮表格線條 -->
+              <line x1="30" y1="36" x2="110" y2="5" stroke="#bae6fd" stroke-width="3" />
+              <line x1="30" y1="50" x2="95" y2="25" stroke="#7dd3fc" stroke-width="2.5" />
+              <line x1="30" y1="64" x2="105" y2="35" stroke="#38bdf8" stroke-width="2.5" />
+              <!-- 標籤 -->
+              <g transform="translate(18, 108)">
+                <rect x="0" y="0" width="110" height="24" rx="12" fill="#0284c7" />
+                <text x="55" y="16" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">① 電腦（名單/TTS）</text>
+              </g>
+            </g>
+
+            <!-- =========================================================
+                 4. 工位硬體二：3D 語音數據機 (56K Voice Modem)
+                 ========================================================= -->
+            <g id="node-modem" class="cursor-pointer" onclick="goToStep(3)" transform="translate(310, 145)">
+              <!-- 發光底盤 -->
+              <ellipse id="modem-halo" cx="52" cy="56" rx="54" ry="24" fill="#fbbf24" opacity="0.08" filter="url(#neonGlow)" />
+              <!-- 3D 機殼頂面 -->
+              <polygon points="5,35 55,15 98,38 48,58" fill="#334155" stroke="#94a3b8" stroke-width="1.5" />
+              <!-- 3D 機殼左側 -->
+              <polygon points="5,35 48,58 48,74 5,51" fill="#0f172a" stroke="#64748b" stroke-width="1.5" />
+              <!-- 3D 機殼右側 (前面板含 LED 燈) -->
+              <polygon points="48,58 98,38 98,54 48,74" fill="#1e293b" stroke="#64748b" stroke-width="1.5" />
+              <!-- Modem 狀態 LED 燈號 (PWR, TX, RX, OH 摘機燈) -->
+              <circle cx="58" cy="63" r="3" fill="#22c55e" />
+              <circle id="led-tx" cx="68" cy="59" r="3" fill="#475569" />
+              <circle id="led-rx" cx="78" cy="55" r="3" fill="#475569" />
+              <circle id="led-oh" cx="88" cy="51" r="3.5" fill="#475569" />
+              <!-- 機殼上印字 -->
+              <text x="35" y="40" fill="#f8fafc" font-size="9" font-weight="900" transform="rotate(-20 35,40)">VOICE MODEM</text>
+
+              <!-- 浮空指令氣泡 (ATDT / TTS / ATH0) -->
+              <g id="modem-bubble" transform="translate(-12, -32)">
+                <rect id="modem-bubble-bg" x="0" y="0" width="128" height="28" rx="8" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5" />
+                <text id="modem-bubble-text" x="64" y="18" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="900" font-family="monospace">
+                  待命 Ready
+                </text>
+              </g>
+
+              <!-- 標籤 -->
+              <g transform="translate(-2, 80)">
+                <rect x="0" y="0" width="110" height="24" rx="12" fill="#d97706" />
+                <text x="55" y="16" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">② 語音 Modem</text>
+              </g>
+            </g>
+
+            <!-- =========================================================
+                 5. 工位硬體三：3D 實體桌上話機＋可拿起聽筒＋真人同仁
+                 ========================================================= -->
+            <g id="node-phone" class="cursor-pointer" onclick="goToStep(6)" transform="translate(215, 245)">
+              <!-- 發光底盤 -->
+              <ellipse id="phone-halo" cx="65" cy="58" rx="64" ry="28" fill="#10b981" opacity="0.08" filter="url(#neonGlow)" />
+
+              <!-- 話機底座 3D -->
+              <polygon points="10,45 68,20 118,48 60,75" fill="#1e293b" stroke="#64748b" stroke-width="1.5" />
+              <polygon points="10,45 60,75 60,88 10,58" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+              <polygon points="60,75 118,48 118,61 60,88" fill="#334155" stroke="#475569" stroke-width="1.5" />
+
+              <!-- 話機小液晶螢幕 -->
+              <polygon points="52,32 88,17 96,23 60,38" fill="#065f46" stroke="#34d399" stroke-width="1" />
+
+              <!-- 3D 數字按鍵陣列 (免手按！) -->
+              <g fill="#94a3b8" opacity="0.85">
+                <circle cx="58" cy="48" r="2.5" /><circle cx="68" cy="44" r="2.5" /><circle cx="78" cy="40" r="2.5" />
+                <circle cx="65" cy="53" r="2.5" /><circle cx="75" cy="49" r="2.5" /><circle cx="85" cy="45" r="2.5" />
+                <circle cx="72" cy="58" r="2.5" /><circle cx="82" cy="54" r="2.5" /><circle cx="92" cy="50" r="2.5" />
+              </g>
+
+              <!-- 可分離抬起的 3D 話機聽筒 (Handset) -->
+              <g id="phone-handset" class="handset-transition">
+                <!-- 聽筒陰影 -->
+                <polygon points="18,36 48,22 62,30 32,44" fill="#020617" opacity="0.45" transform="translate(0,8)" />
+                <!-- 聽筒本體 3D -->
+                <path d="M 16,38 C 14,30 45,16 56,22 L 66,28 C 55,24 28,36 26,44 Z" fill="#10b981" stroke="#a7f3d0" stroke-width="1.5" />
+                <ellipse cx="22" cy="40" rx="9" ry="5" fill="#059669" stroke="#a7f3d0" stroke-width="1.5" />
+                <ellipse cx="58" cy="25" rx="9" ry="5" fill="#059669" stroke="#a7f3d0" stroke-width="1.5" />
+              </g>
+
+              <!-- 同仁真人頭像徽章 (Step 6 亮起對話) -->
+              <g id="staff-avatar" transform="translate(-48, -18)" class="opacity-60 transition-opacity duration-500">
+                <circle cx="28" cy="28" r="24" fill="#0f172a" stroke="#10b981" stroke-width="2.5" />
+                <text x="28" y="36" text-anchor="middle" font-size="24">👩‍💼</text>
+                <rect x="-6" y="46" width="68" height="18" rx="9" fill="#065f46" />
+                <text x="28" y="58" text-anchor="middle" fill="#ecfdf5" font-size="9" font-weight="900">同仁真人接手</text>
+              </g>
+
+              <!-- 標籤 -->
+              <g transform="translate(10, 95)">
+                <rect x="0" y="0" width="115" height="24" rx="12" fill="#059669" />
+                <text x="57" y="16" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">③ 並接實體話機</text>
+              </g>
+            </g>
+
+            <!-- =========================================================
+                 6. 遠端：考生手上的智慧型手機 (3D Candidate Smartphone)
+                 ========================================================= -->
+            <g id="node-student" class="cursor-pointer" onclick="goToStep(5)" transform="translate(675, 78)">
+              <!-- 發光底盤 -->
+              <ellipse id="student-halo" cx="75" cy="145" rx="68" ry="32" fill="#a855f7" opacity="0.12" filter="url(#neonGlow)" />
+
+              <!-- 3D 手機外框與厚度 -->
+              <g id="student-phone-body" class="handset-transition">
+                <rect x="24" y="16" width="106" height="190" rx="18" fill="#020617" transform="translate(6, 8)" opacity="0.6" />
+                <rect x="24" y="16" width="106" height="190" rx="18" fill="#1e293b" stroke="#94a3b8" stroke-width="2.5" />
+                <rect x="29" y="22" width="96" height="178" rx="14" fill="#090d16" />
+                <!-- 動態島聽筒 -->
+                <rect x="62" y="27" width="30" height="6" rx="3" fill="#334155" />
+
+                <!-- 來電顯示バッジ (重點 2：顯示學校正式市話，絕非境外陌生號碼) -->
+                <rect x="35" y="42" width="84" height="44" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1" />
+                <text x="77" y="56" text-anchor="middle" fill="#a5b4fc" font-size="8.5" font-weight="700">來電顯示 (高信任度)</text>
+                <text x="77" y="70" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="900">國立臺中科技大學</text>
+                <text x="77" y="81" text-anchor="middle" fill="#38bdf8" font-size="8.5" font-family="monospace">04-2219-XXXX</text>
+
+                <!-- 考生手機中間動態狀態區 -->
+                <circle id="student-screen-circle" cx="77" cy="118" r="22" fill="#1e293b" stroke="#475569" stroke-width="2" />
+                <text id="student-screen-icon" x="77" y="126" text-anchor="middle" font-size="22">📱</text>
+
+                <text id="student-screen-status" x="77" y="156" text-anchor="middle" fill="#e2e8f0" font-size="10.5" font-weight="900">
+                  考生手機待命中
+                </text>
+                <text id="student-screen-sub" x="77" y="170" text-anchor="middle" fill="#94a3b8" font-size="8.5">
+                  顯示學校代表號，安心接聽
+                </text>
+              </g>
+
+              <!-- 標籤 -->
+              <g transform="translate(20, 218)">
+                <rect x="0" y="0" width="114" height="24" rx="12" fill="#7c3aed" />
+                <text x="57" y="16" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">④ 考生手機</text>
+              </g>
+            </g>
+
+            <!-- =========================================================
+                 7. 舞台中央浮空「語音對話泡泡」(Step 5 TTS / Step 6 真人對話)
+                 ========================================================= -->
+            <g id="stage-speech-overlay" class="hidden" transform="translate(275, 18)">
+              <rect id="speech-box-bg" x="0" y="0" width="375" height="66" rx="16" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+              <text id="speech-box-badge" x="16" y="23" fill="#38bdf8" font-size="11" font-weight="900">
+                🤖 電腦自動播放 TTS 開場白（爭取緩衝時間）：
+              </text>
+              <text id="speech-box-line1" x="16" y="42" fill="#f8fafc" font-size="11.5" font-weight="700">
+                「您好，這裡是國立臺中科技大學，關於您報考相關事項，
+              </text>
+              <text id="speech-box-line2" x="16" y="58" fill="#fde68a" font-size="11.5" font-weight="700">
+                　我們的同仁要跟您說明一下，請稍候。」
+              </text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 舞台底部：3 個硬體分工即時狀態列 (電腦 / Modem / 實體話機) -->
+        <div class="relative z-20 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-800/80">
+          <div id="hw-card-pc" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">🖥️</span>
+            <div>
+              <div class="text-[11px] text-sky-400 font-bold">工位電腦 (PC)</div>
+              <div id="hw-state-pc" class="text-xs font-black text-white">顯示可點擊電話名單</div>
+            </div>
+          </div>
+          <div id="hw-card-modem" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">📟</span>
+            <div>
+              <div class="text-[11px] text-amber-400 font-bold">語音數據機 (Modem)</div>
+              <div id="hw-state-modem" class="text-xs font-black text-white">COM 埠待命中</div>
+            </div>
+          </div>
+          <div id="hw-card-phone" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">☎️</span>
+            <div>
+              <div class="text-[11px] text-emerald-400 font-bold">並接話機 (同仁真人)</div>
+              <div id="hw-state-phone" class="text-xs font-black text-white">聽筒掛上（免按號碼）</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================================================================
+         下半部：三大核心設計重點（少字、純視覺圖解卡 + 語音點讀）
+         ================================================================= -->
+    <section class="pt-2 pb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2 h-6 rounded-full bg-amber-400"></span>
+          <h3 class="text-lg sm:text-xl font-black text-white">為什麼走「本地 Modem 並接話機」？三大設計亮點</h3>
+        </div>
+        <span class="text-xs text-slate-400">點擊卡片可聽語音解說 🔊</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <!-- 重點 1：電腦只做三件事，零 AI 幻覺 -->
+        <div onclick="speakHighlight(0)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/40 border border-slate-800 hover:border-sky-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                設計重點 01
+              </span>
+              <span class="text-xs text-sky-400 font-bold">🔊 點擊聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-3">電腦只做 3 件事，零 AI 講錯話風險</h4>
+
+            <!-- 視覺三宮格：只做 vs 不做 -->
+            <div class="grid grid-cols-3 gap-2 my-3 text-center">
+              <div class="p-2.5 rounded-2xl bg-sky-500/15 border border-sky-500/30">
+                <div class="text-2xl mb-1">⚡</div>
+                <div class="text-xs font-black text-sky-200">1. 自動撥號</div>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-sky-500/15 border border-sky-500/30">
+                <div class="text-2xl mb-1">📢</div>
+                <div class="text-xs font-black text-sky-200">2. 播開場白</div>
+              </div>
+              <div class="p-2.5 rounded-2xl bg-sky-500/15 border border-sky-500/30">
+                <div class="text-2xl mb-1">📝</div>
+                <div class="text-xs font-black text-sky-200">3. 記錄結果</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-rose-300 font-bold">🚫 不錄音 · 🚫 不語音辨識 · 🚫 不代聊</span>
+            <span class="text-emerald-300 font-black">100% 真人溫度</span>
+          </div>
+        </div>
+
+        <!-- 重點 2：學校原號碼來電顯示，高接聽率 -->
+        <div onclick="speakHighlight(1)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 hover:border-emerald-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                設計重點 02
+              </span>
+              <span class="text-xs text-emerald-400 font-bold">🔊 點擊聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-3">來電顯示「學校原號碼」，考生安心接</h4>
+
+            <!-- 視覺對比：本地路線 vs 雲端 ISP -->
+            <div class="grid grid-cols-2 gap-2.5 my-3">
+              <div class="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40">
+                <div class="text-[11px] font-bold text-emerald-300 mb-1">✅ 本校電話線直撥</div>
+                <div class="text-sm font-black text-white font-mono">04-2219-XXXX</div>
+                <div class="text-[11px] text-emerald-200 mt-1">顯示學校代表號，信任感 100%</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/25 opacity-75">
+                <div class="text-[11px] font-bold text-rose-300 mb-1">❌ 雲端 Twilio 路線</div>
+                <div class="text-sm font-black text-slate-300 font-mono">+1 (855) XXX</div>
+                <div class="text-[11px] text-rose-200 mt-1">美國/境外號碼，易被當詐騙拒接</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-300">與同仁手撥完全相同號碼</span>
+            <span class="text-emerald-300 font-black">接聽率最高 📈</span>
+          </div>
+        </div>
+
+        <!-- 重點 3：免雲端通話費，只需一台 Modem 硬體錢 -->
+        <div onclick="speakHighlight(2)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 hover:border-amber-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                設計重點 03
+              </span>
+              <span class="text-xs text-amber-400 font-bold">🔊 點擊聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-3">免付雲端每分鐘月租，僅需 Modem 硬體</h4>
+
+            <!-- 視覺成本圖表 -->
+            <div class="grid grid-cols-2 gap-2.5 my-3">
+              <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-center">
+                <div class="text-2xl mb-0.5">📟</div>
+                <div class="text-xs font-black text-amber-200">一次性 USB Modem</div>
+                <div class="text-[11px] text-slate-300 mt-0.5">插上既有學校電話線即用</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-slate-800/80 border border-slate-700 text-center">
+                <div class="text-2xl mb-0.5">💰</div>
+                <div class="text-xs font-black text-emerald-300">ISP 雲端通話費 $0</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">無須儲值美金、無平台月租</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-300">沿用校內既有總機線路</span>
+            <span class="text-amber-300 font-black">極致省錢・即插即用 ⚡</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       互動邏輯、Web Audio 音效合成器、與 Web Speech 語音導覽引擎
+       ===================================================================== -->
+  <script>
+    // ---------------------------------------------------------------------
+    // 1. 7 個場景步驟資料（少字、重視覺、附帶自然中文導覽口白）
+    // ---------------------------------------------------------------------
+    const STEPS = [
+      {
+        step: 1,
+        icon: '📋',
+        shortTitle: '打開名單',
+        title: '打開站勤表，名單電話直接點',
+        tag: 'Step 1｜準備聯絡',
+        voiceText: '第一步：同仁打開電腦上的考生追蹤名單，姓名、電話、狀態一目了然，電話號碼可以直接用滑鼠點擊。',
+        pcState: '顯示可點擊考生名單',
+        modemState: '序列埠待命中 (Idle)',
+        phoneState: '話機掛上待命',
+        modemCmd: 'READY (COM3)'
+      },
+      {
+        step: 2,
+        icon: '🖱️',
+        shortTitle: '點擊號碼',
+        title: '滑鼠點一下電話號碼，免按話機按鍵',
+        tag: 'Step 2｜一鍵觸發',
+        voiceText: '第二步：同仁直接用滑鼠點一下考生的電話號碼。完全不用低頭去按桌上話機的數字鍵，也不怕按錯號碼！',
+        pcState: '送出號碼 0912-345-678',
+        modemState: '收到電腦撥號請求',
+        phoneState: '不用碰話機按鍵！',
+        modemCmd: '收到號碼 -> 準備撥號'
+      },
+      {
+        step: 3,
+        icon: '📟',
+        shortTitle: 'AT自動撥號',
+        title: '電腦下 AT 指令，Modem 走電話線撥出',
+        tag: 'Step 3｜硬體自動撥接',
+        voiceText: '第三步：電腦小程式透過序列埠，對 Modem 下達 ATDT 撥號指令，Modem 直接走學校電話線把電話撥出去。',
+        pcState: '傳送 ATZ / ATDT 指令',
+        modemState: '摘機並送出雙音多頻撥號音',
+        phoneState: '並接同線，維持掛上',
+        modemCmd: 'ATDT 0912345678'
+      },
+      {
+        step: 4,
+        icon: '📡',
+        shortTitle: '狀態與忙線判斷',
+        title: '畫面顯示響鈴；若忙線或無人接，系統自動記一筆',
+        tag: 'Step 4｜智慧判斷回應碼',
+        voiceText: '第四步：等待接通時，畫面會顯示撥號中、響鈴中。如果遇到忙線或沒人接，Modem 會自動判斷並在名單記一筆「忙線待重撥」，同仁直接跳下一位！',
+        pcState: '監聽回應碼 (RING / BUSY)',
+        modemState: '偵測線路響鈴或忙線訊號',
+        phoneState: '等待對方接聽中',
+        modemCmd: 'RINGING... (偵測狀態)'
+      },
+      {
+        step: 5,
+        icon: '🤖',
+        shortTitle: 'TTS開場白',
+        title: '對方接聽！電腦先播 TTS 開場白表明身分',
+        tag: 'Step 5｜爭取黃金幾秒鐘',
+        voiceText: '第五步：考生接起電話！電腦立刻播放罐頭語音：「您好，這裡是國立臺中科技大學，關於您報考的相關事項，我們的同仁要跟您說明一下，請稍候。」讓考生知道是學校打來的，不會馬上掛斷。',
+        pcState: '播放臺中科大開場白音訊',
+        modemState: '將 TTS 語音注入電話線',
+        phoneState: '畫面提示：請拿起話機！',
+        modemCmd: '🔊 播放 TTS 開場白'
+      },
+      {
+        step: 6,
+        icon: '👩‍💼',
+        shortTitle: '拿起話機接手',
+        title: '同仁拿起話機無縫接手，Modem 自動掛斷讓出線路',
+        tag: 'Step 6｜真人溫暖對話',
+        voiceText: '第六步：畫面跳出「已接通，請拿起話機」。同仁拿起旁邊的實體話機，Modem 這時自動掛斷讓出線路，通話不會斷，接下來就像平常打電話一樣自然聊天！',
+        pcState: '顯示：通話中（真人接手）',
+        modemState: 'ATH0 掛斷讓出電話線',
+        phoneState: '已拿起聽筒！真人正常對話',
+        modemCmd: 'ATH0 (讓出線路)'
+      },
+      {
+        step: 7,
+        icon: '✅',
+        shortTitle: '掛斷點選結果',
+        title: '講完掛上話機，一鍵點選結果，繼續下一位',
+        tag: 'Step 7｜快速完成歸檔',
+        voiceText: '第七步：講完電話掛上話機，同仁只要在畫面上點一下這通的結果，像是「已聯絡」或「需再追蹤」，就能馬上點下一支號碼，輕鬆又不會漏記！',
+        pcState: '點選結果標籤，自動存檔',
+        modemState: '回到待命狀態',
+        phoneState: '掛回聽筒，完成通話',
+        modemCmd: 'IDLE (待命)'
+      }
+    ];
+
+    // 三大重點語音口白
+    const HIGHLIGHT_VOICES = [
+      '設計重點一：電腦只負責撥號、播開場白、跟記結果這三件事。它不錄音、不辨識、也不代替人聊天，所以完全沒有 AI 講錯話的問題！',
+      '設計重點二：因為走學校原本的電話線，考生手機看到的來電顯示就是學校代表號，不會像雲端電話顯示奇怪的美國號碼，接聽率跟信任感最高！',
+      '設計重點三：不用付雲端平台每分鐘的通話費，沿用學校既有的電話線，每個座位只需要一台幾百塊的 USB Modem 硬體就能搞定！'
+    ];
+
+    // 模擬考生名單資料
+    const CANDIDATES = [
+      {
+        id: 'c1',
+        name: '林同學',
+        dept: '資訊管理系',
+        phone: '0912-345-678',
+        mode: 'answered', // 模擬正常接通全流程
+        statusText: '待聯絡',
+        statusColor: 'slate',
+        note: '點電話體驗「接通＋TTS＋拿起話機」'
+      },
+      {
+        id: 'c2',
+        name: '陳同學',
+        dept: '商業設計系',
+        phone: '0933-888-168',
+        mode: 'busy', // 模擬忙線自動記錄
+        statusText: '10:20 忙線，待重撥',
+        statusColor: 'amber',
+        note: '點電話體驗「Modem 偵測忙線自動登記」'
+      },
+      {
+        id: 'c3',
+        name: '張同學',
+        dept: '應用英語系',
+        phone: '0955-123-999',
+        mode: 'answered',
+        statusText: '待聯絡',
+        statusColor: 'slate',
+        note: '備取名單追蹤'
+      }
+    ];
+
+    // 狀態管理
+    let currentStep = 1;
+    let selectedCandidateId = 'c1';
+    let lastSimMode = 'answered'; // 'answered' | 'busy'
+    let voiceEnabled = true;
+    let isAutoTouring = false;
+    let autoTourTimer = null;
+    let audioCtx = null;
+
+    // ---------------------------------------------------------------------
+    // 2. Web Audio API 擬真電話音效合成器 (撥號音 DTMF / 響鈴音 / 忙線音)
+    // ---------------------------------------------------------------------
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // 播放快速雙音多頻 (DTMF) 撥號音效
+    function playDtmfSequence() {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const freqs = [
+        [697, 1209], [770, 1336], [852, 1477],
+        [697, 1336], [770, 1209], [852, 1336], [941, 1336]
+      ];
+      freqs.forEach((pair, idx) => {
+        const start = ctx.currentTime + idx * 0.075;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.frequency.value = pair[0];
+        osc2.frequency.value = pair[1];
+        gain.gain.setValueAtTime(0.06, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.06);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(start);
+        osc2.start(start);
+        osc1.stop(start + 0.065);
+        osc2.stop(start + 0.065);
+      });
+    }
+
+    // 播放電話回鈴音或忙線音
+    function playLineTone(type = 'ring') {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      if (type === 'busy') {
+        // 忙線音：480+620Hz 嘟-嘟-嘟
+        for (let i = 0; i < 3; i++) {
+          const start = ctx.currentTime + i * 0.28;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.value = 480;
+          gain.gain.setValueAtTime(0.08, start);
+          gain.gain.setValueAtTime(0.001, start + 0.16);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.17);
+        }
+      } else {
+        // 響鈴音：440+480Hz 長響
+        const start = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.frequency.value = 440;
+        osc2.frequency.value = 480;
+        gain.gain.setValueAtTime(0.06, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.65);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(start);
+        osc2.start(start);
+        osc1.stop(start + 0.66);
+        osc2.stop(start + 0.66);
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 3. Web Speech API 中文語音導覽與 TTS 模擬引擎
+    // ---------------------------------------------------------------------
+    function getBestChineseVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      return (
+        voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Meijia') || v.name.includes('Google') || v.name.includes('Microsoft'))) ||
+        voices.find(v => v.lang === 'zh-TW') ||
+        voices.find(v => v.lang.startsWith('zh')) ||
+        null
+      );
+    }
+
+    function setSpeakingIndicator(active) {
+      const wave = document.getElementById('speaking-wave');
+      if (!wave) return;
+      if (active) {
+        wave.classList.remove('hidden');
+        wave.classList.add(' inline-flex');
+      } else {
+        wave.classList.add('hidden');
+        wave.classList.remove('inline-flex');
+      }
+    }
+
+    function speakText(text, onEndCallback = null, rate = 1.06, pitch = 1.0) {
+      if (!('speechSynthesis' in window)) {
+        if (onEndCallback) setTimeout(onEndCallback, 2800);
+        return;
+      }
+      window.speechSynthesis.cancel();
+
+      if (!voiceEnabled) {
+        setSpeakingIndicator(false);
+        if (onEndCallback) setTimeout(onEndCallback, 2600);
+        return;
+      }
+
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = getBestChineseVoice();
+      if (voice) utter.voice = voice;
+      utter.lang = 'zh-TW';
+      utter.rate = rate;
+      utter.pitch = pitch;
+
+      utter.onstart = () => setSpeakingIndicator(true);
+      utter.onend = () => {
+        setSpeakingIndicator(false);
+        if (onEndCallback) onEndCallback();
+      };
+      utter.onerror = () => {
+        setSpeakingIndicator(false);
+        if (onEndCallback) onEndCallback();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakCurrentStep(force = false) {
+      const stepObj = STEPS[currentStep - 1];
+      if (!stepObj) return;
+      if (force && !voiceEnabled) {
+        voiceEnabled = true;
+        updateVoiceToggleUI();
+      }
+      speakText(stepObj.voiceText);
+    }
+
+    function speakHighlight(index) {
+      const text = HIGHLIGHT_VOICES[index];
+      if (!text) return;
+      if (!voiceEnabled) {
+        voiceEnabled = true;
+        updateVoiceToggleUI();
+      }
+      document.getElementById('banner-voice-subtitle').textContent = `「${text}」`;
+      speakText(text);
+    }
+
+    function toggleVoiceEnabled() {
+      voiceEnabled = !voiceEnabled;
+      updateVoiceToggleUI();
+      if (!voiceEnabled && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        setSpeakingIndicator(false);
+      } else {
+        speakCurrentStep(false);
+      }
+    }
+
+    function updateVoiceToggleUI() {
+      const icon = document.getElementById('voice-icon');
+      const label = document.getElementById('voice-label');
+      const btn = document.getElementById('btn-voice-toggle');
+      if (voiceEnabled) {
+        icon.textContent = '🔊';
+        label.textContent = '語音導覽：開啟';
+        btn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-xs font-bold text-sky-300 transition-all';
+      } else {
+        icon.textContent = '🔇';
+        label.textContent = '語音導覽：靜音';
+        btn.className = 'flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-400 transition-all';
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 4. 渲染頂部 7 步驟進度膠囊、左側考生名單、與電腦狀態卡
+    // ---------------------------------------------------------------------
+    function renderStepPills() {
+      const container = document.getElementById('step-pills-container');
+      container.innerHTML = STEPS.map(s => {
+        const isActive = s.step === currentStep;
+        const isPast = s.step < currentStep;
+        return `
+          <button
+            onclick="goToStep(${s.step})"
+            class="group relative flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5 p-2 sm:px-3 sm:py-2.5 rounded-xl border text-left transition-all ${
+              isActive
+                ? 'bg-sky-500 text-slate-950 border-sky-300 shadow-lg shadow-sky-500/25 scale-[1.02]'
+                : isPast
+                ? 'bg-slate-800/90 text-emerald-300 border-emerald-500/30 hover:bg-slate-800'
+                : 'bg-slate-950/70 text-slate-400 border-slate-800 hover:bg-slate-800/60 hover:text-slate-200'
+            }"
+          >
+            <span class="text-lg sm:text-xl shrink-0">${s.icon}</span>
+            <div class="min-w-0 text-center sm:text-left">
+              <div class="text-[10px] font-black uppercase tracking-wider ${isActive ? 'text-slate-900' : 'text-slate-400'}">
+                STEP ${s.step}
+              </div>
+              <div class="text-xs font-black truncate ${isActive ? 'text-slate-950' : 'text-white'}">
+                ${s.shortTitle}
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderCandidateList() {
+      const listEl = document.getElementById('candidate-list');
+      listEl.innerHTML = CANDIDATES.map(c => {
+        const isSelected = c.id === selectedCandidateId;
+        const badgeStyles = {
+          slate: 'bg-slate-800 text-slate-300 border-slate-700',
+          amber: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          sky: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+          rose: 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+        }[c.statusColor] || 'bg-slate-800 text-slate-300 border-slate-700';
+
+        return `
+          <div class="p-3 rounded-2xl border transition-all ${
+            isSelected
+              ? 'bg-slate-800/95 border-sky-400 shadow-lg shadow-sky-500/10'
+              : 'bg-slate-950/70 border-slate-800/90 hover:border-slate-700'
+          }">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl ${isSelected ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-300'} font-black flex items-center justify-center text-sm">
+                  ${c.name.slice(0, 1)}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-black text-sm text-white">${c.name}</span>
+                    <span class="text-[11px] text-slate-400">報考：${c.dept}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">${c.note}</div>
+                </div>
+              </div>
+
+              <!-- 可點擊的電話號碼按鈕 -->
+              <button
+                onclick="clickCandidatePhone('${c.id}')"
+                class="px-3 py-1.5 rounded-xl font-mono text-xs sm:text-sm font-black flex items-center gap-1.5 transition-all ${
+                  isSelected && currentStep >= 2 && currentStep <= 6
+                    ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
+                    : 'bg-sky-500/20 hover:bg-sky-400 hover:text-slate-950 text-sky-300 border border-sky-400/40'
+                }"
+              >
+                <span>📞</span>
+                <span class="underline decoration-dotted underline-offset-4">${c.phone}</span>
+              </button>
+            </div>
+
+            <!-- 聯絡狀態列 -->
+            <div class="mt-2 pt-2 border-t border-slate-800/70 flex items-center justify-between text-xs">
+              <span class="text-slate-400">聯絡紀錄：</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeStyles}">
+                ${c.statusText}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPcToast() {
+      const toast = document.getElementById('pc-status-toast');
+      const cand = CANDIDATES.find(c => c.id === selectedCandidateId) || CANDIDATES[0];
+
+      if (currentStep === 1) {
+        toast.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl">👆</span>
+              <div>
+                <div class="text-xs font-black text-white">等待點選電話號碼</div>
+                <div class="text-[11px] text-slate-400">直接點上方任一組藍色電話號碼即可自動撥號</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 text-[11px] font-bold">待命中</span>
+          </div>
+        `;
+      } else if (currentStep === 2 || currentStep === 3) {
+        toast.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl animate-bounce">📟</span>
+              <div>
+                <div class="text-xs font-black text-amber-300">正在透過 Modem 自動撥號給 ${cand.name}...</div>
+                <div class="text-[11px] text-slate-300 font-mono">指令：ATZ ➔ ATDT ${cand.phone.replace(/-/g, '')}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[11px] font-bold">撥號中</span>
+          </div>
+        `;
+      } else if (currentStep === 4) {
+        if (lastSimMode === 'busy') {
+          toast.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">⚡</span>
+                <div>
+                  <div class="text-xs font-black text-rose-300">Modem 回應碼：BUSY（對方忙線中）</div>
+                  <div class="text-[11px] text-amber-200">系統已自動登記「10:20 忙線，待重撥」，可直接點下一位！</div>
+                </div>
+              </div>
+              <button onclick="clickCandidatePhone('c1')" class="px-3 py-1.5 rounded-xl bg-sky-500 text-slate-950 font-black text-xs">改撥林同學 ▶</button>
+            </div>
+          `;
+        } else {
+          toast.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl animate-pulse">🔔</span>
+                <div>
+                  <div class="text-xs font-black text-sky-300">狀態：撥號中 ➔ 響鈴中 (Ringing...)</div>
+                  <div class="text-[11px] text-slate-300">若忙線或無人接，Modem 會自動記錄並跳下一位</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/40 text-[11px] font-bold">響鈴中</span>
+            </div>
+          `;
+        }
+      } else if (currentStep === 5) {
+        toast.innerHTML = `
+          <div class="p-1 rounded-xl bg-emerald-950/80 border border-emerald-400/60">
+            <div class="flex items-center justify-between px-2 py-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xl animate-bounce">📢</span>
+                <div>
+                  <div class="text-xs sm:text-sm font-black text-emerald-300">✅ 已接通！正在播 TTS 開場白，請拿起話機！</div>
+                  <div class="text-[11px] text-emerald-100">電腦正替您表明臺中科大身分，爭取拿起話機的黃金幾秒鐘</div>
+                </div>
+              </div>
+              <button onclick="goToStep(6)" class="px-3 py-1.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs shrink-0 shadow">
+                ✋ 拿起話機
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentStep === 6) {
+        toast.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl">👩‍💼</span>
+              <div>
+                <div class="text-xs font-black text-emerald-300">真人通話中（Modem 已掛斷讓出線路）</div>
+                <div class="text-[11px] text-slate-300">不錄音、不透過 AI，同仁直接用實體話機與 ${cand.name} 自然對談</div>
+              </div>
+            </div>
+            <button onclick="goToStep(7)" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shrink-0">
+              掛上話機 ▶
+            </button>
+          </div>
+        `;
+      } else if (currentStep === 7) {
+        toast.innerHTML = `
+          <div>
+            <div class="text-xs font-black text-amber-300 mb-2">📌 通話結束！請一鍵點選「${cand.name}」的聯絡結果：</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              <button onclick="saveCallResult('✅ 已聯絡（確認報到）', 'emerald')" class="py-1.5 px-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 font-bold text-xs">
+                ✅ 已聯絡
+              </button>
+              <button onclick="saveCallResult('🔄 需再追蹤（考慮中）', 'sky')" class="py-1.5 px-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-200 font-bold text-xs">
+                🔄 需再追蹤
+              </button>
+              <button onclick="saveCallResult('🙅 婉拒就讀', 'amber')" class="py-1.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 font-bold text-xs">
+                🙅 拒絕
+              </button>
+              <button onclick="saveCallResult('❌ 號碼錯誤', 'rose')" class="py-1.5 px-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-200 font-bold text-xs">
+                ❌ 號碼錯誤
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 5. 更新 3D 舞台視覺狀態（線路電流、LED 燈、聽筒抬起、考生手機畫面）
+    // ---------------------------------------------------------------------
+    function update3DStageVisuals() {
+      const s = STEPS[currentStep - 1];
+
+      // 頂部橫幅文字更新
+      document.getElementById('banner-step-num').textContent = s.step;
+      document.getElementById('banner-step-title').textContent = s.title;
+      document.getElementById('banner-step-tag').textContent = s.tag;
+      document.getElementById('banner-voice-subtitle').textContent = `「${s.voiceText}」`;
+
+      // 底部三張硬體狀態小卡更新
+      document.getElementById('hw-state-pc').textContent = s.pcState;
+      document.getElementById('hw-state-modem').textContent = s.modemState;
+      document.getElementById('hw-state-phone').textContent = s.phoneState;
+
+      // Modem 氣泡指令文字
+      document.getElementById('modem-bubble-text').textContent = s.modemCmd;
+
+      // 取得 SVG 內各動態元件
+      const wireSerial = document.getElementById('wire-serial');
+      const wireModemLine = document.getElementById('wire-modem-line');
+      const wirePhoneParallel = document.getElementById('wire-phone-parallel');
+      const wirePstn = document.getElementById('wire-pstn');
+
+      const ledTx = document.getElementById('led-tx');
+      const ledRx = document.getElementById('led-rx');
+      const ledOh = document.getElementById('led-oh');
+
+      const phoneHandset = document.getElementById('phone-handset');
+      const staffAvatar = document.getElementById('staff-avatar');
+      const studentBody = document.getElementById('student-phone-body');
+      const studentIcon = document.getElementById('student-screen-icon');
+      const studentStatus = document.getElementById('student-screen-status');
+      const studentSub = document.getElementById('student-screen-sub');
+      const speechOverlay = document.getElementById('stage-speech-overlay');
+      const speechBadge = document.getElementById('speech-box-badge');
+      const speechLine1 = document.getElementById('speech-box-line1');
+      const speechLine2 = document.getElementById('speech-box-line2');
+      const speechBg = document.getElementById('speech-box-bg');
+
+      // 重置所有線路與動畫狀態
+      [wireSerial, wireModemLine, wirePhoneParallel, wirePstn].forEach(w => {
+        w.setAttribute('class', 'opacity-20');
+      });
+      ledTx.setAttribute('fill', '#475569');
+      ledRx.setAttribute('fill', '#475569');
+      ledOh.setAttribute('fill', '#475569');
+      phoneHandset.classList.remove('handset-lifted');
+      studentBody.classList.remove('handset-ringing');
+      staffAvatar.classList.remove('opacity-100');
+      staffAvatar.classList.add('opacity-50');
+      speechOverlay.classList.add('hidden');
+
+      // 底部卡片發光重置
+      document.getElementById('hw-card-pc').className = 'rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all';
+      document.getElementById('hw-card-modem').className = 'rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all';
+      document.getElementById('hw-card-phone').className = 'rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all';
+
+      // 依據步驟點亮對應 3D 元件
+      if (currentStep === 1) {
+        document.getElementById('hw-card-pc').classList.add('glow-active-blue');
+        studentIcon.textContent = '📱';
+        studentStatus.textContent = '考生手機待命中';
+        studentSub.textContent = '來電將顯示學校代表號';
+      } else if (currentStep === 2) {
+        document.getElementById('hw-card-pc').classList.add('glow-active-blue');
+        wireSerial.setAttribute('class', 'opacity-100 wire-flow');
+        ledRx.setAttribute('fill', '#38bdf8');
+        studentIcon.textContent = '📱';
+        studentStatus.textContent = '電腦已送出號碼';
+        studentSub.textContent = '免按話機按鍵，零誤撥';
+      } else if (currentStep === 3) {
+        document.getElementById('hw-card-modem').classList.add('glow-active-amber');
+        wireSerial.setAttribute('class', 'opacity-100 wire-flow');
+        wireModemLine.setAttribute('class', 'opacity-100 wire-flow');
+        wirePstn.setAttribute('class', 'opacity-100 wire-flow');
+        ledTx.setAttribute('fill', '#fbbf24');
+        ledOh.setAttribute('fill', '#ef4444');
+        studentIcon.textContent = '📡';
+        studentStatus.textContent = '市話基地台連線中';
+        studentSub.textContent = '來電顯示：04-2219-XXXX';
+        playDtmfSequence();
+      } else if (currentStep === 4) {
+        document.getElementById('hw-card-modem').classList.add('glow-active-amber');
+        wireModemLine.setAttribute('class', 'opacity-100 wire-flow');
+        wirePstn.setAttribute('class', 'opacity-100 wire-flow');
+        ledRx.setAttribute('fill', '#fbbf24');
+        ledOh.setAttribute('fill', '#ef4444');
+
+        if (lastSimMode === 'busy') {
+          studentIcon.textContent = '🚫';
+          studentStatus.textContent = '考生通話忙線中 (BUSY)';
+          studentSub.textContent = 'Modem 自動回傳忙線並登記名單';
+          document.getElementById('modem-bubble-text').textContent = 'BUSY -> 自動記一筆';
+          playLineTone('busy');
+        } else {
+          studentBody.classList.add('handset-ringing');
+          studentIcon.textContent = '🔔';
+          studentStatus.textContent = '考生手機響鈴中！';
+          studentSub.textContent = '看到臺中科大號碼，準備接聽';
+          playLineTone('ring');
+        }
+      } else if (currentStep === 5) {
+        document.getElementById('hw-card-pc').classList.add('glow-active-blue');
+        document.getElementById('hw-card-modem').classList.add('glow-active-amber');
+        wireSerial.setAttribute('class', 'opacity-100 wire-flow');
+        wireModemLine.setAttribute('class', 'opacity-100 wire-flow');
+        wirePstn.setAttribute('class', 'opacity-100 wire-flow');
+        ledTx.setAttribute('fill', '#22c55e');
+        ledOh.setAttribute('fill', '#ef4444');
+
+        studentIcon.textContent = '🎧';
+        studentStatus.textContent = '已接聽！收聽學校開場白';
+        studentSub.textContent = '「您好，這裡是國立臺中科技大學...」';
+
+        // 顯示中央 TTS 開場白浮空泡泡
+        speechOverlay.classList.remove('hidden');
+        speechBg.setAttribute('stroke', '#38bdf8');
+        speechBadge.setAttribute('fill', '#38bdf8');
+        speechBadge.textContent = '🤖 電腦自動播 TTS 開場白（表明身分＋爭取幾秒鐘）：';
+        speechLine1.textContent = '「您好，這裡是國立臺中科技大學，關於您報考○○的相關事項，';
+        speechLine2.textContent = '　我們的同仁要跟您說明一下，請稍候。」';
+      } else if (currentStep === 6) {
+        document.getElementById('hw-card-phone').classList.add('glow-active-emerald');
+        // 實體話機聽筒抬起！線路改走綠色並接電話線，Modem 熄燈讓出線路
+        phoneHandset.classList.add('handset-lifted');
+        staffAvatar.classList.remove('opacity-50');
+        staffAvatar.classList.add('opacity-100');
+        wirePhoneParallel.setAttribute('class', 'opacity-100 wire-flow');
+        wirePstn.setAttribute('class', 'opacity-100 wire-flow');
+
+        studentIcon.textContent = '🗣️';
+        studentStatus.textContent = '與學校同仁真人通話中';
+        studentSub.textContent = '通話不斷線，自然親切對談';
+
+        // 顯示中央真人對話泡泡
+        speechOverlay.classList.remove('hidden');
+        speechBg.setAttribute('stroke', '#10b981');
+        speechBadge.setAttribute('fill', '#34d399');
+        speechBadge.textContent = '👩‍💼 同仁拿起實體話機（Modem 自動掛斷讓出線路）：';
+        speechLine1.textContent = '「林同學您好！我是招生處老師，恭喜您通過第一階段，';
+        speechLine2.textContent = '　想跟您確認下週六面試的報到時間方便嗎？」';
+      } else if (currentStep === 7) {
+        document.getElementById('hw-card-pc').classList.add('glow-active-blue');
+        studentIcon.textContent = '✅';
+        studentStatus.textContent = '通話完成，掛斷電話';
+        studentSub.textContent = '同仁在名單勾選結果，繼續下一位';
+      }
+    }
+
+    // ---------------------------------------------------------------------
+    // 6. 互動控制：跳轉步驟、點擊考生電話、儲存聯絡結果、一鍵自動導覽
+    // ---------------------------------------------------------------------
+    function goToStep(stepNumber, shouldSpeak = true) {
+      currentStep = Math.max(1, Math.min(7, stepNumber));
+      renderStepPills();
+      renderCandidateList();
+      renderPcToast();
+      update3DStageVisuals();
+      if (shouldSpeak) {
+        speakCurrentStep(false);
+      }
+    }
+
+    function nextStep() {
+      stopAutoTour();
+      const next = currentStep < 7 ? currentStep + 1 : 1;
+      goToStep(next, true);
+    }
+
+    function prevStep() {
+      stopAutoTour();
+      const prev = currentStep > 1 ? currentStep - 1 : 7;
+      goToStep(prev, true);
+    }
+
+    // 點選左側名單中的考生電話號碼
+    function clickCandidatePhone(candId) {
+      stopAutoTour();
+      selectedCandidateId = candId;
+      const cand = CANDIDATES.find(c => c.id === candId);
+      if (!cand) return;
+
+      lastSimMode = cand.mode;
+
+      if (cand.mode === 'busy') {
+        // 示範忙線自動記錄流程：Step 2 -> Step 3 -> Step 4 (Busy 自動登記)
+        goToStep(2, false);
+        speakText(`點選${cand.name}的電話，電腦自動對 Modem 下達撥號指令。`, () => {
+          goToStep(4, false);
+          cand.statusText = '10:22 忙線，待重撥 (Modem自動記)';
+          cand.statusColor = 'amber';
+          renderCandidateList();
+          renderPcToast();
+          speakText('Modem 偵測到對方忙線回應碼，系統自動在名單記上一筆「忙線待重撥」，同仁完全不用手寫，直接跳下一位！');
+        });
+      } else {
+        // 正常接通示範：跳到 Step 2 並提示可一路往下或啟動自動導覽
+        goToStep(2, true);
+      }
+    }
+
+    // 右上角快捷情境按鈕
+    function simulateQuickScenario(mode) {
+      stopAutoTour();
+      lastSimMode = mode;
+      if (mode === 'busy') {
+        selectedCandidateId = 'c2';
+        const cand = CANDIDATES.find(c => c.id === 'c2');
+        cand.statusText = '10:25 忙線，待重撥 (Modem自動記)';
+        cand.statusColor = 'amber';
+        goToStep(4, false);
+        const msg = '模擬忙線情境：Modem 收到 BUSY 回應碼，系統自動在名單記一筆「忙線、待重撥」，同仁直接點下一位！';
+        document.getElementById('banner-voice-subtitle').textContent = `「${msg}」`;
+        speakText(msg);
+      } else {
+        selectedCandidateId = 'c1';
+        goToStep(5, true);
+      }
+    }
+
+    // Step 7 點選結果按鈕
+    function saveCallResult(resultLabel, color) {
+      const cand = CANDIDATES.find(c => c.id === selectedCandidateId);
+      if (cand) {
+        cand.statusText = resultLabel;
+        cand.statusColor = color;
+      }
+      // 自動把焦點移到下一位待聯絡考生
+      const nextCand = CANDIDATES.find(c => c.id !== selectedCandidateId && c.statusText === '待聯絡') || CANDIDATES[2];
+      if (nextCand) selectedCandidateId = nextCand.id;
+
+      renderCandidateList();
+      const msg = `已登記結果為「${resultLabel}」！名單自動往下推進，可以點下一支電話繼續聯絡。`;
+      document.getElementById('banner-voice-subtitle').textContent = `「${msg}」`;
+      speakText(msg);
+    }
+
+    // 一鍵全流程語音自動導覽劇場 (Step 1 -> Step 7)
+    function toggleAutoTour() {
+      if (isAutoTouring) {
+        stopAutoTour();
+      } else {
+        startAutoTour();
+      }
+    }
+
+    function startAutoTour() {
+      isAutoTouring = true;
+      voiceEnabled = true;
+      lastSimMode = 'answered';
+      selectedCandidateId = 'c1';
+      updateVoiceToggleUI();
+      updateAutoTourButtonUI();
+
+      const runStep = (stepIdx) => {
+        if (!isAutoTouring) return;
+        currentStep = stepIdx;
+        renderStepPills();
+        renderCandidateList();
+        renderPcToast();
+        update3DStageVisuals();
+
+        const stepObj = STEPS[stepIdx - 1];
+        speakText(stepObj.voiceText, () => {
+          if (!isAutoTouring) return;
+          if (stepIdx < 7) {
+            autoTourTimer = setTimeout(() => runStep(stepIdx + 1), 900);
+          } else {
+            stopAutoTour();
+          }
+        });
+      };
+
+      runStep(1);
+    }
+
+    function stopAutoTour() {
+      isAutoTouring = false;
+      if (autoTourTimer) {
+        clearTimeout(autoTourTimer);
+        autoTourTimer = null;
+      }
+      updateAutoTourButtonUI();
+    }
+
+    function updateAutoTourButtonUI() {
+      const btn = document.getElementById('btn-auto-tour');
+      const icon = document.getElementById('tour-icon');
+      const label = document.getElementById('tour-label');
+      if (isAutoTouring) {
+        icon.textContent = '⏹️';
+        label.textContent = '停止自動導覽';
+        btn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-rose-500/25 transition-all';
+      } else {
+        icon.textContent = '▶️';
+        label.textContent = '一鍵語音導覽全流程';
+        btn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition-all';
+      }
+    }
+
+    // 鍵盤左右鍵快捷切換
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextStep();
+      if (e.key === 'ArrowLeft') prevStep();
+    });
+
+    // 初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+      goToStep(1, false);
+    });
+  </script>
+</body>
+</html>
