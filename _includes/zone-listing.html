@@ -31,6 +31,7 @@
     {% endfor %}
     {% if n_pages == 0 %}<li class="empty">目前還沒有教學頁面。</li>{% endif %}
   </ul>
+  {% if include.after_pages %}{{ include.after_pages }}{% endif %}
 
   <h3>📁 資料夾與檔案</h3>
   <ul>
