@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap');
+
+:root {
+  --bg-dark: #070b14;
+  --card-dark: #0f172a;
+}
+
+body {
+  font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: #f8fafc;
+  overflow-x: hidden;
+}
+
+/* 3D 等距工作桌舞台 (Isometric 3D Stage) */
+.stage-viewport {
+  perspective: 1400px;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.16), transparent 60%),
+    radial-gradient(circle at 80% 75%, rgba(245, 158, 11, 0.12), transparent 55%),
+    linear-gradient(180deg, #0b1120 0%, #070b14 100%);
+}
+
+.iso-grid-floor {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+  transform: rotateX(55deg) rotateZ(-12deg) scale(1.1);
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stage-viewport:hover .iso-grid-floor {
+  transform: rotateX(52deg) rotateZ(-9deg) scale(1.12);
+}
+
+/* 3D 物件陰影與浮空動效 */
+.float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+/* 訊號流動動畫 */
+.wire-flow {
+  stroke-dasharray: 10 8;
+  animation: dashFlow 0.8s linear infinite;
+}
+.wire-flow-reverse {
+  stroke-dasharray: 10 8;
+  animation: dashFlowRev 0.8s linear infinite;
+}
+@keyframes dashFlow {
+  to { stroke-dashoffset: -36; }
+}
+@keyframes dashFlowRev {
+  to { stroke-dashoffset: 36; }
+}
+
+/* 話機震動與抬起效果 */
+.handset-ringing {
+  animation: phoneRing 0.35s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes phoneRing {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-4deg) translateY(-4px); }
+  75% { transform: rotate(4deg) translateY(-4px); }
+}
+
+.handset-lifted {
+  transform: translate(-16px, -38px) rotate(-14deg) !important;
+}
+
+.handset-transition {
+  transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 聲波動畫 */
+.sound-bar {
+  animation: soundWave 0.65s ease-in-out infinite alternate;
+}
+@keyframes soundWave {
+  0% { transform: scaleY(0.25); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* 發光聚焦邊框 */
+.glow-active-blue {
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.8), 0 0 35px rgba(56, 189, 248, 0.45);
+}
+.glow-active-amber {
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.85), 0 0 35px rgba(251, 191, 36, 0.45);
+}
+.glow-active-emerald {
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.85), 0 0 35px rgba(52, 211, 153, 0.45);
+}
+.glow-active-purple {
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.85), 0 0 35px rgba(192, 132, 252, 0.45);
+}
+
+/* 3D 翻轉卡片效果 */
+.card-3d {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.card-3d:hover {
+  transform: translateY(-6px) rotateX(4deg);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+}
