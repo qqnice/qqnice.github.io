@@ -9,66 +9,66 @@ window.WORKFLOW_DATA = {
   prereqChecklist: [
     {
       id: "prep-1",
-      category: "帳號與 AI 環境",
-      title: "ChatGPT 帳號 ＋ Google / Gmail 帳號",
+      category: "1. 帳號準備",
+      title: "準備 ChatGPT 帳號 ＋ Google / Gmail 帳號",
       desc: "準備好 ChatGPT 與 Google 帳號。注意：工具可以使用同一個 Gmail 方便記憶，但並非強制同信箱。",
-      tag: "必備基礎",
+      tag: "Step 1 基礎帳號",
       tip: "尚未註冊者請依官方說明先行申請。"
     },
     {
       id: "prep-2",
-      category: "帳號與 AI 環境",
-      title: "桌面版 Codex（可讀寫本機專案資料夾）",
-      desc: "必須安裝桌面版 Codex 並能開啟本機資料夾！單純開網頁版一般聊天，不具備本機技能與檔案操作環境。",
-      tag: "核心環境",
-      tip: "若在第三會議室上課未預裝，請依講師當天提供的安裝檔操作。"
-    },
-    {
-      id: "prep-3",
-      category: "帳號與 AI 環境",
-      title: "確認模型、工具權限與使用額度",
-      desc: "確認帳號目前的訂閱方案與可用額度。不同方案額度不同，需留意是否足夠執行完整階段。",
-      tag: "額度確認",
-      tip: "只檢查當前階段所需工具即可，不必因為後面工具沒連好就卡住第一步。"
-    },
-    {
-      id: "prep-4",
-      category: "校務與信箱權限",
-      title: "校務 ePortal 帳號 ＋ 群組寄信權限",
-      desc: "用於第 04 步寄發全校教學單位與專任教師招募公告信。",
-      tag: "校務系統",
-      tip: "搭配已連接的 Chrome 官方個人檔案進行自動填表與組織樹選取。"
-    },
-    {
-      id: "prep-5",
-      category: "校務與信箱權限",
-      title: "Google 表單 / 試算表權限 ＆ 核對 Gmail 連接信箱",
-      desc: "確認 Google 帳號可建立 Google Form 與連結回覆試算表（Sheet），並核對 AI 的 Gmail 連接工具實際連到哪一個 Gmail 信箱。",
-      tag: "Google 生態系",
-      tip: "請先記下連接的這個 Gmail 帳號，下一步要將學校信箱轉寄過來！"
-    },
-    {
-      id: "prep-6",
-      category: "校務與信箱權限",
-      title: "⭐ 先把「學校信箱」設定轉寄到 Gmail（並實測收件！）",
-      desc: "關鍵前置步驟！為了讓 AI（第 08 步 CollectEventResults）能自動幫你收到學校信箱的回信與成果附件，請先依學校允許的轉寄方式，把學校信箱設定自動轉寄到 Gmail，並實際寄信確認 Gmail 真的收得到！",
-      tag: "必做關鍵步驟",
+      category: "2. 信箱轉寄（必做！）",
+      title: "⭐ 先把「學校信箱」設定自動轉寄到 Gmail（並實測收件！）",
+      desc: "關鍵前置步驟！為了讓 AI（第 08 步 CollectEventResults）能自動幫你收到學校信箱的回信與成果附件，請先依學校允許的轉寄方式，把學校信箱設定自動轉寄到你的 Gmail，並實際寄一封信確認 Gmail 真的收得到！",
+      tag: "Step 2 關鍵前置",
       tip: "重要觀念：轉寄到 Gmail 代表「能在 Gmail 收信」，但不代表能以學校信箱作為 From（寄件人）寄出！"
     },
     {
+      id: "prep-3",
+      category: "3. 桌面環境",
+      title: "安裝桌面版 Codex（可讀寫本機專案資料夾）",
+      desc: "必須安裝桌面版 Codex 並能開啟本機資料夾！單純開網頁版一般聊天，不具備本機技能與檔案操作環境。",
+      tag: "Step 3 核心環境",
+      tip: "若在第三會議室上課未預裝，請依講師當天提供的安裝檔操作。"
+    },
+    {
+      id: "prep-4",
+      category: "4. 額度確認",
+      title: "確認模型、工具權限與使用額度",
+      desc: "確認帳號目前的訂閱方案與可用額度。不同方案額度不同，需留意是否足夠執行完整階段。",
+      tag: "Step 4 額度確認",
+      tip: "只檢查當前階段所需工具即可，不必因為後面工具沒連好就卡住第一步。"
+    },
+    {
+      id: "prep-5",
+      category: "5. 校務系統",
+      title: "確認校務 ePortal 帳號 ＋ 群組寄信權限",
+      desc: "用於第 04 步寄發全校教學單位與專任教師招募公告信。",
+      tag: "Step 5 校務權限",
+      tip: "搭配已連接的 Chrome 官方個人檔案進行自動填表與組織樹選取。"
+    },
+    {
+      id: "prep-6",
+      category: "6. Google 工具連接",
+      title: "確認 Google 表單 / 試算表權限 ＆ 核對 Gmail 連接信箱",
+      desc: "確認 Google 帳號可建立 Google Form 與連結回覆試算表（Sheet），並核對 AI 的 Gmail 連接工具實際連到上述接收轉寄的那個 Gmail 信箱。",
+      tag: "Step 6 工具核對",
+      tip: "請確認連接的 Gmail 與接收學校轉寄信的是同一個信箱！"
+    },
+    {
       id: "prep-7",
-      category: "瀏覽器與教材",
-      title: "Chrome 官方連接入口（勿裝山寨外掛）",
+      category: "7. 瀏覽器外掛",
+      title: "使用 Chrome 官方連接入口（勿裝山寨外掛）",
       desc: "需要 Chrome 外掛操作表單或 ePortal 時，務必使用 App 提供的官方連接入口，並確認連對 Chrome 個人檔案。",
-      tag: "資安守則",
+      tag: "Step 7 資安守則",
       tip: "千萬不要在商店亂裝名稱相近的第三方不明外掛！"
     },
     {
       id: "prep-8",
-      category: "瀏覽器與教材",
+      category: "8. 技能包下載",
       title: "下載課程招生版技能包 ZIP 與教材",
       desc: "從講師連結或 TronClass 取得招生版 10 個技能 ZIP 包（Notion 僅作教材記錄，非執行必要條件）。",
-      tag: "技能安裝",
+      tag: "Step 8 技能安裝",
       tip: "切勿把個人密碼、驗證碼或權杖（Token）放進技能 ZIP 包裡！"
     }
   ],
