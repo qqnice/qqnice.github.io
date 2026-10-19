@@ -1,0 +1,75 @@
+---
+title: 資料安全與結果查核
+description: 使用生成式 AI 處理行政工作前後的檢核事項，含去識別化做法與一份檢核表
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>資料安全與結果查核</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-admin">
+  <div class="container">
+    <nav class="crumb"><a href="../">首頁</a> › <a href="./">AI 協助行政自動化</a> › 資料安全與結果查核</nav>
+
+    <h1>資料安全與結果查核</h1>
+    <p class="lead">用 AI 處理行政工作，風險集中在兩個時間點：資料送出去之前，和結果拿回來之後。本頁各給一份檢核項目。</p>
+
+    <div class="callout">
+      <p><strong>先確認單位規範。</strong>許多單位對生成式 AI 的使用有規定，例如能不能使用、可以用哪些服務、哪些資料不得輸入。本頁是通用提醒，不能取代所屬單位的規定與相關法規（例如個人資料保護法）。不確定時，先詢問單位的資安或資訊部門。</p>
+    </div>
+
+    <h2>1. 送出之前：哪些資料要處理</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>資料類型</th><th>建議做法</th></tr></thead>
+      <tbody>
+        <tr><td>姓名、學號、身分證字號、電話、地址、電子郵件</td><td>以代號取代（例如「學生 A」「教師 B」），對照表另存，不一起送出</td></tr>
+        <tr><td>成績、考核、薪資、請假與健康相關資訊</td><td>預設不送出；確有必要時，先確認單位是否允許，並移除可辨識身分的欄位</td></tr>
+        <tr><td>尚未公開的公文、合約、會議內容</td><td>確認服務的資料處理條款與單位規定之後再決定；能用摘要或遮蔽關鍵資訊的，先遮蔽</td></tr>
+        <tr><td>帳號、密碼、金鑰、內部網址與 IP</td><td>一律不送出</td></tr>
+        <tr><td>已公開的資訊、自己撰寫的草稿</td><td>風險最低，可優先使用</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>去識別化要注意「組合起來仍能認出是誰」。只拿掉姓名，但保留「某系三年級唯一的轉學生」這類描述，仍然可能被辨識。</p>
+
+    <h2>2. 拿回結果：查核什麼</h2>
+    <ol>
+      <li><strong>數字：</strong>金額、人數、日期、期限，一律回原始文件核對。</li>
+      <li><strong>引用：</strong>引用的條文、文號、法規名稱是否真的存在、內容是否與原文一致。AI 可能產生看起來正確但並不存在的引用。</li>
+      <li><strong>專有名詞：</strong>單位名稱、職稱、系統名稱有沒有被改寫成通用說法。</li>
+      <li><strong>遺漏與增添：</strong>有沒有漏掉你要求的項目，或加了你沒提供的內容。</li>
+      <li><strong>語氣與立場：</strong>對外文件的承諾、道歉或責任歸屬，是不是你願意負責的說法。</li>
+    </ol>
+
+    <h2>3. 檢核表</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>階段</th><th>檢核項目</th><th>完成</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4">送出前</td><td>這項工作所屬單位允許使用生成式 AI 嗎？</td><td>☐</td></tr>
+        <tr><td>已移除或以代號取代個人資料？</td><td>☐</td></tr>
+        <tr><td>沒有帳號、密碼、金鑰或內部網址？</td><td>☐</td></tr>
+        <tr><td>提示詞中已附上依據原文，並寫明「找不到就說找不到」？</td><td>☐</td></tr>
+        <tr><td rowspan="4">收到後</td><td>數字與日期已對照原始文件？</td><td>☐</td></tr>
+        <tr><td>引用的條文已回原文核對？</td><td>☐</td></tr>
+        <tr><td>沒有出現我沒提供的資訊？</td><td>☐</td></tr>
+        <tr><td>承辦人已閱讀全文並負責？</td><td>☐</td></tr>
+        <tr><td>留存</td><td>記錄使用的服務、日期、提示詞版本與複核人（供日後回溯）</td><td>☐</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>4. 責任歸屬</h2>
+    <p>AI 協助產生的文件，送出之後的責任仍在承辦人與核稿主管，不會因為內容出自 AI 而轉移。因此建議在流程中明訂「誰是最後複核人」，並把複核這一步寫進作業程序，而不是靠個人自覺。</p>
+
+    <div class="pager">
+      <a href="02-prompt-templates.html">← 上一頁：提示詞範本</a>
+      <a href="./">專區首頁 →</a>
+    </div>
+  </div>
+</body>
+</html>

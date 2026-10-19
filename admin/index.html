@@ -1,0 +1,63 @@
+---
+title: AI 協助行政自動化 教學專區
+description: 用生成式 AI 協助行政工作：任務盤點、提示詞範本與資料安全查核
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 協助行政自動化 教學專區</title>
+  {% include zone-style.html %}
+</head>
+<body class="zone-admin">
+  <div class="container">
+    <nav class="crumb"><a href="../">QQ 教學分享區首頁</a> › AI 協助行政自動化</nav>
+
+    <h1>🗂️ AI 協助行政自動化</h1>
+    <p class="lead">這個專區整理如何用生成式 AI 協助校園與機關的行政工作，例如整理會議紀錄、擬通知信、核對表單、依規章回答問題。重點不在工具操作，而在判斷哪些工作適合交給 AI、怎麼下指令，以及怎麼查核結果。</p>
+
+    <div class="callout">
+      <p><strong>內容性質：</strong>本專區是作者的教學整理與實務建議，不是任何單位的正式規範。範例一律是通用情境，不含實際單位的規章、人員或資料；實際作業請以所屬單位的規定為準。</p>
+    </div>
+
+    <h2>🧭 建議的閱讀順序</h2>
+    <div class="cards">
+      <a class="card" href="01-task-inventory.html">
+        <span class="tag">STEP 1</span>
+        <strong>先盤點，再自動化</strong>
+        <span class="d">用重複性、規則明確度、出錯成本與資料敏感度四個面向，判斷一項行政工作適不適合交給 AI。</span>
+      </a>
+      <a class="card" href="02-prompt-templates.html">
+        <span class="tag">STEP 2</span>
+        <strong>行政工作的提示詞範本</strong>
+        <span class="d">會議紀錄、通知信、規章問答、表格核對四種常見任務的指令寫法，可直接複製修改。</span>
+      </a>
+      <a class="card" href="03-safety-checklist.html">
+        <span class="tag">STEP 3</span>
+        <strong>資料安全與結果查核</strong>
+        <span class="d">送給 AI 之前要先處理什麼、拿到結果之後要核對什麼，附一份可列印的檢核表。</span>
+      </a>
+    </div>
+
+    <div class="callout warn">
+      <p><strong>本站是公開網站。</strong>請不要把含個人資料、尚未公開的公文、人事或財務明細的內容放進這個專區；教學範例請使用虛構資料。</p>
+    </div>
+
+    <h2>🚀 如何使用本專區</h2>
+    <ul>
+      <li>📄 <strong>點擊 <code>.html</code> 頁面：</strong>直接閱讀該單元。</li>
+      <li>📁 <strong>點擊資料夾：</strong>進入該主題的資料；新資料夾需要自己的 <code>index.html</code>，點進去才不會是 404。</li>
+      <li>➕ <strong>新增內容：</strong>把新的 <code>.html</code> 放進 <code>admin/</code> 資料夾，推送後下方目錄會自動更新。檔案開頭加上 <code>title</code> 與 <code>description</code> 兩個欄位（front matter），目錄就會顯示標題與說明。</li>
+    </ul>
+
+    <h2>📂 AI 協助行政自動化 檔案目錄</h2>
+    {% include zone-listing.html folder="admin" %}
+
+    <div class="author-box">
+      <h3>👨‍🏫 關於作者</h3>
+      <p><strong>QQ 老師 (Wen-Yen Lin)</strong> 現任教於國立臺中科技大學資訊管理學系。</p>
+    </div>
+  </div>
+</body>
+</html>
