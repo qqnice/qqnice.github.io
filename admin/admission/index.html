@@ -193,13 +193,46 @@
       <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs sm:text-sm font-bold text-slate-800">📋 2.1 帳號、桌面環境與工具權限準備度</span>
-          <span id="prereq-progress-text" class="text-xs font-bold text-emerald-700">已完成 0 / 7 項 (0%)</span>
+          <span id="prereq-progress-text" class="text-xs font-bold text-emerald-700">已完成 0 / 8 項 (0%)</span>
         </div>
         <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-5 border border-slate-200">
           <div id="prereq-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
         </div>
 
         <div id="prereq-checklist-container" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+      </div>
+
+      <!-- ⭐ 關鍵前置作業特別圖解：先把「學校信箱」設定轉寄到「Gmail」 -->
+      <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-5 sm:p-6 rounded-2xl border-2 border-amber-400 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">📬</span>
+            <div>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950">千萬別漏掉這一步！</span>
+              <h3 class="text-lg sm:text-xl font-black text-slate-900 mt-0.5">關鍵前置步驟：先把「學校信箱」設定自動轉寄到「Gmail」！</h3>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-amber-900 bg-white px-3 py-1 rounded-xl border border-amber-300">影響第 04、07、08 步收信與成果回收</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs items-stretch">
+          <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+            <div class="font-black text-amber-900 mb-1">Step 1：設定學校信箱轉寄</div>
+            <p class="text-slate-600 leading-relaxed">登入學校信箱，依學校允許的轉寄方式，設定將信件自動轉寄到你連接 AI 的那個 <strong>Gmail 信箱</strong>。</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+            <div class="font-black text-emerald-900 mb-1">Step 2：實測確認收得到信</div>
+            <p class="text-slate-600 leading-relaxed">設定完不能只看畫面說成功！請<strong>實際寄一封測試信到學校信箱</strong>，打開 Gmail 確認真的有收到轉寄過來的信。</p>
+          </div>
+          <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+            <div class="font-black text-blue-900 mb-1">Step 3：AI 才能幫你收成果</div>
+            <p class="text-slate-600 leading-relaxed">當老師回信到你的學校信箱時，信件自動轉進 Gmail，第 08 步打工仔（<code>CollectEventResults</code>）就能在 Gmail 自動幫你撈回成果附件！</p>
+          </div>
+          <div class="bg-rose-50 p-3.5 rounded-xl border-2 border-rose-300 shadow-sm">
+            <div class="font-black text-rose-900 mb-1">⚠️ 收信 ≠ 寄件人 (From)</div>
+            <p class="text-rose-800 leading-relaxed font-medium">轉寄到 Gmail 只代表「能在 Gmail 收信」，<strong>不代表能以學校信箱作為 From 寄出</strong>！從 Gmail 寄行前通知時，寄件人仍是你的 Gmail。</p>
+          </div>
+        </div>
       </div>
 
       <!-- 2.1 重點觀念：四種身分要分清楚 -->
@@ -362,6 +395,20 @@
             <div id="skill-overall-progress-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 10%"></div>
           </div>
         </div>
+      </div>
+
+      <!-- 啟動前必做前置提醒橫幅 -->
+      <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📬</span>
+          <div class="text-slate-800">
+            <strong class="text-amber-900">啟動 10 步驟前必做前置確認：</strong>
+            請先將<strong>「學校信箱設定自動轉寄到 Gmail（並實測確認收得到信）」</strong>且完成技能包安裝，後續老師回信時 AI 才能從 Gmail 幫你自動查收！（注意：轉寄僅供收信，寄出時 From 仍為 Gmail）
+          </div>
+        </div>
+        <a href="#sec-prereq" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shrink-0 transition-colors">
+          查看前置設定圖解 ▲
+        </a>
       </div>
 
       <!-- 10 步驟進度條導覽網格 -->
