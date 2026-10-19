@@ -1,0 +1,158 @@
+/* ==========================================================================
+   10 個 AI 打工仔：招生行政自動化高互動指南網站 - 專屬樣式表
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --primary: #1e3a8a;
+  --primary-light: #3b82f6;
+  --accent: #f97316;
+  --accent-Soft: #ffedd5;
+  --emerald: #10b981;
+  --slate-bg: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 漸層背景與裝飾網格 */
+.hero-mesh {
+  background-color: #0f172a;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.28) 0px, transparent 50%),
+    radial-gradient(at 85% 20%, rgba(249, 115, 22, 0.22) 0px, transparent 50%),
+    radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+}
+
+.grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* 卡片懸浮與微動態 */
+.hover-lift {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.12);
+}
+
+/* 10 個打工仔進度條節點樣式 */
+.step-node {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.step-node.active {
+  transform: scale(1.06);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.35);
+}
+.step-node.completed .step-badge {
+  background-color: #10b981;
+  color: white;
+}
+
+/* 瀏覽器模擬視窗外框 */
+.mockup-window {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.mockup-header {
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mockup-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+.mockup-dots span {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+}
+
+/* 流程連接線動畫 */
+@keyframes pulse-flow {
+  0%, 100% { opacity: 0.45; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(3px); }
+}
+.animate-flow {
+  animation: pulse-flow 1.8s infinite ease-in-out;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+.animate-float {
+  animation: float-slow 3.2s infinite ease-in-out;
+}
+
+/* 檔案樹互動樣式 */
+.file-tree-item {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.file-tree-item:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+.file-tree-item.active {
+  background-color: rgba(37, 99, 235, 0.14);
+  border-left: 3px solid #2563eb;
+  font-weight: 600;
+}
+
+/* 自訂捲軸 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 吐司通知動畫 */
+.toast-enter {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast-hidden {
+  transform: translateY(1.5rem);
+  opacity: 0;
+  pointer-events: none;
+}

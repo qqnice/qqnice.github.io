@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 個 AI 打工仔：招生行政自動化高互動指南｜戰情表先行・步步檢核</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- =====================================================================
+       頂部常駐導覽列 (Sticky Navbar)
+       ===================================================================== -->
+  <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <a href="#top" class="flex items-center gap-2.5 group">
+        <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-amber-500 flex items-center justify-center text-xl shadow">🤖</span>
+        <div>
+          <div class="font-black text-sm sm:text-base tracking-tight group-hover:text-amber-300 transition-colors">10 個 AI 打工仔・行政自動化指揮中心</div>
+          <div class="text-[11px] text-slate-400 hidden sm:block">先開戰情表 ➔ 步步有檢核 ➔ 預設私密（分享長官即看進度）</div>
+        </div>
+      </a>
+
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-bold">
+        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors">← 行政專區</a>
+        <a href="#sec-core" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-200 transition-colors">💡 核心觀念</a>
+        <a href="#sec-prereq" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 transition-colors">🧰 前置作業</a>
+        <a href="#sec-warroom" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-emerald-300 transition-colors">🛡️ 戰情表＆隱私</a>
+        <a href="#sec-stepper" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow transition-colors">🚀 10 步互動圖解</a>
+        <a href="#sec-theater" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-purple-300 transition-colors">🎬 實戰與等待點</a>
+        <a href="#sec-deconstruct" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-sky-300 transition-colors">🧩 拆解我的工作</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       HERO 區塊：開場情境與核心理念（「接到任務，先啟動戰情表！」）
+       ===================================================================== -->
+  <section id="top" class="hero-mesh grid-pattern text-white py-12 sm:py-16 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- 左欄：主標題與三大重點 -->
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold">
+            <span>✨ 行政同仁專屬 AI 協作指南</span>
+            <span>｜</span>
+            <span class="text-amber-300">1 個總控包工頭 ＋ 9 個專職打工仔</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
+            接到任務別急著埋頭苦幹，<br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-300 to-emerald-300">
+              先啟動「戰情表」再開始做事！
+            </span>
+          </h1>
+
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+            收到一封招生邀請，後面跟著建檔、開表單、發全校信、收名單、寫公文、寄行前通知、收成果、做網站……<br/>
+            現在，把重複繁瑣的操作交給 <strong>10 個 AI 打工仔（Skill）</strong>，你只要擔任<strong>「戰情室指揮官」</strong>，看著檢核表一步一步拍板把關！
+          </p>
+
+          <!-- 三張核心價值小卡 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div class="bg-slate-900/80 border border-slate-700 p-3.5 rounded-xl">
+              <div class="text-lg mb-1">🧭 1. 戰情表領航</div>
+              <div class="text-xs font-bold text-amber-300 mb-1">先分析任務、啟動戰情表</div>
+              <p class="text-[11px] text-slate-300 leading-relaxed">每一步都有明確檢核（Checklist），隨時掌握任務進行到哪裡，不再漏東漏西。</p>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-700 p-3.5 rounded-xl">
+              <div class="text-lg mb-1">🛑 2. 真人把關不失控</div>
+              <div class="text-xs font-bold text-emerald-300 mb-1">寫完草稿 ≠ 已寄出</div>
+              <p class="text-[11px] text-slate-300 leading-relaxed">AI 負責擬稿、填表与核對；遇到寄信與公文必停下來等你確認，「等待」是正常安全狀態！</p>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-700 p-3.5 rounded-xl">
+              <div class="text-lg mb-1">🔒 3. 預設私密・長官共享</div>
+              <div class="text-xs font-bold text-sky-300 mb-1">只有你看得到，分享才可見</div>
+              <p class="text-[11px] text-slate-300 leading-relaxed">網站發布後預設私人（Owner-Private）；想讓長官知道進度時，把戰情表分享給長官即可！</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a href="#sec-stepper" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg transition-all">
+              🚀 立即體驗 10 步驟互動進度條
+            </a>
+            <a href="#sec-warroom" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-sm transition-all">
+              🛡️ 看懂戰情表＆長官分享機制
+            </a>
+          </div>
+        </div>
+
+        <!-- 右欄：指揮官思維三部曲視覺流程卡 -->
+        <div class="lg:col-span-5">
+          <div class="bg-slate-900/90 border-2 border-blue-500/40 rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <span class="font-bold text-sm text-amber-300">🎯 行政自動化「指揮官三部曲」</span>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">觀念升級</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3.5 rounded-xl bg-slate-800/90 border border-slate-700 flex items-start gap-3">
+                <span class="w-8 h-8 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center shrink-0">1</span>
+                <div>
+                  <div class="font-bold text-white text-sm">接到任務 ➔ 先分析並啟動「戰情表」</div>
+                  <p class="text-slate-300 mt-1 leading-relaxed">呼叫 <code class="text-amber-300">@activityagent</code>，由 <code class="text-sky-300">01 InitActivity</code> 建檔後，立刻請 <code class="text-emerald-300">02 CreateSite</code> 建立戰情表。還沒開始跑表單，你的指揮中心就先就位了！</p>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-800/90 border border-slate-700 flex items-start gap-3">
+                <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white font-black flex items-center justify-center shrink-0">2</span>
+                <div>
+                  <div class="font-bold text-white text-sm">照著戰情表指示 ➔ 一步一檢核完成任務</div>
+                  <p class="text-slate-300 mt-1 leading-relaxed">戰情表內建 <strong>7 項行政檢核</strong> 與 <strong>全校教學單位母表對照</strong>。每完成一步、核對一項，進度條與勾選就往前推進一格。</p>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-800/90 border border-amber-500/50 flex items-start gap-3">
+                <span class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-black flex items-center justify-center shrink-0">3</span>
+                <div>
+                  <div class="font-bold text-amber-300 text-sm">預設私密超安心 ➔ 分享長官一秒掌握進度</div>
+                  <p class="text-slate-300 mt-1 leading-relaxed">發布後只有你看得到（其他人完全看不到）。長官關心進度時，不用另外寫報告，直接把戰情表分享給長官，長官就能即時看到工作進行到哪了！</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 1：核心觀念對比（傳統行政 vs AI 戰情室模式）
+       ===================================================================== -->
+  <section id="sec-core" class="py-12 max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center max-w-3xl mx-auto mb-8">
+      <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-800">一、先了解這套工作流</span>
+      <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">為什麼「1 個總控 ＋ 9 個執行打工仔」能拯救行政日常？</h2>
+      <p class="text-xs sm:text-sm text-slate-600 mt-2">
+        重要觀念：<strong>十個技能不是十個必須一口氣跑完的無腦按鈕</strong>。真實行政流程需要等待長官簽核、等待老師報名與回信；把重複操作交給 AI，把內容判斷與確認留給自己！
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 過去痛點 -->
+      <div class="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm">
+        <div class="flex items-center gap-2.5 text-rose-700 font-black text-base mb-4">
+          <span class="text-2xl">😵‍💫</span>
+          <span>以前的行政日常：檔案四散、進度靠腦袋硬記</span>
+        </div>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-700">
+          <li class="flex items-start gap-2"><span class="text-rose-500 font-bold">✘</span><span>每封招募信、行前通知都要重打活動時間、地點與自己的聯絡署名。</span></li>
+          <li class="flex items-start gap-2"><span class="text-rose-500 font-bold">✘</span><span>Google 表單忘了開「收集 Email」或「自動回條」，老師填完一直打電話問有沒有報名成功。</span></li>
+          <li class="flex items-start gap-2"><span class="text-rose-500 font-bold">✘</span><span>長官臨時問「現在哪幾個系報名了？公文簽了沒？」，得臨時翻信箱、算 Excel 算半天。</span></li>
+          <li class="flex items-start gap-2"><span class="text-rose-500 font-bold">✘</span><span>收回來的成果 Word 檔名都叫《活動成果.docx》，存進資料夾不小心就互相覆蓋，還分不清誰幫誰代寄。</span></li>
+        </ul>
+      </div>
+
+      <!-- 現在做法 -->
+      <div class="bg-gradient-to-br from-blue-50 to-emerald-50 p-6 rounded-2xl border-2 border-emerald-400 shadow-sm">
+        <div class="flex items-center gap-2.5 text-emerald-900 font-black text-base mb-4">
+          <span class="text-2xl">😎</span>
+          <span>現在的 AI 戰情室工作流：有條不紊、步步留證據</span>
+        </div>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-800">
+          <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✔</span><span><strong>先開戰情表再做事：</strong>第 01 步建好唯一資料夾與署名檔，第 02 步立刻生出戰情表掌握 7 大檢核。</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✔</span><span><strong>嚴格安全邊界：</strong>AI 絕對不會把「寫完草稿」當「已寄出」，也不會把「做完公文 Word」當「已送簽核准」。</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✔</span><span><strong>母表減法自動對照：</strong>自動比對全校教學單位母表，一秒看出「已報名單位 vs 未報名單位」與待核對暱稱。</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">✔</span><span><strong>隱私與匯報兼顧：</strong>戰情表與成果站預設僅自己可見（Owner-Private），分享連結給長官就能即時看進度！</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 2：前置作業：上工前裝備檢查站（互動勾選 ＋ 四種身分 ＋ 技能安裝 ＋ 檔案樹）
+       ===================================================================== -->
+  <section id="sec-prereq" class="py-12 bg-slate-100 border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-200 text-amber-900">二、前置作業（非常重要！）</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">🧰 上課或啟動新專案前：裝備檢查站</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            工欲善其事，必先利其器！點擊下方清單逐一檢核你的環境（系統會自動為你記住勾選進度）。
+          </p>
+        </div>
+        <button onclick="checkAllPrereqs()" class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 shadow-sm">
+          ☑️ 全選 ／ 重設檢核清單
+        </button>
+      </div>
+
+      <!-- 2.1 互動勾選清單與進度條 -->
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-800">📋 2.1 帳號、桌面環境與工具權限準備度</span>
+          <span id="prereq-progress-text" class="text-xs font-bold text-emerald-700">已完成 0 / 7 項 (0%)</span>
+        </div>
+        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-5 border border-slate-200">
+          <div id="prereq-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div id="prereq-checklist-container" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+      </div>
+
+      <!-- 2.1 重點觀念：四種身分要分清楚 -->
+      <div>
+        <div class="mb-4">
+          <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+            <span>🪪</span>
+            <span>必考觀念：「四種身分」要分清楚，不可互相推定！</span>
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            這四種身分可能是同一個信箱，也可能完全不同。AI 絕不會因為你登入了某個帳號，就擅自替你決定其他三個身分！
+          </p>
+        </div>
+        <div id="four-identities-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      </div>
+
+      <!-- 2.2 安裝技能包 ＆ 2.3 工作區資料夾樹狀探索器 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 左：2.2 安裝技能包 5 步驟與準備資料表 -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 shadow">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-black text-base text-amber-300">📦 2.2 安裝招生版技能包 ZIP（5 步驟）</h3>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-400/30">安裝技能 ≠ 已登入工具</span>
+            </div>
+            <ol class="space-y-2 text-xs text-slate-200 mb-4">
+              <li><strong>1. 下載 ZIP：</strong>確認講師提供的招生版 ZIP 內含 1 個總控與 9 個執行技能。</li>
+              <li><strong>2. 拖入桌面 Codex：</strong>在可處理本機檔案的桌面 Codex 開啟專案，將 ZIP 拖入（一般網頁聊天無法安裝到桌面環境）。</li>
+              <li><strong>3. 下達安裝檢查指令：</strong>複製下方指令請 AI 安裝並檢查每個資料夾的 <code class="text-sky-300">SKILL.md</code> 與依賴。</li>
+              <li><strong>4. 確認可讀取：</strong>不能只看到 ZIP 就說安裝成功，必須確認 10 個技能都能讀取。</li>
+              <li><strong>5. 介面呼叫：</strong>輸入 <code class="text-amber-300">@</code> 選擇 <code class="text-amber-300">activityagent</code>（這是對話操作示意，不是終端機指令）。</li>
+            </ol>
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+              <p id="install-skill-prompt" class="text-xs font-mono-code text-emerald-300 leading-relaxed">請檢查這份招生技能包，安裝到我的個人技能目錄，保留既有不同用途技能；若有同名版本先告訴我差異。安裝後確認十個技能都能讀取。</p>
+              <button onclick="copyTextToClipboard(document.getElementById('install-skill-prompt').textContent, '安裝技能包指令')"
+                      class="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shrink-0">
+                📋 複製安裝咒語
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="font-black text-base text-slate-900 mb-2">📂 2.3 專案工作區需要準備哪些資料？（缺件也不卡關！）</h3>
+            <p class="text-xs text-slate-600 mb-3">只檢查當前階段所需工具。例如 Sites 尚未連好，仍可先整理活動與建立本機戰情表！</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b-2 border-slate-200 bg-slate-50 text-[11px] text-slate-600">
+                    <th class="py-2 px-3">準備資料</th>
+                    <th class="py-2 px-3">用途</th>
+                    <th class="py-2 px-3">尚未準備好時怎麼辦？</th>
+                  </tr>
+                </thead>
+                <tbody id="workspace-materials-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：互動式專案資料夾樹狀預覽器 (對應手冊第十五節) -->
+        <div class="lg:col-span-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-black text-base text-slate-900">🌲 互動式資料夾結構預覽（換電腦也能一秒接續）</h3>
+              <span class="text-xs font-bold text-blue-600">點擊下方檔案看用途 👇</span>
+            </div>
+            <p class="text-xs text-slate-600 mb-4">
+              所有產出都乖乖放在同一個活動資料夾下。點擊任一檔案，看看它是哪個打工仔產出的、裡面裝了什麼秘密：
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+              <div id="file-tree-list" class="sm:col-span-6 bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1 max-h-80 overflow-y-auto"></div>
+              <div id="file-tree-detail" class="sm:col-span-6 bg-white p-4 rounded-xl border-2 border-blue-200 flex flex-col justify-center"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-950">
+            <strong>💻 跨電腦接續 3 步口訣：</strong>① 確認雲端硬碟已同步完整資料夾與最新 Excel ➔ ② 在新電腦重新登入连接工具（不複製他人密碼憑證）➔ ③ 呼叫 <code class="font-mono-code font-bold">@activityagent</code> 說「接續既有活動，先讀工作進度，告訴我停在哪裡」！
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 3：戰情表核心解密（A/B/C 三模式切換 ＋ 7 大檢核 ＋ 隱私與長官分享模擬器）
+       ===================================================================== -->
+  <section id="sec-warroom" class="py-14 max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+    <div class="text-center max-w-3xl mx-auto">
+      <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">三、核心靈魂：戰情表先行 ＆ 隱私分享機制</span>
+      <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">🛡️ 為什麼「戰情表 (CreateSite)」會出場三次？</h2>
+      <p class="text-xs sm:text-sm text-slate-600 mt-2">
+        接到任務時先分析、啟動戰情表，之後再開始做事！點擊下方按鈕切換 <strong>A / B / C 三種模式</strong>，看看戰情表如何隨著你的進度步步進化：
+      </p>
+    </div>
+
+    <!-- A/B/C 模式切換按鈕 -->
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <button id="btn-warroom-modeA" onclick="switchWarRoomMode('modeA')">🏠 A 模式：剛建檔完（本機草稿）</button>
+      <button id="btn-warroom-modeB" onclick="switchWarRoomMode('modeB')">🌐 B 模式：表單完成後（補雙連結＆首次發布）</button>
+      <button id="btn-warroom-modeC" onclick="switchWarRoomMode('modeC')">📊 C 模式：報名更新後（單位母表對照＆檢核推進）</button>
+    </div>
+
+    <!-- 動態戰情表模擬容器 -->
+    <div id="warroom-mode-content"></div>
+
+    <!-- 7 項行政檢核詳細規則 -->
+    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div>
+          <h3 class="text-lg font-black text-slate-900">✅ 戰情表內建「七項行政檢核」防呆守則</h3>
+          <p class="text-xs text-slate-600">「人工勾選」與「機器證據」分開保存！每一步都有嚴格把關，讓你百分百掌握任務進度：</p>
+        </div>
+        <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-900">名單改動時自動提示重新核對，但不洗掉既有歷史勾選！</span>
+      </div>
+      <div id="seven-checklists-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+    </div>
+
+    <!-- 🔒 隱私權保護 (owner-private) 與長官分享互動模擬器 -->
+    <div class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-blue-500/40 shadow-xl space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">🔒 隱私權與長官匯報神器</span>
+          <h3 class="text-xl sm:text-2xl font-black mt-2">任務發布後「只有你看得到」，想讓長官看進度一鍵分享即可！</h3>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+            很多同仁擔心：「戰情表跟成果網站發布到網路上，會不會被外人看到名單？」請放心！系統預設為 <strong>Owner-Private（私人專屬）</strong>。切換下方三種視角親自體驗：
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button id="btn-privacy-private" onclick="switchPrivacyView('private')">👩‍💻 視角 1：承辦人自己看</button>
+          <button id="btn-privacy-stranger" onclick="switchPrivacyView('stranger')">🚫 視角 2：外人／其他人看</button>
+          <button id="btn-privacy-boss" onclick="switchPrivacyView('boss')">👔 視角 3：分享給長官看進度</button>
+        </div>
+      </div>
+
+      <div id="privacy-simulator-stage"></div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 4：10 個打工仔「一步一步」互動進度條 ＆ 擬真示意圖 (核心要求 1 & 2)
+       ===================================================================== -->
+  <section id="sec-stepper" class="py-14 bg-gradient-to-b from-slate-100 to-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-600 text-white">四、10 個打工仔一步一步互動圖解（支援鍵盤 ◀ ▶ 切換）</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">🚀 點擊任一步驟：看懂「完成後能達成什麼」＆「運作示意圖」</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            包含 <strong>1 個總控包工頭（ActivityAgent）</strong> 與 <strong>9 個專職執行打工仔（01 ~ 09）</strong>。點擊下方進度條節點立即展開圖解！
+          </p>
+        </div>
+        <div class="w-full sm:w-64 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+            <span>探索進度</span>
+            <span id="skill-overall-progress-text" class="text-blue-600">1 / 10</span>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="skill-overall-progress-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 10%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10 步驟進度條導覽網格 -->
+      <div id="skill-stepper-nav" class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2"></div>
+
+      <!-- 當前步驟詳細圖解與示意圖舞台 -->
+      <div id="skill-stepper-detail"></div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 5：高雄高商 5 回合實戰劇場 ＆ 15 個等待點速查表
+       ===================================================================== -->
+  <section id="sec-theater" class="py-14 bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+      <!-- 5 回合實戰劇場 -->
+      <div class="space-y-6">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-500 text-slate-950">五、情境演練：一次不是全部跑完！</span>
+            <h2 class="text-2xl sm:text-3xl font-black mt-2">🎬 1151219 高雄高商大學博覽會：5 回合真實對話節奏</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+              真實工作流會在「等待報名、等待長官簽核、等待活動舉辦」時自然停下來。點擊下方 5 個回合，體驗承辦人與 AI 的真實互動節奏：
+            </p>
+          </div>
+          <div id="theater-round-tabs" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div id="theater-round-content"></div>
+      </div>
+
+      <!-- 15 個等待點白話速查表 (白色卡片區) -->
+      <div class="bg-white text-slate-900 p-5 sm:p-7 rounded-3xl shadow-xl space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">手冊第 14 節精華</span>
+            <h3 class="text-xl font-black text-slate-900 mt-1">🛑 所有等待點速查表：停在哪裡、什麼不能偷做、下一句怎麼接？</h3>
+            <p class="text-xs text-slate-600 mt-0.5">
+              記住黃金守則：<strong>沒有回覆、預選選項、或時間經過，都不算同意！</strong>遇到等待點時，複製右方語句就能精準接續。
+            </p>
+          </div>
+          <div id="wait-states-filter" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                <th class="py-3 px-3">等待情境（停在哪裡）</th>
+                <th class="py-3 px-3">此時已可完成的工作</th>
+                <th class="py-3 px-3">絕對不能先偷做的事（安全護欄）</th>
+                <th class="py-3 px-3">下一句接續語句示例（一鍵複製）</th>
+              </tr>
+            </thead>
+            <tbody id="wait-states-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       模組 6：「拆解我的行政工作」互動工作坊（讓同仁舉一反三拆解自己的業務）
+       ===================================================================== -->
+  <section id="sec-deconstruct" class="py-14 max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+    <div class="text-center max-w-3xl mx-auto">
+      <span class="text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-900">六、舉一反三：拆解你自己的日常業務</span>
+      <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">🧩 我的行政工作拆解工坊：打造你的專屬「戰情表＋AI 打工仔」</h2>
+      <p class="text-xs sm:text-sm text-slate-600 mt-2">
+        看完招生博覽會的 10 個打工仔，你手邊有哪些行政工作也能用<strong>「先開戰情表 ➔ 步步檢核 ➔ 預設私密分享長官」</strong>來完成？點選下方常見業務範本或自由修改，立即產出你的專屬 AI 啟動藍圖！
+      </p>
+    </div>
+
+    <!-- 範本快速切換按鈕 -->
+    <div class="flex flex-wrap items-center justify-center gap-2.5">
+      <button onclick="loadDeconstructTemplate('workshop')" class="px-4 py-2 rounded-xl bg-white border-2 border-blue-200 hover:border-blue-500 text-xs font-bold text-slate-800 shadow-sm transition-all">
+        📚 範本 1：辦理校內教師研習／工作坊
+      </button>
+      <button onclick="loadDeconstructTemplate('evaluation')" class="px-4 py-2 rounded-xl bg-white border-2 border-blue-200 hover:border-blue-500 text-xs font-bold text-slate-800 shadow-sm transition-all">
+        📋 範本 2：系所評鑑／計畫佐證資料催繳
+      </button>
+      <button onclick="loadDeconstructTemplate('committee')" class="px-4 py-2 rounded-xl bg-white border-2 border-blue-200 hover:border-blue-500 text-xs font-bold text-slate-800 shadow-sm transition-all">
+        🏛️ 範本 3：委員會會議通知與出席調查
+      </button>
+      <button onclick="loadDeconstructTemplate('custom')" class="px-4 py-2 rounded-xl bg-amber-50 border-2 border-amber-300 hover:border-amber-500 text-xs font-bold text-amber-900 shadow-sm transition-all">
+        ✨ 範本 4：自訂我的日常行政業務
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- 左：4 步工作拆解表單 -->
+      <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h3 class="font-black text-base text-slate-900 border-b pb-2">✏️ 調整你的業務拆解設定（即時連動右側藍圖）</h3>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">1. 你的行政任務名稱：</label>
+          <input id="dc-task-name" oninput="generateCustomBlueprint()" type="text"
+                 class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">2. 任務目標與期望省下的麻煩：</label>
+          <textarea id="dc-task-goal" oninput="generateCustomBlueprint()" rows="2"
+                    class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">3. 第一步建檔需確認的基本資料（InitActivity）：</label>
+          <input id="dc-init-data" oninput="generateCustomBlueprint()" type="text"
+                 class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-emerald-800 mb-1">4. 放進「戰情表」一步一步追蹤的檢核項目（每行一項）：</label>
+          <textarea id="dc-checklists" oninput="generateCustomBlueprint()" rows="5"
+                    class="w-full px-3 py-2 rounded-lg border border-emerald-300 bg-emerald-50/30 text-xs focus:outline-none focus:border-emerald-600"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-amber-800 mb-1">5. 哪些關鍵點必須「停下來等你親自確認」（每行一項）：</label>
+          <textarea id="dc-wait-points" oninput="generateCustomBlueprint()" rows="3"
+                    class="w-full px-3 py-2 rounded-lg border border-amber-300 bg-amber-50/30 text-xs focus:outline-none focus:border-amber-600"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">6. 預計產出的標準檔案與私人網站：</label>
+          <input id="dc-outputs" oninput="generateCustomBlueprint()" type="text"
+                 class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- 右：即時生成的任務拆解藍圖與啟動咒語 -->
+      <div id="dc-blueprint-preview" class="lg:col-span-7"></div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       底部：12 項活動交接總檢核與頁尾 (對應手冊第十七節)
+       ===================================================================== -->
+  <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <h4 class="text-white font-bold text-sm mb-3">📋 完美結案與跨人交接 12 大黃金守則（手冊第 17 節總整理）</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs text-slate-300">
+          <div>✔ 1. 活動代號、根目錄與承辦人一致</div>
+          <div>✔ 2. 表單短網址與實際回覆 Sheet 配對已驗證</div>
+          <div>✔ 3. 原戰情表網址、原始碼與人工檢核已保存</div>
+          <div>✔ 4. 群組信草稿、兩次確認與寄發證據可追溯</div>
+          <div>✔ 5. 最新 Excel 具下載時間、來源與 SHA-256</div>
+          <div>✔ 6. 有效報名經人工核對，變更者有複核提示</div>
+          <div>✔ 7. Word 草稿與正式公文分開，附件用途已核對</div>
+          <div>✔ 8. 行前通知帳號、名單、全文及附件已審閱</div>
+          <div>✔ 9. 成果作者、代寄關係、原檔及紀錄可追溯</div>
+          <div>✔ 10. 電子成果、內容審核與紙本收訖三軌分開</div>
+          <div>✔ 11. 成果站保留來源對照，未繳事項不消失</div>
+          <div>✔ 12. 工作進度.json 寫明下一步與接續方式</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-4 text-xs">
+        <div>
+          依據文件：<span class="text-slate-200 font-medium">《10 個打工仔：招生行政 Skill 完整工作流》</span>（整理日期：2026 年 10 月 19 日）
+        </div>
+        <a href="#top" class="text-amber-400 hover:text-amber-300 font-bold">▲ 回到頂部</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 全域複製成功 Toast 通知 -->
+  <div id="global-toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-500/50 flex items-center gap-2.5 transition-all duration-300 toast-hidden">
+    <span id="global-toast-msg" class="text-xs sm:text-sm font-bold text-emerald-300">✅ 已複製！</span>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
