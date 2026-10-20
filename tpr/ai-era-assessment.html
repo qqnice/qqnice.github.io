@@ -1,0 +1,1455 @@
+---
+title: AI 時代的評量與論文答辯
+description: 防範 AI 作弊的課程評量設計、AI 時代評量方式的改變與論文答辯的角色：新聞專題、Google Scholar 文獻總整與評量方式深入分析（two-lane、AIAS、口試、過程評量）
+---
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>AI 時代評量與論文答辯研究報告素材</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f7f5f1;
+        --surface: #fffdf9;
+        --surface-2: #efece5;
+        --ink: #211d18;
+        --ink-2: #4c463d;
+        --muted: #7a7264;
+        --line: #ddd6c9;
+        --accent: #9e2b25;
+        --accent-soft: #f6e3e1;
+        --teal: #175e63;
+        --teal-soft: #ddeeed;
+        --grade-a: #1d6f4e;
+        --grade-b: #20508a;
+        --grade-c: #96690d;
+        --grade-d: #6e6259;
+        --warn-bg: #fdf3e0;
+        --warn-line: #e3c98a;
+        --warn-ink: #6d5410;
+        --shadow: 0 1px 2px rgba(40, 32, 20, .06), 0 8px 24px rgba(40, 32, 20, .05);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #171410;
+          --surface: #211d18;
+          --surface-2: #2a251f;
+          --ink: #ece5d8;
+          --ink-2: #c9c0b0;
+          --muted: #9a9081;
+          --line: #3d372e;
+          --accent: #e08a80;
+          --accent-soft: #3d2422;
+          --teal: #7fc4c9;
+          --teal-soft: #1d3234;
+          --grade-a: #7cc9a4;
+          --grade-b: #8db4e0;
+          --grade-c: #ddb45e;
+          --grade-d: #b3a696;
+          --warn-bg: #332a16;
+          --warn-line: #6b5a2a;
+          --warn-ink: #e8cd8a;
+          --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+        font-size: 16px;
+        line-height: 1.75;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+
+      /* ---------- masthead ---------- */
+      .masthead { padding: 44px 0 8px; }
+      .dateline {
+        display: flex; flex-wrap: wrap; gap: 6px 18px;
+        font-size: 13px; color: var(--muted); letter-spacing: .04em;
+        border-bottom: 1px solid var(--line); padding-bottom: 12px;
+      }
+      h1 {
+        font-family: "Noto Serif TC", serif; font-weight: 900;
+        font-size: clamp(30px, 5.4vw, 46px); line-height: 1.25;
+        margin: 22px 0 10px; letter-spacing: .01em;
+      }
+      h1 .accent { color: var(--accent); }
+      .lede { font-size: clamp(16px, 2.4vw, 19px); color: var(--ink-2); max-width: 46em; margin: 0 0 6px; }
+      .lede strong { color: var(--ink); }
+
+      /* ---------- key stats ---------- */
+      .stats {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+        margin: 26px 0 6px;
+      }
+      .stat {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 18px 18px 14px; box-shadow: var(--shadow);
+      }
+      .stat .num {
+        font-family: "Noto Serif TC", serif; font-weight: 900;
+        font-size: clamp(34px, 5vw, 46px); line-height: 1; color: var(--accent);
+      }
+      .stat .what { font-weight: 700; margin-top: 8px; font-size: 15px; line-height: 1.5; }
+      .stat .src { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+      /* ---------- sticky nav ---------- */
+      nav.toc {
+        position: sticky; top: 0; z-index: 40;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--line);
+        margin-top: 26px;
+      }
+      nav.toc .wrap { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding-top: 0; padding-bottom: 0; }
+      nav.toc .wrap::-webkit-scrollbar { display: none; }
+      nav.toc a {
+        flex: 0 0 auto; color: var(--ink-2); font-size: 14px; font-weight: 500;
+        padding: 11px 12px; border-bottom: 2px solid transparent; white-space: nowrap;
+      }
+      nav.toc a:hover { text-decoration: none; color: var(--ink); }
+      nav.toc a.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+
+      /* ---------- sections ---------- */
+      section { padding: 40px 0 6px; scroll-margin-top: 64px; }
+      .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+      .sec-no {
+        font-family: "Noto Serif TC", serif; font-weight: 900; font-size: 15px;
+        color: var(--accent); border: 1.5px solid var(--accent); border-radius: 50%;
+        width: 30px; height: 30px; flex: 0 0 30px;
+        display: inline-flex; align-items: center; justify-content: center;
+        transform: translateY(6px);
+      }
+      h2 { font-family: "Noto Serif TC", serif; font-weight: 900; font-size: clamp(23px, 3.6vw, 30px); line-height: 1.35; margin: 0; }
+      .sec-sub { color: var(--ink-2); max-width: 48em; margin: 8px 0 20px; }
+      h3 { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 19px; margin: 30px 0 10px; }
+      p { margin: 0 0 12px; }
+      ul.tight { margin: 0 0 14px; padding-left: 1.3em; }
+      ul.tight li { margin-bottom: 7px; }
+      .small { font-size: 13.5px; color: var(--muted); }
+
+      /* ---------- grade badges & legend ---------- */
+      .grade {
+        display: inline-block; font-size: 11.5px; font-weight: 700; line-height: 1;
+        padding: 4px 7px; border-radius: 4px; letter-spacing: .03em; vertical-align: 2px;
+        border: 1px solid currentColor; white-space: nowrap;
+      }
+      .g-a { color: var(--grade-a); } .g-b { color: var(--grade-b); }
+      .g-c { color: var(--grade-c); } .g-d { color: var(--grade-d); }
+      .legend {
+        display: flex; flex-wrap: wrap; gap: 8px 20px;
+        background: var(--surface-2); border-radius: 8px; padding: 12px 16px;
+        font-size: 13.5px; color: var(--ink-2); margin: 18px 0 4px;
+      }
+      .legend b { color: var(--ink); }
+
+      /* ---------- exec summary ---------- */
+      .points { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .point {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 16px 18px; box-shadow: var(--shadow);
+      }
+      .point .n {
+        font-family: "Noto Serif TC", serif; font-weight: 900; color: var(--accent);
+        font-size: 20px; line-height: 1;
+      }
+      .point h4 { margin: 8px 0 6px; font-size: 16px; line-height: 1.5; }
+      .point p { font-size: 14.5px; color: var(--ink-2); margin: 0; }
+
+      /* ---------- article cards ---------- */
+      .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 18px 20px; box-shadow: var(--shadow); display: flex; flex-direction: column;
+      }
+      .card .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+      .card h4 { font-family: "Noto Serif TC", serif; font-size: 17px; line-height: 1.5; margin: 0 0 8px; font-weight: 700; }
+      .card p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 8px; }
+      .card .take { font-size: 14px; color: var(--ink-2); background: var(--surface-2); border-radius: 6px; padding: 9px 12px; margin-top: auto; }
+      .card .take b { color: var(--accent); }
+      .card .src-link { font-size: 13px; margin-top: 10px; word-break: break-all; }
+      .warn {
+        background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-ink);
+        border-radius: 8px; padding: 12px 16px; font-size: 14px; margin: 14px 0;
+      }
+      .warn b { font-weight: 700; }
+
+      /* ---------- timeline ---------- */
+      .tl { border-top: 1px solid var(--line); }
+      .tl-row {
+        display: grid; grid-template-columns: 92px 1fr auto; gap: 6px 16px;
+        padding: 13px 4px; border-bottom: 1px solid var(--line); align-items: baseline;
+      }
+      .tl-row .when { font-family: "Noto Serif TC", serif; font-weight: 700; color: var(--accent); font-size: 15px; white-space: nowrap; }
+      .tl-row .what b { font-weight: 700; }
+      .tl-row .what { font-size: 15px; color: var(--ink-2); }
+      .tl-row .what b { color: var(--ink); }
+
+      /* ---------- axes ---------- */
+      .axes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .axis { border-left: 3px solid var(--teal); padding: 4px 0 4px 14px; }
+      .axis h4 { margin: 0 0 4px; font-size: 16px; }
+      .axis p { font-size: 14.5px; color: var(--ink-2); margin: 0; }
+
+      /* ---------- literature ---------- */
+      .lit-tools {
+        display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 6px;
+      }
+      .lit-tools input[type="search"] {
+        flex: 1 1 220px; font: inherit; font-size: 15px;
+        padding: 9px 14px; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--surface); color: var(--ink);
+      }
+      .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+      .chip {
+        font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;
+        padding: 6px 13px; border-radius: 999px;
+        border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+      }
+      .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+      @media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: #1c1210; } }
+      .lit-count { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+      .lit-item {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        margin-bottom: 10px; box-shadow: var(--shadow); overflow: hidden;
+      }
+      .lit-head {
+        display: grid; grid-template-columns: 34px 1fr auto; gap: 4px 12px;
+        padding: 14px 16px; cursor: pointer; align-items: start;
+        background: none; border: 0; width: 100%; text-align: left; font: inherit; color: inherit;
+      }
+      .lit-head:hover { background: var(--surface-2); }
+      .lit-idx { font-family: "Noto Serif TC", serif; font-weight: 900; color: var(--muted); font-size: 17px; }
+      .lit-title { font-weight: 700; font-size: 15.5px; line-height: 1.55; }
+      .lit-cite { font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.6; }
+      .lit-core { font-size: 14.5px; color: var(--ink-2); margin-top: 5px; line-height: 1.65; }
+      .lit-toggle { color: var(--accent); font-size: 13px; font-weight: 700; white-space: nowrap; padding-top: 3px; }
+      .lit-body { display: none; padding: 2px 16px 16px 62px; font-size: 14.5px; color: var(--ink-2); }
+      .lit-item.open .lit-body { display: block; }
+      .lit-body p { margin: 0 0 8px; }
+      .lit-body .lbl { font-weight: 700; color: var(--ink); }
+      .lit-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .btn {
+        font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+        padding: 6px 13px; border-radius: 6px; border: 1px solid var(--accent);
+        color: var(--accent); background: transparent;
+      }
+      .btn:hover { background: var(--accent-soft); }
+      .btn.solid { background: var(--accent); color: #fff; }
+      @media (prefers-color-scheme: dark) { .btn.solid { color: #1c1210; } }
+      .empty-note { display: none; padding: 22px; text-align: center; color: var(--muted); font-size: 14.5px; }
+
+      /* ---------- modes grid ---------- */
+      .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+      .mode {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 18px 20px; box-shadow: var(--shadow);
+      }
+      .mode h4 { font-family: "Noto Serif TC", serif; margin: 0 0 4px; font-size: 18px; }
+      .mode .en { font-size: 12.5px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+      .mode dl { margin: 10px 0 0; font-size: 14px; }
+      .mode dt { font-weight: 700; color: var(--teal); margin-top: 9px; }
+      .mode dd { margin: 2px 0 0; color: var(--ink-2); }
+      .consensus {
+        margin-top: 16px; background: var(--teal-soft); border-radius: 10px; padding: 16px 20px;
+        font-size: 15px; color: var(--ink);
+      }
+      .consensus b { color: var(--teal); }
+
+      /* ---------- layers / viva ---------- */
+      .layers { counter-reset: layer; }
+      .layer { display: grid; grid-template-columns: 130px 1fr; gap: 4px 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .layer .lname { font-family: "Noto Serif TC", serif; font-weight: 700; color: var(--accent); }
+      .layer p { margin: 0; font-size: 15px; color: var(--ink-2); }
+      .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+      .func { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .func .f {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 16px 18px; box-shadow: var(--shadow);
+      }
+      .func .f h4 { margin: 0 0 6px; font-family: "Noto Serif TC", serif; font-size: 17px; color: var(--accent); }
+      .func .f p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+
+      /* ---------- quotes ---------- */
+      .quote {
+        border-left: 3px solid var(--accent); padding: 6px 0 6px 16px; margin: 0 0 16px;
+      }
+      .quote .q { font-family: "Noto Serif TC", serif; font-size: 17.5px; font-weight: 700; line-height: 1.6; }
+      .quote .a { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+
+      /* ---------- outline ---------- */
+      .outline { counter-reset: ch; }
+      .outline li { margin-bottom: 9px; }
+      .outline b { color: var(--ink); }
+
+      /* ---------- deep-dive tables ---------- */
+      table.tbl {
+        width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.6;
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        box-shadow: var(--shadow); margin: 14px 0 8px;
+      }
+      .tbl th, .tbl td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+      .tbl thead th { background: var(--surface-2); font-size: 13px; letter-spacing: .03em; white-space: nowrap; }
+      .tbl tbody tr:last-child td { border-bottom: 0; }
+      .tbl td:first-child { font-weight: 700; }
+      .tbl .lane1 { color: var(--accent); font-weight: 700; white-space: nowrap; }
+      .tbl .lane2 { color: var(--teal); font-weight: 700; white-space: nowrap; }
+
+      /* ---------- footer ---------- */
+      footer { border-top: 1px solid var(--line); margin-top: 48px; padding: 26px 0 46px; }
+      footer p { font-size: 13.5px; color: var(--muted); margin: 0 0 8px; }
+
+      .toast {
+        position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+        background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600;
+        padding: 10px 20px; border-radius: 8px; opacity: 0; pointer-events: none;
+        transition: opacity .25s, transform .25s; z-index: 99; max-width: 88vw; text-align: center;
+      }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+      @media (max-width: 760px) {
+        .stats, .points, .cards, .axes, .cols2, .func { grid-template-columns: 1fr; }
+        .tl-row { grid-template-columns: 76px 1fr; }
+        .tl-row .grade { grid-column: 2; justify-self: start; }
+        .layer { grid-template-columns: 1fr; gap: 2px; }
+        .lit-body { padding-left: 16px; }
+        .tbl thead { display: none; }
+        .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
+        .tbl tr { border-bottom: 1px solid var(--line); padding: 6px 0; }
+        .tbl tbody tr:last-child { border-bottom: 0; }
+        .tbl td { border-bottom: 0; padding: 3px 14px; }
+        .tbl td::before { content: attr(data-th) "："; font-weight: 700; color: var(--teal); }
+        .tbl td:first-child { font-size: 15.5px; padding-top: 7px; }
+        .tbl td:first-child::before { content: ""; }
+        .lit-head { grid-template-columns: 26px 1fr auto; padding: 12px 12px; }
+        section { padding-top: 32px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="masthead wrap">
+      <div class="dateline">
+        <span>研究報告素材總整</span>
+        <span>整理日期：2026 年 10 月 9 日</span>
+        <span>範圍：新聞專題・機構指引・Google Scholar 學術文獻</span>
+      </div>
+      <h1>AI 時代的<span class="accent">評量變革</span>與<span class="accent">論文答辯</span></h1>
+      <p class="lede">當生成式 AI 能在數分鐘內產出一份結構完整的作業，「作品」不再能證明「誰做了思考」。本頁彙整指定新聞專題 5 篇、國際政策脈絡與 <strong>22 篇學術文獻</strong>，並做主題綜合分析——核心問題不是如何抓作弊，而是<strong>在人人可用 AI 的前提下，如何取得可信的學習證據</strong>。第 6 節「評量方式深入探討」進一步逐項拆解七種評量方式的機制、實證、成本與公平取捨，附四軸比較總表與一份可套用的資管系課程設計範例。</p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="num">94%</div>
+          <div class="what">AI 產出的考卷混入真實大學評量，未被閱卷者識破的比例——且平均成績高於真學生</div>
+          <div class="src">Scarfe et al. (2024)，Reading 大學盲測，PLOS ONE［A 級文獻］</div>
+        </div>
+        <div class="stat">
+          <div class="num">61.3%</div>
+          <div class="what">非母語者親筆寫的 TOEFL 作文，被 AI 偵測器平均誤判為 AI 產出的比例</div>
+          <div class="src">Liang et al. (2023)，Patterns［A 級文獻］</div>
+        </div>
+        <div class="stat">
+          <div class="num">92%</div>
+          <div class="what">英國本科生使用生成式 AI 的比例，其中 88% 用於評量作業——AI 使用已是常態而非邊緣違規</div>
+          <div class="src">HEPI／Kortext 學生調查 2025（n=1,041）［B 級調查］</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><b>來源分級：</b></span>
+        <span><span class="grade g-a">A</span> 同儕審查文獻</span>
+        <span><span class="grade g-b">B</span> 機構／監管報告（TEQSA、UNESCO、OECD、大學正式文件）</span>
+        <span><span class="grade g-c">C</span> 新聞報導</span>
+        <span><span class="grade g-d">D</span> 觀點／專欄／部落格（不得寫成學術共識）</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="章節導覽">
+      <div class="wrap">
+        <a href="#summary">執行摘要</a>
+        <a href="#articles">指定文章</a>
+        <a href="#timeline">時間線與爭論</a>
+        <a href="#literature">學術文獻</a>
+        <a href="#analysis">主題分析</a>
+        <a href="#methods">評量方式深探</a>
+        <a href="#viva">論文答辯</a>
+        <a href="#taiwan">台灣脈絡</a>
+        <a href="#toolkit">報告寫作工具箱</a>
+        <a href="#unverified">未能驗證</a>
+      </div>
+    </nav>
+
+    <main class="wrap">
+
+      <!-- ============ 1 執行摘要 ============ -->
+      <section id="summary">
+        <div class="sec-head"><span class="sec-no">1</span><h2>執行摘要：衝擊的本質是「效度崩解」</h2></div>
+        <p class="sec-sub">AI 對傳統評量的根本衝擊，不是作弊變多，而是 take-home essay／回家報告的推論鏈——「作品品質 → 學生能力」——斷裂了。以下八點是整份素材的主軸。</p>
+        <div class="points">
+          <div class="point"><div class="n">01</div><h4>作品不再能單獨證明學習</h4><p>生成式 AI 能產出結構完整、文筆流暢的成品。雪梨大學 two-lane 說明與 Dawson 在 TEQSA 論壇的闡述都把 validity（效度）放在核心；無法執行的 AI 禁令本身也會傷害效度。</p></div>
+          <div class="point"><div class="n">02</div><h4>偵測路線在實證上站不住腳</h4><p>偵測器整體準確率不足、經改寫即大幅崩跌、且系統性誤判非母語寫作者。多所大學已停用，或禁止以偵測分數作為處分證據。</p></div>
+          <div class="point"><div class="n">03</div><h4>「AI 可得高分且不被發現」已被盲測證實</h4><p>Reading 大學將 GPT-4 產出的考卷混入真實評量，94% 未被識破且平均成績高於真學生（Scarfe et al. 2024）。「加強抓作弊」無法回復舊評量的可信度。</p></div>
+          <div class="point"><div class="n">04</div><h4>學生使用 AI 已成常態</h4><p>英國 HEPI 2025 調查（n=1,041）：92% 學生使用生成式 AI、88% 用於評量作業。政策問題已從「抓少數作弊者」轉為「如何取得可信的學習證據」。</p></div>
+          <div class="point"><div class="n">05</div><h4>國際共識：雙軌／分級，而非禁絕或放任</h4><p>一部分評量在受控、現場、口語條件下「保證學習成果」，另一部分公開允許並教導 AI 協作。代表：澳洲 TEQSA 改革文件、雪梨大學 two-lane、AIAS 五級量表。</p></div>
+          <div class="point"><div class="n">06</div><h4>口試／viva 被重新重視</h4><p>即時追問能驗證作品的「認知所有權」，是目前最難被 AI 代打的證據形式；但成本、規模化、焦慮與評分一致性是真實限制，不能浪漫化。丹麥 2026 年以國家政策要求高中生為回家作業做口頭答辯，是政策層級最鮮明的案例。</p></div>
+          <div class="point"><div class="n">07</div><h4>認知成本證據初步、方向一致，但非定論</h4><p>MIT 預印本（Kosmyna et al. 2025，54 人 EEG）與 Gerlich（2025，666 人相關研究）都指向「把思考外包給 AI」與較低投入／批判思考有關，但都不能證明「AI 讓人變笨」的長期因果——引用時必須保留此限定。</p></div>
+          <div class="point"><div class="n">08</div><h4>台灣的特殊處境</h4><p>碩博士論文口試本就是既有制度，課題是「口試是否真的在驗證獨立研究能力」與「課程層級評量如何跟上」；同時台灣缺乏全國一致的生成式 AI 評量指引，各校先行、學生對規範的理解落差大。</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 2 指定文章 ============ -->
+      <section id="articles">
+        <div class="sec-head"><span class="sec-no">2</span><h2>指定文章逐篇摘要</h2></div>
+        <p class="sec-sub">使用者指定的 5 篇文章已逐篇開啟原文閱讀。注意：其中聯合新聞網一篇與台灣醒報專欄為<strong>同一來源</strong>（前者是後者的新聞化轉述），引用時不可計為兩個獨立佐證。</p>
+        <div class="cards">
+          <article class="card">
+            <div class="meta"><span class="grade g-c">C 新聞</span><span>上報 Up Media（編譯 CNN）</span><span>2026-08-10</span></div>
+            <h4>防學生用 AI 寫報告越來越笨，丹麥規定高中生須參加口頭答辯</h4>
+            <p>丹麥教育部 2026-08-06 宣布即時生效的緊急措施：凡非在校作答的重要考試／作業，須加口頭答辯；適用對象含每年須交大型書面作業的約 9,000 名兩年制高中預備課程（HF）學生。配套包括考試時螢幕監控、防火牆限制存取、鼓勵更多作業在校內受控環境完成。教育部長 Magnus Heunicke 稱須行動以免 AI 削弱技能與獨立思考；高中協會、教師協會、學生協會均表支持。</p>
+            <div class="take"><b>分析定位：</b>「口語化＋現場化」由大學討論上升為國家強制政策的首例級案例；但對象是高中、框架細節尚待與學校共擬，不能直接推論大學或台灣適用性。丹麥同時有反向試驗——2026 年起英語科口試的「準備時間」可使用 AI——同一國家內管制與融入並行，正好示範 two-lane 思維。</div>
+            <div class="src-link"><a href="https://www.upmedia.mg/tw/international/headlines/265846" target="_blank" rel="noopener">upmedia.mg/tw/international/headlines/265846</a><br /><span class="small">原始來源：CNN, 2026-08-07</span></div>
+          </article>
+
+          <article class="card">
+            <div class="meta"><span class="grade g-c">C 新聞</span><span>LINE TODAY 轉載民視新聞</span><span>發布日期未能驗證</span></div>
+            <h4>防範 AI 代寫作業，美國多所名校棄用偵測軟體改辦口試</h4>
+            <p>主張 AI 偵測軟體準確度不足、誤判傷信任甚至引發法律風險，耶魯、康乃爾等多校已禁止或不建議教師以偵測工具作為判定作弊的主要依據，教師轉向重新設計評量。文中案例：威斯康辛大學麥迪遜分校教授 Timothy Paustian 曾在題目埋隱藏指令，一次抓到 350 人中 60 人違規，但隨模型升級與學生警覺此法失效；哈佛學院院長 David Deming 則主張寫作課應接受甚至鼓勵 AI、退出偵測競賽。</p>
+            <div class="take"><b>分析定位：</b>敘事主軸「偵測退場 → 口試上場」與 A 級文獻方向一致，但文中數字多為二手轉述、未附原始連結，<b>不可直接當數據來源引用</b>，僅適合作為議題地圖。另：文末自註「本文由 AI 協作，經編輯審核後發布」，引用時應註明。</div>
+            <div class="src-link"><a href="https://today.line.me/tw/v3/article/RBKQjxM" target="_blank" rel="noopener">today.line.me/tw/v3/article/RBKQjxM</a></div>
+          </article>
+
+          <article class="card">
+            <div class="meta"><span class="grade g-d">D 觀點</span><span>陳勇延 Substack（個人電子報）</span></div>
+            <h4>當 AI 可以幫學生完成作業，老師究竟還能評量什麼？——「啟證」方案</h4>
+            <p>提出自製 ChatGPT 專案「啟證｜AI 能力驗證 OS」。主張把問題從追查「作品是不是 AI 寫的」轉為「作業原本要培養的能力，學生現在會不會」；學術誠信（有無違規）與能力評量（有無學會）應分開處理；驗證方式必須對準原能力（要驗寫作就須現場寫，不能以口頭解釋替代）。作法是低成本階梯：先以全班同步的短時微任務（文中以高中公民報告為例，約 5 分鐘筆答核心結論的法律依據）取得證據，僅對證據不足者補驗；證據不足不等於作弊或能力不足；補驗標準須一致，不能憑直覺挑人。</p>
+            <div class="take"><b>分析定位：</b>其「最小驗證任務／證據階梯」與學術界 process-based、programmatic assessment 及 Dawson 的 validity 論述高度相容，可作台灣本土實務觀點引用。作者自承系統仍在設計與準備試行階段，未證明能降低教師負擔或提高判斷準確率——須標明為未經實證檢驗的個人方案，不得寫成研究發現。</div>
+            <div class="src-link"><a href="https://yungyenchen.substack.com/p/ai-047" target="_blank" rel="noopener">yungyenchen.substack.com/p/ai-047</a></div>
+          </article>
+
+          <article class="card">
+            <div class="meta"><span class="grade g-d">D 專欄</span><span>台灣醒報・張瑞雄</span><span>2026-10-05</span></div>
+            <h4>教育停看聽：別急著把 AI 塞進學生的腦袋</h4>
+            <p>前國立臺北商業大學校長張瑞雄的專欄（原始出處）。論證主線：教育要求學生親自做機器已做得更好的事，訓練的是大腦而非作業品質；生成式 AI 與搜尋／計算機不同，在於它能包辦論點、架構與結論，省下的時間正是學習所需的摸索；企業的效率邏輯不能搬進教室；基礎能力未建立前不該以 AI 代做。主張教育部訂 AI 學習紅綠燈（年齡、必須自練的能力、可人機合作的工作），並改革評量（即時寫作、口試、實作、答辯）。評論對象為賴清德總統的「AI 人才方舟計畫」（教育部 2026–2029 投入 117.55 億元），批評政策只談「如何用 AI」而缺「何時不該用 AI」。</p>
+            <div class="take"><b>分析定位：</b>代表台灣學界「踩煞車」論述，與國際「先建立獨立能力、再引入 AI 協作」（reverse scaffolding）相呼應；但其證據多引二手摘要（如歐盟使用率、OECD 警示、MIT 研究），正式報告應回溯 OECD／MIT 原文。</div>
+            <div class="src-link"><a href="https://www.anntw.com/articles/20261005-2xep" target="_blank" rel="noopener">anntw.com/articles/20261005-2xep</a></div>
+          </article>
+
+          <article class="card">
+            <div class="meta"><span class="grade g-c">C 新聞</span><span>聯合新聞網（台灣醒報・呂翔禾報導）</span><span>2026-10-06</span></div>
+            <h4>AI 助理進校園，學者憂學生腦力外包</h4>
+            <p>報導對象即左列張瑞雄在台灣醒報的專欄——與該專欄為同一來源。內容涵蓋：引歐盟數據（2025 年 16–24 歲 63.8% 使用生成式 AI、41% 用於學習）、OECD 警示（用 AI 交出更好作品不等於學更多、拿走 AI 優勢即消失）、MIT 研究（LLM 寫作組腦部連結與內容記憶較弱，惟規模有限）；法國、丹麥、美國教育部的限制措施；評量建議為增加課堂即時寫作、口試、實作與答辯，學生可用 AI 但須能解釋為何接受其答案。</p>
+            <div class="take"><b>引用注意：</b>本篇與張瑞雄專欄不可計為兩個佐證；文中數據宜回溯歐盟、OECD、MIT 原始出處再引用。</div>
+            <div class="src-link"><a href="https://udn.com/news/story/6885/9798146" target="_blank" rel="noopener">udn.com/news/story/6885/9798146</a></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============ 3 時間線 ============ -->
+      <section id="timeline">
+        <div class="sec-head"><span class="sec-no">3</span><h2>新聞脈絡時間線與四大爭論軸線</h2></div>
+        <p class="sec-sub">從 ChatGPT 上線到丹麥國家政策，四年間的主線是：偵測熱 → 偵測證據崩解 → 框架與雙軌改革 → 口試與現場化回歸。</p>
+        <div class="tl">
+          <div class="tl-row"><span class="when">2022-11</span><span class="what"><b>ChatGPT 上線</b>，大學迅速出現禁用與偵測熱（如港大一度禁用、Turnitin 於 2023-04 推出 AI 偵測）。</span><span class="grade g-a">A</span></div>
+          <div class="tl-row"><span class="when">2023-09</span><span class="what"><b>UNESCO 發布首份生成式 AI 教育指引</b>；澳洲 TEQSA 發布 Lodge et al.《Assessment Reform for the Age of AI》。</span><span class="grade g-b">B</span></div>
+          <div class="tl-row"><span class="when">2023 全年</span><span class="what"><b>偵測器偏誤與不可靠證據累積</b>：Liang et al.（Patterns）、Weber-Wulff et al.、Krishna et al.（NeurIPS）。</span><span class="grade g-a">A</span></div>
+          <div class="tl-row"><span class="when">2023-08 起</span><span class="what"><b>美國大學陸續停用 Turnitin AI 偵測</b>（如 Vanderbilt；其後耶魯、Johns Hopkins 等改為不得作處分證據——二手彙整，待各校原文核實）。</span><span class="grade g-c">C</span></div>
+          <div class="tl-row"><span class="when">2024-06</span><span class="what"><b>Reading 盲測</b>：AI 考卷 94% 未被發現且分數較高（PLOS ONE）。</span><span class="grade g-a">A</span></div>
+          <div class="tl-row"><span class="when">2024</span><span class="what"><b>AIAS 五級量表發表</b>並在越南英國大學試行；雪梨大學 two-lane 全校推動。</span><span class="grade g-a">A／B</span></div>
+          <div class="tl-row"><span class="when">2025-02</span><span class="what"><b>HEPI 2025</b>：英國本科生 92% 用 AI、88% 用於評量。</span><span class="grade g-b">B 調查</span></div>
+          <div class="tl-row"><span class="when">2025-06</span><span class="what"><b>MIT「Your Brain on ChatGPT」預印本</b>引發「認知債務」討論（未同儕審查）。</span><span class="grade g-d">預印本</span></div>
+          <div class="tl-row"><span class="when">2025-08</span><span class="what"><b>丹麥宣布 2026 英語口試準備可使用 AI</b> 的試驗（融入路線）。</span><span class="grade g-c">C</span></div>
+          <div class="tl-row"><span class="when">2026-08</span><span class="what"><b>丹麥緊急措施：回家作業須口頭答辯</b>（管制路線）——同國雙軌並行。</span><span class="grade g-c">C</span></div>
+          <div class="tl-row"><span class="when">2026-10</span><span class="what"><b>台灣</b>：AI 人才方舟 117.55 億元引發「紅綠燈」辯論（張瑞雄）；陳勇延提出「啟證」微驗證方案。</span><span class="grade g-c">C／D</span></div>
+        </div>
+
+        <h3>四大爭論軸線</h3>
+        <div class="axes">
+          <div class="axis"><h4>1. 抓 vs. 教</h4><p>偵測／處罰（deterrence）vs. 評量再設計與 AI 素養（redesign）。實證天平明顯傾向後者，但前者在媒體與家長敘事中仍強。</p></div>
+          <div class="axis"><h4>2. 回到現場考試 vs. 走向真實評量</h4><p>回歸紙筆／監考被批評為退回記憶測驗、犧牲疫情後包容性評量的進展。折衷主張：現場但可帶筆記、至少 50% 評量受監督（THE 報導）。另注意：THE 以資訊公開請求調查發現 78% 英國大學仍用線上考試、70% 無意淘汰——「全面回歸現場」更多是敘事而非現況，財政與行政成本是主因。</p></div>
+          <div class="axis"><h4>3. 口試是解方還是新不公平</h4><p>支持者稱口試無法靠 AI 代打；反對者指焦慮、主觀、規模化成本、對非母語與身心障礙學生的不利。</p></div>
+          <div class="axis"><h4>4. AI 是作弊工具還是職場必備技能</h4><p>哈佛 Deming 的「融入派」與張瑞雄的「基礎能力優先派」並非全然對立——差別在時序：先獨立、後協作（reverse scaffolding）是目前文獻中最能調和兩者的設計原則。</p></div>
+        </div>
+
+        <h3>大學改評量實例（新聞層）</h3>
+        <ul class="tight">
+          <li><b>賓州大學（UPenn）</b>：寫作作業搭配口試成為趨勢，校方教學中心稱校內正出現「轉向現場評量（書面＋口語）的大規模移動」，並開辦口試工作坊；教師 Emily Hammer 明言禁令無法執行，但沒親自寫作者在答辯時將非常吃力。［C］</li>
+          <li><b>紐約大學（NYU）</b>：簡報、課堂冷不防提問、office hour 追問增加；Stern 商學院 Panos Ipeirotis 以「以火攻火」用 AI 語音進行口試——其 2026 年研究以語音 AI 主持個人化口試、三個 LLM 組成評分委員會，每場評分成本低於 1 美元（詳文獻 21）。［C／A］</li>
+          <li><b>UC San Diego</b>：工程教授 Huihui Qi 曾以三年研究探討口試規模化，多校邀其辦工作坊。［C］</li>
+        </ul>
+      </section>
+
+      <!-- ============ 4 學術文獻 ============ -->
+      <section id="literature">
+        <div class="sec-head"><span class="sec-no">4</span><h2>學術文獻總表（22 項）</h2></div>
+        <p class="sec-sub">經 Google Scholar 方向檢索、再以出版社／DOI 頁面核實書目資料。點任一列展開「方法／發現／與評量設計的關聯」，每篇附引用格式一鍵複製，供撰寫報告時直接取用。</p>
+        <div class="lit-tools">
+          <input type="search" id="litSearch" placeholder="搜尋作者、篇名關鍵字或主題（如 viva、偵測、效度）…" aria-label="搜尋文獻" />
+        </div>
+        <div class="chips" role="group" aria-label="文獻分類篩選">
+          <button class="chip" data-filter="all" aria-pressed="true">全部</button>
+          <button class="chip" data-filter="detect" aria-pressed="false">偵測實證</button>
+          <button class="chip" data-filter="validity" aria-pressed="false">評量失效與效度</button>
+          <button class="chip" data-filter="framework" aria-pressed="false">框架與政策指引</button>
+          <button class="chip" data-filter="student" aria-pressed="false">學生聲音・機會與風險</button>
+          <button class="chip" data-filter="cognition" aria-pressed="false">認知成本</button>
+          <button class="chip" data-filter="oral" aria-pressed="false">口試・過程・檔案</button>
+        </div>
+        <p class="lit-count" id="litCount"></p>
+        <div id="litList">
+
+          <div class="lit-item" data-cat="validity">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">1</span>
+              <span><span class="lit-title">Chatting and cheating: Ensuring academic integrity in the era of ChatGPT</span>
+              <span class="lit-cite" style="display:block">Cotton, D.R.E., Cotton, P.A. &amp; Shipway, J.R. (2024). <i>Innovations in Education and Teaching International, 61</i>(2), 228–239.</span>
+              <span class="lit-core" style="display:block">早期定調：政策＋訓練＋多元防範，勿只靠偵測。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>敘事綜述＋政策分析（ChatGPT 上線後最早期的高被引文獻之一）。</p>
+              <p><span class="lbl">發現：</span>AI 帶來參與、協作、無障礙等益處，但偵測與防範先天困難；建議大學採主動倫理路線——政策程序、師生訓練、多元偵測與防範並行。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>適合作為報告的「問題定調」引用，但其 2023 年的偵測樂觀程度已被後續文獻（2–4、8）修正。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Cotton, D. R. E., Cotton, P. A., & Shipway, J. R. (2024). Chatting and cheating: Ensuring academic integrity in the era of ChatGPT. Innovations in Education and Teaching International, 61(2), 228–239. https://doi.org/10.1080/14703297.2023.2190148">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1080/14703297.2023.2190148" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="detect">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">2</span>
+              <span><span class="lit-title">GPT detectors are biased against non-native English writers</span>
+              <span class="lit-cite" style="display:block">Liang, W., Yuksekgonul, M., Mao, Y., Wu, E. &amp; Zou, J. (2023). <i>Patterns, 4</i>(7).</span>
+              <span class="lit-core" style="display:block">偵測器對非母語者誤判 61.3%——測的是文字可預測性，不是作者身分。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>以 7 個常用偵測器測試 91 篇非母語者 TOEFL 作文與 88 篇美國八年級作文（全為人寫）。</p>
+              <p><span class="lbl">發現：</span>TOEFL 作文平均誤判率 61.3%、約兩成被全部偵測器一致誤判；母語作文近乎完美分類；以 ChatGPT 提升詞彙豐富度後誤判降至 11.6%——顯示偵測器實際測的是「文字可預測性／詞彙受限程度」，而非作者身分。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>對台灣（絕大多數學生以中文或非母語英文寫作）是最直接的公平性證據；任何以偵測分數處分的制度都須先回答此文。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Liang, W., Yuksekgonul, M., Mao, Y., Wu, E., & Zou, J. (2023). GPT detectors are biased against non-native English writers. Patterns, 4(7). https://www.cell.com/patterns/fulltext/S2666-3899(23)00130-7">複製引用格式</button>
+                <a class="btn" href="https://www.cell.com/patterns/fulltext/S2666-3899(23)00130-7" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="detect">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">3</span>
+              <span><span class="lit-title">Testing of detection tools for AI-generated text</span>
+              <span class="lit-cite" style="display:block">Weber-Wulff, D. et al. (2023). <i>International Journal for Educational Integrity, 19</i>, 26.</span>
+              <span class="lit-core" style="display:block">14 個工具全數 &lt;80% 準確率，不得作舉報學生的唯一依據。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>14 個工具（含 Turnitin、PlagiarismCheck）、54 份文件、6 種文本類別（人寫、機翻人寫、AI 原文、人編 AI、機改 AI 等）。</p>
+              <p><span class="lbl">發現：</span>整體準確率全數 &lt;80%、僅 5 個 &gt;70%；人編 AI 文本準確率約 42%、機改約 26%。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>偵測路線失敗的「總評測」證據——工具既不準確也不可靠，報告不得作為舉報學生的唯一依據。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Weber-Wulff, D., et al. (2023). Testing of detection tools for AI-generated text. International Journal for Educational Integrity, 19, 26. https://doi.org/10.1007/s40979-023-00146-z">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1007/s40979-023-00146-z" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="detect">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">4</span>
+              <span><span class="lit-title">Paraphrasing evades detectors of AI-generated text, but retrieval is an effective defense</span>
+              <span class="lit-cite" style="display:block">Krishna, K., Song, Y., Karpinska, M., Wieting, J. &amp; Iyyer, M. (2023). <i>NeurIPS 2023</i>.</span>
+              <span class="lit-core" style="display:block">改寫使 DetectGPT 準確率 70.3% → 4.6%，且語意基本不變。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>建 11B 參數改寫模型 DIPPER，對三種 LLM 產出改寫後測各偵測器。</p>
+              <p><span class="lbl">發現：</span>DetectGPT 準確率 70.3%→4.6%（假陽性率固定 1%）且語意基本不變；作者提出的檢索式防禦需 API 商配合，學校無法自行實施。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>證明偵測是結構性軍備競賽——防禦主導權不在教育端。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Krishna, K., Song, Y., Karpinska, M., Wieting, J., & Iyyer, M. (2023). Paraphrasing evades detectors of AI-generated text, but retrieval is an effective defense. NeurIPS 2023. https://arxiv.org/abs/2303.13408">複製引用格式</button>
+                <a class="btn" href="https://arxiv.org/abs/2303.13408" target="_blank" rel="noopener">arXiv 連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="validity">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">5</span>
+              <span><span class="lit-title">A real-world test of artificial intelligence infiltration of a university examinations system: A “Turing Test” case study</span>
+              <span class="lit-cite" style="display:block">Scarfe, P., Watcham, K., Clarke, A. &amp; Roesch, E. (2024). <i>PLOS ONE, 19</i>(6), e0305354.</span>
+              <span class="lit-core" style="display:block">AI 考卷 94% 未被發現且分數更高——本領域最有力的「舊評量已失效」單一證據。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>真實世界盲測——以 33 名虛構學生身分把 GPT-4 全文產出的答案混入 Reading 大學心理學系一至三年級真實評量，閱卷者不知情。</p>
+              <p><span class="lbl">發現：</span>94% 未被識破；AI 答案平均成績高於真學生（83.4% 場次高於隨機抽取的真學生組），僅三年級抽象推理題真人反超。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>作者群亦主張不宜全面退回手寫考試，而應承認新常態並改政策。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Scarfe, P., Watcham, K., Clarke, A., & Roesch, E. (2024). A real-world test of artificial intelligence infiltration of a university examinations system: A “Turing Test” case study. PLOS ONE, 19(6), e0305354. https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0305354">複製引用格式</button>
+                <a class="btn" href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0305354" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">6</span>
+              <span><span class="lit-title">The Artificial Intelligence Assessment Scale (AIAS): A framework for ethical integration of generative AI in educational assessment</span>
+              <span class="lit-cite" style="display:block">Perkins, M., Furze, L., Roe, J. &amp; MacVaugh, J. (2024). <i>Journal of University Teaching and Learning Practice, 21</i>(6).</span>
+              <span class="lit-core" style="display:block">五級量表取代非黑即白的禁令：每項評量事前標明 AI 使用等級。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">內容：</span>五級——1 No AI、2 AI Planning、3 AI Collaboration、4 Full AI、5 AI Exploration，要求每項評量事前標明等級。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>與 two-lane 互補的操作工具，適合台灣教師在課程大綱直接採用；其精神與張瑞雄「紅綠燈」主張相近，但更細緻且有國際採用實績（據作者校方報導已譯 16 語、用於 250+ 機構，此為推廣方數據，謹慎引用）。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Perkins, M., Furze, L., Roe, J., & MacVaugh, J. (2024). The Artificial Intelligence Assessment Scale (AIAS): A framework for ethical integration of generative AI in educational assessment. Journal of University Teaching and Learning Practice, 21(6). https://doi.org/10.53761/q3azde36">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.53761/q3azde36" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 框架論文</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">7</span>
+              <span><span class="lit-title">The AI Assessment Scale (AIAS) in action: A pilot implementation of GenAI-supported assessment</span>
+              <span class="lit-cite" style="display:block">Furze, L., Perkins, M., Roe, J. &amp; MacVaugh, J. (2024). <i>Australasian Journal of Educational Technology</i>.</span>
+              <span class="lit-core" style="display:block">AIAS 落地試行：違規案件下降、通過率上升（單校、無對照組）。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>單校（British University Vietnam）全校試行前後比較。</p>
+              <p><span class="lbl">發現：</span>與 GenAI 相關的違規案件顯著下降、學生平均成績 +5.9%、模組通過率 +33.3%，並出現多模態作品。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>少數「分級融入優於禁止」的量化試行證據。<b>限制：</b>無對照組、單一私校脈絡、成績上升亦可能反映評量變易——報告中須如此註明。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Furze, L., Perkins, M., Roe, J., & MacVaugh, J. (2024). The AI Assessment Scale (AIAS) in action: A pilot implementation of GenAI-supported assessment. Australasian Journal of Educational Technology. https://doi.org/10.14742/ajet.9434">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.14742/ajet.9434" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="detect">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">8</span>
+              <span><span class="lit-title">GenAI detection tools, adversarial techniques and implications for inclusivity in higher education</span>
+              <span class="lit-cite" style="display:block">Perkins, M. et al. (2024). arXiv:2403.19148.</span>
+              <span class="lit-core" style="display:block">偵測在對抗技巧下再崩，且對特定族群造成不成比例風險——問題從準確率推進到包容性。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>多偵測器基準測試＋對抗技巧（改寫、翻譯等）操弄。</p>
+              <p><span class="lbl">發現：</span>即使未操弄的 AI 文本，偵測表現已低於 Weber-Wulff 的結果；操弄後再降；不同工具一致性低。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>使用偵測會對特定族群造成不成比例風險，是公平性論證的重要一環。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Perkins, M., et al. (2024). GenAI detection tools, adversarial techniques and implications for inclusivity in higher education. arXiv:2403.19148. https://arxiv.org/abs/2403.19148">複製引用格式</button>
+                <a class="btn" href="https://arxiv.org/abs/2403.19148" target="_blank" rel="noopener">arXiv 連結 ↗</a>
+                <span class="grade g-a">A／預印本系統</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">9</span>
+              <span><span class="lit-title">Developing evaluative judgement for a time of generative artificial intelligence</span>
+              <span class="lit-cite" style="display:block">Bearman, M., Tai, J., Dawson, P., Boud, D. &amp; Ajjawi, R. (2024). <i>Assessment &amp; Evaluation in Higher Education, 49</i>(6), 893–905.</span>
+              <span class="lit-core" style="display:block">評量應培養對 AI 產出的「評價判斷」（evaluative judgement）——評的不是會不會用 AI，而是會不會判斷 AI。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>理論建構。</p>
+              <p><span class="lbl">主張：</span>當 AI 產出無所不在，畢業生最關鍵的能力是判斷作品（自己、他人、AI 的）品質的 evaluative judgement；評量應設計讓學生評判 AI 產出、AI 流程，並理解 AI 如何評判人的作品。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>為「AI 融入式評量」提供學習理論基礎。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Bearman, M., Tai, J., Dawson, P., Boud, D., & Ajjawi, R. (2024). Developing evaluative judgement for a time of generative artificial intelligence. Assessment & Evaluation in Higher Education, 49(6), 893–905. https://doi.org/10.1080/02602938.2024.2335321">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1080/02602938.2024.2335321" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 理論論文</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">10</span>
+              <span><span class="lit-title">Authentic assessment: Creating a blueprint for course design</span>
+              <span class="lit-cite" style="display:block">Villarroel, V., Bloxham, S., Bruna, D., Bruna, C. &amp; Herrera-Seda, C. (2018). <i>Assessment &amp; Evaluation in Higher Education, 43</i>(5).</span>
+              <span class="lit-core" style="display:block">真實評量三維：真實性、認知挑戰、評價判斷。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>系統回顧 125 篇（1988–2015）。</p>
+              <p><span class="lbl">發現：</span>真實評量三維——realism（情境如真實世界）、cognitive challenge（高階認知）、evaluative judgement（學生能判斷品質）。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>AI 時代「真實情境化」模式的經典依據；同時提醒：僅把題目換成職場情境並不足夠，三維須同時設計（Bearman 等 2024 亦批評把 authentic 當萬靈丹）。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Villarroel, V., Bloxham, S., Bruna, D., Bruna, C., & Herrera-Seda, C. (2018). Authentic assessment: Creating a blueprint for course design. Assessment & Evaluation in Higher Education, 43(5).">複製引用格式</button>
+                <span class="grade g-a">A 系統回顧</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">11</span>
+              <span><span class="lit-title">Assessment Reform for the Age of Artificial Intelligence</span>
+              <span class="lit-cite" style="display:block">Lodge, J.M., Howard, S., Bearman, M., Dawson, P. et al. (2023). TEQSA（專家論壇產出，經 Deakin CRADLE 發布）。</span>
+              <span class="lit-core" style="display:block">兩原則五命題；two-lane 的源頭——本主題最重要的政策—理論橋梁文件。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">內容：</span>兩項指導原則——(1) 讓學生為 AI 充斥的社會做倫理且積極的參與準備；(2) 形成對學生學習的可信判斷。五項命題含：以系統性而非單科方式改評量、善用 AI 增強評量、評量過程證據等。</p>
+              <p><span class="lbl">配套闡述：</span>Dawson 強調 validity 為底層原則、無法執行的限制有害、reverse scaffolding（已精熟的能力才開放 AI 卸載、發展中的能力先提供鷹架）。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Lodge, J. M., Howard, S., Bearman, M., Dawson, P., et al. (2023). Assessment Reform for the Age of Artificial Intelligence. TEQSA. https://blogs.deakin.edu.au/cradle/assessment-reform-for-the-age-of-artificial-intelligence/">複製引用格式</button>
+                <a class="btn" href="https://blogs.deakin.edu.au/cradle/assessment-reform-for-the-age-of-artificial-intelligence/" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-b">B 監管指引</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">12</span>
+              <span><span class="lit-title">The two-lane approach to assessment</span>
+              <span class="lit-cite" style="display:block">University of Sydney (2023– ). 校級落實文件。</span>
+              <span class="lit-core" style="display:block">Lane 1 受控保證學習成果、Lane 2 開放 AI 協作——目前國際最完整的大學校級落實範式。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">Lane 1（Secure）：</span>以學程層級設計、現場受控，形式含互動口試、viva、課堂同步評量、考試，目的在保證每位畢業生親自展現學習成果。</p>
+              <p><span class="lbl">Lane 2（Open）：</span>以單科層級設計、公開允許並鷹架 AI 使用（反思、腦力激盪、反方論點、形成性回饋等），目的在培養 AI 世代的專業工作方式。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>適合作為台灣大學校級政策的主要參照（而非丹麥高中模式）。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="University of Sydney. (2023– ). The two-lane approach to assessment. https://educational-innovation.sydney.edu.au/teaching@sydney/aligning-our-assessments-to-the-age-of-generative-ai/">複製引用格式</button>
+                <a class="btn" href="https://educational-innovation.sydney.edu.au/teaching@sydney/aligning-our-assessments-to-the-age-of-generative-ai/" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-b">B 校級文件</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="student">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">13</span>
+              <span><span class="lit-title">Students' voices on generative AI: Perceptions, benefits, and challenges in higher education</span>
+              <span class="lit-cite" style="display:block">Chan, C.K.Y. &amp; Hu, W. (2023). <i>International Journal of Educational Technology in Higher Education, 20</i>, 43.</span>
+              <span class="lit-core" style="display:block">學生要清楚指引、不要禁令；華語脈絡（香港）證據，對台灣最具參照價值。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>香港大學生問卷與訪談。</p>
+              <p><span class="lbl">發現：</span>學生肯定個人化學習與寫作支援等益處，同時憂慮準確性、過度依賴、誠信界線不清；訴求是清楚指引而非禁令。Chan (2023) 同刊 20:38 另提出 pedagogical／governance／operational 三層政策框架。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>少數以學生聲音為主的實證研究。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Chan, C. K. Y., & Hu, W. (2023). Students' voices on generative AI: Perceptions, benefits, and challenges in higher education. International Journal of Educational Technology in Higher Education, 20, 43. https://doi.org/10.1186/s41239-023-00411-8">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1186/s41239-023-00411-8" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 同儕審查</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="student">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">14</span>
+              <span><span class="lit-title">ChatGPT for good? On opportunities and challenges of large language models for education</span>
+              <span class="lit-cite" style="display:block">Kasneci, E. et al. (2023). <i>Learning and Individual Differences, 103</i>, 102274.</span>
+              <span class="lit-core" style="display:block">LLM 的機會與風險並陳：以設計與素養回應，而非禁止。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>專家觀點綜述。</p>
+              <p><span class="lbl">內容：</span>個人化、即時回饋、寫作與程式支援的機會 vs. 偏誤、幻覺、過度依賴、評量誠信的風險；主張以設計與素養回應而非禁止。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>適合作為「機會—風險」平衡敘述的引用點。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Kasneci, E., et al. (2023). ChatGPT for good? On opportunities and challenges of large language models for education. Learning and Individual Differences, 103, 102274. https://doi.org/10.1016/j.lindif.2023.102274">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1016/j.lindif.2023.102274" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 觀點綜述</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="student">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">15</span>
+              <span><span class="lit-title">What if the devil is my guardian angel: ChatGPT as a case study of using chatbots in education</span>
+              <span class="lit-cite" style="display:block">Tlili, A. et al. (2023). <i>Smart Learning Environments, 10</i>, 15.</span>
+              <span class="lit-core" style="display:block">早期輿論正面多於負面，但要求安全使用指引。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>三階段工具性案例——2,330 則推文社群分析、19 位使用者訪談、使用體驗調查。</p>
+              <p><span class="lbl">發現：</span>正面情緒約為負面兩倍，使用者認為具革命潛力，但要求安全使用指引。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>記錄 2023 年初輿論基線，與 2024 年後「評量失效」焦慮形成對照，適合時間線敘事。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Tlili, A., et al. (2023). What if the devil is my guardian angel: ChatGPT as a case study of using chatbots in education. Smart Learning Environments, 10, 15. https://doi.org/10.1186/s40561-023-00237-x">複製引用格式</button>
+                <a class="btn" href="https://doi.org/10.1186/s40561-023-00237-x" target="_blank" rel="noopener">DOI 連結 ↗</a>
+                <span class="grade g-a">A 案例研究</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="validity">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">16</span>
+              <span><span class="lit-title">ChatGPT in higher education: Considerations for academic integrity and student learning</span>
+              <span class="lit-cite" style="display:block">Sullivan, M., Kelly, A. &amp; McLaughlan, P. (2023). <i>Journal of Applied Learning &amp; Teaching, 6</i>(1).</span>
+              <span class="lit-core" style="display:block">媒體敘事集中在誠信，學生聲音與弱勢學生視角明顯缺席。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>內容分析 100 篇澳、紐、美、英新聞。</p>
+              <p><span class="lbl">發現：</span>公共討論與大學回應集中在學術誠信與評量創新，弱勢學生如何受惠幾乎無人討論，學生聲音明顯缺席。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>提醒撰寫台灣報告時主動補上公平與學生觀點，避免複製英語媒體的誠信中心敘事。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Sullivan, M., Kelly, A., & McLaughlan, P. (2023). ChatGPT in higher education: Considerations for academic integrity and student learning. Journal of Applied Learning & Teaching, 6(1). https://core.ac.uk/download/576837200.pdf">複製引用格式</button>
+                <a class="btn" href="https://core.ac.uk/download/576837200.pdf" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-a">A 內容分析</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="cognition">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">17</span>
+              <span><span class="lit-title">Your Brain on ChatGPT: Accumulation of Cognitive Debt when Using an AI Assistant for Essay Writing Task</span>
+              <span class="lit-cite" style="display:block">Kosmyna, N. et al. (2025). MIT Media Lab 預印本（arXiv:2506.08872），<b>未同儕審查</b>。</span>
+              <span class="lit-core" style="display:block">LLM 寫作組腦連結與內容引述記憶最弱——台灣專欄「腦力外包」論述的源頭，但引用必須加註預印本、小樣本。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>54 名波士頓地區大學生、4 個月、EEG＋寫作＋訪談，三組（LLM／搜尋引擎／純腦）。</p>
+              <p><span class="lbl">發現：</span>腦連結強度隨外部支援增加而下降，LLM 組最低，且多數 LLM 組受試者難以引述自己剛寫的內容；第 4 次換組實驗 n 僅 18。後續獨立評註指出：這是任務特定的神經指標，不直接等於能力喪失，亦未建立長期因果。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>不可寫成「MIT 證明 AI 使人變笨」。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Kosmyna, N., et al. (2025). Your Brain on ChatGPT: Accumulation of Cognitive Debt when Using an AI Assistant for Essay Writing Task. MIT Media Lab preprint. https://arxiv.org/abs/2506.08872">複製引用格式</button>
+                <a class="btn" href="https://arxiv.org/abs/2506.08872" target="_blank" rel="noopener">arXiv 連結 ↗</a>
+                <span class="grade g-d">預印本</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="cognition">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">18</span>
+              <span><span class="lit-title">AI tools in society: Impacts on cognitive offloading and the future of critical thinking</span>
+              <span class="lit-cite" style="display:block">Gerlich, M. (2025). <i>Societies, 15</i>(1), 6.</span>
+              <span class="lit-core" style="display:block">AI 使用頻率與批判思考負相關，認知卸載為中介——相關而非因果。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>666 人問卷（Halpern 批判思考測量）＋50 訪談。</p>
+              <p><span class="lbl">發現：</span>AI 使用頻率與批判思考分數強負相關，認知卸載為中介；17–25 歲依賴最高、分數最低；教育程度具緩衝。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>作者自承為相關研究，適合作為「機制假設」而非定論引用。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Gerlich, M. (2025). AI tools in society: Impacts on cognitive offloading and the future of critical thinking. Societies, 15(1), 6. https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5082524">複製引用格式</button>
+                <a class="btn" href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5082524" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-a">A 相關研究</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">19</span>
+              <span><span class="lit-title">Guidance for generative AI in education and research (2023)；AI Competency Framework for Students / for Teachers (2024)</span>
+              <span class="lit-cite" style="display:block">UNESCO (2023, 2024). 國際指引與素養框架。</span>
+              <span class="lit-core" style="display:block">以人為本治理＋師生素養框架：全球教師態度是「有條件接受」而非禁絕。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">內容：</span>全球首份生成式 AI 教育指引（64 頁）——以人為本、年齡適宜、資料隱私、要求各國監管與課程配套，並明言不應在剝奪學生發展認知與社交能力的情境使用 GenAI；2024 素養框架把「判斷與負責任使用」列為核心。</p>
+              <p><span class="lbl">補充調查：</span>UNESCO 2026 年 Digital Learning Week 調查（經報導轉述）：93% 受訪學者認為學生以 GenAI 產出作業、63% 感到學生認知能力下降、&lt;1% 支持全面禁止、多數接受「特定作業可用或揭露後可用」。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="UNESCO. (2023). Guidance for generative AI in education and research. https://unesdoc.unesco.org/ark:/48223/pf0000395373">複製引用格式</button>
+                <a class="btn" href="https://unesdoc.unesco.org/ark:/48223/pf0000395373" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-b">B 國際指引</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="framework">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">20</span>
+              <span><span class="lit-title">OECD Digital Education Outlook 2026</span>
+              <span class="lit-cite" style="display:block">OECD (2026). 國際報告。</span>
+              <span class="lit-core" style="display:block">表現 ≠ 學習：用 AI 交出更好作品，不代表學到更多；拿走 AI 後優勢即消失。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">核心警示：</span>用生成式 AI 可交出更好的作品，但不代表學到更多。政策含義：評量必須能區分「有 AI 的表現」與「內化的能力」——這正是現場／口語驗證存在的理由。</p>
+              <p><span class="lbl">查核狀態：</span>本警示係經張瑞雄專欄與搜尋摘要交叉得知，建議正式引用前下載原文核對章節頁碼。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="OECD. (2026). OECD Digital Education Outlook 2026. https://www.oecd.org/content/dam/oecd/en/publications/reports/2026/01/oecd-digital-education-outlook-2026_940e0dd8/062a7394-en.pdf">複製引用格式</button>
+                <a class="btn" href="https://www.oecd.org/content/dam/oecd/en/publications/reports/2026/01/oecd-digital-education-outlook-2026_940e0dd8/062a7394-en.pdf" target="_blank" rel="noopener">報告 PDF ↗</a>
+                <span class="grade g-b">B 國際報告</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="oral">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">21</span>
+              <span><span class="lit-title">Scalable and personalized oral assessments using voice AI</span>
+              <span class="lit-cite" style="display:block">Ipeirotis, P. &amp; Rizakos, K. (2026). <i>Communications of the ACM</i>（arXiv:2603.18221）。</span>
+              <span class="lit-core" style="display:block">語音 AI 主持個人化口試＋LLM 評分委員會，每場評分成本 &lt;1 美元——「口試規模化」目前最具體的工程證據。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">方法：</span>NYU Stern 兩屆本科班（36、37 人），語音 AI 依每位學生的書面作業生成個人化追問並主持口試，三個 LLM 獨立評分後互評修訂。</p>
+              <p><span class="lbl">發現：</span>口試的證據功能得以保留而邊際成本大降（評分 &lt;$1／場）；作者整理五項工程教訓。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>回應「口試不可規模化」的最新嘗試；但樣本小、單一課程，AI 評分的效度、口音偏誤與申訴機制待獨立驗證，不宜直接採購式引用。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Ipeirotis, P., & Rizakos, K. (2026). Scalable and personalized oral assessments using voice AI. Communications of the ACM. https://arxiv.org/abs/2603.18221">複製引用格式</button>
+                <a class="btn" href="https://arxiv.org/abs/2603.18221" target="_blank" rel="noopener">arXiv 連結 ↗</a>
+                <span class="grade g-a">A 實作研究</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lit-item" data-cat="oral">
+            <button class="lit-head" aria-expanded="false">
+              <span class="lit-idx">22</span>
+              <span><span class="lit-title">Digital portfolios in higher education in the era of GenAI: The 4P framework</span>
+              <span class="lit-cite" style="display:block">Quinn, L. (2025). <i>Journal of Perspectives in Applied Academic Practice</i>（JIPE）。</span>
+              <span class="lit-core" style="display:block">以 Purpose／Product／Process／People 設計數位學習檔案——portfolio 只收成品同樣會被 AI 攻破，必須收過程證據。</span></span>
+              <span class="lit-toggle">展開 ▾</span>
+            </button>
+            <div class="lit-body">
+              <p><span class="lbl">內容：</span>主張 portfolio 必須收過程證據（草稿、修訂、AI 使用反思）並以學生 agency 為中心。</p>
+              <p><span class="lbl">與評量設計的關聯：</span>為「過程化／檔案式」模式提供可操作的設計框架，並與 programmatic assessment 傳統（多個低利害證據點累積成高利害判斷）銜接。</p>
+              <div class="lit-actions">
+                <button class="btn copy-btn" data-cite="Quinn, L. (2025). Digital portfolios in higher education in the era of GenAI: The 4P framework. Journal of Perspectives in Applied Academic Practice (JIPE). https://jipe.sljol.info/articles/36/files/698d627fb145e.pdf">複製引用格式</button>
+                <a class="btn" href="https://jipe.sljol.info/articles/36/files/698d627fb145e.pdf" target="_blank" rel="noopener">原文連結 ↗</a>
+                <span class="grade g-a">A 概念論文</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <p class="empty-note" id="litEmpty">沒有符合條件的文獻，請調整篩選或搜尋字詞。</p>
+
+        <h3>偵測工具爭議的制度面（新聞與彙整層）</h3>
+        <ul class="tight">
+          <li>Turnitin 自承的誤判率（文件級 &lt;1%）與獨立研究結果差距大；其 2026-07 更新的 EULA 明言偵測報告是「決策支援工具、非結論性發現」，教師專業判斷才是最終權威。［C］</li>
+          <li>二手彙整（2026-10 查核，<b>權威性低、僅供索驥各校原文</b>）稱：格拉斯哥（2023-03 起退出）、利物浦（2024-08 關閉，理由含對非母語者偏誤）、劍橋（不鼓勵）、Waterloo（2025-09 停用，校內測試曾把人寫文字標為 100% AI）、耶魯（保留運行但禁止以分數為程序證據）、Johns Hopkins（降為線索）。</li>
+          <li>制度含義：偵測分數在多國已從「證據」降格為「觸發對話的線索」；以分數自動處分在程序正義與法律上越來越站不住。</li>
+        </ul>
+
+        <h3>學生使用數據（調查層）</h3>
+        <p><b>HEPI／Kortext Student Generative AI Survey 2025</b>（英國全日制本科生 n=1,041，Savanta 執行）：任一 AI 工具使用率 66%→92%（2024→2025）；用於評量 53%→88%；主要用途為解釋概念（58%）、摘要文章（48%）、建議研究點子（41%）；使用主因省時（51%）、提升品質（50%）；卻步主因怕被指作弊（53%）、怕幻覺（51%）；59% 認為自己的評量方式已因 AI「大幅改變」。</p>
+        <div class="warn"><b>口徑注意：</b>HEPI 的「用於評量」含合法輔助，與「作弊」不可混為一談；直接把 AI 生成文字交入作業的比例遠低於 88%（各摘要口徑不一，正式引用請查 HEPI 原報告 PDF）。另，指定文章 2 轉述的 AAU／Elon「95% 教職員憂心過度依賴」未取得原調查，僅標為轉述。</div>
+      </section>
+
+      <!-- ============ 5 主題分析 ============ -->
+      <section id="analysis">
+        <div class="sec-head"><span class="sec-no">5</span><h2>主題分析（一）：為何偵測／禁止路線失敗</h2></div>
+        <p class="sec-sub">五個層次的失敗彼此疊加，結論是：偵測至多保留為「啟動對話的低利害線索＋須有其他證據佐證」；禁止則只在受控條件（現場、無裝置）下才有意義——那已不是「禁止路線」，而是評量設計的一部分。</p>
+        <div class="layers">
+          <div class="layer"><span class="lname">統計層</span><p>偵測器測的是文字可預測性（perplexity 等），不是作者身分。受限詞彙的真人寫作（非母語者、公式化學科寫作）與 AI 文本在統計上重疊，誤判是結構性的（Liang 2023）。</p></div>
+          <div class="layer"><span class="lname">對抗層</span><p>改寫、人編、翻譯、擬人化工具以極低成本瓦解偵測（Krishna 2023；Weber-Wulff 2023；Perkins 2024）。生成端背後是大型科技公司，偵測端是教育供應商，軍備競賽不對稱。</p></div>
+          <div class="layer"><span class="lname">證據／程序層</span><p>分數不透明、不可重現、隨版本變動，無法通過學術處分所需的證據標準；多校與 Turnitin 自身 EULA 都已將其降格為「線索／決策支援」。</p></div>
+          <div class="layer"><span class="lname">信任與誘因層</span><p>誤判指控摧毀師生信任、誘使學生把心力花在「降 AI 率」（甚至用 AI 改 AI），與教育目標背道而馳；中國部分大學設論文 AI 率上限後，學生被迫把通順句子改拙，正是此效應的實例。［C］</p></div>
+          <div class="layer"><span class="lname">可執行性層</span><p>非受控環境的禁令無法驗證執行（Dawson：unenforceable restrictions hurt validity）——守規者吃虧、違規者得利（Scarfe 盲測中 AI 作品分數更高），禁令反而製造不公平。</p></div>
+        </div>
+
+        <h3>主題分析（二）：評量 redesign 的五種模式</h3>
+        <p class="sec-sub" style="margin-bottom:16px">五種模式各有證據、成本與限制，實務上以學程層級組合使用，而非單一模式包辦。</p>
+        <div class="modes">
+          <div class="mode">
+            <span class="en">Secure in-person</span>
+            <h4>現場化</h4>
+            <dl>
+              <dt>典型做法</dt><dd>課堂同步寫作、紙筆／受控電腦考試、可帶筆記的現場測驗、實作考試。</dd>
+              <dt>主要證據</dt><dd>TEQSA 原則 2、雪梨 Lane 1；丹麥螢幕監控＋在校作答；THE 調查顯示多校部分回歸。</dd>
+              <dt>成本</dt><dd>場地、監考、排考行政；教師出題更新。</dd>
+              <dt>限制／風險</dt><dd>易退化為記憶測驗；對身障、遠距、工讀學生不利；只保證「無 AI 能力」，不保證「會用 AI」。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Oral</span>
+            <h4>口語化</h4>
+            <dl>
+              <dt>典型做法</dt><dd>書面＋短口試、viva、簡報答辯、課堂追問、AI 語音口試。</dd>
+              <dt>主要證據</dt><dd>UPenn／NYU／Cornell 新聞實例；丹麥國家政策；結構化口試系統回顧（醫學教育）；Ipeirotis 2026 規模化試驗。</dd>
+              <dt>成本</dt><dd>最高的人力時間成本（以 40 人×10 分鐘估算即 400 分鐘）；評分者訓練。</dd>
+              <dt>限制／風險</dt><dd>焦慮、主觀與評分者間差異、非母語不利、紀錄與申訴困難；須結構化題庫、雙評、錄影、替代方案。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Process-based</span>
+            <h4>過程化</h4>
+            <dl>
+              <dt>典型做法</dt><dd>草稿與修訂紀錄、分階段繳交、portfolio、AI 使用揭露與反思、學習日誌。</dd>
+              <dt>主要證據</dt><dd>TEQSA 命題（過程證據比成品更能預測表現）；Quinn 4P 框架；programmatic assessment 傳統。</dd>
+              <dt>成本</dt><dd>教師檢視過程資料的時間；平台需求。</dd>
+              <dt>限制／風險</dt><dd>過程證據本身也可被 AI 偽造（補造草稿、假反思）；須抽查＋現場驗證配套，亦不應要求學生補造紀錄。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Authentic</span>
+            <h4>真實情境化</h4>
+            <dl>
+              <dt>典型做法</dt><dd>在地議題、客戶／社區專案、實驗與田野、多模態成品、需現場資料的任務。</dd>
+              <dt>主要證據</dt><dd>Villarroel 2018 三維框架；Bearman 2024 對「真實」的再概念化。</dd>
+              <dt>成本</dt><dd>設計與評分最耗時；外部合作協調。</dd>
+              <dt>限制／風險</dt><dd>AI 同樣能做「看似真實」的專案；真實性 ≠ 防弊，須搭配過程或口語驗證。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">AI-integrated</span>
+            <h4>AI 融入式</h4>
+            <dl>
+              <dt>典型做法</dt><dd>明訂 AIAS 等級、評 AI 產出的批判、要求比較／修訂 AI 答案、AI 模擬口試練習。</dd>
+              <dt>主要證據</dt><dd>AIAS 試行（Furze 2024）；Bearman evaluative judgement；丹麥英語口試準備可用 AI 試驗。</dd>
+              <dt>成本</dt><dd>教師 AI 素養培訓；工具取得不均。</dd>
+              <dt>限制／風險</dt><dd>若基礎能力未建立先開放，等於制度化外包（Gerlich、Kosmyna 的警告）；付費版工具造成新的不公平。</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="consensus">
+          <b>跨模式的設計共識：</b>① 以學程（program）層級組合模式，而非每科各自為政（programmatic）；② 每項評量事前宣告 AI 條件（等級／紅綠燈）；③ 「最小充分驗證」原則——先用全班同步的低成本任務取得證據，只對證據缺口升級驗證（陳勇延「啟證」與 two-lane 的 Lane 1 抽核精神一致）；④ 驗證任務必須對準原學習目標，不得偷偷提高難度或改變條件，否則測到的是新條件而非原能力（construct alignment）。
+        </div>
+      </section>
+
+      <!-- ============ 6 評量方式深入探討 ============ -->
+      <section id="methods">
+        <div class="sec-head"><span class="sec-no">6</span><h2>評量方式深入探討：先問效度，再問防弊</h2></div>
+        <p class="sec-sub">本節只聚焦「評量方式本身」：理論地基、七種方式的機制與證據、四軸比較、實施成本與公平，最後給一份可直接套用的課程設計範例。證據強度逐項標示；凡屬設計提案、單一部署或二手轉述者，均明文註記——許多流行說法（如某校採口試後「零違規」）在原始來源只是校方宣傳，不能當效果證據。</p>
+
+        <h3>理論地基：五個支柱</h3>
+        <div class="points">
+          <div class="point"><div class="n">支柱 1</div><h4>效度先於防弊（Messick／Kane／Dawson）</h4><p>Messick 的統一效度觀：效度是「根據分數所作推論是否適當」的整合判斷，兩大威脅是構念涵蓋不足與構念無關變異。Kane 的論證鏈（任務→反應→分數→詮釋→決策）最適合 AI 時代：AI 代做斷的是「反應確實來自該生能力」一環。Dawson et al.（2024）主張作弊只是效度威脅之一；無法執行的禁令傷害效度有三個機制——<b>遵守者吃虧</b>（分數排序反映是否守規、而非目標構念）、<b>假保證</b>（教師以為已禁止便不再設計驗證）、<b>揭露寒蟬</b>（學生怕罰不揭露，教師失去判斷 AI 使用品質的資料）。 <span class="grade g-a">A</span> <a href="https://www.tandfonline.com/doi/abs/10.1080/02602938.2024.2386662" target="_blank" rel="noopener">Dawson et al. 2024 ↗</a></p></div>
+          <div class="point"><div class="n">支柱 2</div><h4>建構式對齊要改寫動詞（Biggs）</h4><p>學生實際學的是「被評量的課程」。學習成果（ILO）若寫「撰寫報告／寫出程式」，成品構念已被 AI 掏空；應改寫為可驗證的判斷動詞——「在無工具情境下除錯」「比較兩份 AI 產出並以證據裁決」「為自己的設計決策辯護」。但警告：把 SOLO 層次拉高不等於自動抗 AI——AI 最擅長的正是流暢的「關係性」散文；高層次動詞只有在<b>證據形式同步改變</b>（現場解釋、歷程、對話追問）時才有效，只改課綱動詞是典型的「話語式改變」。 <span class="grade g-a">A 經典</span></p></div>
+          <div class="point"><div class="n">支柱 3</div><h4>學程式評量（van der Vleuten et al. 2012）</h4><p>每個單一評量只是一個低利害<b>資料點</b>，承載回饋而非判決；高利害決策（及格／進階／畢業）須由許多資料點聚合、由專家判斷作出，利害越高、資料點要越多（比例原則）。TEQSA 的改革命題本質上就是它的 AI 版。限制：它需要學程層級治理（課程地圖、委員會、資料系統），單一教師在一門課內只能做「課程版近似」，不能宣稱已實現學程式評量。 <span class="grade g-a">A 經典</span></p></div>
+          <div class="point"><div class="n">支柱 4</div><h4>評鑑判斷 evaluative judgement（Bearman et al. 2024）</h4><p>成品不再證明能力後，剩下能驗證的是學生<b>對成品的判斷與交代</b>：判斷 AI 產出的品質、流程是否可信、以及接受 AI 對自己作品的評判。設計法：給兩份品質不同的 AI 產出要求排序找錯並附證據；自我評量須附「證據對照」（預測自己在 rubric 各向度的等級並引用作品段落）；評 AI 對話紀錄中的追問、驗證與拒絕行為。證據提醒：此為概念／立場論文，「評鑑判斷可教且能遷移」在 GenAI 情境下的因果證據仍薄，不可寫成已證實的解方。 <span class="grade g-a">A 概念論文</span></p></div>
+          <div class="point"><div class="n">支柱 5</div><h4>先獨立、後協作：reverse scaffolding</h4><p>Dawson 在 TEQSA 系列提出：AI 許可的判準是「這個能力<b>是否已被獨立驗證過</b>」——已掌握的成果可用 AI 卸載，正在發展的成果則限制或延後 AI。最強證據是 Bastani et al.（2025, PNAS）近千人預註冊 RCT：無護欄 GPT 組練習表現 +48%、拿掉工具後考試 −17%（p&lt;.05）；教師設計、只給提示不給答案的護欄版練習 +127%、無工具考試與對照<b>無顯著差異</b>。正確解讀：它證明無護欄先行使用有害、護欄可消除傷害，<b>沒有</b>證明護欄組學得比對照更好；且對象是高中數學、短期測量，不能直接外推大學課程。 <span class="grade g-a">A</span> <a href="https://www.pnas.org/doi/10.1073/pnas.2422633122" target="_blank" rel="noopener">Bastani et al. 2025 ↗</a></p></div>
+          <div class="point"><div class="n">寫法</div><h4>先寫效度主張，再選題型</h4><p>寫課綱時先寫一句：「這個分數將被用來宣稱學生能＿＿，證據是＿＿，最可能的替代解釋是＿＿，我用＿＿排除它。」寫不出來，換題型之前先換主張。Corbin, Dawson &amp; Liu（2025）區分「話語式改變」（改規則、標籤、聲明）與「結構式改變」（改任務機制）——只改前者會產生 enforcement illusion，這也是批評分級標籤「貼標籤不等於改革」的核心文獻。 <span class="grade g-a">A</span></p></div>
+        </div>
+
+        <h3>七種評量方式逐項深探</h3>
+        <p class="sec-sub" style="margin-bottom:16px">每種方式固定以同一組欄位剖析：機制、實證、成本與規模、公平、失敗模式、適合／不適合。沒有任何單一方式能同時解決「保證個人能力」與「培養 AI 協作能力」——這正是雙軌制的共同邏輯。</p>
+        <div class="modes">
+          <div class="mode">
+            <span class="en">Secure in-person</span>
+            <h4>1 · 現場受控評量</h4>
+            <dl>
+              <dt>變體</dt><dd>紙筆閉卷、受控電腦考（機房／lockdown）、open-book 現場考、實作考、OSCE 式多站實作。</dd>
+              <dt>機制</dt><dd>切斷的是「證據產生的條件」——在受監督、身分已驗證的時空內產出反應，「反應來自本人」這一推論環節最強。但它不自動保證構念正確：限時背誦考測到的可能只是提取速度與抗壓性。</dd>
+              <dt>實證</dt><dd>Open-book vs closed-book 後設分析（k=44、N=3,499）：整體學習效果差異不顯著（g=−0.22，95% CI 跨 0）——選 open 或 closed 應由構念決定（測「會查證應用」還是「已內化的知識」），不是由防弊決定。 <span class="grade g-a">A</span></dd>
+              <dt>成本與規模</dt><dd>最易規模化（大班、標準化、閱卷可分工）；實作考與 OSCE 成本陡升（場地、考官、題站輪轉），受控電腦考另有機房與授權成本。</dd>
+              <dt>公平</dt><dd>對考試焦慮、注意力／閱讀障礙、非母語、需輔具者最不友善，須提供延長時數等合理調整；遠距與在職學生受時空限制最大。以排除換取的安全，本身是效度損失。</dd>
+              <dt>失敗模式</dt><dd>題庫外洩與考古題文化；韓國 2025 年多校集體在考場內以手機／群組使用 AI 的報導顯示「現場」不等於「隔離」；實作考的背誦化（背範例程式而非理解）。 <span class="grade g-c">C</span></dd>
+              <dt>適合／不適合</dt><dd>適合：基礎概念是否內化、執照門檻、先備能力、程式語法與除錯短題。不適合：需要長時間探究、查證與工具使用的成果——硬塞進 2 小時只會測到速度。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Oral assessment</span>
+            <h4>2 · 口語評量</h4>
+            <dl>
+              <dt>變體</dt><dd>Interactive Oral（Griffith 發展的無腳本職場情境對話）、viva／成品答辯、簡報答辯、課堂隨機追問、AI 語音口試。</dd>
+              <dt>機制</dt><dd>即時、適應性追問使「背下 AI 成品」失效——考官可沿學生剛說的話往下鑽（為什麼選這個方法？換個條件會怎樣？）。同時直接取樣職場溝通構念：向客戶／主管解釋資訊系統決策，正是資管核心工作。</dd>
+              <dt>實證</dt><dd>Griffith IO 的證據為學生知覺與課程評價，非學習成效 RCT，也沒有「違規率下降 X%」的對照數據。結構化口考系統回顧（PLOS，103 篇）：結構化後滿意度 72–96% 認為公平／減壓、虛擬與現場分數無顯著差異、無結構時信度低。焦慮證據互相矛盾（Huxham 口試焦慮較高 vs Phan et al. 2023 壓力較低）——焦慮是利害×熟悉度×可預測性的函數，不是口試的固有屬性。 <span class="grade g-a">A</span></dd>
+              <dt>成本與規模</dt><dd>真人口試 15 分鐘／人，50 人＝12.5 小時純口試；系統回顧實測 150 名學生約需 25–37.5 小時考官時間。AI 語音口試（NYU Stern 兩班共 73 人）邊際評分成本每份 &lt;1 美元，但屬作者自述部署、無獨立效度驗證、無與真人考官的一致性公開對照；媒體流傳的「42 美分」是更早期數字，不可混用。 <span class="grade g-d">D 預印本</span></dd>
+              <dt>公平</dt><dd>口音、語言背景、社交焦慮、聽障／語障都會引入構念無關變異——除非口頭溝通本身就是學習成果。緩解：流程事先公開、提供練習場次、規準明寫「不評口音與流利度」、預先公告替代驗證形式。</dd>
+              <dt>失敗模式</dt><dd>即時耳機連線 AI／提詞（線上口試尤其脆弱）；背誦預演的「表演型理解」（對策：情境變換追問、要求現場修改）；考官疲勞與寬嚴漂移（對策：結構化題本、雙評抽樣）。</dd>
+              <dt>適合／不適合</dt><dd>適合：系統分析與設計答辯、程式理解驗證、管理個案決策辯護、畢業專題。不適合：純知識廣度盤點、未經練習就高利害實施、把口試當「抓作弊」的測謊工具。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Process-based</span>
+            <h4>3 · 過程導向評量</h4>
+            <dl>
+              <dt>變體</dt><dd>草稿／修訂歷程計分、分階段繳交、portfolio＋反思、AI 使用揭露與反思日誌、版本紀錄（Google Docs／Git）驗證。</dd>
+              <dt>機制</dt><dd>把證據從「一個時間點的成品」改為「一段時間的軌跡」——代做者要偽造的是整段可信的思考軌跡，成本高於偽造單一成品；回饋也能在還來得及時介入。TEQSA 提醒：要評真正的歷程，不是「把成品切成三份繳交」的假歷程。 <span class="grade g-b">B</span></dd>
+              <dt>實證</dt><dd>版本控制協議（Frontiers in Education 2023）明言是協議與範例、不是驗證過的偵測工具，投入量 ≠ 理解。南非 280 人研究（Combrinck &amp; Loubser 2025）：能反思者較少依賴生成內容。揭露制度的失敗數據：Gonsalves 發現強制揭露下約 74% 使用 AI 的學生仍未揭露（怕罰、指引模糊、執法不一致）——惟此數字僅取得二手轉述、未讀原文，引用須標示待核對。 <span class="grade g-a">A</span> <span class="grade g-d">D 二手</span></dd>
+              <dt>成本與規模</dt><dd>階段繳交把一次批改變成多次回饋，教師時間近線性增加。規模化解法：階段點只給「完成／回饋碼」不給細分、歷程證據採抽閱＋異常詳閱。</dd>
+              <dt>公平</dt><dd>對時間貧窮學生（打工、照顧責任）不利——他們可能一次完成而非分次迭代；版本紀錄對不熟工具、共用裝置、網路不穩者不利。對策：允許多種歷程證據形式（手寫拍照、口頭反思、Git commit 皆可）、階段點給彈性窗口。</dd>
+              <dt>失敗模式</dt><dd>AI 可一次生成「假草稿鏈」（三版不同成熟度的稿逐日貼上）；反思日誌最容易被 AI 代寫且高度模板化。對策：歷程證據只作觸發追問的線索，要求其中包含課堂內產生的錨點，與校內錨點對不上才是訊號，不單獨計高分。</dd>
+              <dt>適合／不適合</dt><dd>適合：寫作、專題、系統開發（Git 天然歷程）、設計類。不適合：歷程本身非學習目標的科目硬套；把 commit 次數等量化指標直接換算分數（Goodhart 定律：指標一旦成目標即被刷）。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Authentic assessment</span>
+            <h4>4 · 真實評量</h4>
+            <dl>
+              <dt>框架</dt><dd>Villarroel et al.（2018）系統回顧 125 篇文獻歸納三維度：① Realism 真實性（任務與條件對應校外世界）② Cognitive challenge 認知挑戰 ③ Evaluative judgement 評鑑判斷。變體：職場／社區專案、在地資料任務、多模態成品、客戶簡報。 <span class="grade g-a">A 經典</span></dd>
+              <dt>機制批判（重點）</dt><dd>真實任務指向的是<b>效度</b>（測到真實能力與遷移），不是<b>安全</b>（防止代做）。AI 恰恰最擅長真實世界的產出——寫企劃、做簡報、分析公開資料、產出程式原型；任務越像職場，AI 工具鏈越完整。「換成專案就會安全」是 2023 年最常見的誤判。2025 年 scoping review 進一步批評：既有框架描繪的是「現在的」職場，預測不了 AI 改變後的未來。 <span class="grade g-a">A</span></dd>
+              <dt>實證</dt><dd>對投入、動機、就業知覺的正向證據多為知覺與相關研究；對「學習成效優於傳統考試」的因果證據有限且異質。當動機與遷移的工具合理，當防弊工具則無證據。</dd>
+              <dt>成本／公平</dt><dd>設計與評分最耗時、題目年年更新、評分者須校準。在地化／個人化提高代做成本，但學生資料品質、人脈與實習機會的差異會直接變成分數差異；團隊成品無法歸因個人，必須配個人驗證。</dd>
+              <dt>適合／不適合</dt><dd>適合：資管專題、系統分析與設計、資料分析（在地公開資料＋個人化參數）、管理個案。不適合：作為唯一高利害證據、基礎先備能力的把關。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">AI-integrated</span>
+            <h4>5 · AI 融入式評量</h4>
+            <dl>
+              <dt>變體</dt><dd>分級許可框架（AIAS）、評 AI 產出（critique）、AI 對話紀錄為評量對象、人機協作成品（成品＋使用說明＋驗證紀錄）。</dd>
+              <dt>AIAS 五級</dt><dd>Perkins et al.（2024）：1 No AI、2 AI Planning、3 AI Collaboration、4 Full AI、5 AI Exploration；2025 修訂版改環形呈現、強調無等級高下，並移除舊版「附原始稿」要求（無法可靠驗證）。試點證據（Furze et al. 2024，單一機構前後比較、無對照組）：違規案件減少、成績 +5.9%、通過率 +33.3%——通過率上升也可能來自標準或申報口徑改變，只能作「可實施」的可行性證據，不能作學習成效證據。 <span class="grade g-a">A 弱因果</span></dd>
+              <dt>標籤批判</dt><dd>Corbin et al.（2025）指 AIAS 若只貼等級而不改任務，就是話語式改變；AIAS 團隊 2025 年正面回應、主張其定位兼為溝通工具與重設計鷹架。此爭論未決，引用任一方都應提另一方。 <span class="grade g-a">A</span></dd>
+              <dt>評 AI 產出</dt><dd>給學生一份 AI 生成的解答／程式（含已知與未知錯誤），要求找錯、評等、修正並說明證據。2025 年程式教育研究發現：學生修正 LLM 生成程式顯著比傳統考題更困難——它取樣的是更高階的評鑑判斷，不是送分題。風險：命題成本前置、模型更新使題目壽命短。 <span class="grade g-a">A</span></dd>
+              <dt>對話紀錄</dt><dd>評 prompt 的問題意識、追問深度與拒絕紀錄；但對話可事後偽造、可由另一個 AI 生成「看起來很會追問」的紀錄。定位應為形成性＋低利害，或與現場追問交叉驗證，不宜單獨高利害。</dd>
+              <dt>適合／不適合</dt><dd>適合：資料分析、程式開發、個案、企劃等職場已用 AI 的任務。不適合：把「會用 AI」偷換成學科成果（TEQSA 警告：不能以評 AI 使用取代評學科成果本身）；基礎能力尚未獨立驗證前的高階開放任務。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Peer &amp; self assessment</span>
+            <h4>6 · 同儕評量與自我評量</h4>
+            <dl>
+              <dt>新角色</dt><dd>在 AI 時代，其價值從「分擔批改」轉為「訓練評鑑判斷的主場域」——學生評別人（與評 AI 產出）時被迫外顯品質標準，這正是支柱 4 的練習場。</dd>
+              <dt>實證</dt><dd>AI 輔助同儕回饋 RCT（藥學三年級 129 人、353 則回饋）：結構化 prompt 輔助組在各 TGAP 向度（任務／落差／行動）的具體性顯著較高，如能具體指出改進處者 55.0% vs 13.6%。但該研究未測「學生自己的判斷力是否因此成長」——長期外包判斷，判斷本人可能被掏空，故設計上須保留「先自行評、後 AI 輔助修訂」的順序。 <span class="grade g-a">A</span></dd>
+              <dt>風險與對策</dt><dd>① 未校準就計分：先做全班校準（評同一範例、與教師分數對話），教師抽評 20–30% 複核。② 同儕分佔比過高引發友情分與策略行為：建議計「回饋品質」而非直接給同儕定分。③ 自我評量灌水：改評「預測準確度與證據引用」。④ AI 時代新增風險：學生可用 AI 生成看似專業的評語而未讀作品，使一致性數字更好看、判斷卻更空洞。</dd>
+              <dt>適合／不適合</dt><dd>適合：草稿互評、專題里程碑、簡報回饋、程式 code review 練習。不適合：高利害及格判定、未匿名的小班熟人社群。</dd>
+            </dl>
+          </div>
+          <div class="mode">
+            <span class="en">Two-lane &amp; institutional models</span>
+            <h4>7 · 雙軌／分級制度</h4>
+            <dl>
+              <dt>雪梨 two-lane（查核後事實）</dt><dd>Lane 1 <i>Secure</i>：受監督、現場，驗證畢業生能在無外援下展現學習成果（現場口試、viva、同期課堂評量、考試實作），主要在<b>學程層級</b>運作；Lane 2 <i>Open</i>：不設防、AI 使用被鷹架與支持，主要在<b>單元（unit）層級</b>運作。2025 年第 1 學期起預設允許 AI 用於評量（考試除外）。 <span class="grade g-b">B</span> <a href="https://educational-innovation.sydney.edu.au/teaching@sydney/aligning-our-assessments-to-the-age-of-generative-ai/" target="_blank" rel="noopener">雪梨官方頁 ↗</a></dd>
+              <dt>重要查核</dt><dd><b>雪梨並未公布全校統一的配分比例</b>（例如 secure 佔 40%）——比例在學程層級協調、各 unit 落實。Two-lane 是治理原則，不是配分公式；任何引述固定百分比的二手說法都應要求出處。媒體所稱 13 種 secure／18 種 open 形式來自 Chronicle 報導，未在官方頁逐項核對。 <span class="grade g-c">C</span></dd>
+              <dt>公平配套</dt><dd>2026 年雪梨宣布全體師生免費取得 ChatGPT Edu，官方理由之一正是拉平工具取得差距——開放車道若不解決付費版／免費版落差，評到的將是訂閱能力。 <span class="grade g-b">B</span></dd>
+              <dt>其他模式</dt><dd>Monash「逐項指定」制：每項評量由 Chief Examiner 指明 AI 可用方式、學生以 AI statement 承認，粒度更細、行政成本更高。港大 HKU：2023 年先短期禁止、後轉全面融入——政策反轉會造成學生對規則的信任成本。Griffith：由下而上的 IO 教師社群擴散，而非中央治理。 <span class="grade g-b">B</span></dd>
+              <dt>批判與疊用</dt><dd>二元性是刻意的溝通簡化（雪梨官方自承 deliberately binary），代價是中間地帶（工具受控的現場 AI 考）被迫歸邊。兩者可疊用：學程治理用 two-lane 保證節點，課程溝通用 AIAS 細分開放車道內的使用等級。</dd>
+            </dl>
+          </div>
+        </div>
+        <h3>四軸比較總表（17 種方式）</h3>
+        <p class="sec-sub" style="margin-bottom:4px">評級為依上文證據的綜合判斷（高／中／低），非單一研究結果。「效度保證」指對「個人獨立能力」推論的強度；「AI 協作培養」指對「與 AI 工作的能力」取樣的程度。兩軸無法同時拉滿，是所有課程設計取捨的起點。</p>
+        <table class="tbl">
+          <thead><tr><th>評量方式</th><th>效度保證（個人能力）</th><th>AI 協作培養</th><th>成本（教師時間）</th><th>公平風險</th><th>主要證據等級</th></tr></thead>
+          <tbody>
+            <tr><td data-th="">閉卷紙筆現場考</td><td data-th="效度保證">中–高（限內化知識）</td><td data-th="AI 協作培養">無</td><td data-th="成本">低</td><td data-th="公平風險">高（焦慮、障礙、語言）</td><td data-th="證據">後設分析＋傳統測驗文獻</td></tr>
+            <tr><td data-th="">Open-book 現場考</td><td data-th="效度保證">中–高（應用／查證）</td><td data-th="AI 協作培養">低</td><td data-th="成本">低–中（命題貴）</td><td data-th="公平風險">中</td><td data-th="證據">後設分析 k=44</td></tr>
+            <tr><td data-th="">受控電腦實作考</td><td data-th="效度保證">高（程式／操作技能）</td><td data-th="AI 協作培養">低</td><td data-th="成本">中（機房、題庫維護）</td><td data-th="公平風險">中</td><td data-th="證據">可行性研究為主</td></tr>
+            <tr><td data-th="">OSCE／結構式實作多站</td><td data-th="效度保證">高</td><td data-th="AI 協作培養">低</td><td data-th="成本">很高</td><td data-th="公平風險">中（結構化後下降）</td><td data-th="證據">系統回顧（醫學）</td></tr>
+            <tr><td data-th="">Interactive Oral（真人）</td><td data-th="效度保證">高</td><td data-th="AI 協作培養">中（溝通構念）</td><td data-th="成本">很高</td><td data-th="公平風險">中–高（口語、焦慮；可設計緩解）</td><td data-th="證據">知覺／質性＋小樣本</td></tr>
+            <tr><td data-th="">Viva／成品答辯</td><td data-th="效度保證">高（針對該成品）</td><td data-th="AI 協作培養">低–中</td><td data-th="成本">高</td><td data-th="公平風險">中</td><td data-th="證據">試點＋經驗報告</td></tr>
+            <tr><td data-th="">課堂隨機追問（累積）</td><td data-th="效度保證">中（多次取樣後上升）</td><td data-th="AI 協作培養">低</td><td data-th="成本">低（嵌入課堂）</td><td data-th="公平風險">中（須防冷場羞辱效應）</td><td data-th="證據">實務文獻為主</td></tr>
+            <tr><td data-th="">AI 語音口試</td><td data-th="效度保證">未知（宣稱高、未獨立驗證）</td><td data-th="AI 協作培養">低</td><td data-th="成本">邊際低、建置未計</td><td data-th="公平風險">未知（口音辨識、申訴權）</td><td data-th="證據">單一作者部署 n=73</td></tr>
+            <tr><td data-th="">歷程／分階段繳交</td><td data-th="效度保證">中（配錨點後中–高）</td><td data-th="AI 協作培養">中</td><td data-th="成本">高</td><td data-th="公平風險">中（時間貧窮）</td><td data-th="證據">協議＋相關研究</td></tr>
+            <tr><td data-th="">Portfolio＋答辯</td><td data-th="效度保證">中–高</td><td data-th="AI 協作培養">中</td><td data-th="成本">很高</td><td data-th="公平風險">中</td><td data-th="證據">質性／知覺為主</td></tr>
+            <tr><td data-th="">AI 揭露＋反思日誌</td><td data-th="效度保證">低（單獨使用）</td><td data-th="AI 協作培養">中</td><td data-th="成本">中</td><td data-th="公平風險">中（懲罰誠實風險）</td><td data-th="證據">調查（揭露失敗率為二手）</td></tr>
+            <tr><td data-th="">真實／專案評量（開放）</td><td data-th="效度保證">低（個人歸因弱）</td><td data-th="AI 協作培養">高</td><td data-th="成本">很高</td><td data-th="公平風險">高（資源、人脈、搭便車）</td><td data-th="證據">知覺研究為主</td></tr>
+            <tr><td data-th="">評 AI 產出（critique）</td><td data-th="效度保證">中–高（判斷構念）</td><td data-th="AI 協作培養">高</td><td data-th="成本">中（命題前置、題目壽命短）</td><td data-th="公平風險">中</td><td data-th="證據">小型實證（程式域）</td></tr>
+            <tr><td data-th="">AI 對話紀錄評量</td><td data-th="效度保證">低</td><td data-th="AI 協作培養">高</td><td data-th="成本">中</td><td data-th="公平風險">中（付費工具落差）</td><td data-th="證據">幾乎無實證</td></tr>
+            <tr><td data-th="">人機協作成品＋驗證規準</td><td data-th="效度保證">中</td><td data-th="AI 協作培養">高</td><td data-th="成本">中–高</td><td data-th="公平風險">中（工具取得）</td><td data-th="證據">框架／試點（AIAS）</td></tr>
+            <tr><td data-th="">同儕評量（經校準）</td><td data-th="效度保證">低–中（不宜高利害）</td><td data-th="AI 協作培養">中（判斷訓練高）</td><td data-th="成本">中（校準與抽查）</td><td data-th="公平風險">中（串通、友情分）</td><td data-th="證據">RCT（回饋品質）＋傳統文獻</td></tr>
+            <tr><td data-th="">自我評量（評準確度）</td><td data-th="效度保證">低</td><td data-th="AI 協作培養">中</td><td data-th="成本">低</td><td data-th="公平風險">低–中</td><td data-th="證據">大班混合方法研究</td></tr>
+          </tbody>
+        </table>
+
+        <h3>實施層面：評分、驗證、工時與接受度</h3>
+        <div class="layers">
+          <div class="layer"><span class="lname">Rubric 改寫</span><p>把 rubric 從「成品特徵清單」改為「證據判準」——每一列都要能回答「看到什麼，我才相信這個判斷出自學生」。成品規準保留但降權重（標準不因用了 AI 而降低）；新增歷程規準：問題界定的原創性（附錨點）、查證行為（指出 AI 錯誤並附一手來源）、決策可交代性（採納／拒絕的理由）、修訂的實質性。<b>反例警告</b>：不要設「AI 使用量越少越高分」或「文風越不像 AI 越高分」的規準——前者懲罰誠實揭露，後者把評分變成偵測。校準程序（共評範例、雙評抽樣、極端分數複核）比 rubric 文字更重要。</p></div>
+          <div class="layer"><span class="lname">階梯式抽樣驗證</span><p>全班低成本驗證（5 分鐘課堂微任務／簡報後 2 問追問／程式現場小改）→ 隨機＋異常者進第二階深口試（10–15 分鐘）→ 仍無法交代才進第三階（重作受控任務或依校規處理）。<b>明說缺口：未找到任何研究以對照設計測量「抽樣比例 X% 可產生多少嚇阻」</b>；起始建議 15–20% 隨機抽樣為設計提案值、無實證背書。公平陷阱：只抽「可疑者」會複製教師偏見（文風、口音、過去成績）——應隨機為主、規則事先公告；第二階結果只判斷「該任務的證據是否成立」，不直接等於違規認定。</p></div>
+          <div class="layer"><span class="lname">教師工時</span><p>量化研究幾乎不存在（研究缺口第一位）：僅有零散碎片——結構化口考回顧的考官時間 25–37.5 小時／150 名學生、醫學教育的單人成本數字。NYU 的「每份 &lt;1 美元」是<b>邊際現金成本</b>，不含命題、校準、申訴與人工複核的人時，不可偷換為總成本。目前所有「口試太貴／AI 口試好便宜」的宣稱都缺完整成本會計；台灣若要推行，系所層級先做一學期的工時試點紀錄，會是本地最有價值的實證貢獻之一。</p></div>
+          <div class="layer"><span class="lname">學生接受度</span><p>HEPI 2025（英國 n=1,041）：88% 曾在評量中使用 GenAI，學生最怕的是<b>被指控作弊（53%）</b>——學生反對的不是 AI 評量，而是規則不清與被誤指控。對現場考回歸的反彈目前主要是新聞敘事：Brown 大學某課學期中途把期末考改佔 80%，引發 18 人退選、9 人缺考——學期中途變更配分與規則本身即引發公平與信任問題，實施時應避免。未找到以代表性樣本測量學生對受控評量態度變化的同儕審查研究。 <span class="grade g-b">B 調查</span> <span class="grade g-c">C 個案</span></p></div>
+        </div>
+
+        <h3>課程層級決策流程（拿到一門課時，依序作答）</h3>
+        <ol class="outline">
+          <li><b>列 ILO 並分類</b>：每個成果標 A（不可讓渡的個人核心能力）／B（未來工作會與 AI 協作完成）／C（可卸載的機械工作）。C 直接開放 AI、不佔受控資源；寫不出分類，先不要選題型。</li>
+          <li><b>為每個 A 類成果指定 Lane 1 證據</b>：哪一次受控場合、什麼形式，能讓我宣稱「這位學生獨力能做」？一門課至少一個；全學程每個 A 類成果至少在兩個時間點被驗證（學程層級與系辦協調，非單一教師責任）。</li>
+          <li><b>檢查時序（reverse scaffolding）</b>：B 類任務出現前，對應的 A 類基礎是否已被獨立驗證？未驗證，先安排低利害獨立練習＋護欄 AI 版本。</li>
+          <li><b>為每個 B 類成果設計開放任務＋證據要求</b>：成品之外必交獨立草稿錨點、查證紀錄、採納／拒絕決策、揭露表，並決定用 AIAS 哪一級溝通。</li>
+          <li><b>選驗證階梯</b>：全班微驗證 → 抽樣深驗證（隨機比例先定並公告）→ 無法交代時的程序（重作／依校規，不得由教師私下認定違規）。</li>
+          <li><b>算成本</b>：以人時試算（人數×分鐘＋校準＋複核＋申訴預留）。超過可用工時就降利害或改抽樣，不要默默降低評分品質。</li>
+          <li><b>公平預檢</b>：逐項問——身心障礙、語言、打工時間、工具付費、遠距，誰會被這項設計系統性扣分？替代證據是什麼？寫進課綱。</li>
+          <li><b>寫課綱揭露條款</b>：每項評量的 AI 等級、揭露格式、揭露如何影響分數（承諾：誠實揭露本身不扣分）、驗證規則、申訴管道。學期開始公告，<b>學期中不變更配分與規則</b>。</li>
+          <li><b>預設蒐證</b>：先決定紀錄方式，學期末回答三個問題——Lane 1 與 Lane 2 成績相關多高？抽樣驗證通過率？教師實際工時？回饋到系課程委員會（學程式評量的最小迴路）。</li>
+        </ol>
+
+        <h3>範例：資管系必修課（約 50 人）的 two-lane 重新設計</h3>
+        <div class="warn"><b>標明：</b>以下為基於上文文獻的<b>設計提案，未經實證檢驗</b>；課名假設為「資料庫管理系統」或「系統分析與設計」類必修，16 週、50 人、1 名教師＋1 名 TA。Lane 1 合計約 60%、Lane 2 約 40%——此比例是<b>本提案的選擇，不是雪梨大學或任何文獻的處方</b>（雪梨未公布統一比例，見上方查核）。</div>
+        <table class="tbl">
+          <thead><tr><th>週</th><th>評量事件</th><th>車道</th><th>配分</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td data-th="">1</td><td data-th="評量事件">課綱公告 AI 等級表、揭露格式、抽樣口試規則；不計分 AI critique 練習</td><td data-th="車道">—</td><td data-th="配分">0%</td><td data-th="說明">先建立規則信任與評鑑判斷校準</td></tr>
+            <tr><td data-th="">2–13</td><td data-th="評量事件">課堂微驗證 ×6 次（5 分鐘紙筆／現場小題，取最好 5 次）</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">10%</td><td data-th="說明">低利害多資料點（學程式思維）</td></tr>
+            <tr><td data-th="">4</td><td data-th="評量事件">現場實作小考 1（受控電腦：除錯＋查詢撰寫，open-book）</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">10%</td><td data-th="說明">A 類基礎門檻</td></tr>
+            <tr><td data-th="">6</td><td data-th="評量事件">專案提案（開放 AI，AIAS 3）：附獨立草稿錨點＋揭露表，只給回饋碼不細評</td><td data-th="車道"><span class="lane2">Lane 2</span></td><td data-th="配分">5%</td><td data-th="說明">歷程錨點</td></tr>
+            <tr><td data-th="">9</td><td data-th="評量事件">期中現場考（open-book 個案應用題＋短答）</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">15%</td><td data-th="說明">學程安全節點之一</td></tr>
+            <tr><td data-th="">11</td><td data-th="評量事件">AI critique 課堂考題：給 AI 生成的設計／程式，找錯並修正</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">10%</td><td data-th="說明">在受控條件下評 B 類判斷，同時取樣判斷與 AI 素養</td></tr>
+            <tr><td data-th="">13</td><td data-th="評量事件">同儕 code／文件互評（先校準、評回饋品質計分，教師抽查 30%）</td><td data-th="車道"><span class="lane2">Lane 2</span></td><td data-th="配分">5%</td><td data-th="說明">訓練評鑑判斷</td></tr>
+            <tr><td data-th="">15</td><td data-th="評量事件">專案定稿（開放 AI，AIAS 4）：成品＋查證紀錄＋採納／拒絕決策表</td><td data-th="車道"><span class="lane2">Lane 2</span></td><td data-th="配分">20%</td><td data-th="說明">rubric 評查證與決策，不評 AI 使用量</td></tr>
+            <tr><td data-th="">15–16</td><td data-th="評量事件">專案答辯：全班 8 分鐘簡報＋追問（個人計分）</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">15%</td><td data-th="說明">50 人×約 12 分鐘 ≈ 10 小時，分 3 場次、TA 協助計時紀錄</td></tr>
+            <tr><td data-th="">16</td><td data-th="評量事件">階梯深口試：隨機抽 20%（10 人）＋微驗證異常者，15 分鐘</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">證據確認</td><td data-th="說明">通過不加分；無法交代則該任務以受控重作取代計分——重作而非直接違規認定，規則第 1 週公告</td></tr>
+            <tr><td data-th="">16</td><td data-th="評量事件">期末整合短考或個案備忘錄（二擇一依系規範）</td><td data-th="車道"><span class="lane1">Lane 1</span></td><td data-th="配分">10%</td><td data-th="說明">與期中錯開取樣範圍</td></tr>
+          </tbody>
+        </table>
+        <p class="small">教師工時粗估：口試類約 12–14 小時、專案批改約 12 小時（50 份×15 分鐘），其餘批改由 TA 分擔並抽校。若無 TA，應把答辯改為小組場次＋個人追問，並降低專案細評向度。大班（&gt;100）通識課不可行全班真人口試與逐份歷程詳閱，可行組合是受控現場考＋標準化 AI critique 作業＋抽樣口頭驗證；小班研究所則應反過來用盡全班 viva 與 portfolio＋答辯，不要以選擇題期末考作為唯一證據。</p>
+
+        <h3>台灣落地要點</h3>
+        <ul class="tight">
+          <li><b>先查校內規範，不要移植國外百分比</b>：涉及「無法交代作品」的後果（重作、扣分、送學術誠信程序）必須有校規依據與事先公告。台師大 2026 年指引要求教師事前說明 AI 可用範圍與揭露要求、不得單憑 AI 偵測判定違規、應結合口試與歷程紀錄綜合判斷——方向可供各校參考，但屬台師大校內指引，其他學校仍依自校規範。 <span class="grade g-b">B</span> <a href="https://ctld.ntnu.edu.tw/wp-content/uploads/2025/12/附件1-臺師大生成式AI之學習應用及參考指引中文版_20251211.pdf" target="_blank" rel="noopener">台師大指引 PDF ↗</a></li>
+          <li><b>系層級協調口試週</b>：多校已行 16 週制，口試與分階段評量要排進週次表並避開期中／期末壅塞；全系若多門課同時改口試，學生週負荷與教室排程會先爆掉——這是治理問題，不是教師個人努力可解。</li>
+          <li><b>教師評鑑與教學評量連動</b>：評量變嚴、成績分布校正（觀察研究顯示改回受控考試後不及格率上升）在學生教學評量上可能被懲罰。若學校要求改革卻仍以學生滿意度為主要評鑑依據，理性教師會選擇不改革；建議改革試點學期的教學評量僅作參考，並把「評量設計說明」納入教學檔案。</li>
+          <li><b>申訴制度下的程序正義</b>：口試與實作務必留可檢視紀錄（評分表、題本；錄影涉及個資與同意，須依校規與個資法先行公告保存期限與用途）；抽樣規則、觸發條件、重作機會都寫進課綱，申訴時才能證明「同規則適用所有人」。</li>
+          <li><b>工具公平</b>：開放車道若實質需要付費版 AI，等於以訂閱分級評分。台灣短期可行版：指定免費工具可完成所有必修任務，或由學校提供校園授權工具，並在課綱載明（對照雪梨的全校免費提供，見第 7 張卡）。</li>
+          <li><b>TA 與工時現實</b>：上方範例已假設 1 名 TA；無 TA 的班級應自動降規，系辦核課時應把評量形式納入 TA 配置考量。</li>
+        </ul>
+
+        <h3>尚未解決的爭論與研究缺口</h3>
+        <ul class="tight">
+          <li><b>教師工時量化</b>：無改革前後的人時對照研究，所有成本宣稱目前都不可靠。</li>
+          <li><b>抽樣驗證的嚇阻參數</b>：比例、公告方式、觸發條件對行為的影響，零對照證據。</li>
+          <li><b>AI 語音口試的效度</b>：與真人考官的一致性、口音／語言公平、申訴可解釋性，均未獨立驗證；目前僅單一團隊自述。</li>
+          <li><b>Two-lane 的成效評估</b>：雪梨實施後的學習成效、公平與成本尚無公開同儕審查評估；現有材料是政策與新聞。</li>
+          <li><b>AIAS 的因果證據</b>：僅單機構前後比較；「標籤制 vs 結構改革」之爭（Corbin vs Perkins／Furze）未有裁決性研究。</li>
+          <li><b>評鑑判斷教學的遷移</b>：概念強、GenAI 情境的介入證據弱；「評 AI 產出」訓練能否遷移到評一般作品，未知。</li>
+          <li><b>歷程證據的軍備競賽</b>：假草稿鏈、假對話紀錄的生成成本正在下降；歷程評量的「保鮮期」有多長，無縱貫研究。</li>
+          <li><b>學科外推</b>：學程式評量與 OSCE 證據幾乎全來自醫學／健康專業，資管、商管、人文的移植證據稀少；程式領域目前最強的只是經驗報告與預印本。</li>
+          <li><b>長期效果</b>：幾乎所有 AI 評量研究只測量單學期；對畢業後職場表現與知識保留的縱貫證據不存在。</li>
+          <li><b>台灣本地證據</b>：除校內指引外，未找到台灣大學評量改革的同儕審查成效研究——本地教師的工時試點與抽樣驗證紀錄（見「實施層面」），正是可填補的空白。</li>
+        </ul>
+      </section>
+
+
+      <!-- ============ 7 論文答辯 ============ -->
+      <section id="viva">
+        <div class="sec-head"><span class="sec-no">7</span><h2>論文答辯／口試：為何被重新重視</h2></div>
+        <p class="sec-sub">口試的價值不只是防弊。它有三個功能——AI 只是讓 viva 從「學位儀式」變回「證據機制」。</p>
+        <div class="func">
+          <div class="f"><h4>驗證功能</h4><p>即時追問能測試學生是否理解自己作品中的概念、方法選擇與推論——作品可代工，現場推理鏈難以代工。這是 viva 數百年來在博士訓練中的原始功能。</p></div>
+          <div class="f"><h4>形成性功能</h4><p>答辯中的追問本身即教學——學生須組織、辯護、修正自己的主張；UPenn 教師受訪時強調目的在重建推理與創造技能，而非抓作弊。</p></div>
+          <div class="f"><h4>訊號功能</h4><p>對雇主與社會重建學位可信度——在 AI 成品氾濫時，「本人能當場解釋並延伸其作品」成為學位含金量的可觀察指標。</p></div>
+        </div>
+
+        <div class="cols2">
+          <div>
+            <h3>實施要點</h3>
+            <ul class="tight">
+              <li><b>結構化</b>：預先公布題型範圍與評分規準、題庫化追問向度（概念理解、方法辯護、結果詮釋、限制與替代解釋、AI 使用揭露）。醫學教育的系統回顧（18 篇）顯示，結構化口試的信度與公平優於傳統即興口試。</li>
+              <li><b>分級使用而非全員全長度</b>：課程層級用「全班同步微驗證 → 少數人補充口試」的階梯；學位層級維持完整委員會口試，但應增加針對「研究過程」的追問（資料從何而來、分析決策、AI 在各階段的角色），而非只問結論。</li>
+              <li><b>紀錄與雙評</b>：錄影／紀錄、兩位評分者、校準會議，是應付主觀與申訴的最低配置。</li>
+              <li><b>AI 的新角色</b>：AI 可作考前模擬考官（NYU 的作法）或口試主持的規模化嘗試（Ipeirotis 2026），但高利害判定仍應由人負責，且須揭露並提供申訴管道。</li>
+              <li><b>把結果的使用說清楚</b>：口試是用來「補足證據」還是「推翻書面成績」，須事前規範；一次答不出來只能推論證據不足，不能推論作弊。</li>
+            </ul>
+          </div>
+          <div>
+            <h3>公平性問題（不可迴避）</h3>
+            <ul class="tight">
+              <li><b>語言</b>：口語表達能力與學科理解是兩個構念；對非母語、口語焦慮或語障學生，口試可能系統性低估其學科能力——須提供替代證據形式（現場筆答追問）與合理調整。陳勇延的微任務以筆答為主、口試為輔，正是此考量。</li>
+              <li><b>焦慮與文化</b>：口試焦慮、面對權威的表達文化差異會污染測量；同儕口試（peer oral exams）被學生評為壓力最低且仍具學習效果，可作低利害練習。</li>
+              <li><b>一致性</b>：不同考官的追問深度差異即是分數差異；無結構、無紀錄的口試在申訴時幾乎不可辯護。</li>
+              <li><b>規模與勞動</b>：口試成本最終由教師工時吸收；若無學程層級的抽樣／分級設計與教學負荷配套，口試熱潮可能在兩三年內因過勞而退潮——這與英國大學遲遲不全面回歸現場評量是同一邏輯。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 8 台灣脈絡 ============ -->
+      <section id="taiwan">
+        <div class="sec-head"><span class="sec-no">8</span><h2>台灣脈絡的特殊性</h2></div>
+        <p class="sec-sub">台灣碩博士學位口試行之有年，課題是「深化」而非「引進」；但指引碎片化、誠信教育薄弱、政策偏重推廣，是與澳洲（監管者主動推評量改革）最大的差異。</p>
+        <div class="cards">
+          <article class="card">
+            <div class="meta"><span class="grade g-b">B 正式文件</span><span>國立陽明交通大學</span></div>
+            <h4>《生成式 AI 在教育之原則與應用聲明》</h4>
+            <p>台灣少數可取得全文的大學指引：要求教師事前在評量標準中明訂人機合作可接受程度並與學生共識；多元評量（書面、報告、口試、簡報、討論、實作、實習）＋課堂寫作防範代寫；指導教授應增加研究會議頻率、掌握學生進度以保論文品質；學生對作品負全責、須正確引註並標明原創部分。</p>
+            <div class="take"><b>分析定位：</b>可作為台灣大學端「指引先行、評量多元化」的代表文本，也是報告中台灣個案章節的核心材料。</div>
+            <div class="src-link"><a href="https://www.nycu.edu.tw/userfiles/oaerien/files/20240612115323232.pdf" target="_blank" rel="noopener">陽明交大聲明 PDF ↗</a></div>
+          </article>
+          <article class="card">
+            <div class="meta"><span class="grade g-c">C 新聞</span><span>Taipei Times 報導</span><span>2026-08-12</span></div>
+            <h4>EdYouth 課綱觀察報告：學生對 AI 規範的理解落差</h4>
+            <p>台灣青年民主協會教育團隊（EdYouth）2026 年報告指出：台灣無獨立的學術誠信課程、近四分之一受訪者稱無人教過學術誠信、近半學生對生成式 AI 規範表示不清楚或困惑。教育部次長朱俊彰回應將推負責任使用 AI 的路徑圖與學術誠信課程。</p>
+            <div class="take"><b>分析定位：</b>在規範不清下處罰學生，程序正義先天不足；這使台灣更應先走「宣告 AI 條件＋教 evaluative judgement」，而非偵測處罰。</div>
+            <div class="src-link"><a href="https://www.taipeitimes.com/News/taiwan/archives/2026/08/12/2003862359" target="_blank" rel="noopener">taipeitimes.com ↗</a></div>
+          </article>
+        </div>
+        <h3>六個結構性課題</h3>
+        <ul class="tight">
+          <li><b>口試深化</b>：台大 2022 年（AI 熱潮前、政治人物論文爭議脈絡下）通過研究生須簽署論文原創聲明並附抄襲比對結果始得畢業。AI 時代的新問題是：口試委員是否實際追問研究過程與 AI 使用、學生是否被要求揭露 AI 在文獻回顧／分析／寫作各階段的角色。2026 年師大一場以「學位論文 AI 揭露方式」為題的演講顯示此議題正在台灣學界發酵（該來源為演講影片，僅作議題訊號）。</li>
+          <li><b>指引碎片化</b>：目前可取得全文的大學指引以陽明交大聲明為代表，教育部層級以推廣計畫為主，尚無相當於 TEQSA 的全國評量改革文件；各校作法落差將直接成為學生跨校不公平的來源。</li>
+          <li><b>政策主軸偏「推廣」</b>：AI 人才方舟（117.55 億元，2026–2029）與 TAICA 台灣人工智慧學院聯盟（2024 年 25 校）顯示政策重心在擴散 AI 課程與人才培育，評量與誠信配套相對薄弱——正是張瑞雄專欄的批評點。</li>
+          <li><b>語言雙重性</b>：台灣學生同時面對中文寫作（偵測工具對中文的效度幾乎無公開獨立驗證）與英文寫作（Liang 偏誤直接適用）——引進任何偵測工具前，本地效度驗證是空白且必要的功課。</li>
+          <li><b>在職專班與學位結構</b>：台灣碩士在職專班規模大、學生動機與職場 AI 使用現實緊密，two-lane 的 Lane 2（專業工作中的 AI 協作）可能比 Lane 1 更貼近其學習目標；以專業實務報告替代論文的學位類型，其口試設計應與學術型有所區分。</li>
+          <li><b>高中端連動</b>：丹麥案例屬高中；台灣 108 課綱的學習歷程檔案同樣面臨「成品可由 AI 代工」的效度問題，大學端的微驗證／口試經驗與高中端學習歷程的真實性驗證可相互借鏡（此為素材分析之推論，非文獻結論）。</li>
+        </ul>
+      </section>
+
+      <!-- ============ 9 工具箱 ============ -->
+      <section id="toolkit">
+        <div class="sec-head"><span class="sec-no">9</span><h2>報告寫作工具箱</h2></div>
+        <div class="cols2">
+          <div>
+            <h3>建議報告架構（七章）</h3>
+            <ol class="outline">
+              <li><b>緒論</b>：從「抓作弊」到「證據危機」——以 validity 重新定義問題（引 Lodge／Dawson、Scarfe）</li>
+              <li><b>國際政策與新聞脈絡</b>：偵測退場、丹麥雙軌、英美口試回歸（時間線表）</li>
+              <li><b>文獻回顧</b>：偵測實證（Liang／Weber-Wulff／Krishna）、認知成本（Kosmyna／Gerlich，均標註限制）、框架文獻（two-lane／AIAS／evaluative judgement／authentic assessment）</li>
+              <li><b>分析架構</b>：五種 redesign 模式 × 證據／成本／公平 三軸比較表</li>
+              <li><b>論文答辯專章</b>：驗證、形成、訊號三功能；結構化與公平設計；台灣既有口試制度的改革點（過程追問、AI 揭露、紀錄雙評）</li>
+              <li><b>台灣個案</b>：陽明交大指引文本分析、方舟計畫的「紅綠燈」缺口、EdYouth 的學生理解落差</li>
+              <li><b>結論與政策建議</b>：學程層級 two-lane、每項評量宣告 AI 等級、偵測降格為線索、口試分級階梯、教師工時配套</li>
+            </ol>
+          </div>
+          <div>
+            <h3>尚缺的研究缺口</h3>
+            <ul class="tight">
+              <li><b>台灣本地實證幾乎空白</b>：無台灣大學生 AI 使用率的代表性調查、無中文 AI 偵測工具的獨立效度研究、無各校指引的系統性盤點。</li>
+              <li><b>口試的效度與公平實證不足</b>：口試分數與書面分數的增量效度、對非母語與焦慮學生的差異影響（DIF）、結構化介入的效果，多來自醫學教育，外推至人文社會科需驗證。</li>
+              <li><b>微驗證／階梯式設計尚無同儕審查的效果研究</b>：需要多少抽核比例才能維持嚇阻與效度，是開放問題。</li>
+              <li><b>AI 主持口試僅單一商學院、樣本 &lt;80</b>：其評分與人類考官的一致性、口音偏誤、學生接受度待獨立複製。</li>
+              <li><b>長期認知效應未定</b>：Kosmyna 為預印本、Gerlich 為相關研究，「認知債務」是否累積、是否可逆、劑量關係如何，均無縱貫證據。</li>
+              <li><b>成本面研究缺席</b>：幾乎無文獻量化 redesign 的教師工時與制度成本，政策倡議普遍低估此軸。</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>可直接引用的關鍵論點</h3>
+        <div class="quote"><p class="q">「無法執行的 AI 禁令，本身就傷害評量效度。」</p><p class="a">— TEQSA《Assessment Reform for the Age of AI》／Dawson 闡述 <span class="grade g-b">B</span></p></div>
+        <div class="quote"><p class="q">「偵測器測的是文字的可預測性，不是作者身分。」</p><p class="a">— Liang et al. (2023), Patterns <span class="grade g-a">A</span></p></div>
+        <div class="quote"><p class="q">「AI 作品在真實評量中 94% 未被發現，且分數更高。」</p><p class="a">— Scarfe et al. (2024), PLOS ONE <span class="grade g-a">A</span></p></div>
+        <div class="quote"><p class="q">「用 AI 交出更好的作品，不等於學到更多；拿走 AI，優勢即消失。」</p><p class="a">— OECD Digital Education Outlook 2026 <span class="grade g-b">B</span></p></div>
+        <div class="quote"><p class="q">「證據不足 ≠ 能力不足 ≠ 作弊。」</p><p class="a">— 陳勇延「啟證」方案 <span class="grade g-d">D</span>（與 validity 文獻相容，引用時標明為實務觀點）</p></div>
+        <div class="quote"><p class="q">「先獨立、後協作（reverse scaffolding），是調和融入派與基礎派的設計原則。」</p><p class="a">— Dawson／TEQSA <span class="grade g-b">B</span></p></div>
+      </section>
+
+      <!-- ============ 10 未能驗證 ============ -->
+      <section id="unverified">
+        <div class="sec-head"><span class="sec-no">10</span><h2>未能驗證事項（引用前請留意）</h2></div>
+        <p class="sec-sub">以下事項在本次掃描中未能取得一手來源，撰寫正式報告時不可臆測，應逐項查證或明確標示為待查。</p>
+        <ul class="tight">
+          <li><b>指定文章 2（LINE／民視）的發布日期</b>：頁面未顯示，未能驗證；文中 95% 調查與 MIT「認知放棄」說法未取得原始出處，僅作轉述標示。</li>
+          <li><b>台大、清大、成大針對生成式 AI 的專門評量／論文口試新規定</b>：多次搜尋未取得官方原文，未臆測內容；僅取得陽明交大正式聲明與台大 2022 年原創聲明報導。建議向各校教務處／教學發展中心索取最新文件。</li>
+          <li><b>教育部大學層級「生成式 AI 學習指引」正式文件</b>：未取得文件本身；EdYouth 報導提及教育部 2026 年 5 月提出負責任使用路徑圖，細節待查教育部原文。</li>
+          <li><b>各校停用 Turnitin 的清單</b>：來自二手彙整網站（2026-10 查核），個別學校狀態可能變動，正式引用須逐校查證。</li>
+          <li><b>OECD Digital Education Outlook 2026</b>：相關警示係經張瑞雄專欄與搜尋摘要交叉得知，頁碼與章節未核實。</li>
+          <li><b>Google Scholar 檢索限制</b>：Scholar 介面無法直接批量開啟，本頁文獻係透過搜尋引擎與出版社／DOI 頁面核實書目資料，引用次數未逐篇查證。</li>
+          <li><b>雪梨大學 two-lane 的全校統一配分比例</b>：官方來源未公布，僅確認學程／unit 層級分工；第 6 節範例課的 Lane 1 約 60%／Lane 2 約 40% 為設計提案值，不是雪梨的處方。媒體所稱 13 種 secure／18 種 open 形式來自 Chronicle 報導，未在官方頁逐項核對。</li>
+          <li><b>Gonsalves「約 74% 使用 AI 的學生未揭露」與 Luo &amp; Dawson（2026）教師懲罰揭露研究</b>：僅取得二手彙整轉述，未讀原文，第 6 節引用處已標示，正式報告引用前應回原文核對。</li>
+          <li><b>UniSA 互動口試「零違規、滿意度 +40%」等流傳數字</b>：僅見於評論文章轉述校方宣傳，未找到原始評估報告，本頁不採用。</li>
+          <li><b>台灣各校學則／申訴程序細節</b>：因校而異，未逐校查核；第 6 節「台灣落地要點」為程序原則而非法律意見。</li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>本頁為研究報告素材總整，整理日期 2026-10-09。內容分為「已開啟原文逐篇閱讀」與「搜尋索引摘要」兩種查核深度；所有數據均附來源與分級，D 級觀點不代表學術共識。引用前請依各節標示回溯原始出處。</p>
+        <p>主要來源：上報、LINE TODAY／民視、陳勇延 Substack、聯合新聞網、台灣醒報（指定文章）；CNN、Times Higher Education、HEPI、陽明交大、Taipei Times（新聞／機構）；TEQSA、雪梨大學、UNESCO、OECD（機構指引）；學術文獻 22 項之 DOI／出版社連結見第 4 節。</p>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        var toast = document.getElementById('toast');
+        var toastTimer = null;
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add('show');
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+        }
+
+        /* ---- literature expand/collapse ---- */
+        var heads = document.querySelectorAll('.lit-head');
+        heads.forEach(function (head) {
+          head.addEventListener('click', function () {
+            var item = head.closest('.lit-item');
+            var open = item.classList.toggle('open');
+            head.setAttribute('aria-expanded', open ? 'true' : 'false');
+            head.querySelector('.lit-toggle').textContent = open ? '收合 ▴' : '展開 ▾';
+          });
+        });
+
+        /* ---- copy citation ---- */
+        function fallbackCopy(text) {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+          document.body.removeChild(ta);
+          return ok;
+        }
+        document.querySelectorAll('.copy-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var text = btn.getAttribute('data-cite');
+            function done(ok) { showToast(ok ? '已複製引用格式，可直接貼入報告參考文獻' : '複製失敗，請手動選取引用文字'); }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text)); });
+            } else {
+              done(fallbackCopy(text));
+            }
+          });
+        });
+
+        /* ---- literature filter + search ---- */
+        var items = Array.prototype.slice.call(document.querySelectorAll('.lit-item'));
+        var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+        var searchInput = document.getElementById('litSearch');
+        var countEl = document.getElementById('litCount');
+        var emptyEl = document.getElementById('litEmpty');
+        var activeFilter = 'all';
+
+        function applyFilter() {
+          var q = (searchInput.value || '').trim().toLowerCase();
+          var shown = 0;
+          items.forEach(function (item) {
+            var catOk = activeFilter === 'all' || item.getAttribute('data-cat') === activeFilter;
+            var qOk = !q || item.textContent.toLowerCase().indexOf(q) !== -1;
+            var vis = catOk && qOk;
+            item.style.display = vis ? '' : 'none';
+            if (vis) shown++;
+          });
+          countEl.textContent = '顯示 ' + shown + ' / ' + items.length + ' 項文獻';
+          emptyEl.style.display = shown === 0 ? 'block' : 'none';
+        }
+        chips.forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            chips.forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+            chip.setAttribute('aria-pressed', 'true');
+            activeFilter = chip.getAttribute('data-filter');
+            applyFilter();
+          });
+        });
+        searchInput.addEventListener('input', applyFilter);
+        applyFilter();
+
+        /* ---- scrollspy ---- */
+        var navLinks = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+        var sections = navLinks.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+        if ('IntersectionObserver' in window) {
+          var spy = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                navLinks.forEach(function (a) {
+                  a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+                });
+              }
+            });
+          }, { rootMargin: '-30% 0px -60% 0px' });
+          sections.forEach(function (s) { spy.observe(s); });
+        }
+      })();
+    </script>
+  </body>
+</html>
