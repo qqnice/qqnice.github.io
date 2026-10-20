@@ -1,5 +1,717 @@
 {
   "semester": "115-1",
-  "verified": {},
-  "courses": []
+  "verified": {
+    "p": true,
+    "v1": true,
+    "v2": true,
+    "g": true,
+    "s": true,
+    "a": true
+  },
+  "courses": [
+    {
+      "person": "p",
+      "day": 1,
+      "period": 5,
+      "course": "專題研討（三）",
+      "class": "智工博二",
+      "room": "1403B"
+    },
+    {
+      "person": "p",
+      "day": 1,
+      "period": 6,
+      "course": "專題研討（三）",
+      "class": "智工博二",
+      "room": "1403B"
+    },
+    {
+      "person": "p",
+      "day": 5,
+      "period": 4,
+      "course": "專題演講（一）",
+      "class": "資工所研一",
+      "room": "1403A"
+    },
+    {
+      "person": "p",
+      "day": 6,
+      "period": 1,
+      "course": "實務專題（二）",
+      "class": "資工四Ａ",
+      "room": ""
+    },
+    {
+      "person": "p",
+      "day": 6,
+      "period": 4,
+      "course": "實務專題（三）",
+      "class": "資工五乙",
+      "room": ""
+    },
+    {
+      "person": "p",
+      "day": 6,
+      "period": 6,
+      "course": "實務專題（三）",
+      "class": "資工五乙",
+      "room": ""
+    },
+    {
+      "person": "p",
+      "day": 6,
+      "period": 8,
+      "course": "實務專題（三）",
+      "class": "資工五乙",
+      "room": ""
+    },
+    {
+      "person": "p",
+      "day": 6,
+      "period": 9,
+      "course": "實務專題（二）",
+      "class": "資工四Ａ",
+      "room": ""
+    },
+    {
+      "person": "v1",
+      "day": 4,
+      "period": 1,
+      "course": "校外實習",
+      "class": "室設四１ (協)",
+      "room": "4317"
+    },
+    {
+      "person": "v1",
+      "day": 4,
+      "period": 2,
+      "course": "校外實習",
+      "class": "室設四１ (協)",
+      "room": "4317"
+    },
+    {
+      "person": "v1",
+      "day": 4,
+      "period": 3,
+      "course": "校外實習",
+      "class": "室設四１ (協)",
+      "room": "4317"
+    },
+    {
+      "person": "v1",
+      "day": 4,
+      "period": 4,
+      "course": "校外實習",
+      "class": "室設四１ (協)",
+      "room": "4317"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 1,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "T302"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 2,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "T302"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 3,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "T302"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 4,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "T302"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 10,
+      "course": "週會/班會",
+      "class": "護理所專二",
+      "room": "T101"
+    },
+    {
+      "person": "v2",
+      "day": 3,
+      "period": 11,
+      "course": "週會/班會",
+      "class": "護理所專二",
+      "room": "T101"
+    },
+    {
+      "person": "v2",
+      "day": 4,
+      "period": 5,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "M509"
+    },
+    {
+      "person": "v2",
+      "day": 4,
+      "period": 6,
+      "course": "內外科護理學及實驗（二）",
+      "class": "護理三１",
+      "room": "M509"
+    },
+    {
+      "person": "v2",
+      "day": 5,
+      "period": 5,
+      "course": "進階護理學（二）",
+      "class": "護理所研二 (協)",
+      "room": "R309"
+    },
+    {
+      "person": "v2",
+      "day": 5,
+      "period": 6,
+      "course": "進階護理學（二）",
+      "class": "護理所研二 (協)",
+      "room": "R309"
+    },
+    {
+      "person": "v2",
+      "day": 5,
+      "period": 9,
+      "course": "進階專科護理學（二）／進階護理學（二）",
+      "class": "護理所專二／護理所專二 (協)",
+      "room": "T113／T112"
+    },
+    {
+      "person": "v2",
+      "day": 5,
+      "period": 10,
+      "course": "進階專科護理學（二）／進階護理學（二）",
+      "class": "護理所專二／護理所專二 (協)",
+      "room": "T113／T112"
+    },
+    {
+      "person": "v2",
+      "day": 5,
+      "period": 11,
+      "course": "進階專科護理學（二）",
+      "class": "護理所專二",
+      "room": "T113"
+    },
+    {
+      "person": "v2",
+      "day": 6,
+      "period": 1,
+      "course": "專題實作（二）",
+      "class": "護理四Ａ／護理四Ｂ",
+      "room": ""
+    },
+    {
+      "person": "v2",
+      "day": 6,
+      "period": 2,
+      "course": "專題實作（二）",
+      "class": "護理四Ａ／護理四Ｂ",
+      "room": ""
+    },
+    {
+      "person": "v2",
+      "day": 6,
+      "period": 3,
+      "course": "統計應用與資料分析",
+      "class": "護理所專二",
+      "room": "T411"
+    },
+    {
+      "person": "v2",
+      "day": 6,
+      "period": 4,
+      "course": "統計應用與資料分析",
+      "class": "護理所專二",
+      "room": "T411"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 1,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 2,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 3,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 4,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 5,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 6,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 7,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "v2",
+      "day": 7,
+      "period": 8,
+      "course": "進階專科護理學實習（二）／進階護理學實習（二）",
+      "class": "護理所專二／護理所研二",
+      "room": "0000"
+    },
+    {
+      "person": "g",
+      "day": 1,
+      "period": 3,
+      "course": "微積分",
+      "class": "資工一１",
+      "room": "6605"
+    },
+    {
+      "person": "g",
+      "day": 1,
+      "period": 4,
+      "course": "微積分",
+      "class": "資工一１",
+      "room": "6605"
+    },
+    {
+      "person": "g",
+      "day": 1,
+      "period": 5,
+      "course": "微積分",
+      "class": "資工一１",
+      "room": "6605"
+    },
+    {
+      "person": "g",
+      "day": 3,
+      "period": 5,
+      "course": "書報討論一",
+      "class": "資工所研一 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 3,
+      "period": 6,
+      "course": "書報討論一",
+      "class": "資工所研一 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 3,
+      "period": 7,
+      "course": "書報討論三",
+      "class": "資工所研二 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 3,
+      "period": 8,
+      "course": "書報討論三",
+      "class": "資工所研二 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 5,
+      "period": 2,
+      "course": "工程數學",
+      "class": "資工二２",
+      "room": "6701"
+    },
+    {
+      "person": "g",
+      "day": 5,
+      "period": 3,
+      "course": "工程數學",
+      "class": "資工二２",
+      "room": "6701"
+    },
+    {
+      "person": "g",
+      "day": 5,
+      "period": 4,
+      "course": "工程數學",
+      "class": "資工二２",
+      "room": "6701"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 1,
+      "course": "資訊系統實作一／實務專題（二）",
+      "class": "資工所研一 (協)／資工四Ａ (協)",
+      "room": "0000"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 2,
+      "course": "資訊系統實作一／實務專題（一）",
+      "class": "資工所研一 (協)／資工三２ (協)",
+      "room": "0000"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 5,
+      "course": "書報討論一",
+      "class": "資工所專一 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 6,
+      "course": "書報討論一",
+      "class": "資工所專一 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 7,
+      "course": "書報討論三",
+      "class": "資工所專二 (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 8,
+      "course": "書報討論三／實務專題（一）",
+      "class": "資工所專二 (協)／資工三２ (協)",
+      "room": "2803"
+    },
+    {
+      "person": "g",
+      "day": 6,
+      "period": 9,
+      "course": "實務專題（二）",
+      "class": "資工四Ａ (協)",
+      "room": ""
+    },
+    {
+      "person": "g",
+      "day": 7,
+      "period": 2,
+      "course": "資訊系統實作一",
+      "class": "資工所專一 (協)",
+      "room": "0000"
+    },
+    {
+      "person": "g",
+      "day": 7,
+      "period": 6,
+      "course": "資訊系統實作一",
+      "class": "資工所專一 (協)",
+      "room": "0000"
+    },
+    {
+      "person": "g",
+      "day": 7,
+      "period": 11,
+      "course": "週會/班會",
+      "class": "資工所專二",
+      "room": "2701"
+    },
+    {
+      "person": "g",
+      "day": 7,
+      "period": 12,
+      "course": "週會/班會",
+      "class": "資工所專二",
+      "room": "2701"
+    },
+    {
+      "person": "s",
+      "day": 1,
+      "period": 2,
+      "course": "生產與作業管理",
+      "class": "企管三１",
+      "room": "7801"
+    },
+    {
+      "person": "s",
+      "day": 1,
+      "period": 3,
+      "course": "生產與作業管理",
+      "class": "企管三１",
+      "room": "7801"
+    },
+    {
+      "person": "s",
+      "day": 1,
+      "period": 4,
+      "course": "生產與作業管理",
+      "class": "企管三１",
+      "room": "7801"
+    },
+    {
+      "person": "s",
+      "day": 1,
+      "period": 5,
+      "course": "生產與作業管理",
+      "class": "企管三甲",
+      "room": "5405"
+    },
+    {
+      "person": "s",
+      "day": 1,
+      "period": 6,
+      "course": "生產與作業管理",
+      "class": "企管三甲",
+      "room": "5405"
+    },
+    {
+      "person": "s",
+      "day": 3,
+      "period": 2,
+      "course": "物流管理",
+      "class": "企管五甲",
+      "room": "5411"
+    },
+    {
+      "person": "s",
+      "day": 3,
+      "period": 3,
+      "course": "物流管理",
+      "class": "企管五甲",
+      "room": "5411"
+    },
+    {
+      "person": "s",
+      "day": 3,
+      "period": 4,
+      "course": "物流管理",
+      "class": "企管五甲",
+      "room": "5411"
+    },
+    {
+      "person": "s",
+      "day": 4,
+      "period": 5,
+      "course": "市場調查與研究",
+      "class": "企管四Ａ",
+      "room": "7804"
+    },
+    {
+      "person": "s",
+      "day": 4,
+      "period": 6,
+      "course": "市場調查與研究",
+      "class": "企管四Ａ",
+      "room": "7804"
+    },
+    {
+      "person": "s",
+      "day": 4,
+      "period": 7,
+      "course": "市場調查與研究",
+      "class": "企管四Ａ",
+      "room": "7804"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 1,
+      "course": "專題製作（一）",
+      "class": "企管四Ａ／企管四１",
+      "room": "0000"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 2,
+      "course": "專題製作（一）",
+      "class": "企管四Ａ／企管四１",
+      "room": "0000"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 3,
+      "course": "專題製作（一）",
+      "class": "企管四Ａ／企管四１",
+      "room": "0000"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 4,
+      "course": "專題製作",
+      "class": "企管五甲",
+      "room": ""
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 5,
+      "course": "專題製作",
+      "class": "企管五甲",
+      "room": ""
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 6,
+      "course": "專題製作",
+      "class": "企管五甲／企管五乙",
+      "room": "0000"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 7,
+      "course": "專題製作",
+      "class": "企管五乙",
+      "room": "0000"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 8,
+      "course": "專題製作／週會/班會",
+      "class": "企管五乙／企管所專一",
+      "room": "0000／7805"
+    },
+    {
+      "person": "s",
+      "day": 6,
+      "period": 9,
+      "course": "週會/班會",
+      "class": "企管所專一",
+      "room": "7805"
+    },
+    {
+      "person": "a",
+      "day": 1,
+      "period": 5,
+      "course": "生涯運動 (健身運動)",
+      "class": "體育二１",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 1,
+      "period": 6,
+      "course": "生涯運動 (健身運動)",
+      "class": "體育二１",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 1,
+      "period": 7,
+      "course": "生涯運動 (健身運動)",
+      "class": "體育二２",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 1,
+      "period": 8,
+      "course": "生涯運動 (健身運動)",
+      "class": "體育二２",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 1,
+      "course": "體育",
+      "class": "企管一１",
+      "room": ""
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 2,
+      "course": "體育",
+      "class": "企管一１",
+      "room": ""
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 3,
+      "course": "健身運動",
+      "class": "體育三Ａ",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 4,
+      "course": "健身運動",
+      "class": "體育三Ａ",
+      "room": "0000"
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 7,
+      "course": "週會/班會",
+      "class": "保金一乙",
+      "room": "5302"
+    },
+    {
+      "person": "a",
+      "day": 3,
+      "period": 8,
+      "course": "週會/班會",
+      "class": "保金一乙",
+      "room": "5302"
+    }
+  ]
 }
