@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "skill": "tw-edu-anti-ai-assessment",
+  "sample": false,
+  "input": {
+    "path": "artifacts/教師/ai真實學習研究/anti_ai_assessment_input.json",
+    "sha256": "ed2f6df3ced35a53a51a71c7e276746cc3047d048e30655c56080a5897eee85f"
+  },
+  "outputs": [
+    {
+      "path": "artifacts/教師/ai真實學習研究/評量設計AI可答性檢視.docx",
+      "sha256": "722866a75e8d8e36b0582ed7e83421165bb758aa63e9e47e8e0cf88efec29839"
+    }
+  ],
+  "pending_checks": [
+    "source_verification"
+  ],
+  "qa": {
+    "visual_review": "passed",
+    "rendered_pages": 2,
+    "reviewed_at": "2026-10-02"
+  }
+}

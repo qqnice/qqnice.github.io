@@ -1,0 +1,261 @@
+passport_version: "1.0"
+course:
+  code: "[NEEDS PROFESSOR INPUT: 課號]"
+  title: "Linux 系統實務"
+  discipline: "資訊管理"
+  level: "大學部三年級"
+  credits: 3
+  modality: "in-person"
+  class_size: 40
+  contact_hours_per_week: 3
+  weeks: 18
+  language_of_instruction: "國語"
+  prerequisites:
+    - "[NEEDS PROFESSOR INPUT: 先修課程或必要基礎]"
+  institution_constraints:
+    - "選修課程"
+    - "總授課時數 54 小時"
+
+term_calendar:
+  start_date: null
+  end_date: null
+  holidays: []
+  exam_weeks:
+    - W9
+    - W18
+  add_drop_deadline: null
+  withdrawal_deadline: null
+
+learner_profile:
+  prior_knowledge: "具備基礎 Linux 指令與基礎網路概念；實際程度以第一週診斷為準"
+  motivation_context: "資訊管理系大學部三年級選修，連結系統管理、雲端與維運能力"
+  known_difficulties:
+    - "能貼上指令但未必能解釋或驗證"
+    - "題目參數或故障原因改變後難以遷移"
+    - "可能把 AI 在場的完成感誤認為獨立理解"
+  accessibility_needs: "unknown"
+  cohort_evidence: null
+
+learning_outcomes:
+  - id: LO1
+    statement: "根據命令輸出、服務狀態、系統日誌與網路觀察，診斷 Linux 權限、服務與連線異常"
+    bloom_level: analyze
+    assessed_by: [A1, A2, A5]
+    taught_in: [W1, W2, W3, W4, W5, W8, W9, W15, W17, W18]
+  - id: LO2
+    statement: "使用 Shell 或 Python 建立可重複執行的系統管理與部署流程，並處理輸入、錯誤與執行紀錄"
+    bloom_level: create
+    assessed_by: [A1, A3, A4]
+    taught_in: [W6, W7, W8, W11, W12, W16, W17, W18]
+  - id: LO3
+    statement: "使用容器映像、網路、持久化儲存及多容器編排部署具 TLS 的 Linux 應用服務，並說明架構、相依關係及安全邊界"
+    bloom_level: create
+    assessed_by: [A2, A4]
+    taught_in: [W4, W10, W11, W12, W13, W14, W16, W17, W18]
+  - id: LO4
+    statement: "對 AI、文件或同儕提出的技術建議進行比較、驗證、反例測試與風險判斷"
+    bloom_level: evaluate
+    assessed_by: [A1, A2, A3, A4, A5]
+    taught_in: [W2, W3, W4, W5, W6, W7, W8, W9, W10, W12, W13, W14, W15, W16, W17, W18]
+  - id: LO5
+    statement: "規劃並執行系統安全強化、監控告警、資料備份、服務復原及災難應變，並以 RPO 與 RTO 檢核復原成效"
+    bloom_level: evaluate
+    assessed_by: [A3, A4, A5]
+    taught_in: [W8, W12, W13, W14, W15, W16, W17, W18]
+  - id: LO6
+    statement: "在團隊中分工協作，並能以個人身分解釋技術選擇、回應追問及修正系統"
+    bloom_level: evaluate
+    assessed_by: [A1, A4, A5, A6]
+    taught_in: [W3, W4, W5, W7, W10, W11, W12, W13, W14, W15, W16, W17, W18]
+
+assessment_plan:
+  - id: A1
+    type: portfolio
+    title: "PAVET 實作歷程作品集"
+    weight: 25
+    outcomes_assessed: [LO1, LO2, LO4, LO6]
+    week: W17
+    ai_resilience: redesigned
+    artifact_ref: null
+  - id: A2
+    type: exam
+    title: "期中個人故障診斷"
+    weight: 20
+    outcomes_assessed: [LO1, LO3, LO4]
+    week: W9
+    ai_resilience: redesigned
+    artifact_ref: null
+  - id: A3
+    type: project
+    title: "Shell 或 Python 自動化任務"
+    weight: 15
+    outcomes_assessed: [LO2, LO4, LO5]
+    week: W8
+    ai_resilience: redesigned
+    artifact_ref: null
+  - id: A4
+    type: project
+    title: "容器化服務部署、監控與災難復原整合專案"
+    weight: 25
+    outcomes_assessed: [LO2, LO3, LO4, LO5, LO6]
+    week: W18
+    ai_resilience: redesigned
+    artifact_ref: null
+  - id: A5
+    type: exam
+    title: "個人延宕遷移與微口試"
+    weight: 10
+    outcomes_assessed: [LO1, LO4, LO5, LO6]
+    week: W18
+    ai_resilience: redesigned
+    artifact_ref: null
+  - id: A6
+    type: participation
+    title: "協作與角色證據"
+    weight: 5
+    outcomes_assessed: [LO6]
+    week: W17
+    ai_resilience: reviewed
+    artifact_ref: null
+
+schedule:
+  - id: W1
+    topic: "課程導入、基礎診斷、檔案權限與套件管理"
+    outcomes: [LO1]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W2
+    topic: "網路設定、路由、DNS 與防火牆"
+    outcomes: [LO1, LO4]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W3
+    topic: "雲端 Linux 虛擬機、SSH、金鑰與遠端管理"
+    outcomes: [LO1, LO4, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W4
+    topic: "systemd、Web 服務、TLS 與日誌"
+    outcomes: [LO1, LO3, LO4, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W5
+    topic: "DNS 與安全檔案服務整合"
+    outcomes: [LO1, LO4, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W6
+    topic: "Shell 腳本與自動化基礎"
+    outcomes: [LO2, LO4]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W7
+    topic: "Python 系統管理與 API"
+    outcomes: [LO2, LO4, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W8
+    topic: "監控、效能與容量診斷"
+    outcomes: [LO1, LO2, LO4, LO5]
+    activities: []
+    assessments_due: [A3]
+    artifact_refs: []
+  - id: W9
+    topic: "期中個人故障診斷"
+    outcomes: [LO1, LO4]
+    activities: []
+    assessments_due: [A2]
+    artifact_refs: []
+  - id: W10
+    topic: "容器基礎、映像、生命週期與隔離"
+    outcomes: [LO3, LO4, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W11
+    topic: "容器網路、持久化儲存與資料服務"
+    outcomes: [LO2, LO3, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W12
+    topic: "Dockerfile、Registry 與版本化部署"
+    outcomes: [LO2, LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W13
+    topic: "多容器編排、反向代理、TLS 與機密管理"
+    outcomes: [LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W14
+    topic: "可觀測性一：集中式日誌、指標與儀表板"
+    outcomes: [LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W15
+    topic: "可觀測性二：健康檢查、告警與事件診斷"
+    outcomes: [LO1, LO4, LO5, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W16
+    topic: "備份設計、資料一致性與服務復原"
+    outcomes: [LO2, LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: []
+    artifact_refs: []
+  - id: W17
+    topic: "災難演練與異地主機重建"
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: [A1, A6]
+    artifact_refs: []
+  - id: W18
+    topic: "容器化服務期末驗收、動態故障與口試"
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6]
+    activities: []
+    assessments_due: [A4, A5]
+    artifact_refs: []
+
+policies:
+  grading_scheme: "A1 25%；A2 20%；A3 15%；A4 25%；A5 10%；A6 5%"
+  late_policy: "[NEEDS PROFESSOR INPUT: 遲交、補交與延長規定]"
+  ai_use_policy: "課程主要實作開放 AI，但須揭露關鍵使用並提供採用、修改、拒絕及驗證證據；期中與期末的個人診斷或遷移階段短時禁止 AI，之後可重新開放比較。"
+  integrity_policy: "[NEEDS PROFESSOR INPUT: 校級學術倫理政策連結與適用方式]"
+  attendance_policy: "[NEEDS PROFESSOR INPUT: 出席與替代參與方式]"
+
+workload_audit:
+  estimated_hours_per_week: 6
+  credit_hour_target: null
+  status: not_audited
+  constants_used: "每週課內 3 小時；暫估課外練習、閱讀與專案平均 3 小時，待依校規與學生資料調整"
+
+gates:
+  alignment_gate:
+    status: not_run
+    last_run: null
+    findings: []
+  quality_gate:
+    status: not_run
+    last_run: null
+    findings: []
+
+artifacts:
+  - path: "artifacts/教師/ai真實學習研究/Linux進階課程_PAVET教學方法與18週課程規劃_草案.md"
+    type: syllabus
+    produced_by: course-designer
+    stage: 1
+    confirmed_by_professor: false
+
+iteration_history: []

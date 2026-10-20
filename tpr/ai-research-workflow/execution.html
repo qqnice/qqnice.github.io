@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="教學實踐研究通過後的互動工作台：從倫理、18週執行、資料品質到成果報告、投稿與AI揭露。">
+  <meta name="author" content="QQnice 林文彥">
+  <meta name="theme-color" content="#071a2b">
+  <title>研究執行與文章發表工作台｜AI協助研究的工作流</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23071a2b'/%3E%3Cpath d='M17 17h30v8H25v8h18v8H25v6h22v8H17z' fill='%234ee0c1'/%3E%3Ccircle cx='49' cy='14' r='5' fill='%23ffbd59'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="execution.css">
+  <script src="execution.js" defer></script>
+</head>
+<body class="execution-page">
+  <a class="skip-link" href="#main">跳至主要內容</a>
+  <header class="site-header execution-header">
+    <a class="brand" href="index.html" aria-label="回到研究成果首頁">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <span><b>PAVET Research</b><small>研究執行與文章發表</small></span>
+    </a>
+    <nav aria-label="本頁導覽">
+      <a href="#readiness">準備度</a>
+      <a href="#timeline">時間線</a>
+      <a href="#fieldwork">資料工作流</a>
+      <a href="#publication">投稿決策</a>
+      <a href="#toolkit">成果下載</a>
+      <a href="#author">關於講者</a>
+      <a href="index.html">研究首頁</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="execution-hero" id="readiness">
+      <div class="hero-intro">
+        <p class="eyebrow">計畫通過之後，才是研究可信度真正被建立的地方</p>
+        <h1>研究執行與<br><span>文章發表工作台</span></h1>
+        <p class="lead">把倫理、版本、偏離、資料品質與投稿決策，轉成每週可以操作、檢查與留下證據的研究流程。</p>
+        <p class="execution-authorline">QQnice 林文彥 · 國立臺中科技大學資訊管理系 · <a href="mailto:qqnice@gmail.com">qqnice@gmail.com</a></p>
+        <div class="hero-actions">
+          <a class="button primary" href="#timeline">開啟18週時間線</a>
+          <a class="button secondary" href="files/17-execution-publication-handout.md" download>下載完整講義</a>
+        </div>
+        <div class="status-legend" aria-label="內容證據狀態">
+          <span class="status verified">已查證</span>
+          <span class="status pending">待核</span>
+          <span class="status experience">講者經驗</span>
+          <span class="status inference">合理推論</span>
+        </div>
+      </div>
+
+      <aside class="readiness-panel" aria-labelledby="readiness-title">
+        <div class="readiness-head">
+          <div class="progress-ring" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-track" cx="60" cy="60" r="48"></circle>
+              <circle id="progress-circle" class="ring-value" cx="60" cy="60" r="48"></circle>
+            </svg>
+            <strong id="progress-number">0%</strong>
+          </div>
+          <div>
+            <p class="panel-kicker">開學前準備度</p>
+            <h2 id="readiness-title">六項最低啟動條件</h2>
+            <p id="readiness-message">先完成倫理與同意，再開始資料蒐集。</p>
+          </div>
+        </div>
+        <div class="check-stack" data-check-group="readiness">
+          <label><input type="checkbox" value="ethics"><span><b>倫理程序</b><small>完成審查或依本校程序備案</small></span></label>
+          <label><input type="checkbox" value="consent"><span><b>同意書</b><small>涵蓋錄音、AI處理、保存與退出</small></span></label>
+          <label><input type="checkbox" value="instruments"><span><b>研究工具</b><small>版本定稿、專家審查與預試</small></span></label>
+          <label><input type="checkbox" value="folders"><span><b>資料結構</b><small>原始資料唯讀、分析複本分離</small></span></label>
+          <label><input type="checkbox" value="variables"><span><b>變項說明</b><small>構念、操作定義、量尺與時點</small></span></label>
+          <label><input type="checkbox" value="ailog"><span><b>AI紀錄</b><small>工具、版本、輸入、輸出與裁決</small></span></label>
+        </div>
+        <button class="quiet-button" id="export-progress" type="button">匯出準備紀錄</button>
+      </aside>
+    </section>
+
+    <section class="truth-strip" aria-label="執行原則">
+      <article><strong>先同意</strong><span>再蒐集資料</span></article>
+      <article><strong>當場記錄</strong><span>不靠事後補寫</span></article>
+      <article><strong>人工裁決</strong><span>AI不能取代研究者</span></article>
+      <article><strong>設計誠實</strong><span>不把支持寫成證明</span></article>
+    </section>
+
+    <section class="workspace-section timeline-section" id="timeline">
+      <div class="section-heading execution-heading">
+        <p class="eyebrow">研究不是一條最後才整理的時間線</p>
+        <h2>點選階段，確認當下該留下什麼</h2>
+        <p>時間點是建議架構；實際倫理、行政與合約要求以本校程序及簽約文件為準。</p>
+      </div>
+      <div class="timeline-shell">
+        <div id="timeline-tabs" class="timeline-tabs" role="tablist" aria-label="研究執行階段"></div>
+        <article id="timeline-detail" class="timeline-detail" tabindex="-1" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <section class="workspace-section audit-section" id="audit">
+      <div class="section-heading execution-heading compact-heading">
+        <p class="eyebrow">可重現性檢核</p>
+        <h2>完成不等於可被檢查</h2>
+        <p>四道關卡分別檢查倫理、工具、執行紀錄與發布風險；勾選結果只保存在你的瀏覽器。</p>
+      </div>
+      <div class="audit-layout">
+        <div id="audit-gates" class="audit-gates"></div>
+        <aside class="audit-summary">
+          <span class="summary-label">目前狀態</span>
+          <strong id="audit-score">0 / 16</strong>
+          <p id="audit-message">先從倫理與同意開始。</p>
+          <div class="bar" aria-hidden="true"><i id="audit-bar"></i></div>
+          <button id="reset-state" class="quiet-button inverse" type="button">清除本機紀錄</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="workspace-section fieldwork-section" id="fieldwork">
+      <div class="section-heading execution-heading">
+        <p class="eyebrow">訪談、錄音、編碼與因果論述</p>
+        <h2>把技術流程變成人工可把關的證據鏈</h2>
+      </div>
+      <div class="process-tabs" role="tablist" aria-label="資料工作流">
+        <button class="process-tab active" type="button" role="tab" aria-selected="true" data-process="recording">多人錄音與轉寫</button>
+        <button class="process-tab" type="button" role="tab" aria-selected="false" data-process="coding">AI輔助質性編碼</button>
+        <button class="process-tab" type="button" role="tab" aria-selected="false" data-process="causal">研究設計與因果語言</button>
+      </div>
+      <div id="process-panel" class="process-panel" role="tabpanel"></div>
+
+      <div class="claim-lab" aria-labelledby="claim-title">
+        <div>
+          <p class="eyebrow">論述語氣實驗室</p>
+          <h3 id="claim-title">你的研究設計，允許你說到哪裡？</h3>
+        </div>
+        <label>研究設計
+          <select id="design-select">
+            <option value="prepost">單班前後測</option>
+            <option value="crossyear">跨年度比較</option>
+            <option value="delayed">先行／延遲介入</option>
+            <option value="qualitative">質性訪談與作品分析</option>
+          </select>
+        </label>
+        <label>補充證據
+          <select id="evidence-select">
+            <option value="single">單一資料來源</option>
+            <option value="triangulated">多來源交叉佐證</option>
+            <option value="repeated">重複測量＋多來源</option>
+          </select>
+        </label>
+        <div id="claim-output" class="claim-output" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="workspace-section publication-section" id="publication">
+      <div class="section-heading execution-heading">
+        <p class="eyebrow">從成果報告到投稿</p>
+        <h2>一組資料，兩種文件，三道決策</h2>
+        <p>成果報告重完整歷程；期刊稿重問題、方法與論證。兩者共用資料與圖表，但不應視為同一份文件。</p>
+      </div>
+
+      <div class="publication-grid">
+        <article class="decision-card journal-card">
+          <div class="card-topline"><span>01</span><em class="status inference">合理推論</em></div>
+          <h3>目標期刊適配度</h3>
+          <p>逐項檢查，而不是只看期刊名稱或收錄印象。</p>
+          <div id="journal-checks" class="mini-checks"></div>
+          <div class="score-line"><strong id="journal-score">0 / 8</strong><span id="journal-message">尚未形成投稿判斷</span></div>
+        </article>
+
+        <article class="decision-card disclosure-card">
+          <div class="card-topline"><span>02</span><em class="status verified">已查證原則</em></div>
+          <h3>AI 使用揭露判斷</h3>
+          <p>先依用途盤點，再讀目標刊政策；同一出版社不同期刊也可能不同。</p>
+          <fieldset id="ai-use-options" class="mini-checks">
+            <legend>本稿使用AI的用途</legend>
+            <label><input type="checkbox" value="copyedit">文字潤飾</label>
+            <label><input type="checkbox" value="search">文獻搜尋或摘要</label>
+            <label><input type="checkbox" value="analysis">資料分析或編碼</label>
+            <label><input type="checkbox" value="code">程式或圖表</label>
+            <label><input type="checkbox" value="content">產生研究內容</label>
+            <label><input type="checkbox" value="review">處理審稿材料</label>
+          </fieldset>
+          <label class="policy-check"><input id="policy-read" type="checkbox">已閱讀並保存目標刊AI政策</label>
+          <div id="disclosure-output" class="decision-output" aria-live="polite"></div>
+        </article>
+
+        <article class="decision-card pipeline-card">
+          <div class="card-topline"><span>03</span><em class="status experience">管理工具</em></div>
+          <h3>稿件目前在哪一站？</h3>
+          <p>點選狀態，工作台會顯示下一個最小可執行動作。</p>
+          <div id="stage-buttons" class="stage-buttons" role="group" aria-label="稿件狀態"></div>
+          <div id="stage-output" class="decision-output" aria-live="polite"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace-section response-section" id="response">
+      <div class="section-heading execution-heading compact-heading">
+        <p class="eyebrow">修訂回覆工具</p>
+        <h2>把每一則意見變成可追蹤的修改紀錄</h2>
+      </div>
+      <div class="response-builder">
+        <div class="response-form">
+          <label>審查意見<textarea id="reviewer-comment" rows="4" placeholder="貼上一則審查意見，不要包含尚未去識別的敏感資料。"></textarea></label>
+          <label>作者回應<textarea id="author-response" rows="4" placeholder="說明同意、修改，或以證據回應不同意之處。"></textarea></label>
+          <label>修改位置<input id="change-location" type="text" placeholder="例如：方法，第8頁，第2段"></label>
+          <button id="build-response" class="button primary" type="button">建立逐條回覆</button>
+        </div>
+        <div class="response-preview">
+          <div class="preview-head"><b>回覆草稿</b><button id="copy-response" class="quiet-button" type="button">複製文字</button></div>
+          <pre id="response-output">請先填入審查意見、作者回應與修改位置。</pre>
+          <p>AI可協助整理格式與語氣，但作者仍須對內容、證據與修改負責。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace-section toolkit-section" id="toolkit">
+      <div class="section-heading execution-heading">
+        <p class="eyebrow">講義與投影片</p>
+        <h2>帶走完整內容，再回到工作台操作</h2>
+      </div>
+      <div class="download-grid">
+        <a class="download-card" href="files/17-execution-publication-handout.md" download>
+          <span>MD</span><div><b>執行階段與文章發表講義</b><p>完整章節、查證狀態、待補項目與來源。</p></div><em>下載</em>
+        </a>
+        <a class="download-card" href="files/18-execution-publication-slides.pptx" download>
+          <span>PPTX</span><div><b>圖文版教學投影片</b><p>48頁可編輯投影片，延續同一視覺風格。</p></div><em>下載</em>
+        </a>
+        <a class="download-card" href="index.html#library">
+          <span>16+</span><div><b>完整研究成果檔案館</b><p>研究構想、文獻、方法、課程與分析工具。</p></div><em>開啟</em>
+        </a>
+      </div>
+      <div class="boundary-note">
+        <strong>使用界線</strong>
+        <p>本頁是教學與研究管理工具，不取代研究倫理審查、校內行政程序、期刊投稿規範或法律意見。凡標示「待核」的內容，請在正式使用前回到最新官方來源確認。</p>
+      </div>
+    </section>
+
+    <section class="author-section author-section-execution" id="author" aria-labelledby="author-title">
+      <div class="author-photo-wrap">
+        <img class="author-photo" src="images/qqnice-lin-wen-yen.png" alt="QQnice 林文彥個人照片" width="720" height="720">
+      </div>
+      <div class="author-copy">
+        <p class="eyebrow">作者與講者</p>
+        <h2 id="author-title">QQnice · 林文彥</h2>
+        <p class="author-role">國立臺中科技大學（台中科大）資訊管理系</p>
+        <p>以教學實踐研究為核心，將課堂問題、研究證據、教學介入與成果發表整合為可操作的研究工作流。</p>
+        <a class="author-email" href="mailto:qqnice@gmail.com" aria-label="寄信給林文彥">qqnice@gmail.com</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="execution-footer">
+    <p><b>AI協助研究的工作流</b></p>
+    <p>QQnice 林文彥 · 國立臺中科技大學 · <a class="footer-email" href="mailto:qqnice@gmail.com">qqnice@gmail.com</a></p>
+    <a href="../">回到教學實踐專區</a> · <a href="#readiness">回到頁首</a>
+  </footer>
+</body>
+</html>
