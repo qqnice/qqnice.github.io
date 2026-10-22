@@ -1,0 +1,2120 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>電梯狀態機互動實驗室 · Unreal Engine BP_ElevatorKit 視覺化教學</title>
+<style>
+:root {
+  --bg: #0f171e;
+  --bg-soft: #16222c;
+  --card: #1b2936;
+  --card-alt: #213242;
+  --line: #2e4458;
+  --ink: #eef4f8;
+  --muted: #9ab0c4;
+  --accent: #38bdf8;
+  --lime: #a3e635;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --orange: #f97316;
+  --red: #ef4444;
+  --purple: #a855f7;
+  /* State colors matching manual */
+  --st0: #64748b; /* 待命 */
+  --st1: #10b981; /* 開門中 */
+  --st2: #0ea5e9; /* 停留 */
+  --st3: #f59e0b; /* 關門中 */
+  --st4: #a855f7; /* 移動中 */
+  /* Blueprint colors */
+  --bp-grid: #141c24;
+  --bp-func: #2c4a70;
+  --bp-branch: #7f2929;
+  --bp-switch: #3a5a40;
+  --bp-set: #1e5aa8;
+  --bp-kit: #26547c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+button, select {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 14px;
+  background: var(--card-alt);
+  color: var(--ink);
+  transition: all 0.16s ease;
+}
+button:hover { background: #2c4358; border-color: var(--accent); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:focus-visible, a:focus-visible, select:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+button.primary {
+  background: var(--green);
+  color: #06281e;
+  border-color: #34d399;
+  font-weight: 700;
+}
+button.primary:hover { background: #34d399; }
+button.warn {
+  background: #3b2119;
+  border-color: var(--orange);
+  color: #fed7aa;
+}
+button.active {
+  background: rgba(163, 230, 53, 0.2);
+  border-color: var(--lime);
+  color: var(--lime);
+  font-weight: 700;
+}
+
+.wrap { max-width: 1320px; margin: 0 auto; padding: 20px 24px 60px; }
+
+/* Header */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.brand-badge {
+  background: linear-gradient(135deg, var(--green), var(--accent));
+  color: #081c24;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+.header-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sound-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 99px;
+}
+.sound-btn.on {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--green);
+  color: #6ee7b7;
+}
+
+/* Hero & Core Spirit Banner */
+.hero {
+  padding: 24px 0 18px;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+h1 {
+  font-size: clamp(26px, 3.6vw, 40px);
+  line-height: 1.2;
+  margin: 6px 0 12px;
+  letter-spacing: -0.02em;
+}
+h2 { font-size: 19px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+h3 { font-size: 15px; margin: 0 0 6px; }
+p { margin: 6px 0; color: var(--muted); }
+
+/* Mental Model Card: Two Paths + Shared Data */
+.spirit-card {
+  background: linear-gradient(145deg, #192938, #14202b);
+  border: 1px solid #314b63;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+.spirit-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lime);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.spirit-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1.15fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.spirit-box {
+  background: rgba(15, 23, 30, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  transition: all 0.25s;
+}
+.spirit-box.flash-event {
+  border-color: var(--amber);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+}
+.spirit-box.flash-tick {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+.spirit-box b { display: block; color: var(--ink); font-size: 13px; margin-bottom: 3px; }
+.spirit-arrow { color: var(--accent); font-weight: 900; font-size: 16px; text-align: center; }
+
+/* Level Selector Bar */
+.level-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: var(--bg-soft);
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.level-btn {
+  flex: 1;
+  min-width: 170px;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid transparent;
+}
+.level-btn small { display: block; font-size: 11px; color: var(--muted); }
+.level-btn b { font-size: 14px; display: block; margin-top: 2px; }
+.level-btn.current {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(56, 189, 248, 0.15));
+  border-color: var(--green);
+}
+.level-btn.current small { color: var(--lime); font-weight: 700; }
+
+/* Banner Alert for Scenario / Bug Mode */
+.task-banner {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--amber);
+  color: #fef3c7;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.task-banner.bug-active {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: var(--red);
+  color: #fecaca;
+}
+
+/* Main 2-Column Interactive Grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 440px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+}
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.small { font-size: 12px; color: var(--muted); }
+
+/* Elevator Scene */
+.scene {
+  height: 360px;
+  background: linear-gradient(180deg, #131d27 0%, #182634 100%);
+  border: 1px solid #2b4257;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+/* Height Ruler on Left */
+.ruler {
+  position: absolute;
+  left: 10px;
+  top: 24px;
+  bottom: 24px;
+  width: 44px;
+  border-right: 1px dashed #3d5a73;
+  font-size: 10px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ruler span {
+  position: absolute;
+  right: 6px;
+  transform: translateY(50%);
+}
+.floorline {
+  position: absolute;
+  left: 58px;
+  right: 14px;
+  border-bottom: 2px solid #355069;
+  height: 28px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.f2 { top: 68px; }
+.f1 { top: 268px; }
+
+/* Hall Displays & Call Indicators */
+.hall-panel {
+  position: absolute;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d151c;
+  border: 1px solid #334e68;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.hall-panel.hp2 { top: 48px; }
+.hall-panel.hp1 { top: 248px; }
+.led-screen {
+  font-family: "SF Mono", Consolas, monospace;
+  background: #050a0e;
+  color: var(--amber);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 800;
+  min-width: 42px;
+  text-align: center;
+  border: 1px solid #223546;
+}
+.hall-lamp {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #293846;
+  transition: all 0.2s;
+}
+.hall-lamp.lit {
+  background: var(--lime);
+  box-shadow: 0 0 10px var(--lime);
+}
+
+/* Elevator Shaft & Cabin */
+.shaft {
+  position: absolute;
+  left: 92px;
+  width: 148px;
+  top: 20px;
+  bottom: 20px;
+  background: rgba(10, 17, 24, 0.55);
+  border-left: 4px solid #31495e;
+  border-right: 4px solid #31495e;
+}
+.cabin {
+  position: absolute;
+  bottom: 40px;
+  left: 102px;
+  width: 128px;
+  height: 94px;
+  border: 4px solid var(--st0);
+  background: #243442;
+  border-radius: 8px 8px 2px 2px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cabin-header {
+  height: 18px;
+  background: #0f1821;
+  font-size: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+  color: var(--amber);
+  font-family: monospace;
+}
+.cabin-interior {
+  height: calc(100% - 18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(circle at 50% 20%, #3b5266, #1d2b38);
+}
+.door {
+  position: absolute;
+  top: 18px;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(90deg, #5c768d, #486176);
+  border: 1px solid #314659;
+  z-index: 3;
+}
+.door.left { left: 0; }
+.door.right { right: 0; }
+
+/* Laser Beam for Door Blocked Sensor */
+.sensor-beam {
+  position: absolute;
+  left: 96px;
+  width: 140px;
+  height: 4px;
+  background: rgba(239, 68, 68, 0.85);
+  box-shadow: 0 0 12px var(--red);
+  z-index: 4;
+  pointer-events: none;
+  animation: pulseBeam 0.5s infinite alternate;
+}
+@keyframes pulseBeam {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+.obstacle {
+  position: absolute;
+  left: 150px;
+  bottom: 42px;
+  font-size: 32px;
+  z-index: 5;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+  transition: bottom 0.2s;
+}
+
+/* Controls below scene */
+.control-group {
+  margin-top: 12px;
+  background: var(--bg-soft);
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+.control-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.btn-call {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+.lamp-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3b4d5e;
+  display: inline-block;
+}
+.btn-call.active .lamp-dot {
+  background: var(--lime);
+  box-shadow: 0 0 8px var(--lime);
+}
+
+/* Transport Controls (Tick Microscope) */
+.transport {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.step-btn {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: var(--accent);
+  color: #bae6fd;
+  font-weight: 700;
+}
+
+/* Right Column: Brain Inspector + Tabs */
+.state-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border-left: 6px solid var(--st0);
+  margin-bottom: 14px;
+}
+.state-badge {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.state-pin-tag {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+}
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.info-box {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.info-box .label {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.info-box p {
+  color: var(--ink);
+  font-size: 13.5px;
+  margin: 0;
+}
+.reason-banner {
+  background: rgba(16, 185, 129, 0.11);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.reason-banner .label {
+  font-size: 11px;
+  color: var(--lime);
+  font-weight: 700;
+}
+.reason-banner p {
+  color: var(--ink);
+  margin: 3px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 7 Blueprint Variables Dashboard */
+.vars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.vars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.var-chip {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  transition: all 0.25s;
+  position: relative;
+}
+.var-chip.changed {
+  border-color: var(--lime);
+  background: rgba(163, 230, 53, 0.14);
+  transform: scale(1.02);
+}
+.var-name {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.type-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.t-int { background: #22d3ee; }    /* Unreal Cyan for Integer */
+.t-float { background: #a3e635; }  /* Unreal Green for Float */
+.t-bool { background: #ef4444; }   /* Unreal Red for Boolean */
+.var-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.var-sub { font-size: 10px; color: var(--muted); }
+
+/* Visualizer Tabs: State Graph vs Unreal Blueprint View */
+.section { margin-top: 22px; }
+.view-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.tab-btn.active {
+  background: var(--accent);
+  color: #06202e;
+  border-color: var(--accent);
+}
+
+/* State Machine SVG Diagram */
+.diagram-scroll {
+  overflow-x: auto;
+  border-radius: 16px;
+  background: #121b24;
+  border: 1px solid var(--line);
+  padding: 8px;
+}
+.state-diagram {
+  display: block;
+  width: 100%;
+  min-width: 780px;
+  height: auto;
+}
+.edge path {
+  fill: none;
+  stroke: #47627b;
+  stroke-width: 2.2;
+  marker-end: url(#arrow);
+  transition: stroke 0.25s, stroke-width 0.25s;
+}
+.edge text {
+  fill: #9ab0c4;
+  font-size: 12.5px;
+  paint-order: stroke;
+  stroke: #121b24;
+  stroke-width: 6px;
+  stroke-linejoin: round;
+}
+.edge.recent path {
+  stroke: var(--amber);
+  stroke-width: 4;
+  stroke-dasharray: 8 5;
+  animation: flowDash 0.6s linear infinite;
+  marker-end: url(#arrow-hot);
+}
+@keyframes flowDash {
+  to { stroke-dashoffset: -13; }
+}
+.edge.recent text {
+  fill: #fde68a;
+  font-weight: 700;
+}
+.edge.locked { opacity: 0.15; }
+.diagram-node { cursor: pointer; transition: opacity 0.25s; }
+.diagram-node.locked { opacity: 0.2; pointer-events: none; }
+.diagram-node rect {
+  fill: #1b2936;
+  stroke: #4c6983;
+  stroke-width: 2;
+  transition: all 0.2s;
+}
+.diagram-node:hover rect { stroke: var(--accent); }
+.diagram-node text {
+  fill: var(--ink);
+  text-anchor: middle;
+  font-size: 18px;
+  font-weight: 700;
+}
+.diagram-node .sub { font-size: 11.5px; font-weight: 400; fill: var(--muted); }
+.diagram-node.current rect {
+  fill: #0f382c;
+  stroke: var(--lime);
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 12px rgba(163, 230, 53, 0.35));
+}
+.diagram-node.current .sub { fill: #d9f99d; }
+.diagram-node .now { visibility: hidden; font-size: 11px; fill: var(--lime); font-weight: 800; }
+.diagram-node.current .now { visibility: visible; }
+
+/* Unreal Engine Blueprint Live Canvas */
+.bp-canvas {
+  background-color: var(--bp-grid);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border-radius: 16px;
+  border: 1px solid #354c62;
+  padding: 18px;
+  overflow-x: auto;
+}
+.bp-section-title {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--amber);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bp-flow-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 820px;
+}
+.bp-node {
+  background: rgba(22, 31, 41, 0.94);
+  border: 1.5px solid #455d75;
+  border-radius: 10px;
+  min-width: 170px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  overflow: hidden;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.bp-node.firing {
+  border-color: #fff;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.65);
+}
+.bp-header {
+  padding: 5px 10px;
+  font-weight: 800;
+  font-size: 12px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bp-header.func { background: linear-gradient(90deg, #5b21b6, #3b1d70); }
+.bp-header.switch { background: linear-gradient(90deg, #15803d, #14532d); }
+.bp-header.branch { background: linear-gradient(90deg, #991b1b, #63171b); }
+.bp-header.kit { background: linear-gradient(90deg, #0369a1, #0c4a6e); }
+.bp-header.set { background: linear-gradient(90deg, #0e7490, #164e63); }
+.bp-body { padding: 8px 10px; }
+.bp-pin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+  margin: 2px 0;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 11.5px;
+}
+.bp-pin-row.active-pin {
+  background: rgba(163, 230, 53, 0.22);
+  color: var(--lime);
+  font-weight: 700;
+}
+.bp-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.bp-branch-lane {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 30, 0.7);
+  border: 1px solid #2b3e50;
+  opacity: 0.45;
+  transition: all 0.2s;
+}
+.bp-branch-lane.active-lane {
+  opacity: 1;
+  border-color: var(--lime);
+  background: rgba(16, 185, 129, 0.13);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+.wire-exec {
+  color: #fff;
+  font-weight: 900;
+  font-family: monospace;
+  letter-spacing: -1px;
+}
+.bp-branch-lane.active-lane .wire-exec {
+  color: var(--lime);
+  text-shadow: 0 0 8px var(--lime);
+}
+.bp-chip {
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-family: "SF Mono", Consolas, monospace;
+  border: 1px solid #47627b;
+  background: #1a2836;
+}
+.bp-chip.kit { border-color: #38bdf8; color: #bae6fd; }
+.bp-chip.branch { border-color: #f87171; color: #fecaca; }
+.bp-chip.set { border-color: #a3e635; color: #ecfccb; }
+
+/* Experiments & Bug Doctor */
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 12px;
+}
+.exp-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.exp-card.bug-card {
+  border-color: rgba(249, 115, 22, 0.4);
+}
+.exp-card p { font-size: 13px; margin: 8px 0 14px; }
+
+/* Bottom Log & Multi-Quiz */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 20px;
+}
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+.log-list li {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  display: flex;
+  gap: 8px;
+}
+.log-list time {
+  color: var(--accent);
+  font-family: monospace;
+  min-width: 48px;
+}
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.quiz-options button { text-align: left; }
+.quiz-feedback {
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  font-size: 13.5px;
+}
+footer {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+@media (max-width: 960px) {
+  .hero, .main-grid, .bottom-grid, .cards-3 { grid-template-columns: 1fr; }
+  .vars-grid { grid-template-columns: repeat(2, 1fr); }
+  .spirit-flow { grid-template-columns: 1fr; }
+  .spirit-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="brand">
+      <span class="brand-badge">UE5 BP_ElevatorKit</span>
+      <span>電梯狀態機 · 互動聲光實驗室</span>
+    </div>
+    <div class="header-tools">
+      <button id="soundToggle" class="sound-btn on" aria-pressed="true">🔊 音效已開啟（點擊可靜音）</button>
+      <a href="../unrealev/" style="font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;">📖 對照學生操作手冊 ↗</a>
+    </div>
+  </header>
+
+  <!-- Hero + Mental Model -->
+  <section class="hero">
+    <div>
+      <div class="eyebrow">THINK IN STATE MACHINES · 狀態機思維</div>
+      <h1>為什麼按鈕不直接搬動電梯？</h1>
+      <p>在 Unreal Engine 設計電梯時，最核心的精神是<strong>「把突發事件（按按鈕）與每幀動作（UpdateLift）分開」</strong>。透過改變 <code>State</code> 變數，就像幫電梯切換不同的工作守則！</p>
+    </div>
+
+    <div class="spirit-card" aria-label="狀態機核心架構：兩條路的交會點">
+      <div class="spirit-title">
+        <span>⚡ 兩條路的交會點（觀察下方哪一格正在發光）</span>
+        <span id="spiritStatus" style="color:var(--muted);font-weight:400;">等待操作…</span>
+      </div>
+      <div class="spirit-flow">
+        <div class="spirit-box" id="boxEvent">
+          <b>① 突發事件 Event</b>
+          <span style="color:var(--muted)">玩家按 1/2/E 呼叫<br><code>CallElevator</code><br>按一次、執行一次</span>
+        </div>
+        <div class="spirit-arrow">➔</div>
+        <div class="spirit-box" id="boxData">
+          <b>② 狀態資料 Variables</b>
+          <span style="color:var(--lime)">7 個藍圖變數<br><code>State</code> · <code>Requests</code><br>記住現在是什麼情況</span>
+        </div>
+        <div class="spirit-arrow">➔</div>
+        <div class="spirit-box" id="boxTick">
+          <b>③ 每幀決策 Tick</b>
+          <span style="color:var(--muted)"><code>UpdateLift</code><br>用 <code>Switch on Int</code><br>每一幀移動一點點</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progressive 4-Level Curriculum Switcher -->
+  <nav class="level-bar" aria-label="選擇教學關卡模式">
+    <button class="level-btn" data-level="1">
+      <small>🌱 關卡 1 模式</small>
+      <b>會動就好 (State 0 ↔ 4)</b>
+    </button>
+    <button class="level-btn" data-level="2">
+      <small>🚪 關卡 2 模式</small>
+      <b>加上門的循環 (五狀態)</b>
+    </button>
+    <button class="level-btn" data-level="3">
+      <small>💡 關卡 3 模式</small>
+      <b>方向箭頭與按鈕亮燈</b>
+    </button>
+    <button class="level-btn current" data-level="4">
+      <small>🚀 關卡 4 完整版</small>
+      <b>請求排隊 + 防夾擋門</b>
+    </button>
+  </nav>
+
+  <!-- Active Scenario / Bug Mode Banner -->
+  <div id="taskBanner" class="task-banner" hidden>
+    <div id="taskText"></div>
+    <button id="clearTaskBtn" style="padding:5px 10px;font-size:12px;">結束實驗 / 恢復正常</button>
+  </div>
+
+  <!-- Main Interactive Simulator -->
+  <div class="main-grid">
+    <!-- Left: Visual Elevator Shaft & Controls -->
+    <section class="card">
+      <div class="card-top">
+        <h2>① 聲光電梯模擬器</h2>
+        <span id="clock" class="small">播放中 · 0.0 s</span>
+      </div>
+
+      <div class="scene" role="img" aria-label="兩層樓電梯動態切面圖">
+        <div class="ruler">
+          <span style="bottom:200px;">500cm</span>
+          <span style="bottom:100px;">250cm</span>
+          <span style="bottom:0px;">0cm</span>
+        </div>
+
+        <div class="floorline f2"><span>2F 樓層線</span></div>
+        <div class="floorline f1"><span>1F 樓層線</span></div>
+
+        <!-- Hall Panels (Level 3+ Displays & Button Lights) -->
+        <div class="hall-panel hp2" title="2F 門外顯示器與呼叫燈">
+          <span>2F 外</span>
+          <span class="led-screen" id="disp2">1F</span>
+          <span class="hall-lamp" id="lamp2" title="Kit Set Button Light (2F)"></span>
+        </div>
+        <div class="hall-panel hp1" title="1F 門外顯示器與呼叫燈">
+          <span>1F 外</span>
+          <span class="led-screen" id="disp1">1F</span>
+          <span class="hall-lamp" id="lamp1" title="Kit Set Button Light (1F)"></span>
+        </div>
+
+        <div class="shaft"></div>
+
+        <!-- Elevator Cabin -->
+        <div class="cabin" id="cabin">
+          <div class="cabin-header">
+            <span id="cabinStateTag">ST:0</span>
+            <span id="cabinDisp">1F</span>
+          </div>
+          <div class="cabin-interior">
+            <span id="passengerInCabin" style="font-size:28px;">🧍</span>
+          </div>
+          <div id="doorLeft" class="door left"></div>
+          <div id="doorRight" class="door right"></div>
+        </div>
+
+        <!-- Door Sensor Laser & Obstacle Person -->
+        <div id="sensorBeam" class="sensor-beam" hidden></div>
+        <div class="obstacle" id="person" hidden title="站在門口的乘客 (Kit Is Door Blocked = true)">🚶</div>
+      </div>
+
+      <!-- Player Input Controls -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>🎮 玩家操作（對應 <code>OnCallButtonPressed</code> / <code>OnCabinButtonPressed</code>）</span>
+        </div>
+        <div class="controls-row">
+          <button id="call1" class="btn-call">
+            <span>呼叫 1F <small style="color:var(--muted)">(Floor=1)</small></span>
+            <span class="lamp-dot"></span>
+          </button>
+          <button id="call2" class="btn-call">
+            <span>呼叫 2F <small style="color:var(--muted)">(Floor=2)</small></span>
+            <span class="lamp-dot"></span>
+          </button>
+        </div>
+        <div class="controls-row" style="margin-bottom:0;">
+          <button id="blockBtn" aria-pressed="false">🚶 站到門口擋門 (Blocked)</button>
+          <button id="cabinToggleBtn" aria-pressed="true" class="active">🧍 玩家在車廂內 (InCabin)</button>
+        </div>
+      </div>
+
+      <!-- Time Microscope Controls -->
+      <div class="transport">
+        <button class="primary" id="playBtn">⏸ 暫停</button>
+        <button class="step-btn" id="stepBtn" title="暫停並只執行一次 UpdateLift (0.1秒)">🔬 單步一幀 (+0.1s)</button>
+        <button id="resetBtn">↺ 重置</button>
+        <label class="small" style="margin-left:auto;">
+          倍速
+          <select id="speedSelect" aria-label="模擬倍速">
+            <option value="0.25">0.25x 慢動作</option>
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x 正常</option>
+            <option value="2">2x 快轉</option>
+          </select>
+        </label>
+      </div>
+      <p class="small" style="margin-top:8px;">💡 教學秘訣：先按「⏸ 暫停」，再狂點「🔬 單步一幀」，就能看清楚每一幀 <code>UpdateLift</code> 是怎麼一點一點開門與移動的！</p>
+    </section>
+
+    <!-- Right: State Decision & 7 Unreal Variables -->
+    <section class="card">
+      <div class="card-top">
+        <h2>② 電梯大腦即時解剖（UpdateLift 決策面板）</h2>
+        <span id="levelIndicator" class="small" style="color:var(--lime);font-weight:700;">目前模式：關卡 4 完整版</span>
+      </div>
+
+      <div class="state-hero" id="stateHero">
+        <div>
+          <div class="small">目前狀態 (State)</div>
+          <div class="state-badge" id="stateTitle">0 · 待命 (Idle)</div>
+        </div>
+        <div class="state-pin-tag" id="switchPinTag">Switch on Int ➔ 出口 0</div>
+      </div>
+
+      <div class="inspector-grid">
+        <div class="info-box">
+          <div class="label">🔄 這一幀持續做什麼？（白線動作）</div>
+          <p id="actionText"></p>
+        </div>
+        <div class="info-box">
+          <div class="label">🔀 什麼條件成立才會換狀態？（Branch 判斷）</div>
+          <p id="ruleText"></p>
+        </div>
+      </div>
+
+      <div class="reason-banner">
+        <div class="label">🧠 此刻大腦的即時判斷（為什麼留著或切換？）</div>
+        <p id="reasonText"></p>
+      </div>
+
+      <!-- 7 Variables from BP_ElevatorKit -->
+      <div class="vars-header">
+        <h3>📦 你在 <code>BP_ElevatorKit</code> 新增的 7 個變數 + 套件高度</h3>
+        <span class="small">綠框閃爍 = 剛剛數值改變</span>
+      </div>
+      <div class="vars-grid">
+        <div class="var-chip" id="vc-state">
+          <div class="var-name"><span class="type-dot t-int"></span>State</div>
+          <div class="var-val" id="v-state">0</div>
+          <div class="var-sub">Integer (0~4)</div>
+        </div>
+        <div class="var-chip" id="vc-floor">
+          <div class="var-name"><span class="type-dot t-int"></span>CurrentFloor</div>
+          <div class="var-val" id="v-floor">1</div>
+          <div class="var-sub">目前/剛離開樓層</div>
+        </div>
+        <div class="var-chip" id="vc-target">
+          <div class="var-name"><span class="type-dot t-int"></span>TargetFloor</div>
+          <div class="var-val" id="v-target">1</div>
+          <div class="var-sub">目標樓層 (1或2)</div>
+        </div>
+        <div class="var-chip" id="vc-dir">
+          <div class="var-name"><span class="type-dot t-int"></span>Direction</div>
+          <div class="var-val" id="v-dir">0</div>
+          <div class="var-sub">1上 / -1下 / 0停</div>
+        </div>
+        <div class="var-chip" id="vc-alpha">
+          <div class="var-name"><span class="type-dot t-float"></span>DoorAlpha</div>
+          <div class="var-val" id="v-alpha">0.00</div>
+          <div class="var-sub">0全關 ～ 1全開</div>
+        </div>
+        <div class="var-chip" id="vc-dwell">
+          <div class="var-name"><span class="type-dot t-float"></span>DwellRemaining</div>
+          <div class="var-val" id="v-dwell">0.0s</div>
+          <div class="var-sub">停留剩餘秒數</div>
+        </div>
+        <div class="var-chip" id="vc-req">
+          <div class="var-name"><span class="type-dot t-bool"></span>Requests[]</div>
+          <div class="var-val" id="v-req">[F, F]</div>
+          <div class="var-sub">1F / 2F 排隊登記</div>
+        </div>
+        <div class="var-chip" id="vc-z">
+          <div class="var-name"><span class="type-dot t-float"></span>Kit Get Lift Z</div>
+          <div class="var-val" id="v-z">0 cm</div>
+          <div class="var-sub">1F=0, 2F=500</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Section 3: Dual View (State Diagram + Live Unreal Blueprint Node Graph) -->
+  <section class="card section">
+    <div class="card-top">
+      <div>
+        <h2>③ 狀態圖 vs Unreal 藍圖節點對照</h2>
+        <p class="small">一邊看「概念狀態圖」，一邊對照「Unreal 裡面 <code>Switch on Int</code> 的白線怎麼走」！點擊狀態圖上的節點可直接跳轉體驗該狀態。</p>
+      </div>
+      <div class="view-tabs">
+        <button class="tab-btn active" data-view="both">🔀 上下同步對照</button>
+        <button class="tab-btn" data-view="diagram">🗺️ 只看狀態轉移圖</button>
+        <button class="tab-btn" data-view="blueprint">🧩 只看 Unreal 藍圖執行流</button>
+      </div>
+    </div>
+
+    <!-- View A: SVG State Diagram -->
+    <div id="diagramPane">
+      <div class="diagram-scroll">
+        <svg class="state-diagram" viewBox="0 0 1040 590" role="img" aria-label="電梯五狀態與切換條件互動圖">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#47627b"/>
+            </marker>
+            <marker id="arrow-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/>
+            </marker>
+          </defs>
+
+          <!-- Edges -->
+          <g class="edge" data-edge="0-4">
+            <path d="M 200 210 L 430 110"/>
+            <text text-anchor="middle" x="305" y="140">
+              <tspan x="305" dy="0">有別層請求 → StartMove</tspan>
+              <tspan x="305" dy="18">設 TargetFloor, State = 4</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="4-0">
+            <path d="M 420 82 C 260 60 150 110 140 205"/>
+            <text text-anchor="middle" x="235" y="75">
+              <tspan x="235" dy="0">[僅關卡1] 到達目標 → State = 0</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="4-1">
+            <path d="M 570 110 L 800 210"/>
+            <text text-anchor="middle" x="705" y="140">
+              <tspan x="705" dy="0">剩餘距離 ≤ 本次步長 → OnArrived</tspan>
+              <tspan x="705" dy="18">對齊高度、清除該層請求、State = 1</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="0-1">
+            <path d="M 230 248 L 770 248"/>
+            <text text-anchor="middle" x="500" y="232">
+              <tspan x="500" dy="0">本層呼叫 / 待命發現本層請求 → State = 1</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="1-2">
+            <path d="M 820 286 L 745 415"/>
+            <text text-anchor="middle" x="715" y="345">
+              <tspan x="715" dy="0">門全開 (DoorAlpha ≥ 1)</tspan>
+              <tspan x="715" dy="18">設 DwellRemaining = 3s</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="2-3">
+            <path d="M 640 450 L 440 450"/>
+            <text text-anchor="middle" x="540" y="422">
+              <tspan x="540" dy="0">倒數 ≤ 0 且門口沒人</tspan>
+              <tspan x="540" dy="18">→ State = 3 (開始關門)</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="3-0">
+            <path d="M 280 415 L 160 286"/>
+            <text text-anchor="middle" x="184" y="355">
+              <tspan x="184" dy="0">門全關 (DoorAlpha ≤ 0)</tspan>
+              <tspan x="184" dy="18">→ State = 0 (回待命派車)</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="3-1">
+            <path d="M 360 488 C 360 575 960 575 960 380 Q 960 310 900 286"/>
+            <text text-anchor="middle" x="680" y="552">
+              <tspan x="680" dy="0">關門時有人擋門 (Blocked) 或本層再按 → 保留開度，切回 State = 1 重新開門</tspan>
+            </text>
+          </g>
+          <g class="edge" data-edge="2-2">
+            <path d="M 800 430 C 910 385 910 515 800 475"/>
+            <text text-anchor="middle" x="905" y="370">
+              <tspan x="905" dy="0">本層再按：重設 3 秒</tspan>
+              <tspan x="905" dy="18">到期但有人：再等 0.5 秒</tspan>
+            </text>
+          </g>
+
+          <!-- State Nodes (Clickable to inspect/jump) -->
+          <g class="diagram-node" data-state="0" transform="translate(70 210)">
+            <rect width="160" height="76" rx="14"/>
+            <text x="80" y="31">待命</text>
+            <text class="sub" x="80" y="55">State 0 · 出口 0</text>
+            <text class="now" x="80" y="-10">● 目前狀態</text>
+          </g>
+          <g class="diagram-node" data-state="4" transform="translate(420 40)">
+            <rect width="160" height="76" rx="14"/>
+            <text x="80" y="31">移動中</text>
+            <text class="sub" x="80" y="55">State 4 · 出口 4</text>
+            <text class="now" x="80" y="-10">● 目前狀態</text>
+          </g>
+          <g class="diagram-node" data-state="1" transform="translate(770 210)">
+            <rect width="160" height="76" rx="14"/>
+            <text x="80" y="31">開門中</text>
+            <text class="sub" x="80" y="55">State 1 · 出口 1</text>
+            <text class="now" x="80" y="-10">● 目前狀態</text>
+          </g>
+          <g class="diagram-node" data-state="2" transform="translate(640 415)">
+            <rect width="160" height="76" rx="14"/>
+            <text x="80" y="31">停留</text>
+            <text class="sub" x="80" y="55">State 2 · 出口 2</text>
+            <text class="now" x="80" y="-10">● 目前狀態</text>
+          </g>
+          <g class="diagram-node" data-state="3" transform="translate(280 415)">
+            <rect width="160" height="76" rx="14"/>
+            <text x="80" y="31">關門中</text>
+            <text class="sub" x="80" y="55">State 3 · 出口 3</text>
+            <text class="now" x="80" y="-10">● 目前狀態</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- View B: Live Unreal Engine Blueprint Execution Visualizer -->
+    <div id="blueprintPane" style="margin-top:16px;">
+      <div class="bp-canvas">
+        <div class="bp-section-title">
+          <span>🟣 Unreal Blueprint 即時白線追蹤：<code>UpdateLift</code>（每一幀由 Event Tick 呼叫）</span>
+          <span id="bpLastEvent" style="color:var(--lime);">等待事件…</span>
+        </div>
+
+        <div class="bp-flow-row">
+          <!-- Function Entry Node -->
+          <div class="bp-node firing" style="min-width:155px;">
+            <div class="bp-header func"><span>UpdateLift</span><span>▷</span></div>
+            <div class="bp-body">
+              <div class="bp-pin-row"><span>每幀入口</span><span>▷</span></div>
+              <div class="bp-pin-row" style="color:#bae6fd;"><span>Kit Update Displays</span><span>▷</span></div>
+            </div>
+          </div>
+
+          <!-- Switch on Int Node -->
+          <div class="bp-node firing" style="min-width:175px;">
+            <div class="bp-header switch"><span>🔀 Switch on Int</span></div>
+            <div class="bp-body">
+              <div class="bp-pin-row" style="border-bottom:1px solid #334e68;margin-bottom:4px;">
+                <span style="color:#22d3ee;">● Selection: State</span>
+                <b id="bpStateVal" style="color:#fff;">= 0</b>
+              </div>
+              <div class="bp-pin-row" id="pin-0"><span>出口 0 (待命)</span><span>▷</span></div>
+              <div class="bp-pin-row" id="pin-1"><span>出口 1 (開門中)</span><span>▷</span></div>
+              <div class="bp-pin-row" id="pin-2"><span>出口 2 (停留)</span><span>▷</span></div>
+              <div class="bp-pin-row" id="pin-3"><span>出口 3 (關門中)</span><span>▷</span></div>
+              <div class="bp-pin-row" id="pin-4"><span>出口 4 (移動中)</span><span>▷</span></div>
+            </div>
+          </div>
+
+          <!-- 5 Execution Lanes -->
+          <div class="bp-branches">
+            <div class="bp-branch-lane" id="lane-0">
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip kit">Dispatch (派車檢查)</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip branch">Branch: 本層有請求?</span>
+              <span class="wire-exec">➔</span>
+              <span class="bp-chip set">True: Set State=1 ｜ False: FindRequest → StartMove(State=4)</span>
+            </div>
+
+            <div class="bp-branch-lane" id="lane-1">
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip set">Set DoorAlpha (+dt/1.2)</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip kit">Kit Apply Doors</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip branch">Branch: DoorAlpha ≥ 1.0?</span>
+              <span class="wire-exec">➔</span>
+              <span class="bp-chip set">True: Set DwellRemaining=3, Set State=2</span>
+            </div>
+
+            <div class="bp-branch-lane" id="lane-2">
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip set">Set DwellRemaining (-dt)</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip branch">Branch: DwellRemaining ≤ 0?</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip kit">Kit Is Door Blocked?</span>
+              <span class="wire-exec">➔</span>
+              <span class="bp-chip set">有人: Dwell=0.5 ｜ 沒人: Set State=3</span>
+            </div>
+
+            <div class="bp-branch-lane" id="lane-3">
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip kit">Kit Is Door Blocked?</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip branch">Branch: 有人擋門?</span>
+              <span class="wire-exec">➔</span>
+              <span class="bp-chip set">True: Set State=1 (重開門) ｜ False: 減少 DoorAlpha → ≤0 設 State=0</span>
+            </div>
+
+            <div class="bp-branch-lane" id="lane-4">
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip kit">Kit Get Lift Z</span>
+              <span class="wire-exec">━━▷</span>
+              <span class="bp-chip branch">Branch: 剩餘距離 ≤ 步長?</span>
+              <span class="wire-exec">➔</span>
+              <span class="bp-chip set">True: Set Lift Z(對齊) → OnArrived() ｜ False: Set Lift Z(繼續移)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: 3 Classic Experiments + 3 Blueprint Bug Doctor Scenarios -->
+  <section class="card section">
+    <h2>④ 動手做實驗：先預測、再用「🔬 單步一幀」驗證</h2>
+    <p class="small">點擊任一情境會自動擺好現場並暫停，讓你用「單步執行」一格一格看清楚狀態機怎麼思考。</p>
+
+    <div class="cards-3">
+      <article class="exp-card">
+        <div>
+          <span class="eyebrow">實驗 01 · 排隊與派車</span>
+          <h3>門開著時，收到 2F 呼叫會立刻衝出去嗎？</h3>
+          <p>1F 門全開（State 2）時按下 2F。觀察 <code>Requests[1]</code> 已經變成 <code>true</code>，但為什麼電梯還停在原地？</p>
+        </div>
+        <button data-scenario="queue">▶ 載入實驗 01（門開時按別層）</button>
+      </article>
+
+      <article class="exp-card">
+        <div>
+          <span class="eyebrow">實驗 02 · 防夾優先權</span>
+          <h3>門關到一半（40%），突然有人站到門口！</h3>
+          <p>在 <code>State 3 (關門中)</code> 把人放到門口。點一下單步：會先繼續關門，還是立刻切回 <code>State 1</code>？門開度會歸零嗎？</p>
+        </div>
+        <button data-scenario="block">▶ 載入實驗 02（關門中擋門）</button>
+      </article>
+
+      <article class="exp-card">
+        <div>
+          <span class="eyebrow">實驗 03 · 移動中不掉頭</span>
+          <h3>正往 2F 上樓途中，1F 又有人按按鈕！</h3>
+          <p>電梯在 <code>State 4</code> 升到 200cm 時收到 1F 請求。它會半路折返，還是先完成 2F 的開關門才下樓？</p>
+        </div>
+        <button data-scenario="moving">▶ 載入實驗 03（上樓途中按 1F）</button>
+      </article>
+    </div>
+
+    <h2 style="margin-top:24px;">🐞 藍圖除錯診所：如果接錯線會發生什麼災難？</h2>
+    <p class="small">初學者在 Unreal 接線時最常犯這 3 個錯誤。點一下親眼看看「沒有照狀態機規則寫」會出現什麼好笑又危險的 Bug！</p>
+
+    <div class="cards-3">
+      <article class="exp-card bug-card">
+        <div>
+          <span class="eyebrow" style="color:var(--orange);">常見 Bug A · 敞開大門飛天</span>
+          <h3>在 CallElevator 直接呼叫 StartMove</h3>
+          <p>如果不先登記到 <code>Requests</code> 等待命才派車，而是按下按鈕就直接 <code>Set State = 4</code>，門還沒關就會直接帶著人飛上樓！</p>
+        </div>
+        <button class="warn" data-bug="openMove">💥 體驗 Bug A：開著門直接起飛</button>
+      </article>
+
+      <article class="exp-card bug-card">
+        <div>
+          <span class="eyebrow" style="color:var(--orange);">常見 Bug B · 無限開關門鬼打牆</span>
+          <h3>OnArrived 忘記清除 Requests 陣列</h3>
+          <p>到達樓層時如果忘了把該層的 <code>Requests</code> 設回 <code>false</code>，電梯關好門回到 <code>State 0</code> 又會以為有人叫，永遠困在同一層！</p>
+        </div>
+        <button class="warn" data-bug="infiniteLoop">💥 體驗 Bug B：到站忘記消請求</button>
+      </article>
+
+      <article class="exp-card bug-card">
+        <div>
+          <span class="eyebrow" style="color:var(--orange);">常見 Bug C · 瞬間秒關夾人門</span>
+          <h3>把 DoorAlpha 直接設成 0 而不是每幀遞減</h3>
+          <p>在 <code>UpdateLift</code> 如果忘了用 <code>DoorAlpha - dt / DoorOpenTime</code>，而是直接 <code>Set DoorAlpha = 0</code>，門會在 1 幀內瞬間夾死！</p>
+        </div>
+        <button class="warn" data-bug="instantDoor">💥 體驗 Bug C：沒有過渡瞬間關門</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- Section 5: Decision Log & Interactive Concept Quiz -->
+  <div class="bottom-grid section">
+    <section class="card">
+      <div class="card-top">
+        <h2>📜 狀態機決策日誌</h2>
+        <button id="clearLogBtn" style="font-size:11px;padding:4px 8px;">清空紀錄</button>
+      </div>
+      <p class="small">只記錄「事件觸發」與「狀態切換決策」，不逐幀洗版。</p>
+      <ol id="logList" class="log-list"></ol>
+    </section>
+
+    <section class="card">
+      <div class="card-top">
+        <h2>🎯 觀念快問快答（Unreal 實戰檢定）</h2>
+        <span id="quizProgress" class="small">第 1 / 3 題</span>
+      </div>
+      <p id="quizQuestion" style="color:var(--ink);font-weight:700;font-size:15px;"></p>
+      <div id="quizOptions" class="quiz-options"></div>
+      <div id="quizFeedback" class="quiz-feedback" aria-live="polite">👆 選一個答案試試看！</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button id="nextQuizBtn" style="font-size:12px;">下一題 ➔</button>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div>
+      依 <b>Unreal Engine BP_ElevatorKit</b> 關卡 1～4 規格製作｜開關門 <code>DoorOpenTime = 1.2s</code> · 停留 <code>DwellTime = 3.0s</code> · 速度 <code>MoveSpeed = 200 cm/s</code> · 樓高 <code>FloorHeights = [0, 500]</code>
+    </div>
+    <div>
+      <a href="../unrealev/">返回學生操作手冊</a> · <a href="../">返回 Unreal 課程首頁</a>
+    </div>
+  </footer>
+</main>
+
+<script>
+/* =========================================================================
+   1. Web Audio Synthesizer (Zero-dependency procedural sound effects)
+   ========================================================================= */
+class SoundEngine {
+  constructor() {
+    this.enabled = true;
+    this.ctx = null;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+  tone(freq, duration = 0.12, type = 'sine', gainVal = 0.12, delay = 0) {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime + delay;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(gainVal, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  }
+  playButton() {
+    this.tone(880, 0.07, 'triangle', 0.14, 0);
+    this.tone(1320, 0.09, 'sine', 0.1, 0.04);
+  }
+  playStep() {
+    this.tone(520, 0.04, 'square', 0.05, 0);
+  }
+  playArrivalDing() {
+    // Classic "Ding-Dong" elevator arrival chime
+    this.tone(783.99, 0.35, 'sine', 0.18, 0);    // G5
+    this.tone(659.25, 0.55, 'sine', 0.18, 0.22); // E5
+  }
+  playDoorOpen() {
+    this.tone(440, 0.12, 'sine', 0.09, 0);
+    this.tone(554.37, 0.15, 'sine', 0.09, 0.08);
+  }
+  playDoorClose() {
+    this.tone(554.37, 0.12, 'sine', 0.09, 0);
+    this.tone(415.3, 0.15, 'sine', 0.09, 0.08);
+  }
+  playBlockedAlert() {
+    this.tone(310, 0.1, 'sawtooth', 0.12, 0);
+    this.tone(260, 0.14, 'sawtooth', 0.12, 0.11);
+  }
+  playMoveHum(zRatio) {
+    // Subtle pitch-shifting hum during movement
+    this.tone(140 + zRatio * 100, 0.08, 'triangle', 0.03, 0);
+  }
+}
+const sfx = new SoundEngine();
+
+/* =========================================================================
+   2. Elevator State Machine Model (Supports Level 1~4 & Bug Doctor Modes)
+   ========================================================================= */
+class Elevator {
+  constructor() {
+    this.level = 4;      // 1, 2, 3, or 4
+    this.bugMode = null; // null | 'openMove' | 'infiniteLoop' | 'instantDoor'
+    this.inCabin = true;
+    this.reset();
+  }
+  reset() {
+    Object.assign(this, {
+      state: 0,
+      floor: 1,
+      target: 1,
+      dir: 0,
+      z: 0,
+      alpha: 0,
+      dwell: 0,
+      blocked: false,
+      requests: [false, false],
+      lights: [false, false],
+      time: 0,
+      logs: [],
+      lastTransition: null,
+      lastEventName: '等待呼叫…'
+    });
+    this.log('系統初始化：停在 1F (Z=0cm)，門全關 (State 0)。');
+  }
+  log(message) {
+    this.logs.unshift({ time: this.time.toFixed(1), message });
+    this.logs = this.logs.slice(0, 35);
+  }
+  change(next, why) {
+    const old = this.state;
+    this.lastTransition = { key: `${old}-${next}`, why };
+    this.state = next;
+    this.log(`State ${old} ➔ ${next}｜${why}`);
+    if (next === 1) sfx.playDoorOpen();
+    if (next === 3) sfx.playDoorClose();
+  }
+  startMove(f, reasonText) {
+    this.target = f;
+    this.dir = f > this.floor ? 1 : (f < this.floor ? -1 : 0);
+    this.change(4, reasonText || `StartMove(${f}F)：設 TargetFloor=${f}, Direction=${this.dir}`);
+  }
+  call(f) {
+    if (![1, 2].includes(f)) return;
+    sfx.playButton();
+    this.lastEventName = `CallElevator(Floor=${f})`;
+
+    if (this.level >= 3) {
+      this.lights[f - 1] = true;
+    }
+
+    // Bug Mode A: Directly start moving even if doors are open!
+    if (this.bugMode === 'openMove') {
+      this.log(`🐞 [Bug A 觸發] CallElevator 直接呼叫 StartMove(${f})，完全沒管門還開著！`);
+      this.startMove(f, `🐞 錯誤接線：直接強制切換到 State 4（門開度仍是 ${Math.round(this.alpha*100)}%）`);
+      return;
+    }
+
+    // Level 1: Only State 0 and State 4 exist
+    if (this.level === 1) {
+      if (f === this.floor && this.state === 0) {
+        this.log(`已在 ${f}F（關卡 1 不管門，保持待命）。`);
+      } else if (this.state === 0) {
+        this.startMove(f, `關卡 1 直接出發前往 ${f}F`);
+      } else {
+        this.log(`關卡 1 移動中不排隊，忽略 ${f}F 按鈕。`);
+      }
+      return;
+    }
+
+    // Level 2, 3, 4 logic
+    if (f === this.floor && this.state !== 4) {
+      this.lights[f - 1] = false;
+      if (this.state === 2) {
+        this.dwell = 3;
+        this.lastTransition = { key: '2-2', why: '本層再按：維持 State 2，只把 DwellRemaining 重設為 3 秒' };
+        this.log('本層再按：DwellRemaining 重設為 3.0 秒，維持停留 (State 2)。');
+      } else if (this.state !== 1) {
+        this.change(1, '本層呼叫：開始或恢復開門 (State 1)');
+      } else {
+        this.log('本層再按：目前已在開門中 (State 1)，繼續開門。');
+      }
+    } else {
+      if (this.level < 4 && this.state !== 0) {
+        this.log(`（關卡 ${this.level} 尚未寫 Requests 排隊陣列，非待命狀態下呼叫不會被記錄；可切到關卡 4 體驗排隊）`);
+        return;
+      }
+      if (this.level < 4 && this.state === 0) {
+        this.startMove(f, `待命時直接前往 ${f}F`);
+        return;
+      }
+      this.requests[f - 1] = true;
+      this.log(`收到 ${f}F 請求：Requests[${f-1}] = true（先登記，當下 State 不變）。`);
+    }
+  }
+  block(value) {
+    this.blocked = value;
+    if (value) sfx.playBlockedAlert();
+    this.log(value ? '🚶 門口有人 (Kit Is Door Blocked = true)：等待 State 2 或 3 檢查。' : '門口已清空 (Blocked = false)。');
+  }
+  tick(dt) {
+    this.time += dt;
+    switch (this.state) {
+      case 0: {
+        this.dir = 0;
+        if (this.level < 4) break;
+        if (this.requests[this.floor - 1]) {
+          this.requests[this.floor - 1] = false;
+          this.lights[this.floor - 1] = false;
+          this.change(1, 'Dispatch：待命時發現本層請求，開門服務');
+          break;
+        }
+        const f = this.requests.findIndex(Boolean) + 1;
+        if (f) {
+          this.startMove(f, `Dispatch 派車：門已全關，前往排隊中的 ${f}F`);
+        }
+        break;
+      }
+      case 1: {
+        this.alpha = Math.min(1, this.alpha + dt / 1.2);
+        if (this.alpha >= 1) {
+          this.dwell = 3;
+          this.change(2, 'DoorAlpha ≥ 1（門全開），設 DwellRemaining = 3 秒');
+        }
+        break;
+      }
+      case 2: {
+        this.dwell -= dt;
+        if (this.dwell <= 0) {
+          if (this.blocked && this.level >= 4) {
+            this.dwell = 0.5;
+            sfx.playBlockedAlert();
+            this.lastTransition = { key: '2-2', why: '倒數到期但門口有人：維持 State 2，再延長 0.5 秒' };
+            this.log('倒數到期但門口有人：維持停留 (State 2)，DwellRemaining 設為 0.5 秒。');
+          } else {
+            this.change(3, 'DwellRemaining ≤ 0 且門口沒人，開始關門');
+          }
+        }
+        break;
+      }
+      case 3: {
+        if (this.blocked && this.level >= 4) {
+          sfx.playBlockedAlert();
+          this.change(1, '擋門防夾優先！保留目前 DoorAlpha 開度，立刻切回 State 1 重新開門');
+          break;
+        }
+        if (this.bugMode === 'instantDoor') {
+          this.alpha = 0;
+          this.log('🐞 [Bug C 觸發] 沒有每幀扣 dt/1.2，而是直接 Set DoorAlpha = 0，門瞬間秒關！');
+          this.change(0, '🐞 瞬間關門完畢，回 State 0');
+          break;
+        }
+        this.alpha = Math.max(0, this.alpha - dt / 1.2);
+        if (this.alpha <= 0) {
+          this.change(0, 'DoorAlpha ≤ 0（門已全關），回到 State 0 待命才能派車');
+        }
+        break;
+      }
+      case 4: {
+        const targetZ = (this.target - 1) * 500;
+        const step = 200 * dt;
+        if (Math.abs(targetZ - this.z) <= step) {
+          // OnArrived!
+          this.z = targetZ;
+          this.floor = this.target;
+          this.dir = 0;
+          this.lights[this.floor - 1] = false;
+          sfx.playArrivalDing();
+
+          if (this.bugMode === 'infiniteLoop') {
+            this.log(`🐞 [Bug B 觸發] OnArrived 忘記把 Requests[${this.floor-1}] 設為 false！等一下關完門又會重複開門！`);
+          } else {
+            this.requests[this.floor - 1] = false;
+          }
+
+          if (this.level === 1) {
+            this.change(0, `OnArrived：到達 ${this.floor}F，關卡 1 直接回 State 0 待命`);
+          } else {
+            this.alpha = 0;
+            this.change(1, `OnArrived：到達 ${this.floor}F，更新 CurrentFloor、清除請求、進入 State 1 開門`);
+          }
+        } else {
+          this.z += Math.sign(targetZ - this.z) * step;
+          if (Math.random() < 0.35) sfx.playMoveHum(this.z / 500);
+        }
+        break;
+      }
+    }
+  }
+}
+
+/* =========================================================================
+   3. UI Rendering, Variable Flash Detection & Interactive Wiring
+   ========================================================================= */
+const sim = new Elevator();
+const $ = id => document.getElementById(id);
+const stateNames = ['待命 (Idle)', '開門中 (Opening)', '停留 (Dwell)', '關門中 (Closing)', '移動中 (Moving)'];
+const stateColors = ['var(--st0)', 'var(--st1)', 'var(--st2)', 'var(--st3)', 'var(--st4)'];
+
+const actionsDesc = [
+  '車廂停住、門全關。在關卡 4 由 Dispatch 檢查 Requests 陣列，決定服務本層或派車去別層。',
+  '車廂不動。每一幀把 DoorAlpha 增加 (dt / 1.2)，並呼叫 Kit Apply Doors 把門拉開一點。',
+  '門保持 100% 全開。每一幀把 DwellRemaining 減去經過秒數 dt（倒數計時）。',
+  '先用 Kit Is Door Blocked 檢查門口；沒人擋門才把 DoorAlpha 減少一點。',
+  '門保持全關。每一幀用 Kit Get Lift Z 算距離、呼叫 Kit Set Lift Z 往目標移動一點。'
+];
+const rulesDesc = [
+  '本層有請求 ➔ State 1 (開門)；別層有請求 ➔ StartMove 設 State 4；無請求 ➔ 維持 State 0。',
+  '當 DoorAlpha ≥ 1.0（門全開）➔ 設 DwellRemaining = 3.0 秒，切換到 State 2。',
+  '當 DwellRemaining ≤ 0：若門口沒人 ➔ 切 State 3；若有人擋門 ➔ 設 0.5 秒繼續留 State 2。',
+  '若門口有人 (Blocked) ➔ 立刻切回 State 1；若沒人且 DoorAlpha ≤ 0 ➔ 切回 State 0。',
+  '當剩餘距離 ≤ 本幀步長 (200*dt) ➔ 對齊樓層高度、呼叫 OnArrived() 切到 State 1 開門。'
+];
+
+let running = true;
+let speed = 1;
+let prevVars = {};
+
+function getReasonText() {
+  switch (sim.state) {
+    case 0:
+      return sim.requests.some(Boolean)
+        ? '⚡ 發現排隊請求！下一次 Tick 更新將由 Dispatch 派車（注意：按按鈕只負責登記，由待命狀態統一發車）。'
+        : '目前沒有任何樓層請求，電梯乖乖停在待命狀態 (State 0)。試著點擊左方「呼叫 1F」或「呼叫 2F」！';
+    case 1:
+      return `門正在打開中（目前 DoorAlpha = ${sim.alpha.toFixed(2)}，即 ${Math.round(sim.alpha*100)}%）。還沒達到 1.0 全開，所以還不會開始停留倒數。`;
+    case 2:
+      return `門全開停留中，倒數還剩 ${Math.max(0, sim.dwell).toFixed(1)} 秒。${sim.blocked ? '⚠️ 門口有人擋住！倒數歸零時會自動延長 0.5 秒，絕不強行關門。' : '倒數歸零且門口沒人時，就會切換到 State 3 開始關門。'}${sim.requests.some(Boolean) ? '（別層請求已排隊記下，必須等關好門回 State 0 才會出發！）' : ''}`;
+    case 3:
+      return sim.blocked
+        ? '🚨 偵測到門口有人 (Kit Is Door Blocked = true)！下一幀將優先切回 State 1 重新開門，保留目前開度不夾人！'
+        : `門正在關閉中（剩餘開度 ${Math.round(sim.alpha*100)}%）。必須完全關緊 (DoorAlpha ≤ 0) 才能回到 State 0 待命。`;
+    case 4:
+      return `正在前往 ${sim.target}F，距離目標還有 ${Math.abs((sim.target-1)*500 - sim.z).toFixed(0)} cm。${sim.bugMode === 'openMove' && sim.alpha > 0 ? '😱 糟糕！因為 Bug A 沒等門關好，現在門開著在飛！' : '移動途中收到任何新請求都只會先登記在 Requests[]，不會半路掉頭。'}`;
+  }
+}
+
+function flashSpiritBox(id, cls, msg) {
+  const el = $(id);
+  el.classList.add(cls);
+  if (msg) $('spiritStatus').textContent = msg;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove(cls), 550);
+}
+
+function updateVarChip(id, valId, newVal) {
+  const str = String(newVal);
+  if (prevVars[id] !== undefined && prevVars[id] !== str) {
+    const chip = $(id);
+    chip.classList.add('changed');
+    clearTimeout(chip._t);
+    chip._t = setTimeout(() => chip.classList.remove('changed'), 450);
+  }
+  prevVars[id] = str;
+  $(valId).textContent = str;
+}
+
+function render() {
+  const stColor = stateColors[sim.state];
+  $('stateHero').style.borderLeftColor = stColor;
+  $('cabin').style.borderColor = stColor;
+  $('stateTitle').textContent = `${sim.state} · ${stateNames[sim.state]}`;
+  $('switchPinTag').textContent = `Switch on Int ➔ 出口 ${sim.state}`;
+  $('actionText').textContent = actionsDesc[sim.state];
+  $('ruleText').textContent = rulesDesc[sim.state];
+  $('reasonText').textContent = getReasonText();
+
+  // Update 7 Variables + Lift Z with change highlighting
+  updateVarChip('vc-state', 'v-state', sim.state);
+  updateVarChip('vc-floor', 'v-floor', sim.floor);
+  updateVarChip('vc-target', 'v-target', sim.target);
+  updateVarChip('vc-dir', 'v-dir', sim.dir === 1 ? '+1 (▲)' : sim.dir === -1 ? '-1 (▼)' : '0 (停)');
+  updateVarChip('vc-alpha', 'v-alpha', sim.alpha.toFixed(2));
+  updateVarChip('vc-dwell', 'v-dwell', sim.state === 2 ? Math.max(0, sim.dwell).toFixed(1) + 's' : '0.0s');
+  updateVarChip('vc-req', 'v-req', `[${sim.requests[0] ? 'T' : 'F'}, ${sim.requests[1] ? 'T' : 'F'}]`);
+  updateVarChip('vc-z', 'v-z', `${sim.z.toFixed(0)} cm`);
+
+  // Scene & Displays
+  const dispFloor = sim.z >= 250 ? 2 : 1;
+  const arrowStr = sim.dir === 1 ? '▲' : sim.dir === -1 ? '▼' : '';
+  const dispText = sim.level >= 3 ? `${arrowStr}${dispFloor}F` : `${dispFloor}F`;
+  $('disp1').textContent = dispText;
+  $('disp2').textContent = dispText;
+  $('cabinDisp').textContent = dispText;
+  $('cabinStateTag').textContent = `State:${sim.state}`;
+
+  $('lamp1').classList.toggle('lit', sim.lights[0] || sim.requests[0]);
+  $('lamp2').classList.toggle('lit', sim.lights[1] || sim.requests[1]);
+
+  $('clock').textContent = `${running ? '▶ 播放中' : '⏸ 已暫停'} · ${sim.time.toFixed(1)} s`;
+  $('cabin').style.bottom = (40 + sim.z * 0.4) + 'px';
+  $('doorLeft').style.transform = `translateX(${-sim.alpha * 100}%)`;
+  $('doorRight').style.transform = `translateX(${sim.alpha * 100}%)`;
+
+  const personY = 42 + (sim.floor - 1) * 200;
+  $('person').hidden = !sim.blocked;
+  $('person').style.bottom = personY + 'px';
+  $('sensorBeam').hidden = !sim.blocked;
+  $('sensorBeam').style.bottom = (personY + 18) + 'px';
+
+  $('passengerInCabin').hidden = !sim.inCabin;
+  $('blockBtn').textContent = sim.blocked ? '🚶 離開門口 (Blocked=true)' : '🚶 站到門口擋門 (Blocked=false)';
+  $('blockBtn').classList.toggle('active', sim.blocked);
+  $('cabinToggleBtn').classList.toggle('active', sim.inCabin);
+  $('playBtn').textContent = running ? '⏸ 暫停' : '▶ 繼續播放';
+
+  for (const i of [1, 2]) {
+    const isQueued = sim.requests[i - 1] || sim.lights[i - 1];
+    $('call' + i).classList.toggle('active', isQueued);
+  }
+
+  // State Diagram Highlight
+  document.querySelectorAll('.diagram-node').forEach(n => {
+    const st = Number(n.dataset.state);
+    n.classList.toggle('current', st === sim.state);
+    n.classList.toggle('locked', sim.level === 1 && (st === 1 || st === 2 || st === 3));
+  });
+  document.querySelectorAll('.edge').forEach(n => {
+    n.classList.toggle('recent', n.dataset.edge === sim.lastTransition?.key);
+    if (sim.level === 1) {
+      n.classList.toggle('locked', !['0-4', '4-0'].includes(n.dataset.edge));
+    } else {
+      n.classList.toggle('locked', n.dataset.edge === '4-0');
+    }
+  });
+
+  // Unreal Blueprint Live View Highlight
+  $('bpStateVal').textContent = `= ${sim.state}`;
+  $('bpLastEvent').textContent = `最近事件：${sim.lastEventName}`;
+  for (let i = 0; i <= 4; i++) {
+    $('pin-' + i).classList.toggle('active-pin', i === sim.state);
+    $('lane-' + i).classList.toggle('active-lane', i === sim.state);
+  }
+
+  // Log list render
+  const sig = JSON.stringify(sim.logs);
+  if ($('logList').dataset.sig !== sig) {
+    $('logList').dataset.sig = sig;
+    $('logList').replaceChildren(...sim.logs.map(l => {
+      const li = document.createElement('li');
+      const t = document.createElement('time');
+      t.textContent = l.time + 's';
+      const span = document.createElement('span');
+      span.textContent = l.message;
+      li.append(t, span);
+      return li;
+    }));
+  }
+}
+
+/* =========================================================================
+   4. Event Listeners & Controls
+   ========================================================================= */
+$('soundToggle').onclick = () => {
+  sfx.enabled = !sfx.enabled;
+  $('soundToggle').classList.toggle('on', sfx.enabled);
+  $('soundToggle').setAttribute('aria-pressed', String(sfx.enabled));
+  $('soundToggle').textContent = sfx.enabled ? '🔊 音效已開啟（點擊可靜音）' : '🔇 音效已靜音（點擊開啟）';
+  if (sfx.enabled) sfx.playButton();
+};
+
+$('call1').onclick = () => {
+  flashSpiritBox('boxEvent', 'flash-event', '⚡ 觸發 CallElevator(1) ➔ 寫入狀態資料');
+  flashSpiritBox('boxData', 'flash-event');
+  sim.call(1);
+  render();
+};
+$('call2').onclick = () => {
+  flashSpiritBox('boxEvent', 'flash-event', '⚡ 觸發 CallElevator(2) ➔ 寫入狀態資料');
+  flashSpiritBox('boxData', 'flash-event');
+  sim.call(2);
+  render();
+};
+$('blockBtn').onclick = () => {
+  sim.block(!sim.blocked);
+  render();
+};
+$('cabinToggleBtn').onclick = () => {
+  sim.inCabin = !sim.inCabin;
+  sfx.playButton();
+  sim.log(sim.inCabin ? '🧍 玩家進入車廂 (Kit Is Player in Cabin = true)。' : '🚶 玩家離開車廂 (In Cabin = false)。');
+  render();
+};
+$('playBtn').onclick = () => {
+  running = !running;
+  render();
+};
+$('stepBtn').onclick = () => {
+  running = false;
+  sfx.playStep();
+  flashSpiritBox('boxTick', 'flash-tick', '🔬 單步執行一次 UpdateLift (dt = 0.1s)');
+  sim.tick(0.1);
+  render();
+};
+$('resetBtn').onclick = () => {
+  sim.bugMode = null;
+  sim.reset();
+  running = true;
+  $('taskBanner').hidden = true;
+  $('taskBanner').classList.remove('bug-active');
+  render();
+};
+$('speedSelect').onchange = e => {
+  speed = Number(e.target.value);
+};
+$('clearLogBtn').onclick = () => {
+  sim.logs = [];
+  render();
+};
+$('clearTaskBtn').onclick = () => {
+  sim.bugMode = null;
+  sim.reset();
+  running = true;
+  $('taskBanner').hidden = true;
+  $('taskBanner').classList.remove('bug-active');
+  render();
+};
+
+// Clickable State Diagram nodes to jump directly to a state for inspection
+document.querySelectorAll('.diagram-node').forEach(node => {
+  node.onclick = () => {
+    const targetState = Number(node.dataset.state);
+    if (sim.level === 1 && [1, 2, 3].includes(targetState)) return;
+    running = false;
+    sfx.playStep();
+    if (targetState === 0) Object.assign(sim, { state: 0, alpha: 0, dwell: 0 });
+    if (targetState === 1) Object.assign(sim, { state: 1, alpha: 0.3 });
+    if (targetState === 2) Object.assign(sim, { state: 2, alpha: 1, dwell: 3.0 });
+    if (targetState === 3) Object.assign(sim, { state: 3, alpha: 0.6 });
+    if (targetState === 4) Object.assign(sim, { state: 4, alpha: 0, target: sim.floor === 1 ? 2 : 1, dir: sim.floor === 1 ? 1 : -1 });
+    sim.log(`👆 手動跳轉至 State ${targetState} (${stateNames[targetState]}) 並暫停，方便觀察單步行為。`);
+    render();
+  };
+});
+
+// Level Switcher (Level 1 ~ 4)
+const levelNames = {
+  1: '🌱 關卡 1：會動就好（只有 State 0 待命 ↔ State 4 移動中）',
+  2: '🚪 關卡 2：加上門的循環（完整 0→4→1→2→3→0 五個狀態）',
+  3: '💡 關卡 3：方向箭頭與按鈕燈（加入 Direction 與 Kit Set Button Light）',
+  4: '🚀 關卡 4 完整版：Requests 排隊陣列 + Dispatch 派車 + 防夾擋門'
+};
+document.querySelectorAll('.level-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('current'));
+    btn.classList.add('current');
+    sim.level = Number(btn.dataset.level);
+    sim.bugMode = null;
+    $('taskBanner').hidden = true;
+    $('levelIndicator').textContent = levelNames[sim.level];
+    sfx.playButton();
+    sim.reset();
+    render();
+  };
+});
+
+// View Tabs (Diagram / Blueprint / Both)
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const v = btn.dataset.view;
+    $('diagramPane').hidden = (v === 'blueprint');
+    $('blueprintPane').hidden = (v === 'diagram');
+  };
+});
+
+// 3 Guided Experiments
+document.querySelectorAll('[data-scenario]').forEach(btn => {
+  btn.onclick = () => {
+    sim.level = 4;
+    sim.bugMode = null;
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('current', b.dataset.level === '4'));
+    $('levelIndicator').textContent = levelNames[4];
+    sim.reset();
+    sim.logs = [];
+    running = false;
+    const s = btn.dataset.scenario;
+    let text = '';
+    if (s === 'queue') {
+      Object.assign(sim, { state: 2, alpha: 1, dwell: 2.5 });
+      sim.call(2);
+      text = '🔬 【實驗 01 已載入】目前在 1F 門全開 (State 2)，且已按下 2F（Requests[1]=true）。請點「單步一幀」觀察：為什麼它不會馬上飛去 2F？要等到哪個狀態才會派車？';
+    } else if (s === 'block') {
+      Object.assign(sim, { state: 3, alpha: 0.4 });
+      sim.block(true);
+      text = '🔬 【實驗 02 已載入】目前門關到 40% (State 3)，門口突然站了一個人 (Blocked=true)！點一下「單步一幀」看看 State 變成多少？DoorAlpha 從哪裡開始重開？';
+    } else if (s === 'moving') {
+      Object.assign(sim, { state: 4, target: 2, dir: 1, z: 200, requests: [false, true], lights: [false, true] });
+      sim.call(1);
+      text = '🔬 【實驗 03 已載入】車廂正在往 2F 移動 (Z=200cm)，此時收到 1F 呼叫！按「繼續播放」觀察它如何先完成 2F 的開關門，回待命後才派車回 1F。';
+    }
+    $('taskText').textContent = text;
+    $('taskBanner').classList.remove('bug-active');
+    $('taskBanner').hidden = false;
+    render();
+    $('taskBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+});
+
+// 3 Bug Doctor Modes
+document.querySelectorAll('[data-bug]').forEach(btn => {
+  btn.onclick = () => {
+    sim.level = 4;
+    sim.reset();
+    sim.bugMode = btn.dataset.bug;
+    running = true;
+    let text = '';
+    if (sim.bugMode === 'openMove') {
+      Object.assign(sim, { state: 2, alpha: 1, dwell: 3 });
+      sim.call(2);
+      text = '💥 【Bug A 示範中：敞開大門直接起飛】因為在 CallElevator 直接呼叫 StartMove，沒有等 State 3 關好門回 State 0，電梯現在門開著 100% 直接往上飛了！';
+    } else if (sim.bugMode === 'infiniteLoop') {
+      Object.assign(sim, { state: 0 });
+      sim.call(2);
+      text = '💥 【Bug B 示範中：無限開關門鬼打牆】觀察電梯到達 2F 後，因為 OnArrived 忘記把 Requests[1] 設回 false，關完門回 State 0 又立刻打開門，永遠困在 2F！';
+    } else if (sim.bugMode === 'instantDoor') {
+      Object.assign(sim, { state: 2, alpha: 1, dwell: 0.4 });
+      text = '💥 【Bug C 示範中：瞬間秒關夾人門】注意看門！倒數結束進入 State 3 時，因為直接寫 Set DoorAlpha = 0 而非每幀遞減，門在一瞬間（0.02秒）就啪地關上了！';
+    }
+    $('taskText').textContent = text;
+    $('taskBanner').classList.add('bug-active');
+    $('taskBanner').hidden = false;
+    render();
+    $('taskBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+});
+
+/* =========================================================================
+   5. Multi-Question Concept Quiz
+   ========================================================================= */
+const quizzes = [
+  {
+    q: 'Q1. 當電梯門全開、正在停留倒數（State 2）時，玩家又按了一次「本層按鈕」，狀態機應該怎麼做？',
+    opts: [
+      { text: '切換到 State 1，把門關起來再重新打開一次', ok: false, why: '門已經是 100% 全開了，不需要重新開門喔！' },
+      { text: '維持在 State 2（不換狀態），只把 DwellRemaining 重設回 3 秒', ok: true, why: '✅ 答對了！這就是狀態機的精髓：「事件發生不一定會換狀態，有時只是更新資料（重設倒數），讓乘客多一點時間進出」。' },
+      { text: '立刻切換到 State 3 把門關上', ok: false, why: '按本層呼叫鈕是為了進電梯，不能反而把門關上！' }
+    ]
+  },
+  {
+    q: 'Q2. 在 Unreal 的 BP_ElevatorKit 中，為什麼 CallElevator 收到別層呼叫時，不直接呼叫 Kit Set Lift Z 移動車廂？',
+    opts: [
+      { text: '因為 CallElevator 只在按按鈕那一瞬間執行一次；連續平滑移動必須交給每一幀執行的 UpdateLift (State 4)', ok: true, why: '✅ 完全正確！按鈕事件（Event）只負責登記 Requests 或改 State；真正的連續移動與開關門都是在 UpdateLift 每一幀移動一點點完成的。' },
+      { text: '因為 Kit Set Lift Z 只能在 EventGraph 使用', ok: false, why: 'Kit Set Lift Z 應該放在 UpdateLift 函數的 State 4 分支裡喔！' },
+      { text: '因為 Unreal 不允許在函數裡改變高度', ok: false, why: 'Unreal 可以改高度，但如果在單次事件裡改高度，電梯會瞬間移動（瞬移）而不是平滑升降。' }
+    ]
+  },
+  {
+    q: 'Q3. 在關卡 4，為什麼「派車前往別層 (Dispatch ➔ StartMove)」規定只能在 State 0（待命）執行？',
+    opts: [
+      { text: '為了節省電腦記憶體', ok: false, why: '跟記憶體無關，是為了確保安全與動作順序！' },
+      { text: '因為只有回到 State 0 時，才保證「門已經 100% 全關好」且「上一趟已經完成」，這時出發才安全！', ok: true, why: '✅ 太棒了！如果不在 State 0 集中派車，就會發生「門還開著就起飛」或「上樓到一半半路折返」的混亂邏輯。' },
+      { text: '因為 Switch on Int 只有第 0 個出口能接 StartMove', ok: false, why: 'Switch on Int 每個出口都能接任何節點，是我們在設計邏輯時刻意只在出口 0 派車！' }
+    ]
+  }
+];
+let quizIdx = 0;
+
+function renderQuiz() {
+  const item = quizzes[quizIdx];
+  $('quizProgress').textContent = `第 ${quizIdx + 1} / ${quizzes.length} 題`;
+  $('quizQuestion').textContent = item.q;
+  $('quizFeedback').textContent = '👆 點選上方選項來驗證你的理解！';
+  $('quizFeedback').style.color = 'var(--muted)';
+  $('quizOptions').replaceChildren(...item.opts.map(opt => {
+    const b = document.createElement('button');
+    b.textContent = opt.text;
+    b.onclick = () => {
+      sfx.playButton();
+      $('quizFeedback').textContent = opt.why;
+      $('quizFeedback').style.color = opt.ok ? 'var(--lime)' : '#fca5a5';
+    };
+    return b;
+  }));
+}
+$('nextQuizBtn').onclick = () => {
+  quizIdx = (quizIdx + 1) % quizzes.length;
+  sfx.playButton();
+  renderQuiz();
+};
+renderQuiz();
+
+/* =========================================================================
+   6. Main Animation Loop (Tick Driver)
+   ========================================================================= */
+let lastTime = performance.now();
+let accumulator = 0;
+
+function loop(now) {
+  const elapsed = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+  if (running) {
+    accumulator += elapsed * speed;
+    let ticked = false;
+    while (accumulator >= 0.02) {
+      sim.tick(0.02);
+      accumulator -= 0.02;
+      ticked = true;
+    }
+    if (ticked) {
+      $('boxTick').classList.add('flash-tick');
+    }
+  } else {
+    accumulator = 0;
+    $('boxTick').classList.remove('flash-tick');
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+render();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
