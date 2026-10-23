@@ -1,0 +1,784 @@
+---
+title: 5 筆海外刷卡＝10 張支出證明單？交給 AI 一鍵套原檔生成！
+description: 個資零外洩雙模式（可選不填姓名防比對）× 100% 沿用學校原始 Word 範本，將日常繁瑣 Routine 核銷交給 AI 一鍵完成
+---
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5 筆海外刷卡＝10 張支出證明單？交給 AI 一鍵套原檔生成！｜個資零外洩 × Routine 核銷自動化</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle at 15% 15%, #fef3c7 0%, #e0f2fe 48%, #f1f5f9 100%);
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    .font-serif-doc {
+      font-family: 'Noto Serif TC', 'PMingLiU', '標楷體', serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* 螢光筆塗抹視覺效果 */
+    .highlighter-yellow {
+      background: linear-gradient(104deg, rgba(253, 224, 71, 0) 0.9%, rgba(253, 224, 71, 0.85) 2.4%, rgba(253, 224, 71, 0.65) 5.8%, rgba(253, 224, 71, 0.8) 93%, rgba(253, 224, 71, 0.7) 96%, rgba(253, 224, 71, 0) 98%);
+      border-radius: 4px;
+    }
+
+    /* 手寫紅藍圈選字體感 */
+    .hand-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border: 2.5px solid #1e3a8a;
+      border-radius: 55% 45% 52% 48% / 48% 52% 45% 55%;
+      font-weight: 900;
+      color: #1e3a8a;
+      transform: rotate(-6deg);
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.96); opacity: 0.5; }
+      60% { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-anim {
+      animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 模擬學校 Word 表格格線 */
+    .word-table {
+      border-collapse: collapse;
+      width: 100%;
+      border: 2px solid #0f172a;
+      background: #ffffff;
+    }
+    .word-table td, .word-table th {
+      border: 1px solid #1e293b;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.45;
+      vertical-align: middle;
+    }
+    .word-label {
+      background-color: #f8fafc;
+      font-weight: 700;
+      text-align: center;
+      color: #1e293b;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-3 sm:p-6">
+
+  <!-- 頂部快速導覽列 -->
+  <header class="max-w-6xl mx-auto mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="../" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 shadow-sm border border-slate-200 text-xs font-bold transition">
+        ← 返回 AI 行政專區
+      </a>
+      <a href="../helpers.html" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-sm text-xs font-bold transition">
+        🧑‍💼 看「你是大腦・10 隻小幫手」總覽
+      </a>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="https://app.notion.com/p/qqnice/4027d70966248062bbbdea8985493e96?pvs=28" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-amber-300 shadow-sm text-xs font-bold transition">
+        📓 閱讀 Notion 教學原文 ↗
+      </a>
+      <a href="支出證明單_skill.zip" download class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm text-xs font-bold transition">
+        📦 下載支出證明單 Skill 包 (.zip)
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== 主容器 ==================== -->
+  <main class="max-w-6xl mx-auto space-y-8">
+
+    <!-- 1. HERO 痛點共鳴與核心觀念區 -->
+    <section class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border-2 border-white p-5 sm:p-8 relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-80 h-80 bg-amber-300/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-sky-300/25 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-4 text-center max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs sm:text-sm font-black shadow-md">
+          💳 經費核銷救星 Skill · 把繁瑣重複的報帳表格交給 AI！
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          帳單上 <span class="text-orange-600">5 筆海外刷卡</span>，竟然要手填 <span class="text-rose-600 underline decoration-wavy decoration-rose-400 underline-offset-4">10 張支出證明單</span>？！
+        </h1>
+
+        <p class="text-xs sm:text-base text-slate-600 leading-relaxed font-medium">
+          助理與老師最怕月底報帳：每筆國外買 AI 軟體（OpenAI、Claude、Grok…）都伴隨一筆「國外交易手續費」，<strong>5 筆交易瞬間變成 10 張支出證明單</strong>！<br class="hidden sm:inline" />
+          現在，只要把<strong>「螢光筆標記的帳單局部」</strong>交給這個 Skill，它就會<strong>直接調動你原本的學校 Word 範本檔</strong>一鍵生成，還能選擇<strong>「🔒 不填姓名保護個資」</strong>！
+        </p>
+
+        <!-- 三大核心價值徽章 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-left">
+          <div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-3.5 flex items-start gap-3">
+            <span class="text-2xl shrink-0">⚡</span>
+            <div>
+              <div class="text-xs font-black text-amber-900">1 筆自動拆 2 張（5 筆變 10 張）</div>
+              <p class="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                自動將「主交易款」與「手續費」拆開，連「○○元交易之手續費」跟「不能取得單據原因」都幫你自動寫好！
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-3.5 flex items-start gap-3">
+            <span class="text-2xl shrink-0">🔒</span>
+            <div>
+              <div class="text-xs font-black text-emerald-900">個資零外洩！可選「無姓名模式」</div>
+              <p class="text-xs text-emerald-800 mt-0.5 leading-relaxed">
+                怕帳單配對出是誰買的？直接選<strong>「生成空白受領人」</strong>！帳單沒名字、申請單也沒名字，AI 根本不知道是誰的帳單！
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-sky-50/90 border border-sky-200 rounded-2xl p-3.5 flex items-start gap-3">
+            <span class="text-2xl shrink-0">📄</span>
+            <div>
+              <div class="text-xs font-black text-sky-900">100% 沿用你原本的 Word 範本</div>
+              <p class="text-xs text-sky-800 mt-0.5 leading-relaxed">
+                不會隨便亂畫一個野生表格！直接讀取學校原始 <code class="font-mono-code font-bold">支出證明單.docx</code> 填入儲存格，嚴格受你限制。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. 核心互動體驗：真實帳單 ➔ 原檔 Word 支出證明單 ==================== -->
+    <section class="bg-white rounded-3xl shadow-xl border border-slate-200 p-5 sm:p-7 space-y-6">
+      
+      <!-- 頂部控制列：雙模式個資開關 ＆ 廠商排除開關 -->
+      <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full">互動實測工作台</span>
+            <h2 class="text-base sm:text-xl font-black text-white">親手點點看：從「螢光筆帳單」一鍵變成「學校標準 Word 憑證」</h2>
+          </div>
+          <p class="text-xs text-slate-300">
+            點擊左側帳單的 <strong class="text-amber-300">A ～ E 螢光標記列</strong>，並切換右上方的 <strong class="text-emerald-300">「個資保護模式」</strong>，觀察右側 Word 表格如何即時連動！
+          </p>
+        </div>
+
+        <!-- 關鍵特色切換：匿名保護個資 vs 全自動填入 -->
+        <div class="flex flex-wrap items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700 shrink-0">
+          <button onclick="setPrivacyMode('anonymous')" id="btn-mode-anon" class="px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow">
+            <span>🔒</span> 匿名留白模式 (推薦・零個資)
+          </button>
+          <button onclick="setPrivacyMode('autofill')" id="btn-mode-auto" class="px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+            <span>⚡</span> 全自動帶入申請人模式
+          </button>
+        </div>
+      </div>
+
+      <!-- 個資安全動態解說橫幅 -->
+      <div id="privacy-explainer-banner" class="bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all">
+        <div class="flex items-start sm:items-center gap-3">
+          <div id="privacy-icon" class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0 shadow">
+            🛡️
+          </div>
+          <div>
+            <div id="privacy-title" class="text-xs sm:text-sm font-black text-emerald-950">
+              目前啟用：【🔒 匿名留白模式】—— 為什麼這樣做完全沒有個資疑慮？
+            </div>
+            <p id="privacy-desc" class="text-xs text-emerald-800 mt-0.5 leading-relaxed">
+              1️⃣ 帳單只拍「消費項目局部」（無卡號、無帳單抬頭姓名） ➕ 2️⃣ 生成時<strong>不給 AI 申請人姓名與身分證字號</strong>！<br class="hidden sm:inline" />
+              AI 只負責把繁瑣的 10 頁金額與品名填進 Word 原檔，受領人欄位留白，下載回本機後再自己填名或蓋章，<strong>雲端永遠無法比對出這張帳單是誰刷的！</strong>
+            </p>
+          </div>
+        </div>
+        <div class="shrink-0">
+          <label class="inline-flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50">
+            <input type="checkbox" id="chk-exclude-typeless" onchange="toggleExcludeTypeless()" class="w-4 h-4 accent-orange-600 rounded" />
+            <span>示範：排除 B (TYPELESS) 廠商</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 主互動雙欄：左帳單明細 ➔ 右 Word 原檔預覽 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- 左欄 (5欄)：仿真實拍信用卡帳單（含螢光筆標記 A~E 與退款防呆提示） -->
+        <div class="lg:col-span-5 bg-stone-100 rounded-2xl p-4 border-2 border-stone-300 shadow-inner space-y-3">
+          <div class="flex items-center justify-between border-b border-stone-300 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📸</span>
+              <div>
+                <div class="text-xs font-black text-stone-800">局部拍攝的信用卡帳單明細（無姓名抬頭）</div>
+                <div class="text-xs text-stone-500">點擊螢光筆標記 A ～ E 切換右側憑證</div>
+              </div>
+            </div>
+            <span id="total-vouchers-badge" class="bg-slate-900 text-amber-300 text-xs font-black px-2.5 py-1 rounded-lg">
+              5 筆海外 ＝ 10 張憑證
+            </span>
+          </div>
+
+          <!-- 模擬帳單紙張列表 -->
+          <div class="bg-[#fdfbf7] rounded-xl p-3 border border-stone-300 shadow-sm space-y-1.5 font-mono-code text-xs">
+            
+            <!-- 一般國內消費（未標記，AI 自動忽略） -->
+            <div class="flex items-center justify-between px-2 py-1 text-stone-400">
+              <span>115/09/16 美廉社－台中大慶店</span>
+              <span>75 TW (未標記・不處理)</span>
+            </div>
+
+            <!-- 標記 A -->
+            <div onclick="selectTransaction('A')" id="row-A" class="tx-row cursor-pointer rounded-lg p-2 border-2 border-orange-500 bg-yellow-100/90 shadow-sm transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">A</span> 115/09/17 OPENAI A</span>
+                <span>690 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/09/17 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">10</span>
+              </div>
+            </div>
+
+            <!-- 退款防呆示範列 -->
+            <div class="rounded-lg p-2 bg-rose-50/80 border border-dashed border-rose-300 text-rose-800">
+              <div class="flex items-center justify-between">
+                <span>115/09/21 LINK.COM* TYPELESS</span>
+                <span>1,818 IE</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>115/09/29 LINK.COM* TYPELESS (刷退)</span>
+                <span class="font-bold">-1,818 IE</span>
+              </div>
+              <div class="text-xs font-sans font-bold text-rose-600 mt-1">
+                🛡️ Skill 智慧防呆：偵測到正負相抵刷退，自動排除不印出錯誤憑證！
+              </div>
+            </div>
+
+            <!-- 標記 B -->
+            <div onclick="selectTransaction('B')" id="row-B" class="tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">B</span> 115/09/24 LINK.COM* TYPELESS</span>
+                <span>951 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/09/24 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">14</span>
+              </div>
+            </div>
+
+            <!-- 標記 C -->
+            <div onclick="selectTransaction('C')" id="row-C" class="tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">C</span> 115/09/29 OPENAI *CHATGPT SUBSCR</span>
+                <span>3,300 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/09/29 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">50</span>
+              </div>
+            </div>
+
+            <!-- 標記 D1 (GROK XAI) -->
+            <div onclick="selectTransaction('G')" id="row-G" class="tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">D1</span> 115/10/05 GROK XAI</span>
+                <span>996 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/10/05 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">15</span>
+              </div>
+            </div>
+
+            <!-- 標記 D2 -->
+            <div onclick="selectTransaction('D')" id="row-D" class="tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">D2</span> 115/10/07 OPENAI *CHATGPT SUBSCR</span>
+                <span>4,918 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/10/07 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">74</span>
+              </div>
+            </div>
+
+            <!-- 標記 E -->
+            <div onclick="selectTransaction('E')" id="row-E" class="tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]">
+              <div class="flex items-center justify-between highlighter-yellow px-1.5 py-0.5 font-bold text-slate-900">
+                <span class="flex items-center gap-1.5"><span class="hand-circle">E</span> 115/10/07 TAVUS</span>
+                <span>699 US</span>
+              </div>
+              <div class="flex items-center justify-between px-1.5 pt-1 text-slate-700 font-semibold">
+                <span class="pl-8">↳ 115/10/07 國外交易手續費</span>
+                <span class="bg-yellow-200 px-1.5 rounded font-bold">10</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="text-xs text-stone-600 bg-white p-2.5 rounded-xl border border-stone-200 flex items-center justify-between">
+            <span>💡 <strong>智慧配對：</strong>手續費就算忘記畫螢光筆，Skill 也會自動抓出相鄰手續費拆成第 2 張！</span>
+          </div>
+        </div>
+
+        <!-- 右欄 (7欄)：100% 學校原始 Word 範本《支出證明單》即時預覽 -->
+        <div class="lg:col-span-7 space-y-4">
+          
+          <!-- 切換查看：第 1 張（主交易款） vs 第 2 張（國外交易手續費） -->
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-100 p-2 rounded-2xl border border-slate-200">
+            <div class="flex items-center gap-1.5">
+              <button onclick="setVoucherTab('main')" id="tab-voucher-main" class="px-3.5 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white shadow transition">
+                📄 第 1 張：主交易款憑證 (<span id="btn-main-amt">690</span>元)
+              </button>
+              <button onclick="setVoucherTab('fee')" id="tab-voucher-fee" class="px-3.5 py-2 rounded-xl text-xs font-black bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition">
+                🧾 第 2 張：國外交易手續費憑證 (<span id="btn-fee-amt">10</span>元)
+              </button>
+            </div>
+            <span class="text-xs font-bold text-indigo-700 px-2">
+              ✨ 直接套入學校原始 <code class="font-mono-code">支出證明單.docx</code>
+            </span>
+          </div>
+
+          <!-- 模擬 Word 紙張外框 -->
+          <div id="word-paper" class="bg-white rounded-2xl p-5 sm:p-7 border-2 border-slate-300 shadow-lg relative pop-anim">
+            <!-- 右上角浮水印標章 -->
+            <div class="absolute top-3 right-4 flex items-center gap-1.5 bg-sky-50 border border-sky-200 text-sky-800 text-xs font-bold px-2.5 py-1 rounded-full">
+              <span>📌</span> 100% 原檔表格結構・絕不跑版
+            </div>
+
+            <!-- 支出證明單標準標題 -->
+            <div class="text-center space-y-1 mb-4 font-serif-doc">
+              <h3 class="text-xl sm:text-2xl font-black tracking-[0.35em] text-slate-900">支 出 證 明 單</h3>
+              <p class="text-xs sm:text-sm font-bold text-slate-700 tracking-widest">
+                中華民國 <span class="text-indigo-700 underline px-1">115</span> 年 <span class="text-indigo-700 underline px-1">10</span> 月 <span class="text-indigo-700 underline px-1">24</span> 日
+              </p>
+            </div>
+
+            <!-- 學校原始支出證明單表格 -->
+            <div class="overflow-x-auto">
+              <table class="word-table font-serif-doc">
+                <tbody>
+                  <tr>
+                    <td rowspan="2" class="word-label w-12">受<br/>領<br/>人</td>
+                    <td class="word-label w-28">姓名或名稱</td>
+                    <td class="w-36 font-sans" id="cell-payee-name">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold text-xs">
+                        🔒 留白 (保護個資)
+                      </span>
+                    </td>
+                    <td class="word-label w-36">身分證或營利<br/>事業統一編號</td>
+                    <td colspan="3" class="font-sans" id="cell-payee-id">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold text-xs">
+                        🔒 留白 (下載後自填)
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="word-label">地　　　址</td>
+                    <td colspan="5" class="font-sans font-semibold text-slate-800" id="cell-payee-addr">
+                      台中市北區三民路三段129號 <span class="text-xs text-slate-400 font-normal">(預設學校地址，不問私人住址)</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="word-label py-3">貨物名稱廠牌規格<br/>或支出事由</td>
+                    <td colspan="3" class="font-sans font-black text-base text-indigo-950 bg-amber-50/70" id="cell-item-title">
+                      OPENAI A
+                    </td>
+                    <td class="word-label w-20">單位<br/>數量</td>
+                    <td class="text-center font-sans font-bold text-base w-16" id="cell-item-qty">1</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="word-label py-3">單　　　價</td>
+                    <td colspan="2" class="font-sans font-bold text-base text-slate-900" id="cell-unit-price">
+                      690
+                    </td>
+                    <td class="word-label w-24">實付金額</td>
+                    <td colspan="2" class="font-sans font-black text-base text-emerald-800 bg-emerald-50/60" id="cell-total-price">
+                      新臺幣690元整
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="word-label py-3">不能取得<br/>單據原因</td>
+                    <td colspan="5" class="font-sans font-bold text-slate-900 bg-amber-50/70" id="cell-reason">
+                      境外廠商無法列印電子發票證明
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 表格下方附註與經手人 -->
+            <div class="mt-2.5 flex flex-wrap items-center justify-between text-xs font-serif-doc text-slate-700 px-1">
+              <span>附註：受領人如為機關或本機關人員，得免記其地址及其統一編號</span>
+              <span class="font-bold">經 手 人：<span class="inline-block w-24 border-b border-slate-400 text-center font-sans text-slate-400 font-normal">(強制留白)</span></span>
+            </div>
+          </div>
+
+          <!-- 為什麼「套用原檔」超重要說明卡 -->
+          <div class="bg-indigo-50/90 border border-indigo-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                <span>🎯</span> 為什麼我們強調「直接拿你原本的 Word 檔去生成」？
+              </div>
+              <p class="text-xs text-indigo-900 leading-relaxed">
+                一般聊天 AI 會自己隨便畫一個格線不對的表格，印出來去主計室一定被退件！<br class="hidden sm:inline" />
+                透過 Skill 綁定學校原始 <code class="font-mono-code font-bold">支出證明單.docx</code>，<strong>格式 100% 鎖死、限制條件寫死</strong>（如：絕不把 690+10 合併成 700 元、經手人必留白），一鍵輸出單一合併 Word 檔，直接列印就能簽章核銷！
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 3. 舉一反三工坊：你的日常工作還有哪些 Routine 瑣事？ ==================== -->
+    <section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl shadow-xl p-5 sm:p-8 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-black">
+            💡 觀念推廣 · 把這招類推到所有日常行政！
+          </div>
+          <h2 class="text-xl sm:text-3xl font-black text-white">
+            這只是一個範例！看看身邊還有哪些「固定表格 ＋ 重複填寫」的瑣事？
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+            只要你手邊有<strong>「原本就在用的 Word / Excel 表格範本」</strong>，加上<strong>「明確的填寫規則與限制」</strong>，都能把這套邏輯複製過去，讓 AI 幫老師與助理調動日常文件！點擊下方 4 個校園常見情境看看怎麼套用：
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 個校園 Routine 類推互動卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div onclick="showAnalogy(0)" id="ana-card-0" class="ana-card cursor-pointer rounded-2xl p-4 bg-white/15 border-2 border-amber-400 transition hover:-translate-y-1 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">💳</span>
+            <span class="text-xs font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">本頁範例</span>
+          </div>
+          <h3 class="font-black text-base text-white">1. 海外刷卡 ➔ 支出證明單</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            1 張信用卡帳單標記 5 筆境外刷卡，自動拆成 10 頁「交易款＋手續費」合併 Word 檔。
+          </p>
+        </div>
+
+        <div onclick="showAnalogy(1)" id="ana-card-1" class="ana-card cursor-pointer rounded-2xl p-4 bg-white/5 border border-white/15 hover:bg-white/10 transition hover:-translate-y-1 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">🧾</span>
+            <span class="text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30 px-2 py-0.5 rounded-full">經費核銷類推</span>
+          </div>
+          <h3 class="font-black text-base text-white">2. 講座名單 ➔ 領據與印領清冊</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            給 AI 演講題目、時數與講師職級，自動套入學校標準「演講費領據 Word」與交通費清冊。
+          </p>
+        </div>
+
+        <div onclick="showAnalogy(2)" id="ana-card-2" class="ana-card cursor-pointer rounded-2xl p-4 bg-white/5 border border-white/15 hover:bg-white/10 transition hover:-translate-y-1 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">✈️</span>
+            <span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">差旅報帳類推</span>
+          </div>
+          <h3 class="font-black text-base text-white">3. 機票水單 ➔ 出差旅費報告表</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            拍下電子機票、住宿收據與匯率表，自動換算日支生活費並填入學校「出差旅費報告表.docx」。
+          </p>
+        </div>
+
+        <div onclick="showAnalogy(3)" id="ana-card-3" class="ana-card cursor-pointer rounded-2xl p-4 bg-white/5 border border-white/15 hover:bg-white/10 transition hover:-translate-y-1 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">🏅</span>
+            <span class="text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-400/30 px-2 py-0.5 rounded-full">活動行政類推</span>
+          </div>
+          <h3 class="font-black text-base text-white">4. 得獎名單 ➔ 批次套印獎狀聘書</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            從比賽或研習 Excel 名單，直接套入學校標準「獎狀 / 感謝狀 Word 範本」，一次生成 50 頁免手貼！
+          </p>
+        </div>
+
+      </div>
+
+      <!-- 類推拆解公式展示框 -->
+      <div id="analogy-detail-box" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 space-y-1">
+          <div class="text-amber-400 font-black">📥 第一步：你給 AI 的來源資料</div>
+          <div id="ana-input" class="text-white font-medium leading-relaxed">
+            局部拍攝、畫好螢光筆的信用卡帳單圖片（隱去姓名與卡號）。
+          </div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 space-y-1">
+          <div class="text-sky-400 font-black">📐 第二步：綁定的原始範本與限制規則</div>
+          <div id="ana-rule" class="text-white font-medium leading-relaxed">
+            綁定學校原始《支出證明單.docx》；規定每筆拆「交易款＋手續費」2 張、經手人必留白、可選匿名不填姓名。
+          </div>
+        </div>
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 space-y-1">
+          <div class="text-emerald-400 font-black">📤 第三步：一鍵生成的完美產出</div>
+          <div id="ana-output" class="text-white font-medium leading-relaxed">
+            直接產出單一合併 Word 檔（共 10 頁），格線字型 100% 符合主計室規定，省下 90% 重複打字時間！
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部一鍵複製啟動指令區 -->
+      <div class="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 border border-amber-400/40 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="text-xs font-black text-amber-300">💬 想要馬上試試看？把這句啟動指令複製起來對 AI 說：</div>
+          <p id="prompt-to-copy" class="text-xs sm:text-sm font-mono-code text-white bg-slate-950/80 px-3.5 py-2.5 rounded-xl border border-slate-700">
+            請使用支出證明單技能，幫我依這張信用卡帳單的螢光筆標記製作合併 Word 檔。我要使用「匿名留白模式」（受領人姓名與身分證字號留白保護個資），將每筆交易款與國外交易手續費分開各做一張！
+          </p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="copyPromptText()" id="copy-btn" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black shadow-lg transition">
+            📋 一鍵複製啟動指令
+          </button>
+          <a href="支出證明單_skill.zip" download class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-black shadow-lg transition">
+            📦 下載 Skill 包
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-6xl mx-auto mt-8 pb-6 text-center text-xs text-slate-500 space-y-1">
+    <p>國立臺中科技大學 AI 協助行政自動化教學專區 · 信用卡支出證明單 Skill 推廣示範</p>
+  </footer>
+
+  <script>
+    // 帳單螢光筆標記交易資料庫
+    const TX_DATA = {
+      A: {
+        code: 'A',
+        date: '115/09/17',
+        item: 'OPENAI A',
+        mainAmt: 690,
+        feeAmt: 10
+      },
+      B: {
+        code: 'B',
+        date: '115/09/24',
+        item: 'LINK.COM* TYPELESS',
+        mainAmt: 951,
+        feeAmt: 14
+      },
+      C: {
+        code: 'C',
+        date: '115/09/29',
+        item: 'OPENAI *CHATGPT SUBSCR',
+        mainAmt: 3300,
+        feeAmt: 50
+      },
+      G: {
+        code: 'D1',
+        date: '115/10/05',
+        item: 'GROK XAI',
+        mainAmt: 996,
+        feeAmt: 15
+      },
+      D: {
+        code: 'D2',
+        date: '115/10/07',
+        item: 'OPENAI *CHATGPT SUBSCR',
+        mainAmt: 4918,
+        feeAmt: 74
+      },
+      E: {
+        code: 'E',
+        date: '115/10/07',
+        item: 'TAVUS',
+        mainAmt: 699,
+        feeAmt: 10
+      }
+    };
+
+    const ANALOGY_DATA = [
+      {
+        input: '局部拍攝、畫好螢光筆的信用卡帳單圖片（隱去姓名與卡號）。',
+        rule: '綁定學校原始《支出證明單.docx》；規定每筆拆「交易款＋手續費」2 張、經手人必留白、可選匿名不填姓名。',
+        output: '直接產出單一合併 Word 檔（共 10 頁），格線字型 100% 符合主計室規定，省下 90% 重複打字時間！'
+      },
+      {
+        input: '活動海報或演講名單 Excel（講師姓名、講座題目、鐘點節數、跨縣市起訖站）。',
+        rule: '綁定學校標準《演講鐘點費領據.docx》；依內聘/外聘自動套用鐘點費標準，個資敏感欄位可留白供講師親簽。',
+        output: '一鍵生成全場次講師領據合併 Word 檔，不再一張張複製貼上改金額！'
+      },
+      {
+        input: '電子機票行程單、旅館水單截圖、出差請示單核准日期。',
+        rule: '綁定學校《國外出差旅費報告表.docx》；依日期自動對應匯率與日支生活費標準，按天數逐列填入原始格線。',
+        output: '自動算好外幣折合台幣金額並填妥整張差旅報告表 Word，核對無誤即可送印！'
+      },
+      {
+        input: '競賽得獎名單或研習營完訓名單 Excel（組別、名次、指導老師、學生姓名）。',
+        rule: '綁定學校《標準獎狀與感謝狀範本.docx》；嚴格鎖定字距、校印留白位置與流水字號格式。',
+        output: '3 秒鐘生成 50 頁排版整齊的合併獎狀 Word 檔，直接送印不跑版！'
+      }
+    ];
+
+    let currentTxKey = 'A';
+    let currentVoucherTab = 'main'; // 'main' | 'fee'
+    let currentPrivacyMode = 'anonymous'; // 'anonymous' | 'autofill'
+    let excludeTypeless = false;
+
+    function selectTransaction(key) {
+      if (excludeTypeless && key === 'B') {
+        return;
+      }
+      currentTxKey = key;
+
+      // 更新左側列表高亮
+      ['A', 'B', 'C', 'G', 'D', 'E'].forEach(k => {
+        const el = document.getElementById('row-' + k);
+        if (!el) return;
+        if (excludeTypeless && k === 'B') {
+          el.className = 'tx-row rounded-lg p-2 border border-stone-300 bg-stone-200/70 opacity-45 line-through cursor-not-allowed';
+        } else if (k === key) {
+          el.className = 'tx-row cursor-pointer rounded-lg p-2 border-2 border-orange-500 bg-yellow-100/95 shadow-md scale-[1.01] transition';
+        } else {
+          el.className = 'tx-row cursor-pointer rounded-lg p-2 border border-amber-300 bg-yellow-50/80 transition hover:scale-[1.01]';
+        }
+      });
+
+      renderWordPreview();
+    }
+
+    function setVoucherTab(tab) {
+      currentVoucherTab = tab;
+      const btnMain = document.getElementById('tab-voucher-main');
+      const btnFee = document.getElementById('tab-voucher-fee');
+
+      if (tab === 'main') {
+        btnMain.className = 'px-3.5 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white shadow transition';
+        btnFee.className = 'px-3.5 py-2 rounded-xl text-xs font-black bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition';
+      } else {
+        btnFee.className = 'px-3.5 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white shadow transition';
+        btnMain.className = 'px-3.5 py-2 rounded-xl text-xs font-black bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition';
+      }
+      renderWordPreview();
+    }
+
+    function setPrivacyMode(mode) {
+      currentPrivacyMode = mode;
+      const btnAnon = document.getElementById('btn-mode-anon');
+      const btnAuto = document.getElementById('btn-mode-auto');
+      const banner = document.getElementById('privacy-explainer-banner');
+      const icon = document.getElementById('privacy-icon');
+      const title = document.getElementById('privacy-title');
+      const desc = document.getElementById('privacy-desc');
+
+      if (mode === 'anonymous') {
+        btnAnon.className = 'px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow';
+        btnAuto.className = 'px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+        banner.className = 'bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all';
+        icon.className = 'w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0 shadow';
+        icon.textContent = '🛡️';
+        title.className = 'text-xs sm:text-sm font-black text-emerald-950';
+        title.textContent = '目前啟用：【🔒 匿名留白模式】—— 為什麼這樣做完全沒有個資疑慮？';
+        desc.className = 'text-xs text-emerald-800 mt-0.5 leading-relaxed';
+        desc.innerHTML = '1️⃣ 帳單只拍「消費項目局部」（無卡號、無帳單抬頭姓名） ➕ 2️⃣ 生成時<strong>不給 AI 申請人姓名與身分證字號</strong>！<br class="hidden sm:inline" />AI 只負責把繁瑣的 10 頁金額與品名填進 Word 原檔，受領人欄位留白，下載回本機後再自己填名或蓋章，<strong>雲端永遠無法比對出這張帳單是誰刷的！</strong>';
+      } else {
+        btnAuto.className = 'px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-amber-400 text-slate-950 shadow';
+        btnAnon.className = 'px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+        banner.className = 'bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all';
+        icon.className = 'w-11 h-11 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow';
+        icon.textContent = '⚡';
+        title.className = 'text-xs sm:text-sm font-black text-amber-950';
+        title.textContent = '目前啟用：【⚡ 全自動帶入模式】—— 連同受領人資訊一次填到好！';
+        desc.className = 'text-xs text-amber-900 mt-0.5 leading-relaxed';
+        desc.innerHTML = '若在受信任環境或希望連同申請人姓名一次印出，可選擇提供申請教師姓名與身分證字號（地址固定填學校地址「台中市北區三民路三段129號」，不問私人住址），10 頁憑證全自動填妥！';
+      }
+      renderWordPreview();
+    }
+
+    function toggleExcludeTypeless() {
+      excludeTypeless = document.getElementById('chk-exclude-typeless').checked;
+      const badge = document.getElementById('total-vouchers-badge');
+      if (excludeTypeless) {
+        badge.textContent = '已排除 B ➔ 剩餘生成 8 張憑證';
+        if (currentTxKey === 'B') {
+          currentTxKey = 'A';
+        }
+      } else {
+        badge.textContent = '5 筆海外 ＝ 10 張憑證';
+      }
+      selectTransaction(currentTxKey);
+    }
+
+    function renderWordPreview() {
+      const tx = TX_DATA[currentTxKey];
+      if (!tx) return;
+
+      document.getElementById('btn-main-amt').textContent = tx.mainAmt.toLocaleString();
+      document.getElementById('btn-fee-amt').textContent = tx.feeAmt.toLocaleString();
+
+      const paper = document.getElementById('word-paper');
+      paper.classList.remove('pop-anim');
+      void paper.offsetWidth;
+      paper.classList.add('pop-anim');
+
+      // 受領人欄位依據個資模式切換
+      const nameCell = document.getElementById('cell-payee-name');
+      const idCell = document.getElementById('cell-payee-id');
+      if (currentPrivacyMode === 'anonymous') {
+        nameCell.innerHTML = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold text-xs">🔒 留白 (不提供姓名防比對)</span>';
+        idCell.innerHTML = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold text-xs">🔒 留白 (下載回本機再填)</span>';
+      } else {
+        nameCell.innerHTML = '<span class="font-bold text-slate-900">王○○ (範例教師)</span>';
+        idCell.innerHTML = '<span class="font-mono-code font-bold text-slate-900">B123456789 (範例字號)</span>';
+      }
+
+      // 交易款 vs 手續費欄位
+      const titleCell = document.getElementById('cell-item-title');
+      const unitPriceCell = document.getElementById('cell-unit-price');
+      const totalPriceCell = document.getElementById('cell-total-price');
+      const reasonCell = document.getElementById('cell-reason');
+
+      if (currentVoucherTab === 'main') {
+        titleCell.textContent = tx.item;
+        unitPriceCell.textContent = tx.mainAmt.toLocaleString();
+        totalPriceCell.textContent = `新臺幣${tx.mainAmt}元整`;
+        reasonCell.textContent = '境外廠商無法列印電子發票證明';
+      } else {
+        titleCell.textContent = `${tx.item} ${tx.mainAmt}元交易之手續費`;
+        unitPriceCell.textContent = tx.feeAmt.toLocaleString();
+        totalPriceCell.textContent = `新臺幣${tx.feeAmt}元整`;
+        reasonCell.textContent = '國外交易手續費，無法取得單據';
+      }
+    }
+
+    function showAnalogy(idx) {
+      for (let i = 0; i < 4; i++) {
+        const card = document.getElementById('ana-card-' + i);
+        if (i === idx) {
+          card.className = 'ana-card cursor-pointer rounded-2xl p-4 bg-white/15 border-2 border-amber-400 transition -translate-y-1 space-y-2';
+        } else {
+          card.className = 'ana-card cursor-pointer rounded-2xl p-4 bg-white/5 border border-white/15 hover:bg-white/10 transition hover:-translate-y-1 space-y-2';
+        }
+      }
+      const data = ANALOGY_DATA[idx];
+      document.getElementById('ana-input').textContent = data.input;
+      document.getElementById('ana-rule').textContent = data.rule;
+      document.getElementById('ana-output').textContent = data.output;
+    }
+
+    function copyPromptText() {
+      const text = document.getElementById('prompt-to-copy').textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✅ 已複製！直接貼給 AI 即可';
+        setTimeout(() => {
+          btn.textContent = '📋 一鍵複製啟動指令';
+        }, 2500);
+      });
+    }
+  </script>
+</body>
+</html>
