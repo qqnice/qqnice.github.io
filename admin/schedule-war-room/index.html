@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>五十幾位主管的課表，不必再一張一張對｜課表戰情表開發初衷與技能包互動指南</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css?v=202610231155" />
+</head>
+<body class="antialiased selection:bg-blue-600 selection:text-white min-h-screen flex flex-col">
+
+  <!-- =====================================================================
+       頂部常駐導覽列 (Sticky Header)
+       ===================================================================== -->
+  <header class="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- 左側品牌與返回連結 -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="https://qqnice.github.io/admin/" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition-colors">
+          ← 行政專區
+        </a>
+        <a href="https://qqnice.github.io/admin/admission/" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-500/30 transition-colors">
+          🤖 10個打工仔指南
+        </a>
+        <a href="#top" class="flex items-center gap-2.5 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-400 via-blue-600 to-emerald-500 flex items-center justify-center text-lg shadow-lg shadow-blue-500/20">
+            🗓️
+          </div>
+          <div>
+            <div class="font-black text-sm sm:text-base tracking-tight group-hover:text-amber-300 transition-colors">
+              進階課表戰情表・開發初衷與技能包互動指南
+            </div>
+            <div class="text-[11px] text-slate-400 hidden md:block">
+              從「辦活動寄信」延伸到「跨單位排會議」｜查名錄 ➔ 驗課表 ➔ 跨院比對 ➔ 快取重用
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- 中右導覽與 60 秒語音導覽控制 -->
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-bold">
+        <a href="#sec-origin" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors hidden xl:inline-block">🌱 理念延伸</a>
+        <a href="#sec-pain" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-rose-300 transition-colors hidden lg:inline-block">⏱️ 痛點估算</a>
+        <a href="#sec-input-flow" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-sky-300 transition-colors hidden lg:inline-block">⚙️ 運作原理</a>
+        <a href="#sec-warroom-demo" class="px-3 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-white shadow transition-colors">🧪 54人戰情表實測</a>
+        <a href="#sec-trust-cache" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-amber-300 transition-colors hidden sm:inline-block">🛡️ 查核與快取</a>
+        <a href="#sec-how-to-use" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow transition-colors">📦 怎麼用最方便</a>
+
+        <!-- 語音開關 -->
+        <button onclick="toggleVoice()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 flex items-center gap-1">
+          <span id="voice-toggle-icon">🔊</span>
+          <span id="voice-toggle-label" class="hidden sm:inline">語音解說：開啟</span>
+        </button>
+
+        <!-- 60 秒自動導覽按鈕 -->
+        <button onclick="startOrStopAutoTour()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all">
+          <span id="auto-tour-icon">▶️</span>
+          <span id="auto-tour-label">看 60 秒互動導覽</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 導覽進行中浮動字幕列 -->
+    <div id="sticky-tour-bar" class="hidden bg-slate-900/95 border-t border-amber-500/40 px-4 py-2.5">
+      <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <span id="tour-banner-num" class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-xs">1/6</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="tour-banner-title" class="font-black text-sm text-white">導覽標題</span>
+              <span id="tour-sound-wave" class="hidden inline-flex items-end gap-0.5 h-4">
+                <span class="w-1 bg-amber-400 rounded-full sound-bar"></span>
+                <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+                <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+              </span>
+            </div>
+            <p id="tour-banner-subtitle" class="text-xs text-amber-200 mt-0.5">導覽解說字幕</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <div id="tour-step-pills" class="flex flex-wrap items-center gap-1"></div>
+          <button onclick="goToTourStep(currentTourIdx - 1, true)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">◀</button>
+          <button onclick="goToTourStep(currentTourIdx + 1, true)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">▶</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       HERO 區塊：主標、從「活動行政」到「課表比對」的初衷橋樑、5 大快速行動
+       ===================================================================== -->
+  <section id="top" class="hero-mesh grid-pattern text-white py-12 sm:py-16 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+        <!-- 左欄 (7/12)：核心宣言與三大感受 -->
+        <div class="lg:col-span-7 space-y-5">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-bold">
+            <span>🌟 AI 行政減負系列新篇章</span>
+            <span>｜</span>
+            <span class="text-amber-300 font-mono-code">Skill: nutc-advanced-schedule-war-room</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight">
+            五十幾位主管的課表，<br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-300 to-emerald-300">
+              不必再一張一張對。
+            </span>
+          </h1>
+
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed max-w-2xl">
+            過去我們讓 AI 小幫手協助<strong>辦活動、建報名表、寄發通知信與追進度</strong>；現在，我們把同樣的「戰情表」理念延伸到全校各處室與學院最頭痛的<strong>跨單位會議排程</strong>：<br />
+            只要輸入<strong>姓名、職銜或單位</strong>，AI 協助從官方名錄確認名單、取得公開課表、自動排除 Office Hour 並合併兼職，產生一目了然、可查證、下一次還能直接重用的<strong>會議排程課表戰情表</strong>！
+          </p>
+
+          <!-- 3 個讓同仁秒懂的感受小卡 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="bg-slate-900/85 border border-slate-700/90 p-3.5 rounded-2xl">
+              <div class="text-xs font-black text-sky-300 mb-1">💡 1. 我懂了！</div>
+              <div class="text-sm font-bold text-white mb-1">查名錄＋抓課表＋自動比對</div>
+              <p class="text-xs text-slate-300 leading-relaxed">不用自己先查現任主任是誰，輸入「六個學院院長」或「商學院所有主任」，系統先列姓名請你確認再查課表。</p>
+            </div>
+            <div class="bg-slate-900/85 border border-slate-700/90 p-3.5 rounded-2xl">
+              <div class="text-xs font-black text-emerald-300 mb-1">⚡ 2. 這真的有用！</div>
+              <div class="text-sm font-bold text-white mb-1">整組比較、跨院累加、去重</div>
+              <p class="text-xs text-slate-300 leading-relaxed">一人身兼多職只算一次！自動排除 Office Hour 假衝堂，10 秒看出整週哪些時段 0 人上課或最少人衝堂。</p>
+            </div>
+            <div class="bg-slate-900/85 border border-slate-700/90 p-3.5 rounded-2xl">
+              <div class="text-xs font-black text-amber-300 mb-1">🛡️ 3. 我敢使用！</div>
+              <div class="text-sm font-bold text-white mb-1">雙層查核＋學期快取重用</div>
+              <p class="text-xs text-slate-300 leading-relaxed">每筆附官方連結與原始節次，同仁於 Excel 核對「相同」後，同一學期下次開會 0 秒直接重用快取！</p>
+            </div>
+          </div>
+
+          <!-- 5 個主要行動按鈕 (對應設計規範第五節) -->
+          <div class="flex flex-wrap items-center gap-2.5 pt-2">
+            <button onclick="startOrStopAutoTour()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-all">
+              🎬 看 60 秒示範
+            </button>
+            <a href="#sec-warroom-demo" onclick="applyDemoPreset('cross_college')" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition-all">
+              🧪 試著操作一份戰情表
+            </a>
+            <a href="#sec-warroom-demo" onclick="applyDemoPreset('all54')" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm transition-all">
+              🏛️ 查看 54 位主管真實感案例
+            </a>
+            <a href="#sec-trust-cache" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm transition-all">
+              🔍 了解如何查核資料
+            </a>
+            <a href="#sec-how-to-use" class="px-3.5 py-2.5 rounded-xl bg-blue-600/80 hover:bg-blue-500 text-white border border-blue-400/40 font-bold text-xs sm:text-sm transition-all">
+              📦 認識與使用課表戰情表 Skill
+            </a>
+          </div>
+        </div>
+
+        <!-- 右欄 (5/12)：從「辦活動戰情表」到「課表比對戰情表」的初衷演進卡 -->
+        <div class="lg:col-span-5">
+          <div id="sec-origin" class="bg-slate-900/95 border-2 border-sky-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <span class="text-[11px] font-bold text-amber-300 uppercase tracking-wider">OUR MISSION & EVOLUTION</span>
+                <h2 class="text-base sm:text-lg font-black text-white">🌱 為什麼我們要開發這套新技能包？</h2>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                降低行政負擔
+              </span>
+            </div>
+
+            <!-- 演進對比雙卡片 -->
+            <div class="space-y-3 text-xs">
+              <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-400/40 flex items-center justify-center text-xl shrink-0">
+                  📨
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 font-bold text-[10px]">第一棒：活動行政自動化</span>
+                    <span class="font-bold text-white">辦活動、建表單、寄信與公文戰情表</span>
+                  </div>
+                  <p class="text-slate-300 mt-1 leading-relaxed">
+                    透過 <code>ActivityAgent</code> 總控 9 個小幫手，我們解決了「活動建檔 ➔ 報名表 ➔ ePortal 群組信 ➔ 行前通知 ➔ 成果回收」的流程追蹤問題。
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex justify-center -my-1">
+                <span class="px-3 py-0.5 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[11px] font-black">
+                  ⬇️ 把「戰情表減負理念」延伸到全校更普遍的痛點 ⬇️
+                </span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-950/90 to-slate-800/90 border-2 border-sky-400/60 flex items-start gap-3 shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/30 border border-sky-300 flex items-center justify-center text-xl shrink-0">
+                  🗓️
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded bg-sky-400 text-slate-950 font-black text-[10px]">全新延伸：跨單位會議排程</span>
+                    <span class="font-black text-white text-sm">進階課表比對戰情表 Skill</span>
+                  </div>
+                  <p class="text-slate-200 mt-1.5 leading-relaxed">
+                    學校召開跨單位會議時，最難的不是發通知，而是<strong>「找出 50 幾位主管或委員真的能出席的時間」</strong>。我們讓 AI 接手「找名單、查課表、排除 Office Hour、合併兼職、交叉比對」的重複苦工，把時間真正還給同仁！
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 核心承諾金句 -->
+            <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-400/30 text-xs text-amber-100 leading-relaxed">
+              🎯 <strong>我們的初衷：</strong>不是讓 AI 替長官決定開會時間，而是把<strong>可靠、有來源、可複核的資訊</strong>整理好，讓承辦同仁更快、更有把握地提出候選時段！
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       區塊 1：先讓大家看見痛點 —— 參與人數滑桿 ＆ 人工時間估算器 ＆ 8 大價值對照 (#sec-pain)
+       ===================================================================== -->
+  <section id="sec-pain" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+    <!-- 標題區 -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div>
+        <span class="px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black uppercase tracking-wider">
+          SECTION 01 · 為什麼這件事非做不可？
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+          名單要自己找、課表要逐一查、時間還要人工比。<br class="hidden sm:inline" />
+          <span class="text-rose-600">人數一多，排一場會議就可能花掉半天！</span>
+        </h2>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 max-w-md">
+        當與會者只有 3、5 人，人工比對尚可應付；但只要擴大到全校主管、院長、系主任或大型委員會，工作量與出錯風險就會急遽放大。
+      </p>
+    </div>
+
+    <!-- 互動痛點滑桿與可調式時間估算器 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+      <!-- 左側 (5/12)：可調整參數的控制面板 -->
+      <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-lg flex flex-col justify-between space-y-5">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-black text-base sm:text-lg text-slate-900">🎛️ 拖動滑桿：感受人工排程負擔</h3>
+            <span id="pain-scale-badge" class="px-3 py-1 rounded-full text-xs font-bold border">全校主管會議</span>
+          </div>
+
+          <!-- 滑桿 1：參與人數 -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="pain-people-slider" class="text-xs sm:text-sm font-bold text-slate-700">
+                👥 會議與會人數（5 人 ～ 54 位主管）
+              </label>
+              <span id="pain-people-display" class="text-xl font-black text-blue-600 font-mono-code">54 位</span>
+            </div>
+            <input id="pain-people-slider" type="range" min="5" max="54" value="54"
+              oninput="updatePainCalculator()"
+              class="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 rounded-lg" />
+            <div class="flex justify-between text-[11px] text-slate-500 font-bold pt-1">
+              <button onclick="document.getElementById('pain-people-slider').value=5;updatePainCalculator()" class="hover:text-blue-600">5人 (小組)</button>
+              <button onclick="document.getElementById('pain-people-slider').value=18;updatePainCalculator()" class="hover:text-blue-600">18人 (一級+院長)</button>
+              <button onclick="document.getElementById('pain-people-slider').value=35;updatePainCalculator()" class="hover:text-blue-600">35人 (跨院主任)</button>
+              <button onclick="document.getElementById('pain-people-slider').value=54;updatePainCalculator()" class="hover:text-blue-600">54人 (全校主管)</button>
+            </div>
+          </div>
+
+          <!-- 滑桿 2 & 3：自訂假設參數（透明公式，不誇大固定時數） -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+                <span>每人查詢＋整理</span>
+                <span id="pain-per-person-display" class="text-blue-700 font-mono-code">4 分鐘/人</span>
+              </div>
+              <input id="pain-mins-per-person" type="range" min="2" max="8" step="0.5" value="4"
+                oninput="updatePainCalculator()"
+                class="w-full accent-slate-700 cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+              <div class="text-[10px] text-slate-400 mt-1">含找名錄、進系統、抄課表、濾除 OH</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+                <span>交叉比對基礎時間</span>
+                <span id="pain-cross-display" class="text-rose-700 font-mono-code">98 分鐘</span>
+              </div>
+              <input id="pain-cross-mins" type="range" min="15" max="60" step="5" value="35"
+                oninput="updatePainCalculator()"
+                class="w-full accent-rose-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+              <div class="text-[10px] text-slate-400 mt-1">隨人數增加，攤開比對與去重時間放大</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 估算結果公式卡 -->
+        <div class="p-4 rounded-2xl bg-slate-900 text-white space-y-2">
+          <div class="text-[11px] font-mono-code text-slate-400">
+            公式：估計人工時間 = (人數 × 每人查詢整理) + 交叉比對時間
+          </div>
+          <div class="text-xs text-slate-300 flex flex-wrap items-center gap-2">
+            <span>查詢整理：<strong id="pain-formula-lookup" class="text-sky-300">216 分鐘</strong></span>
+            <span>＋</span>
+            <span>交叉比對：<strong id="pain-formula-cross" class="text-amber-300">98 分鐘</strong></span>
+          </div>
+          <div class="pt-1 border-t border-slate-800 flex items-baseline justify-between">
+            <span class="text-xs font-bold text-rose-300">⏳ 單次人工排程預估耗時：</span>
+            <span id="pain-total-time-display" class="text-lg sm:text-xl font-black text-amber-300">約 5 小時 14 分鐘</span>
+          </div>
+          <p id="pain-risk-desc" class="text-xs text-slate-300 pt-1"></p>
+        </div>
+      </div>
+
+      <!-- 右側 (7/12)：動態課表堆疊視覺舞台 ＋ 4 大人工陷阱 -->
+      <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-lg flex flex-col justify-between space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="font-black text-base sm:text-lg text-slate-900">🗂️ 桌面上的課表堆疊模擬（每一張都要人工點開核對）</h3>
+            <p class="text-xs text-slate-500">紫色標記代表「身兼多職（人工易重複算）」、黃色標記代表「含 Office Hour（人工易誤判為有課）」</p>
+          </div>
+        </div>
+
+        <!-- 54 張迷你課表動態網格 -->
+        <div id="pain-sheets-stack" class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 gap-1.5 max-h-[290px] overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200">
+          <!-- 由 app.js 動態渲染 -->
+        </div>
+
+        <!-- 三大核心痛點總結 (對應文件第二節) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div class="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200">
+            <div class="font-black text-xs text-rose-900">痛點 1：找人很麻煩</div>
+            <p class="text-[11px] text-rose-800 mt-1 leading-relaxed">
+              手上只有「全校一級主管」「商學院所有主任」等職銜，查現任姓名、處理同名異人與兼職就先卡關。
+            </p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200">
+            <div class="font-black text-xs text-amber-900">痛點 2：課表很難一起看</div>
+            <p class="text-[11px] text-amber-800 mt-1 leading-relaxed">
+              傳統課表以「個人」為中心；排會議卻要看「一群人」哪一節同時有空，還得手動濾掉 Office Hour。
+            </p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+            <div class="font-black text-xs text-indigo-900">痛點 3：查過無法累積重用</div>
+            <p class="text-[11px] text-indigo-800 mt-1 leading-relaxed">
+              缺少保存與查核機制，每次換會議、換承辦人或被質疑時，又要從第 1 個人重新查起！
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 8 大工作價值對照表 (對應文件第三節) -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 class="font-black text-base sm:text-lg">📊 課表戰情表具體可以幫同仁什麼忙？（昔日苦工 vs. 技能包協助）</h3>
+          <p class="text-xs text-slate-400">適用人事室、秘書室、教務處、主計室、研發處、國際處、學務處、總務處及各學院系所</p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold">
+          把繁瑣留給工具，把判斷留給同仁
+        </span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+              <th class="py-3 px-4 font-black w-1/3">😫 同仁原本面對的工作</th>
+              <th class="py-3 px-4 font-black w-1/3 bg-sky-50 text-sky-950">🤖 課表戰情表 Skill 提供的協助</th>
+              <th class="py-3 px-4 font-black w-1/3">✨ 帶來的實際行政價值</th>
+            </tr>
+          </thead>
+          <tbody id="work-value-tbody" class="divide-y divide-slate-200">
+            <!-- 由 app.js 渲染 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       區塊 2：技能包大致上是怎麼運行的？—— 簡單輸入模擬 ＆ 5 步嚴謹管線 (#sec-input-flow)
+       ===================================================================== -->
+  <section id="sec-input-flow" class="py-12 sm:py-16 bg-slate-900/5 border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+
+      <!-- 標題區 -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-wider">
+            SECTION 02 · 技能包運作原理大公開
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+            前台輸入超簡單，後台管線超嚴謹：<br class="hidden sm:inline" />
+            <span class="text-blue-600">不論輸入名字、職銜或單位，都會先確認「是哪些人」才查表！</span>
+          </h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 max-w-md">
+          我們追求的「一鍵完成」不是省略必要的確認，而是把<strong>名單解析、兼職去重、快取檢查、官方查詢、Office Hour 排除與驗證</strong>包進可靠的工作包裡。
+        </p>
+      </div>
+
+      <!-- 互動區塊 A：4 種自然語言輸入示例切換 -->
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-lg space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="font-black text-base sm:text-lg text-slate-900">
+            ⌨️ 第一步：你可以這樣對 AI 下指令（點選下方 4 種真實輸入範例）
+          </h3>
+          <span class="text-xs text-slate-500">支援：具體姓名 ／ 職銜群組 ／ 組織單位 ／ 全校跨單位大型組合</span>
+        </div>
+
+        <!-- 4 個範例按鈕 -->
+        <div id="input-example-tabs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <!-- 由 app.js 渲染 -->
+        </div>
+
+        <!-- 仿真對話輸入與官方名錄解析結果對照 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch pt-1">
+          <!-- 左：使用者輸入框模擬 -->
+          <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between space-y-4 border border-slate-800">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
+                <span>💬 承辦人輸入的自然語言指令</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">免背代碼</span>
+              </div>
+              <div class="text-xs text-amber-300 font-bold">
+                📌 會議標題：<span id="sim-meeting-title" class="text-white"></span>
+              </div>
+              <div id="sim-user-input" class="p-3.5 rounded-xl bg-slate-800 border border-slate-700 text-xs sm:text-sm text-sky-100 leading-relaxed font-medium">
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-800">
+              <div class="text-xs font-bold text-emerald-300">⚡ AI 技能包收到後的第 1 個反應：</div>
+              <p id="sim-parsed-summary" class="text-xs text-slate-300 leading-relaxed"></p>
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <span id="sim-roster-count" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-200 text-xs font-mono-code font-bold"></span>
+                <span class="text-slate-500">➔</span>
+                <span id="sim-unique-count" class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-xs font-mono-code font-black"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右：解析後的職務清單與「等待真人確認」預覽 -->
+          <div class="lg:col-span-7 bg-slate-50 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black">
+                  🛑 先確認人，再查課表
+                </span>
+                <span class="text-xs font-bold text-slate-700">官方名錄解析預覽（職務層 vs 唯一人員層）</span>
+              </div>
+              <span id="sim-dedup-note" class="text-xs font-bold text-purple-700"></span>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-slate-200">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-600 text-[11px] border-b border-slate-200">
+                    <th class="py-2 px-3">群組歸屬</th>
+                    <th class="py-2 px-3">單位與職稱 (rosterPositions)</th>
+                    <th class="py-2 px-3">解析姓名</th>
+                    <th class="py-2 px-3">唯一編號</th>
+                    <th class="py-2 px-3">系統狀態與去重說明</th>
+                  </tr>
+                </thead>
+                <tbody id="sim-roster-preview">
+                  <!-- 由 app.js 渲染 -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 pt-1">
+              <span>👉 承辦人確認：「名單正確，請開始查表！」後，立即進入下方 5 步自動化管線。</span>
+              <a href="#sec-warroom-demo" class="text-blue-600 font-black hover:underline">直接看產出的戰情表 ↓</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 互動區塊 B：技能包 5 大運作步驟 Stepper -->
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="font-black text-base sm:text-lg text-slate-900">
+            🔄 第二步：點選了解 <code class="text-blue-700 font-mono-code">nutc-advanced-schedule-war-room</code> 的 5 階段嚴謹運作流程
+          </h3>
+          <span class="text-xs text-slate-500">點選任一步驟查看「AI 自動代勞什麼」與「真人安全把關點」</span>
+        </div>
+
+        <div id="pipeline-step-buttons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <!-- 由 app.js 渲染 -->
+        </div>
+
+        <div id="pipeline-step-detail">
+          <!-- 由 app.js 渲染 -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       區塊 3：呈現戰情表的價值 —— 54 位主管進階課表戰情表互動沙盒 (#sec-warroom-demo)
+       ===================================================================== -->
+  <section id="sec-warroom-demo" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+    <!-- 標題與快速體驗情境按鈕 -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div>
+        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
+          SECTION 03 · 10 秒看懂戰情表的威力（真實互動沙盒）
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+          親手操作看看！整組選取、跨院比較、個人課表與衝突明細
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+          顏色不是裝飾，而是在直接回答：<strong>「誰有課、何時重疊、哪些時段全員無固定授課（🟢 共同無課）」</strong>！
+        </p>
+      </div>
+
+      <!-- 快速體驗情境按鈕列 -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-slate-500">⚡ 一鍵體驗情境：</span>
+        <button onclick="applyDemoPreset('all54')" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow">
+          🏛️ 全校 54 位主管 (58職務)
+        </button>
+        <button onclick="applyDemoPreset('exec_deans')" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow">
+          👔 一級主管＋六院院長
+        </button>
+        <button onclick="applyDemoPreset('cross_college')" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow">
+          🤝 跨院比較：商學院＋資流學院
+        </button>
+        <button onclick="applyDemoPreset('single_multi')" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black shadow">
+          👤 看兼職＋Office Hour＋0000教室個案
+        </button>
+      </div>
+    </div>
+
+    <!-- 模擬瀏覽器外框：進階課表戰情表主體 -->
+    <div class="bg-white rounded-3xl border-2 border-slate-300 shadow-2xl overflow-hidden">
+
+      <!-- 模擬視窗頂欄 -->
+      <div class="bg-slate-900 text-white px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="window-dot bg-rose-500"></span>
+          <span class="window-dot bg-amber-400"></span>
+          <span class="window-dot bg-emerald-500"></span>
+          <span class="ml-2 font-black text-xs sm:text-sm tracking-tight text-white">
+            📊 115-1 全校行政暨教學主管課表比對戰情表（互動示範版）
+          </span>
+          <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-mono-code">
+            115年(上) 教師課表
+          </span>
+        </div>
+
+        <!-- 檢視模式切換：整週摘要 / 單日對照 / 單人完整課表 -->
+        <div class="flex items-center gap-1.5 bg-slate-800 p-1 rounded-2xl">
+          <button id="btn-view-week" onclick="setWarRoomViewMode('week')">
+            🗓️ 整週摘要熱力圖
+          </button>
+          <button id="btn-view-day" onclick="setWarRoomViewMode('day')">
+            📋 單日逐節對照
+          </button>
+          <button id="btn-view-person" onclick="setWarRoomViewMode('person')">
+            👤 單人完整課表＆人工核對
+          </button>
+        </div>
+      </div>
+
+      <!-- 戰情表控制區：群組篩選、跨組累加與一人多職去重橫幅 -->
+      <div class="p-4 sm:p-6 bg-slate-50 border-b border-slate-200 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="text-xs font-bold text-slate-700">
+            🏢 <strong>群組篩選與跨院累加：</strong>點選群組名稱可「整組累加加入比較（保留已選他組）」；點選「單看」則只看該組。
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="applyDemoPreset('all54')" class="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold">
+              全選 54 人
+            </button>
+            <button onclick="applyDemoPreset('clear')" class="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold">
+              全部清空
+            </button>
+          </div>
+        </div>
+
+        <!-- 群組按鈕列 -->
+        <div id="warroom-group-buttons" class="flex flex-wrap items-center gap-2">
+          <!-- 由 app.js 渲染 -->
+        </div>
+
+        <!-- 一人多職去重即時統計橫幅 -->
+        <div id="warroom-dedup-banner" class="p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
+          <!-- 由 app.js 渲染 -->
+        </div>
+
+        <!-- 可收合／微調之個別人員膠囊列 -->
+        <details class="group bg-white rounded-xl border border-slate-200 p-3">
+          <summary class="cursor-pointer text-xs font-bold text-slate-700 flex items-center justify-between select-none">
+            <span>👥 展開／微調目前篩選群組之個別人員（可單獨勾選取消，或點「課表↗」看個人完整週課表）</span>
+            <span class="text-blue-600 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div id="warroom-roster-pills" class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+            <!-- 由 app.js 渲染 -->
+          </div>
+        </details>
+      </div>
+
+      <!-- 戰情表主舞台 (左 8 欄課表矩陣 + 右 4 欄選取時段衝突與 Office Hour 排除明細) -->
+      <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div id="warroom-main-stage" class="lg:col-span-8">
+          <!-- 由 app.js 依 week / day / person 渲染 -->
+        </div>
+
+        <!-- 右側：時段衝突與查核明細面板 -->
+        <div class="lg:col-span-4 bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 sticky top-24">
+          <div id="warroom-slot-inspector">
+            <!-- 由 app.js 渲染 -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       區塊 4：把信任機制做成可視化 —— 三層查核狀態卡 ＆「第一次 vs 下一次」快取重用 (#sec-trust-cache)
+       ===================================================================== -->
+  <section id="sec-trust-cache" class="py-12 sm:py-16 bg-slate-900 text-white border-y border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+
+      <!-- 標題區 -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black uppercase tracking-wider">
+            SECTION 04 · 為什麼這不是黑箱猜測？
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">
+            AI 負責整理，同仁保有最後確認權。<br class="hidden sm:inline" />
+            <span class="text-amber-300">確認過一次，下一次就不必從頭開始！</span>
+          </h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-md">
+          每一份課表都保留官方查詢網址、學期標籤、原始課程與轉換後節次。透過「系統完整核對 ＋ 同仁人工核對」，把核對成果變成全處室可重用的快取資產。
+        </p>
+      </div>
+
+      <!-- 互動三層狀態卡檢視器 -->
+      <div class="bg-slate-800/70 rounded-3xl p-6 border border-slate-700 space-y-5 text-slate-900">
+        <div class="flex flex-wrap items-center justify-between gap-3 text-white">
+          <div>
+            <h3 class="font-black text-base sm:text-lg">🔍 點選人員：查看「三層資料查核狀態卡」與來源追溯</h3>
+            <p class="text-xs text-slate-300">試著在第三層切換「相同 / 未核對 / 有差異」，上方戰情表的共同空堂燈號也會即時聯動！</p>
+          </div>
+          <div id="trust-person-selector" class="flex flex-wrap gap-2">
+            <!-- 由 app.js 渲染 -->
+          </div>
+        </div>
+
+        <div id="trust-status-detail">
+          <!-- 由 app.js 渲染三層狀態卡 -->
+        </div>
+      </div>
+
+      <!-- 區塊 5 對比：「第一次建立」vs「下一次建立（快取重用）」 -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="font-black text-lg sm:text-xl text-white">
+              ♻️ 「第一次建立」vs.「同一學期下一次建立」：為什麼快取機制能幫全校省下巨量時間？
+            </h3>
+            <p class="text-xs text-slate-400">
+              快取不只是為了技術效率，而是把同仁已投入的核對心血保存下來，避免組織重複勞動。
+            </p>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-2xl shrink-0">
+            <button id="btn-cache-first" onclick="switchCacheCompareMode('first')">
+              🌱 第一次建立戰情表
+            </button>
+            <button id="btn-cache-next" onclick="switchCacheCompareMode('next')">
+              ⚡ 下一次開會（重用快取）
+            </button>
+          </div>
+        </div>
+
+        <div id="cache-compare-stage">
+          <!-- 由 app.js 渲染 -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       區塊 5：透過這個技能包怎麼使用會更方便？（4 大省力秘訣 ＋ 6 大處室情境與一鍵複製咒語） (#sec-how-to-use)
+       ===================================================================== -->
+  <section id="sec-how-to-use" class="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+
+    <!-- 標題區 -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+      <div>
+        <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-wider">
+          SECTION 05 · 怎麼使用這個技能包最方便？
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+          不用寫程式！掌握 4 個省力秘訣，<br class="hidden sm:inline" />
+          <span class="text-blue-600">複製一句話貼給 AI，就能開始建立你的會議戰情表</span>
+        </h2>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 max-w-md">
+        同一套 <code class="font-mono-code font-bold text-slate-900">nutc-advanced-schedule-war-room</code> 技能包，只要換個會議標題與參與名單，全校各處室與各學院都能重複套用！
+      </p>
+    </div>
+
+    <!-- 4 大最方便的使用秘訣卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 font-black flex items-center justify-center text-lg">1</div>
+        <h4 class="font-black text-slate-900 text-base">直接講「職銜或單位」，不用自己先翻名錄</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          不必先花半小時查現任系主任是誰！直接告訴 AI「我要排一級主管跟商學院所有主任」，讓技能包幫你從官方名錄抓出姓名清單，你只要負責看一眼確認。
+        </p>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-black flex items-center justify-center text-lg">2</div>
+        <h4 class="font-black text-slate-900 text-base">先鎖定「必席核心群組」，再跨組累加微調</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          50 幾人若找不到 100% 空堂怎麼辦？在戰情表先單看「主席＋核心主管」的綠燈時段，再把其他學院整組加進來，挑出「只有 1～2 人有課」的時段去協調請假或代理！
+        </p>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-black flex items-center justify-center text-lg">3</div>
+        <h4 class="font-black text-slate-900 text-base">學期初核對一次 Excel，整個學期直接吃老本</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          第一次產出後，打開地端 Excel 把核對無誤的老師改為「相同」並執行回寫。之後這學期不管臨時要排什麼委員會，AI 都能 0 秒直接重用快取！
+        </p>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 font-black flex items-center justify-center text-lg">4</div>
+        <h4 class="font-black text-slate-900 text-base">預設地端私密安全，想分享時再選發布管道</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          預設只會在你的電腦產出 Excel 與戰情表網頁，外人完全看不到；當你想把戰情表連結傳給長官看時，再選擇發布到「① GPT 網站」或「② GitHub Pages」。
+        </p>
+      </div>
+    </div>
+
+    <!-- 6 大處室／學院情境卡與一鍵複製咒語工作站 -->
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="font-black text-base sm:text-lg text-slate-900">
+          🎯 點選你的處室或會議情境，一鍵複製「啟動對話咒語」：
+        </h3>
+        <span class="text-xs text-slate-500">涵蓋：全校主管會議、校務／院務會議、系主任會議、預算協調、快取重用與發布</span>
+      </div>
+
+      <div id="scenario-tabs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- 由 app.js 渲染 -->
+      </div>
+
+      <div id="scenario-detail">
+        <!-- 由 app.js 渲染 -->
+      </div>
+    </div>
+
+    <!-- 進階技能包底層 CLI 指令透明展示（供資訊人員或進階同仁參考） -->
+    <div class="bg-slate-900 text-white rounded-3xl p-6 border border-slate-800 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-xs font-mono-code text-sky-400 font-bold">UNDER THE HOOD · 技能包底層自動化腳本</span>
+          <h4 class="font-black text-base sm:text-lg mt-0.5">🔧 當你用自然語言下指令時，AI 在後台幫你執行的 3 個標準命令</h4>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-mono-code">
+          .agents/skills/nutc-advanced-schedule-war-room
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono-code">
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="text-amber-300 font-sans font-bold">① 打包產出 Excel 快取與自包含戰情表</div>
+          <pre class="text-emerald-300 overflow-x-auto leading-relaxed">python scripts/advanced_schedule_artifacts.py package \
+  --input capture.json \
+  --output outputs/nutc-advanced-war-room/115-1</pre>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="text-sky-300 font-sans font-bold">② 套用同仁已人工複核之 Excel 刷新網站</div>
+          <pre class="text-emerald-300 overflow-x-auto leading-relaxed">python scripts/advanced_schedule_artifacts.py build \
+  --input source-snapshot-advanced.json \
+  --review-workbook reviewed.xlsx \
+  --output dashboard-refreshed</pre>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="text-purple-300 font-sans font-bold">③ 自動驗收資料契約與去重完整性</div>
+          <pre class="text-emerald-300 overflow-x-auto leading-relaxed">python scripts/advanced_schedule_artifacts.py validate \
+  --schedule dashboard/schedule.json</pre>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- =====================================================================
+       區塊 6：9 大產品設計鐵律 ＆ 7 題新手驗收互動問答 ＆ 結尾邀請 (#sec-principles-quiz)
+       ===================================================================== -->
+  <section id="sec-principles-quiz" class="py-12 sm:py-16 bg-slate-100 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+
+      <!-- 9 大產品原則 -->
+      <div class="space-y-5">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-slate-900 text-amber-300 text-xs font-black uppercase tracking-wider">
+            SECTION 06 · 我們的品質承諾與自我檢核
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+            🛡️ 課表戰情表嚴格遵守的 9 大產品原則
+          </h2>
+        </div>
+
+        <div id="principles-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- 由 app.js 渲染 -->
+        </div>
+      </div>
+
+      <!-- 7 題驗收問題互動問答 (對應文件第九節) -->
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900">
+              🎓 課堂與新同仁 60 秒快問快答（點選問題翻開解答）
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+              如果能回答這 7 個問題，代表你已經完全懂這套「從名單、查詢、驗證、快取到會議比對」的完整工作流程！
+            </p>
+          </div>
+        </div>
+
+        <div id="acceptance-quiz-list" class="space-y-3">
+          <!-- 由 app.js 渲染 -->
+        </div>
+      </div>
+
+      <!-- 結尾溫暖宣言 (對應文件最後短版宣言) -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-8 sm:p-10 shadow-2xl border border-blue-500/30 text-center space-y-5">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold">
+          ✨ 讓科技回到行政現場，真正替人減少負擔
+        </div>
+        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">
+          「一場會議，不該從五十幾張課表開始。」
+        </h3>
+        <p class="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed">
+          我們不是要增加一套新的行政負擔，而是把原本分散、重複、容易出錯的工作，整理成任何同仁都能使用的標準流程。<br />
+          課表戰情表把<strong>公開名單、官方課表、群組比較與人工查核</strong>整合成一個技能包。AI 幫忙處理大量整理工作，同仁保有確認與決策權；確認過的資料可以延續使用，不必每次重新來過。<br />
+          <strong class="text-amber-300">少一點查找與抄寫，多一點清楚與從容。這就是我們開發這個工作包的初衷。</strong>
+        </p>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a href="#sec-warroom-demo" class="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm shadow-lg transition-all">
+            🧪 回到上方戰情表再試玩看看
+          </a>
+          <a href="#sec-how-to-use" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-sm shadow-lg transition-all">
+            📋 複製啟動咒語開始使用
+          </a>
+          <a href="../" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-sm transition-all">
+            🗂️ 返回 AI 協助行政自動化專區
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 頁尾 -->
+  <footer class="bg-slate-950 text-slate-400 py-6 border-t border-slate-800 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        <strong>進階課表戰情表（nutc-advanced-schedule-war-room）</strong>｜AI 推動計畫・行政減負互動教學示範網站
+      </div>
+      <div>
+        設計理念：先確認人再查課表・一人多職只計一次・AI 整理＋真人核對・快取跨次重用
+      </div>
+    </div>
+  </footer>
+
+  <script src="data.js?v=202610231155"></script>
+  <script src="app.js?v=202610231155"></script>
+</body>
+</html>
