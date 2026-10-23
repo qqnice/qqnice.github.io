@@ -1,1001 +1,826 @@
 ---
-title: 招生行政 10 個 AI 打工仔：高互動架構與流程展示平台
-description: 戰情表先行（Dashboard-First）掌握全局・ActivityAgent 總控星型調度 9 個小幫手，全流程動態演練模擬器
+title: 你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事
+description: 執行同仁才是真正的大腦！用講的下指令，打開一張戰情表一目了然，讓 10 隻 AI 小幫手幫你把重複瑣事吃光光
 ---
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>招生行政 10 個 AI 打工仔：高互動架構與流程展示平台</title>
+  <title>你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
     body {
       font-family: 'Noto Sans TC', sans-serif;
-    }
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* 自訂霓虹光暈與玻璃擬物感 */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    .dark .glass-card {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(51, 65, 85, 0.8);
+      background: radial-gradient(circle at 20% 20%, #fef3c7 0%, #e0f2fe 45%, #f3e8ff 100%);
+      overflow-x: hidden;
     }
 
-    .glow-active {
-      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4), 0 0 10px -2px rgba(59, 130, 246, 0.3);
+    /* 活潑的浮動與彈跳動畫 */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes bouncePop {
+      0% { transform: scale(0.95); }
+      40% { transform: scale(1.08) rotate(-2deg); }
+      70% { transform: scale(0.98) rotate(1deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    @keyframes soundWave {
+      0%, 100% { height: 6px; }
+      50% { height: 22px; }
+    }
+    @keyframes flowDash {
+      to { stroke-dashoffset: -40; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45); }
+      50% { box-shadow: 0 0 0 12px rgba(249, 115, 22, 0); }
     }
 
-    .pulse-ring {
-      animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .float-anim {
+      animation: floatSlow 3.5s ease-in-out infinite;
     }
-    @keyframes pulse-border {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.05); }
+    .pop-anim {
+      animation: bouncePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pulse-orange {
+      animation: pulseGlow 2s infinite;
+    }
+    .flow-line {
+      stroke-dasharray: 8 6;
+      animation: flowDash 1.2s linear infinite;
     }
 
-    /* 連線動畫 */
-    .connector-line {
-      stroke-dasharray: 6;
-      animation: dash 20s linear infinite;
+    /* 語音音波條 */
+    .wave-bar {
+      width: 4px;
+      border-radius: 999px;
+      background: #f97316;
+      animation: soundWave 0.6s ease-in-out infinite;
     }
-    @keyframes dash {
-      to { stroke-dashoffset: -1000; }
+
+    /* 小幫手卡片發光激活態 */
+    .helper-card {
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .helper-card:hover {
+      transform: translateY(-6px) scale(1.03);
+    }
+    .helper-card.active-helper {
+      transform: translateY(-8px) scale(1.05);
+      border-color: #f97316 !important;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%) !important;
+      box-shadow: 0 14px 28px -6px rgba(249, 115, 22, 0.35), 0 0 0 3px #fdba74;
+    }
+
+    /* 對話氣泡尾巴 */
+    .speech-bubble {
+      position: relative;
+    }
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 32px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: #1e293b transparent;
+      display: block;
+      width: 0;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen p-3 sm:p-6">
 
-  <!-- 頂部標頭導航 -->
-  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <a href="./" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 text-xs font-medium">
-          ← 行政專區
-        </a>
-        <a href="admission/" class="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 transition-colors border border-emerald-500/30 text-xs font-medium">
-          🤖 實作指南
-        </a>
-      </div>
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-emerald-400 flex items-center justify-center font-black text-white text-xl shadow-lg">
-          10
-        </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="font-bold text-lg sm:text-xl tracking-tight text-white">AI 招生行政工作流 · 10 個打工仔</h1>
-            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-medium">戰情表先行架構</span>
-          </div>
-          <p class="text-xs text-slate-400">1 個總控指揮官 (ActivityAgent) ＋ 9 個執行打工仔</p>
-        </div>
-      </div>
-
-      <!-- 導航切換鈕 -->
-      <nav class="flex items-center bg-slate-800 p-1 rounded-xl text-xs sm:text-sm font-medium border border-slate-700/60">
-        <button onclick="switchTab('hub')" id="tab-hub" class="tab-btn px-3 sm:px-4 py-2 rounded-lg transition-all bg-blue-600 text-white shadow">
-          🌟 總控指揮網
-        </button>
-        <button onclick="switchTab('dashboard-first')" id="tab-dashboard-first" class="tab-btn px-3 sm:px-4 py-2 rounded-lg transition-all text-slate-300 hover:text-white">
-          🎯 戰情表先行理念
-        </button>
-        <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-3 sm:px-4 py-2 rounded-lg transition-all text-slate-300 hover:text-white">
-          ⏱️ 動態演練模擬
-        </button>
-        <button onclick="switchTab('matrix')" id="tab-matrix" class="tab-btn px-3 sm:px-4 py-2 rounded-lg transition-all text-slate-300 hover:text-white">
-          📋 10 打工仔矩陣
-        </button>
-      </nav>
+  <!-- 頂部迷你導覽列 -->
+  <div class="max-w-6xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <a href="./" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-sm border border-slate-200 text-xs font-bold transition">
+        ← 返回行政專區
+      </a>
+      <a href="admission/" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm text-xs font-bold transition">
+        📖 看完整 10 步教學手冊 ↗
+      </a>
     </div>
-  </header>
+    <div class="inline-flex items-center gap-2 bg-white/90 px-3.5 py-1.5 rounded-full border border-amber-300 shadow-sm text-xs font-bold text-amber-900">
+      <span>💡 核心秘訣：</span>
+      <span class="text-orange-600">你出大腦拆解瑣事</span> ＋ <span class="text-emerald-600">一張戰情表看進度</span> ＋ <span class="text-indigo-600">用講的叫小幫手做！</span>
+    </div>
+  </div>
 
-  <!-- 主內容容器 -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+  <!-- ==================== 單一主視覺互動示意圖容器 ==================== -->
+  <div class="max-w-6xl mx-auto bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-white p-4 sm:p-7 space-y-6 relative overflow-hidden">
+    
+    <!-- 背景裝飾光暈 -->
+    <div class="absolute -top-20 -right-20 w-72 h-72 bg-amber-300/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-sky-300/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- ==================== 頁籤 1：總控指揮網 (HUB & SPOKE) ==================== -->
-    <section id="section-hub" class="space-y-6">
-      <!-- 簡介 Banner -->
-      <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-blue-800/40 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="max-w-3xl space-y-3 relative z-10">
-          <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-blue-400/20">
-            星型指揮架構 · Hub and Spoke
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-            以 <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-300">ActivityAgent</span> 為核心大腦，調度 9 個打工仔
-          </h2>
-          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            承辦人不必手動記住 9 個繁複技能的先後次序！總控大腦透過 <code class="bg-slate-800/80 px-2 py-0.5 rounded font-mono text-emerald-300 text-xs">工作進度.json</code> 精準掌控狀態機，在需要時自動呼喚專職小幫手，並嚴格把關「選項優先」與「寄信/上簽前承辦人審核」！
-          </p>
-        </div>
+    <!-- 標題區：超有共鳴的一句話 -->
+    <div class="text-center space-y-2 relative z-10">
+      <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs sm:text-sm font-black shadow-md">
+        ✨ 別再自己苦命複製貼上了！來養一隊 AI 小幫手吧！
       </div>
+      <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+        各位同仁才是<span class="text-orange-600 underline decoration-wavy decoration-amber-400 underline-offset-4">最強大腦</span>，這 10 個 Skill 是你養的<span class="text-indigo-600">勤勞小幫手</span>！
+      </h1>
+      <p class="text-xs sm:text-base text-slate-600 max-w-3xl mx-auto font-medium">
+        AI 最擅長處理重複的日常瑣事！只要把工作拆解好，<strong>「用講的也會通」</strong>，你只要打開<strong>一張戰情表</strong>就能掌握全局，省下時間去做真正想做的事 ☕
+      </p>
+    </div>
 
-      <!-- 核心互動畫布區 -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- ==================== 第一層：你是大腦（語音下指令互動區） ==================== -->
+    <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 rounded-2xl p-4 sm:p-5 border-2 border-orange-200 shadow-sm relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         
-        <!-- 左/中側：互動節點佈局 (8 欄) -->
-        <div class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm relative min-h-[580px] flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">點擊任意打工仔節點查看分工詳情</span>
-            <span class="text-xs text-blue-600 font-medium">● 綠框表示關鍵樞紐</span>
-          </div>
-
-          <!-- 中心樞紐：ActivityAgent -->
-          <div class="my-auto py-8 relative flex flex-col items-center justify-center">
-            
-            <!-- 核心總控卡片 -->
-            <div onclick="selectSkill('activityagent')" id="node-activityagent" class="cursor-pointer transition-all duration-300 transform hover:scale-105 z-20 w-64 p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-blue-950 text-white shadow-2xl border-2 border-emerald-400 glow-active text-center">
-              <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-2xl font-bold">
-                👑
-              </div>
-              <div class="text-xs font-bold text-emerald-400 tracking-wider">總控入口 · 指揮大腦</div>
-              <div class="font-extrabold text-lg text-white">ActivityAgent</div>
-              <div class="text-[11px] text-slate-300 mt-1">
-                掌控工作進度 · 協調九大技能 · 斷點續作
-              </div>
-              <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-center gap-1.5 text-[10px] text-emerald-300 font-mono">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                守護：工作進度.json
-              </div>
+        <!-- 左側：指揮官（你）與省時效益計數器 -->
+        <div class="lg:col-span-4 flex items-center gap-3.5 bg-white p-3.5 rounded-2xl border border-orange-200 shadow-sm">
+          <div class="relative shrink-0">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl shadow-md float-anim">
+              🧑‍💼
             </div>
-
-            <!-- 環繞的 9 個小幫手網格 -->
-            <div class="grid grid-cols-3 gap-3 w-full mt-8 z-10">
-              
-              <!-- 01 InitActivity -->
-              <div onclick="selectSkill('initactivity')" id="node-initactivity" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">📥</div>
-                <div class="text-[10px] text-blue-600 font-bold">01 建檔兵</div>
-                <div class="text-xs font-bold text-slate-800">InitActivity</div>
-                <div class="text-[10px] text-slate-500">整理邀請・定承辦</div>
-              </div>
-
-              <!-- 02 CreateSite (突出標示) -->
-              <div onclick="selectSkill('createsite')" id="node-createsite" class="skill-node cursor-pointer p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/70 hover:bg-emerald-100 transition-all text-center relative shadow-sm">
-                <span class="absolute -top-2 right-2 bg-emerald-600 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">先行核心</span>
-                <div class="text-lg mb-1">📊</div>
-                <div class="text-[10px] text-emerald-700 font-bold">02 戰情官</div>
-                <div class="text-xs font-bold text-emerald-950">CreateSite</div>
-                <div class="text-[10px] text-emerald-700">本機先行・7項檢核</div>
-              </div>
-
-              <!-- 03 CreateGoogleForm -->
-              <div onclick="selectSkill('creategoogleform')" id="node-creategoogleform" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">📝</div>
-                <div class="text-[10px] text-blue-600 font-bold">03 表單師</div>
-                <div class="text-xs font-bold text-slate-800">CreateGoogleForm</div>
-                <div class="text-[10px] text-slate-500">完整題型・串Sheet</div>
-              </div>
-
-              <!-- 04 SendGroupMail -->
-              <div onclick="selectSkill('sendgroupmail')" id="node-sendgroupmail" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">📢</div>
-                <div class="text-[10px] text-blue-600 font-bold">04 校務信差</div>
-                <div class="text-xs font-bold text-slate-800">SendGroupMail</div>
-                <div class="text-[10px] text-slate-500">ePortal・招募公告</div>
-              </div>
-
-              <!-- 05 UpdateNews -->
-              <div onclick="selectSkill('updatenews')" id="node-updatenews" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">🔄</div>
-                <div class="text-[10px] text-blue-600 font-bold">05 情報員</div>
-                <div class="text-xs font-bold text-slate-800">UpdateNews</div>
-                <div class="text-[10px] text-slate-500">下載回覆・核對名單</div>
-              </div>
-
-              <!-- 06 CreateNormal -->
-              <div onclick="selectSkill('createnormal')" id="node-createnormal" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">📑</div>
-                <div class="text-[10px] text-blue-600 font-bold">06 公文士</div>
-                <div class="text-xs font-bold text-slate-800">CreateNormal</div>
-                <div class="text-[10px] text-slate-500">上簽草稿・公差假</div>
-              </div>
-
-              <!-- 07 SendEventMail -->
-              <div onclick="selectSkill('sendeventmail')" id="node-sendeventmail" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">✉️</div>
-                <div class="text-[10px] text-blue-600 font-bold">07 行前嚮導</div>
-                <div class="text-xs font-bold text-slate-800">SendEventMail</div>
-                <div class="text-[10px] text-slate-500">Gmail草稿・夾附件</div>
-              </div>
-
-              <!-- 08 CollectEventResults -->
-              <div onclick="selectSkill('collecteventresults')" id="node-collecteventresults" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">📸</div>
-                <div class="text-[10px] text-blue-600 font-bold">08 成果快照兵</div>
-                <div class="text-xs font-bold text-slate-800">CollectResults</div>
-                <div class="text-[10px] text-slate-500">查回信・辨照片歸屬</div>
-              </div>
-
-              <!-- 09 CreateReport -->
-              <div onclick="selectSkill('create-report')" id="node-create-report" class="skill-node cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition-all text-center">
-                <div class="text-lg mb-1">🏆</div>
-                <div class="text-[10px] text-blue-600 font-bold">09 結案總監</div>
-                <div class="text-xs font-bold text-slate-800">CreateReport</div>
-                <div class="text-[10px] text-slate-500">成果網站・閉環歸檔</div>
-              </div>
-
-            </div>
-
+            <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow">
+              大腦指揮官
+            </span>
           </div>
-
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-            <span>🛡️ 嚴格防線：未經使用者審閱完整草稿，絕不私自寄信或上簽</span>
-            <span class="font-mono">EVT 唯一識別碼綁定</span>
+          <div class="space-y-1">
+            <div class="text-xs font-bold text-orange-600">👑 執行同仁（就是你！）</div>
+            <div class="text-sm font-black text-slate-900">負責動腦拆解 ＆ 拍板確認</div>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="inline-flex items-center gap-1 bg-amber-100 text-amber-900 text-xs font-extrabold px-2.5 py-1 rounded-lg">
+                ⏱️ 已幫你省下：<span id="saved-time-counter" class="text-orange-600 text-sm">180</span> 分鐘
+              </span>
+              <span id="coffee-badge" class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-lg">
+                ☕ 悠哉喝咖啡中
+              </span>
+            </div>
           </div>
         </div>
 
-        <!-- 右側：技能細節卡片面板 (5 欄) -->
-        <div class="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[580px]">
-          <div id="skill-detail-panel" class="space-y-4">
-            <!-- 預設載入 ActivityAgent -->
+        <!-- 右側：🎤 用講的嘛通！點擊一句話立即體驗 -->
+        <div class="lg:col-span-8 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-white text-sm shadow pulse-orange">🎤</span>
+              <span class="text-xs sm:text-sm font-black text-slate-800">點一句話試試看！「用講的也會通」，看小幫手怎麼幫你跑腿：</span>
+            </div>
+            <button onclick="toggleAutoTour()" id="auto-tour-btn" class="px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-black shadow transition flex items-center gap-1.5">
+              <span id="auto-tour-icon">▶</span> <span id="auto-tour-text">自動連播看全員出動</span>
+            </button>
           </div>
 
-          <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 -mx-6 -mb-6 p-4 rounded-b-2xl flex items-center justify-between text-xs">
-            <span class="text-slate-500">架構規則來源：</span>
-            <span class="font-mono text-blue-600 font-semibold">.agents/skills/activityagent/SKILL.md</span>
+          <!-- 5 個超白話語音指令按鈕 -->
+          <div class="flex flex-wrap gap-2">
+            <button onclick="triggerVoiceCommand(0)" id="cmd-btn-0" class="cmd-btn px-3 py-2 rounded-xl bg-white hover:bg-orange-100 border-2 border-orange-300 text-xs font-bold text-slate-800 shadow-sm transition flex items-center gap-1.5">
+              🗣️ 「幫我建檔 12/3 中興國中博覽會，先把戰情表開起來！」
+            </button>
+            <button onclick="triggerVoiceCommand(1)" id="cmd-btn-1" class="cmd-btn px-3 py-2 rounded-xl bg-white hover:bg-orange-100 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm transition flex items-center gap-1.5">
+              🗣️ 「幫我做好 30 系報名表，再擬好全校招募信草稿給我審！」
+            </button>
+            <button onclick="triggerVoiceCommand(2)" id="cmd-btn-2" id="cmd-btn-2" class="cmd-btn px-3 py-2 rounded-xl bg-white hover:bg-orange-100 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm transition flex items-center gap-1.5">
+              🗣️ 「抓最新報名名單更新戰情表，對完名冊幫我生出公差假公文！」
+            </button>
+            <button onclick="triggerVoiceCommand(3)" id="cmd-btn-3" class="cmd-btn px-3 py-2 rounded-xl bg-white hover:bg-orange-100 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm transition flex items-center gap-1.5">
+              🗣️ 「寄行前通知給報名老師，活動後把回傳照片做成成果網站！」
+            </button>
           </div>
         </div>
 
       </div>
-    </section>
 
-    <!-- ==================== 頁籤 2：戰情表先行設計理念 ==================== -->
-    <section id="section-dashboard-first" class="hidden space-y-6">
+      <!-- 動態語音對話黑板（顯示目前語音指令與小隊長回應） -->
+      <div class="mt-3 bg-slate-900 text-white rounded-xl p-3 sm:px-4 flex flex-wrap items-center justify-between gap-3 shadow-inner">
+        <div class="flex items-center gap-3">
+          <!-- 動態音波 -->
+          <div class="flex items-center gap-1 h-6 px-1">
+            <div class="wave-bar" style="animation-delay: 0s"></div>
+            <div class="wave-bar" style="animation-delay: 0.15s"></div>
+            <div class="wave-bar" style="animation-delay: 0.3s"></div>
+            <div class="wave-bar" style="animation-delay: 0.1s"></div>
+          </div>
+          <div class="text-xs sm:text-sm">
+            <span class="text-amber-400 font-black">你剛說：</span>
+            <span id="live-voice-text" class="font-bold text-white">「幫我建檔 12/3 中興國中博覽會，先把戰情表開起來！」</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+          <span>🎩 <strong>總管 ActivityAgent：</strong></span>
+          <span id="live-agent-reply" class="text-emerald-300 font-bold">收到！馬上派 01 建檔兵 ＋ 02 戰情官 先把戰情表架起來！</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 第二層（正中央核心）：一目了然的「省事戰情表 Dashboard」 ==================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch relative z-10">
       
-      <!-- 核心理念 Header -->
-      <div class="bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-emerald-800/40">
-        <div class="max-w-3xl space-y-3">
-          <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-emerald-400/20">
-            Design Philosophy · 本機優先・掌握全局
+      <!-- 左側：🎩 1號總管 ActivityAgent（幫你管秩序的包工頭） -->
+      <div class="lg:col-span-4 flex flex-col justify-between bg-gradient-to-b from-indigo-950 via-slate-900 to-indigo-950 text-white rounded-2xl p-5 border-2 border-indigo-400 shadow-xl relative overflow-hidden">
+        <div class="space-y-3 relative z-10">
+          <div class="flex items-center justify-between">
+            <span class="bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 text-xs font-black px-2.5 py-0.5 rounded-full">
+              第 1 個 Skill · 總管小隊長
+            </span>
+            <span class="text-xs text-emerald-300 font-bold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> 控管全局中
+            </span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-            為什麼我們堅持 <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">「先開戰情表 Dashboard」</span>？
-          </h2>
-          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            打破傳統「先跑一堆繁瑣流程才看得到結果」的盲區！活動一經建檔，第 02 階段立即在本機生成戰情表。不依賴外部連線、不卡在表單申請，第一時間為承辦人與主管開展「全校 30 個教學單位母表」與「7 項流程檢核點」的完整戰鬥全景！
-          </p>
+
+          <div onclick="focusHelper('activityagent')" class="cursor-pointer group flex items-center gap-3.5 bg-white/10 hover:bg-white/15 p-3.5 rounded-2xl border border-white/15 transition">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-sky-400 flex items-center justify-center text-4xl shadow-lg shrink-0 group-hover:scale-110 transition">
+              🎩
+            </div>
+            <div>
+              <div class="text-base sm:text-lg font-black text-white flex items-center gap-1.5">
+                ActivityAgent
+              </div>
+              <p class="text-xs text-indigo-200 font-medium leading-relaxed mt-0.5">
+                「老大您只管看戰情表！底下 9 隻小幫手誰該出場、做到哪裡，全由我幫您盯緊緊！」
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/90 rounded-xl p-3 border border-slate-700 space-y-2 text-xs">
+            <div class="font-bold text-amber-300 flex items-center gap-1.5">
+              <span>✨</span> 為什麼有總管超省事？
+            </div>
+            <ul class="space-y-1.5 text-slate-200">
+              <li class="flex items-start gap-1.5">
+                <span class="text-emerald-400 font-bold">✔</span>
+                <span><strong>不用背順序：</strong>叫他一聲，自動幫你傳喚對的小幫手。</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <span class="text-emerald-400 font-bold">✔</span>
+                <span><strong>隨時可中斷：</strong>等老師報名、等長官簽公文時自動存檔，明天回來接著做！</span>
+              </li>
+              <li class="flex items-start gap-1.5">
+                <span class="text-emerald-400 font-bold">✔</span>
+                <span><strong>絕對不越權：</strong>寄信、送簽前一定把草稿捧到您面前，您點頭才送出！</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-indigo-800/60 flex items-center justify-between text-xs text-indigo-300">
+          <span>👇 往下指揮 9 隻專職小幫手</span>
+          <span class="font-bold text-amber-300">👉 往右即時更新戰情表</span>
         </div>
       </div>
 
-      <!-- 四大核心理念卡片 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- 右側（8欄）：📊 省事、省空間、一目了然的「魔法戰情表 Dashboard」 -->
+      <div class="lg:col-span-8 bg-slate-900 text-white rounded-2xl p-5 border-2 border-emerald-400 shadow-xl flex flex-col justify-between relative overflow-hidden">
         
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3 hover:border-emerald-500 transition-all">
-          <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
-            1
+        <!-- 頂部：戰情表標題與「傳統混亂 vs 戰情表一表搞定」切換器 -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-xl">📊</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-black text-white">活動報名戰情表 Dashboard</h2>
+                <span id="dash-stage-pill" class="bg-emerald-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full">
+                  一表掌握全局・省事省空間
+                </span>
+              </div>
+              <p class="text-xs text-slate-400">不用開 20 個 Excel 跟信箱！打開這一張表，30 系報名與 7 大進度一目了然</p>
+            </div>
           </div>
-          <h3 class="font-bold text-slate-800 text-base">零依賴・本機率先成型</h3>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            不要求先連好 Google、不要求表單已建立、不要求先有 Excel 名單。在 Mode A 模式下，本機 HTML 立即生成可供檢閱，工作不中斷。
-          </p>
-          <div class="text-[11px] font-mono text-emerald-600 bg-emerald-50/70 p-2 rounded">
-            狀態：local_draft (尚未發布)
+
+          <!-- 趣味對比按鈕 -->
+          <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs font-bold">
+            <button onclick="switchDeskMode('clean')" id="btn-desk-clean" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 transition">
+              ✨ 現在：一張戰情表
+            </button>
+            <button onclick="switchDeskMode('messy')" id="btn-desk-messy" class="px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition">
+              😵 以前：桌面大爆炸
+            </button>
           </div>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3 hover:border-emerald-500 transition-all">
-          <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
-            2
-          </div>
-          <h3 class="font-bold text-slate-800 text-base">30 系所母表先攤開</h3>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            從臺中科大教學單位母表出發，30 個系所直接陳列於儀表板。開放前標記「等待開放」，開放後誰報名、誰缺席一目了然，隨時掌握全校覆蓋率。
-          </p>
-          <div class="text-[11px] font-mono text-blue-600 bg-blue-50/70 p-2 rounded">
-            覆蓋率分母明確 · 催辦不漏接
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3 hover:border-emerald-500 transition-all">
-          <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
-            3
-          </div>
-          <h3 class="font-bold text-slate-800 text-base">7 項檢核嚴守相依性</h3>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            在戰情表內建 7 項行政檢核。嚴格規定：<strong>「未完成報名名冊人工核對前，禁止勾選公文已上簽」</strong>！用軟體架構守護行政安全。
-          </p>
-          <div class="text-[11px] font-mono text-amber-700 bg-amber-50/70 p-2 rounded">
-            registrationConfirmed ➔ officialSubmitted
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3 hover:border-emerald-500 transition-all">
-          <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xl font-bold">
-            4
-          </div>
-          <h3 class="font-bold text-slate-800 text-base">單一事實來源・持續匯流</h3>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            戰情表不是看過即丟的報表！後續 03 表單短網址、04 ePortal草稿、05 最新Excel、06 公文文號、07 行前通知，全部持續回寫匯流到這張戰情表。
-          </p>
-          <div class="text-[11px] font-mono text-purple-700 bg-purple-50/70 p-2 rounded">
-            兩網址齊備 ➔ 首次發布 Sites
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 戰情表兩段式發布與門檻圖解 -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <span>🚦</span> 戰情表的生命週期：從本機草稿到雲端公開
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+        <!-- 模式 A：乾淨清爽的戰情表預覽（預設） -->
+        <div id="desk-clean-view" class="my-3 space-y-4">
           
-          <!-- 階段 1 -->
-          <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-3 relative">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500">STAGE 02A</span>
-              <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">本機成型</span>
+          <!-- 3 個超直覺大字指標 -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-center">
+              <div class="text-xs text-slate-400">🎯 活動狀態</div>
+              <div id="dash-metric-status" class="text-sm sm:text-base font-black text-amber-300 mt-1">12/3 中興國中 (本機就緒)</div>
             </div>
-            <h4 class="font-bold text-slate-800 text-base">Mode A：本機初始戰情表</h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              InitActivity 一完成立即開出。無表單、無 Sheet、無 Excel。統計顯示「尚未開放 / 尚無統計」，避免假零或假進度。
-            </p>
-            <div class="text-[11px] text-slate-500 bg-white p-2.5 rounded border border-slate-200">
-              📂 產出：<code class="text-blue-600 font-mono">戰情表網站/dist/index.html</code>
+            <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-center">
+              <div class="text-xs text-slate-400">🏫 30 系所報名進度</div>
+              <div id="dash-metric-units" class="text-sm sm:text-base font-black text-emerald-400 mt-1">母表 30 系已載入</div>
             </div>
-          </div>
-
-          <!-- 階段 2 (門檻) -->
-          <div class="border-2 border-dashed border-amber-300 rounded-xl p-5 bg-amber-50/50 space-y-3 relative">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-700">GATEWAY</span>
-              <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">首次發布門檻</span>
-            </div>
-            <h4 class="font-bold text-amber-950 text-base">兩大網址嚴格驗證</h4>
-            <p class="text-xs text-amber-900 leading-relaxed">
-              只有同時滿足：
-              <br>1. Google 報名表已發布 (可用短網址)
-              <br>2. 回覆 Google Sheet 已綁定 (試算表網址)
-              <br>缺一不可！驗證通過後才授權發布至 Sites！
-            </p>
-            <div class="text-[11px] text-amber-800 bg-white p-2.5 rounded border border-amber-200">
-              🔒 守護：避免半成品或假網址流出
+            <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-center">
+              <div class="text-xs text-slate-400">🛡️ 真人把關狀態</div>
+              <div id="dash-metric-guard" class="text-sm sm:text-base font-black text-sky-300 mt-1">等待您下令出動</div>
             </div>
           </div>
 
-          <!-- 階段 3 -->
-          <div class="border border-emerald-300 rounded-xl p-5 bg-emerald-50/50 space-y-3 relative">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-emerald-700">STAGE 02B/C</span>
-              <span class="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">雲端戰情</span>
+          <!-- 7 項行政檢核進度燈（點亮動畫） -->
+          <div class="bg-slate-800/60 rounded-xl p-3.5 border border-slate-700/80 space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-300">🚥 戰情表內建「7 項進度打勾」— 小幫手做完一項，進度推進一格：</span>
+              <span class="text-amber-300 font-bold">🔒 未核對名單前，自動鎖住公文上簽！</span>
             </div>
-            <h4 class="font-bold text-emerald-950 text-base">Mode B/C：線上發布與名冊更新</h4>
-            <p class="text-xs text-emerald-900 leading-relaxed">
-              沿用原 Site 網址更新，不重新建站。隨時同步最新報名 XLSX、計算單位覆蓋率、提供未報名 CSV 下載。
-            </p>
-            <div class="text-[11px] text-emerald-800 bg-white p-2.5 rounded border border-emerald-200">
-              🌐 產出：<code class="text-emerald-700 font-mono">https://*.chatgpt.site</code>
+            <div class="grid grid-cols-2 sm:grid-cols-7 gap-2 text-center" id="seven-checks-grid">
+              <div id="chk-1" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">📢</div>
+                <div class="font-bold mt-0.5">1.寄招募信</div>
+              </div>
+              <div id="chk-2" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">📬</div>
+                <div class="font-bold mt-0.5">2.寄發成功</div>
+              </div>
+              <div id="chk-3" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">👀</div>
+                <div class="font-bold mt-0.5">3.核對報名</div>
+              </div>
+              <div id="chk-4" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">📑</div>
+                <div class="font-bold mt-0.5">4.公文上簽</div>
+              </div>
+              <div id="chk-5" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">✉️</div>
+                <div class="font-bold mt-0.5">5.行前通知</div>
+              </div>
+              <div id="chk-6" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">📸</div>
+                <div class="font-bold mt-0.5">6.收到成果</div>
+              </div>
+              <div id="chk-7" class="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all">
+                <div class="text-base">🏆</div>
+                <div class="font-bold mt-0.5">7.成果網站</div>
+              </div>
             </div>
           </div>
-
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ==================== 頁籤 3：動態演練模擬器 ==================== -->
-    <section id="section-simulator" class="hidden space-y-6">
-      
-      <!-- 控制列 -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">招生活動行政全流程 · 動態演練推進器</h2>
-          <p class="text-xs text-slate-500">點擊「單步推進」或「自動播放」，觀察 ActivityAgent 如何協同 9 個打工仔與點亮戰情表！</p>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button onclick="simStepPrev()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
-            ◀ 上一步
-          </button>
-          <button onclick="simTogglePlay()" id="sim-play-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow transition flex items-center gap-1.5">
-            <span id="sim-play-icon">▶</span> <span id="sim-play-text">自動演練</span>
-          </button>
-          <button onclick="simStepNext()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
-            下一步 ▶
-          </button>
-          <button onclick="simReset()" class="px-3 py-2 text-slate-400 hover:text-slate-600 text-xs transition">
-            重設
+        <!-- 模式 B：以前傳統桌面大爆炸（點擊切換才顯示，製造強烈反差感） -->
+        <div id="desk-messy-view" class="hidden my-3 bg-rose-950/60 border-2 border-dashed border-rose-400/60 rounded-xl p-4 text-center space-y-3">
+          <div class="text-3xl">😱 📄 📁 📊 📧 📝 😭</div>
+          <div class="text-sm sm:text-base font-black text-rose-200">
+            以前沒有戰情表：桌面開滿 15 個分頁，找一個名單翻遍信箱！
+          </div>
+          <div class="flex flex-wrap justify-center gap-2 text-xs text-rose-200">
+            <span class="bg-rose-900/80 px-2.5 py-1 rounded border border-rose-700">❌ 報名表最新版_最終版_v3.xlsx</span>
+            <span class="bg-rose-900/80 px-2.5 py-1 rounded border border-rose-700">❌ 到底哪個系還沒報名？人工數花眼</span>
+            <span class="bg-rose-900/80 px-2.5 py-1 rounded border border-rose-700">❌ 公文名單跟表單對不起來</span>
+            <span class="bg-rose-900/80 px-2.5 py-1 rounded border border-rose-700">❌ 長官突然問進度答不出來</span>
+          </div>
+          <button onclick="switchDeskMode('clean')" class="px-4 py-1.5 rounded-full bg-emerald-500 text-slate-950 text-xs font-black shadow">
+            👉 快切回「一張戰情表」拯救人生！
           </button>
         </div>
-      </div>
 
-      <!-- 推進進度條 -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <div class="flex items-center justify-between text-xs font-bold text-slate-600">
-          <span id="sim-current-step-label">當前階段：準備開始</span>
-          <span id="sim-progress-percent" class="font-mono text-blue-600">0%</span>
-        </div>
-        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-          <div id="sim-progress-bar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 h-full w-0 transition-all duration-500"></div>
-        </div>
-
-        <!-- 9 步導覽節點 -->
-        <div class="grid grid-cols-9 gap-1 text-center pt-2">
-          <button onclick="simGoTo(1)" id="step-node-1" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">01 建檔</button>
-          <button onclick="simGoTo(2)" id="step-node-2" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">02 戰情A</button>
-          <button onclick="simGoTo(3)" id="step-node-3" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">03 表單</button>
-          <button onclick="simGoTo(4)" id="step-node-4" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">04 公告</button>
-          <button onclick="simGoTo(5)" id="step-node-5" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">05 名冊</button>
-          <button onclick="simGoTo(6)" id="step-node-6" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">06 公文</button>
-          <button onclick="simGoTo(7)" id="step-node-7" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">07 行前</button>
-          <button onclick="simGoTo(8)" id="step-node-8" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">08 成果</button>
-          <button onclick="simGoTo(9)" id="step-node-9" class="step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100">09 網站</button>
+        <!-- 戰情表底部口號 -->
+        <div class="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
+          <span>💡 <strong>先開戰情表的好處：</strong>一開始就把全校 30 系跟 7 大步驟擺在眼前，完全不慌張！</span>
+          <span class="text-emerald-400 font-bold">🔒 預設私密 (Owner-Private)，分享給長官就能一秒匯報進度！</span>
         </div>
       </div>
 
-      <!-- 演練情境雙欄動態看板 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- 左卡：當前小幫手執勤狀態 -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <span class="text-xs font-bold uppercase tracking-wider text-blue-600">調度中打工仔與任務</span>
-            <span id="sim-active-agent-badge" class="bg-blue-100 text-blue-800 text-[11px] px-2.5 py-0.5 rounded-full font-bold">ActivityAgent 調度中</span>
-          </div>
-
-          <div id="sim-agent-card" class="space-y-4">
-            <!-- 動態填充 -->
-          </div>
-        </div>
-
-        <!-- 右卡：戰情表與工作進度連動反應 -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">戰情表連動響應 (Dashboard State)</span>
-            <span id="sim-dashboard-status-badge" class="bg-slate-100 text-slate-600 text-[11px] px-2.5 py-0.5 rounded-full font-bold font-mono">Mode A</span>
-          </div>
-
-          <div id="sim-dashboard-reaction" class="space-y-4">
-            <!-- 動態填充 -->
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- ==================== 頁籤 4：10 個打工仔完整矩陣 ==================== -->
-    <section id="section-matrix" class="hidden space-y-6">
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-        <div class="mb-6">
-          <h2 class="text-xl sm:text-2xl font-bold text-slate-900">10 個打工仔招生行政技能速查矩陣</h2>
-          <p class="text-xs sm:text-sm text-slate-500">整理日期：2026 年 10 月 · 嚴格遵循工作進度規範與人機審查防線</p>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs sm:text-sm border-collapse">
-            <thead>
-              <tr class="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold">
-                <th class="p-3">角色／序號</th>
-                <th class="p-3">技能名稱</th>
-                <th class="p-3">主要職責</th>
-                <th class="p-3">核心產出</th>
-                <th class="p-3 text-red-600">人機安全防線 (不可越權)</th>
-              </tr>
-            </thead>
-            <tbody id="matrix-table-body" class="divide-y divide-slate-100 text-slate-700">
-              <!-- 動態渲染 10 個技能 -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- 頁腳說明 -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 text-xs text-center mt-auto">
-    <div class="max-w-7xl mx-auto px-4 space-y-2">
-      <p>國立臺中科技大學 招生行政專案 · 10 個 AI 打工仔高互動架構展示系統</p>
-      <p class="text-slate-500 font-mono text-[11px]">遵守 AGENTS.md 總控規範 · 本機戰情先行 · 7 項檢核嚴格相依 · 保持所有待審畫面</p>
     </div>
-  </footer>
 
-  <!-- 核心資料與互動邏輯 Script -->
+    <!-- ==================== 第三層：你養的 9 隻跑腿小幫手工坊（點擊看可愛對話） ==================== -->
+    <div class="space-y-3 relative z-10">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🐝</span>
+          <h3 class="text-base sm:text-lg font-black text-slate-900">
+            底下這 9 隻專職小幫手，專門幫你把「日常重複瑣事」吃光光！
+          </h3>
+          <span class="text-xs bg-orange-100 text-orange-800 font-bold px-2.5 py-0.5 rounded-full">
+            👆 點擊任一隻小幫手，聽聽他怎麼幫你省事
+          </span>
+        </div>
+      </div>
+
+      <!-- 小幫手說話氣泡展示框（點擊任一小幫手時生動對話） -->
+      <div id="helper-speech-box" class="speech-bubble bg-slate-900 text-white rounded-2xl p-4 shadow-lg border-2 border-amber-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div id="bubble-icon" class="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400 flex items-center justify-center text-3xl shrink-0">
+            🖥️
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="bubble-title" class="text-sm sm:text-base font-black text-amber-300">02號 戰情看板員 (CreateSite)</span>
+              <span id="bubble-badge" class="bg-emerald-500 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">省下翻找檔案的麻煩</span>
+            </div>
+            <p id="bubble-quote" class="text-xs sm:text-sm text-white font-medium leading-relaxed">
+              「老大！活動一建完檔，我馬上在電腦裡幫您把『戰情表』開好！不用等表單、不用等名單，30 個系所跟 7 個步驟一字排開，您隨時打開都清清楚楚！」
+            </p>
+          </div>
+        </div>
+        <div class="bg-slate-800 rounded-xl p-2.5 border border-slate-700 shrink-0 w-full sm:w-64 text-xs space-y-1">
+          <div class="text-rose-300 line-through" id="bubble-old">❌ 以前：四處翻信箱、開十幾個檔案找進度</div>
+          <div class="text-emerald-300 font-bold" id="bubble-new">✅ 現在：打開一張戰情表，進度一秒看懂！</div>
+        </div>
+      </div>
+
+      <!-- 9 隻小幫手活潑卡片網格 -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2.5 pt-2">
+        
+        <!-- 01 -->
+        <div onclick="focusHelper('initactivity')" id="card-initactivity" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-orange-600 bg-orange-50 rounded-full py-0.5 mb-1.5">01 建檔兵</div>
+            <div class="text-3xl my-1">🐣</div>
+            <div class="text-xs font-black text-slate-900">整理邀請</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">來文丟給我，3秒建好資料夾</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            省下打字建檔
+          </div>
+        </div>
+
+        <!-- 02 (核心高亮) -->
+        <div onclick="focusHelper('createsite')" id="card-createsite" class="helper-card active-helper cursor-pointer bg-white rounded-2xl p-3 border-2 border-emerald-500 text-center flex flex-col justify-between shadow-sm relative">
+          <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded-full shadow whitespace-nowrap">
+            ⭐ 先開戰情表
+          </span>
+          <div>
+            <div class="text-xs font-black text-emerald-700 bg-emerald-50 rounded-full py-0.5 mb-1.5 mt-1">02 戰情官</div>
+            <div class="text-3xl my-1">🖥️</div>
+            <div class="text-xs font-black text-slate-900">戰情看板</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">一表看30系與7大進度</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            省空間一目了然
+          </div>
+        </div>
+
+        <!-- 03 -->
+        <div onclick="focusHelper('creategoogleform')" id="card-creategoogleform" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-sky-600 bg-sky-50 rounded-full py-0.5 mb-1.5">03 表單師</div>
+            <div class="text-3xl my-1">📋</div>
+            <div class="text-xs font-black text-slate-900">做報名表</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">30系選單自動填好串Sheet</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免手貼30個系
+          </div>
+        </div>
+
+        <!-- 04 -->
+        <div onclick="focusHelper('sendgroupmail')" id="card-sendgroupmail" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-amber-600 bg-amber-50 rounded-full py-0.5 mb-1.5">04 廣播員</div>
+            <div class="text-3xl my-1">📯</div>
+            <div class="text-xs font-black text-slate-900">群組公告</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">擬好招募信幫填ePortal</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免想破頭寫信
+          </div>
+        </div>
+
+        <!-- 05 -->
+        <div onclick="focusHelper('updatenews')" id="card-updatenews" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-purple-600 bg-purple-50 rounded-full py-0.5 mb-1.5">05 偵探兵</div>
+            <div class="text-3xl my-1">🕵️</div>
+            <div class="text-xs font-black text-slate-900">抓報名表</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">抓最新Excel算誰還沒報</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免人工對名單
+          </div>
+        </div>
+
+        <!-- 06 -->
+        <div onclick="focusHelper('createnormal')" id="card-createnormal" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-rose-600 bg-rose-50 rounded-full py-0.5 mb-1.5">06 小書僮</div>
+            <div class="text-3xl my-1">📜</div>
+            <div class="text-xs font-black text-slate-900">寫公文稿</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">套範本自動排好Word簽呈</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免重打公文表
+          </div>
+        </div>
+
+        <!-- 07 -->
+        <div onclick="focusHelper('sendeventmail')" id="card-sendeventmail" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-teal-600 bg-teal-50 rounded-full py-0.5 mb-1.5">07 小保母</div>
+            <div class="text-3xl my-1">🎒</div>
+            <div class="text-xs font-black text-slate-900">行前通知</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">自動帶入名單夾好必備附件</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免怕漏夾附件
+          </div>
+        </div>
+
+        <!-- 08 -->
+        <div onclick="focusHelper('collecteventresults')" id="card-collecteventresults" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-indigo-600 bg-indigo-50 rounded-full py-0.5 mb-1.5">08 收集狂</div>
+            <div class="text-3xl my-1">📸</div>
+            <div class="text-xs font-black text-slate-900">收成果照</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">去信箱認領老師照片歸檔</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免逐封下載改名
+          </div>
+        </div>
+
+        <!-- 09 -->
+        <div onclick="focusHelper('create-report')" id="card-create-report" class="helper-card cursor-pointer bg-white rounded-2xl p-3 border-2 border-slate-200 text-center flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="text-xs font-black text-pink-600 bg-pink-50 rounded-full py-0.5 mb-1.5">09 設計師</div>
+            <div class="text-3xl my-1">🎨</div>
+            <div class="text-xs font-black text-slate-900">成果網站</div>
+            <p class="text-xs text-slate-500 mt-1 leading-snug">照片圖說一鍵變漂亮網頁</p>
+          </div>
+          <div class="mt-2 pt-1.5 border-t border-slate-100 text-xs font-bold text-emerald-600">
+            免熬夜做報告
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 底部總結金句橫幅 -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🎉</span>
+        <div class="text-xs sm:text-sm font-medium leading-relaxed">
+          <strong class="text-amber-300">學會這套「大腦拆解 ＋ 戰情表先行」思維：</strong>
+          不管是招生、研習營、會議還是評鑑，把重複瑣事交給小幫手，把珍貴時間留給自己！
+        </div>
+      </div>
+      <a href="admission/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 text-xs font-black shadow-md transition shrink-0">
+        🚀 馬上點我看 10 個小幫手實作步驟 ▶
+      </a>
+    </div>
+
+  </div>
+
   <script>
-    // 10 個打工仔資料庫
-    const SKILLS_DATA = {
+    // 小幫手生動台詞資料庫
+    const HELPERS_INFO = {
       activityagent: {
-        id: 'activityagent',
-        title: 'ActivityAgent（招生行政總控）',
-        role: '總控指揮官・專案大腦',
-        badge: '總控入口',
-        icon: '👑',
-        color: 'emerald',
-        desc: '全流程指揮中心。引導使用者以「選項優先」確認活動與承辦人；先建本機戰情表，待表單與 Sheet 兩連結齊備才發布 Sites；依序調度九大技能，維護工作進度.json，支援中斷續作。',
-        inputs: ['使用者招生邀請、文字或既有活動代號', '承辦人基本資料', '既有工作進度.json'],
-        outputs: ['唯一活動資料夾 (115XXXX學校)', '活動資料.json / 工作進度.json', '調度各子技能執行指令'],
-        guardrail: '只查看時不寫入任何檔案；寄信前必確認草稿；絕不自動越過外部等待點或省略人工核對！',
-        philosophy: '「總控不是常駐服務，而是對話協調者。等待是常態，AI 不催促、不偷跑。」'
+        icon: '🎩',
+        title: '總管小隊長 (ActivityAgent)',
+        badge: '管秩序大總管・支援中斷續作',
+        quote: '「老大您喝茶！您不用記先叫誰、後叫誰，只要跟我說一聲，我就幫您派對的小幫手出場，還會自動幫您把進度記在帳本裡！」',
+        oldWay: '❌ 以前：自己記十幾個行政步驟，做到一半被打斷就忘記做到哪',
+        newWay: '✅ 現在：問總管一聲「繼續這個活動」，無縫接軌繼續跑！',
+        checks: [1, 2, 3, 4, 5, 6, 7]
       },
       initactivity: {
-        id: 'initactivity',
-        title: '01. InitActivity（活動建檔兵）',
-        role: '活動建立・承辦核對',
-        badge: '第 01 階段',
-        icon: '📥',
-        color: 'blue',
-        desc: '收到招生邀請信或公文後，核對活動資訊（時間、地點、對象、截止日），確認承辦人聯絡資訊，建立唯一的活動代號（EVT-YYYYMMDD-001）與專案資料夾。',
-        inputs: ['招生邀請信內文 / 電子公文文字', '承辦人姓名、單位、電話、Email'],
-        outputs: ['承辦人資料.json', '信件署名.txt', '活動資訊.txt', '活動資料.json', '活動成果/ 資料夾'],
-        guardrail: '承辦人資訊必須由使用者明確確認；未確認前不將建檔標記為 completed。',
-        philosophy: '「活動身份一經定錨，全流程沿用唯一 EVT 代號，不重複建立平行資料夾。」'
+        icon: '🐣',
+        title: '01號 建檔小精靈 (InitActivity)',
+        badge: '省下打字建資料夾的瑣事',
+        quote: '「把邀請信或公文貼給我！我幫您把活動時間、地點、承辦人簽名檔一次整理好，連專屬資料夾都幫您建得整整齊齊！」',
+        oldWay: '❌ 以前：手動開資料夾、從公文慢慢複製時間地點、重打聯絡人署名',
+        newWay: '✅ 現在：文字貼上 3 秒建檔完成，資訊清楚又不怕漏看！',
+        checks: []
       },
       createsite: {
-        id: 'createsite',
-        title: '02. CreateSite（戰情官・本機先行）',
-        role: '報名戰情表・進度總管',
-        badge: '第 02 階段 (先行核心)',
-        icon: '📊',
-        color: 'emerald',
-        desc: '【全案核心樞紐】活動初始化後立即在本機建立 HTML 戰情表（Mode A）。先展現 30 系所母表與 7 項行政檢核；表單與 Sheet 兩網址齊備後才首次發布線上；後續名單與進度持續回寫本表！',
-        inputs: ['活動資料.json', '30 個教學單位母表', '後續：報名表短網址、回覆Sheet連結、最新Excel'],
-        outputs: ['戰情表網站/dist/index.html (本機草稿)', '戰情表紀錄.json', '線上私人站 (https://*.chatgpt.site)'],
-        guardrail: '【嚴格依賴】未完成「確認線上表單報名資訊」前，禁止勾選「公文已上簽」！',
-        philosophy: '「先開戰情表，掌握全局！不因表單未建或沒名單而停頓，一開始就有完整視圖。」'
+        icon: '🖥️',
+        title: '02號 戰情看板員 (CreateSite)',
+        badge: '省事省空間・一張表看全局',
+        quote: '「老大！活動一建完檔，我馬上在電腦裡幫您把『戰情表』開好！不用等表單、不用等名單，30 個系所跟 7 個步驟一字排開，您隨時打開都清清楚楚！」',
+        oldWay: '❌ 以前：四處翻信箱、開十幾個檔案找進度，長官臨時問起手忙腳亂',
+        newWay: '✅ 現在：打開一張戰情表，30 系誰報名、走到哪一步，一秒看懂！',
+        checks: [1, 2, 3, 4, 5, 6, 7]
       },
       creategoogleform: {
-        id: 'creategoogleform',
-        title: '03. CreateGoogleForm（表單師）',
-        role: '線上報名表・回覆Sheet',
-        badge: '第 03 階段',
-        icon: '📝',
-        color: 'blue',
-        desc: '透過側邊瀏覽器或 Chrome 外掛建立 Google 報名表。完整填寫所有題目、單位母表下拉選單、五種職稱與回條設定；通過未發布檢查才正式發布，並立即建立連結回覆試算表。',
-        inputs: ['已確認活動資訊', '教學單位母表 (30系所)', '指定 Google 帳號'],
-        outputs: ['報名短網址 (https://forms.gle/...)', 'Google Sheet 連結', '表單編輯網址'],
-        guardrail: '嚴格遵守「設計完整後才發布」！絕不先發布空白半成品再補題目；保留編輯分頁由使用者關閉。',
-        philosophy: '「兩個網址（表單+Sheet）齊備，才能解鎖戰情表的首次線上發布門檻。」'
+        icon: '📋',
+        title: '03號 表單造型師 (CreateGoogleForm)',
+        badge: '省下手動輸入 30 個系所的苦工',
+        quote: '「做 Google 報名表最煩的就是貼 30 個系所跟職稱選單對吧？交給我！我全部幫您設好、檢查完再發布，順便連好回覆試算表，把兩個網址直接鑲進戰情表！」',
+        oldWay: '❌ 以前：一個系一個系複製貼上做下拉選單，還常忘記開回條或連試算表',
+        newWay: '✅ 現在：題目、選單、試算表一次自動搞定，直接補進戰情表發布！',
+        checks: []
       },
       sendgroupmail: {
-        id: 'sendgroupmail',
-        title: '04. SendGroupMail（校務信差）',
-        role: '全校招募公告・ePortal',
-        badge: '第 04 階段',
-        icon: '📢',
-        color: 'blue',
-        desc: '依已確認活動資料與報名短網址，自動擬定國立臺中科技大學 ePortal 群組信草稿，經承辦人確認內容後，操作 ePortal 填寫並在最終提交前再次請求確認。',
-        inputs: ['活動資料.json', '報名表短網址', '信件署名.txt'],
-        outputs: ['群組寄信草稿.txt', '群組寄信紀錄.json (含暫存ID/提交狀態)'],
-        guardrail: '擬完草稿不等於已寄出；登入與最終「提交」前必須取得承辦人明確授權。',
-        philosophy: '「全校廣播必須字字斟酌，草稿預覽是 AI 與承辦人之間的安全防護罩。」'
+        icon: '📯',
+        title: '04號 廣播小郵差 (SendGroupMail)',
+        badge: '省下想破頭寫全校公告的時間',
+        quote: '「招募信草稿我照著活動資料自動寫好囉！附上您的聯絡署名跟報名短網址，等您看過點頭，我就幫您填進 ePortal！」',
+        oldWay: '❌ 以前：每次辦活動都要重新翻舊信改日期、改網址，深怕貼錯連結',
+        newWay: '✅ 現在：小郵差自動擬好草稿請您過目，點頭確認才送出！',
+        checks: [1, 2]
       },
       updatenews: {
-        id: 'updatenews',
-        title: '05. UpdateNews（情報員）',
-        role: '回覆下載・名冊比對',
-        badge: '第 05 階段',
-        icon: '🔄',
-        color: 'blue',
-        desc: '自 Google Sheet 下載最新 XLSX 回覆檔至本機專案工作區，比對單位別名（如資管系➔資訊管理系），區分確認參加人員與未報名單位，供戰情表與公文草稿使用。',
-        inputs: ['已連結之 Google Sheet 回覆試算表', '工作區教學單位母表'],
-        outputs: ['報名資料/報名資料最新.xlsx', '報名資料/來源紀錄.json (含雜湊與時間戳)'],
-        guardrail: '下載完成不等於報名確認已勾選！名冊更新必須提示承辦人重新核對。',
-        philosophy: '「真實資料留在本地 Excel，保留每一筆原始回覆，絕不默默篡改或丟棄待核對資料。」'
+        icon: '🕵️',
+        title: '05號 名單偵探兵 (UpdateNews)',
+        badge: '省下人工比對 Excel 的眼力',
+        quote: '「我去把最新報名 Excel 抓下來啦！誰寫『資管系』我自動對回『資訊管理系』，哪幾個系還沒派人報名，戰情表上馬上幫您標出來！」',
+        oldWay: '❌ 以前：下載 Excel 自己用眼睛看哪些系還沒報名，算覆蓋率算到頭暈',
+        newWay: '✅ 現在：自動下載比對 30 系母表，未報名單位一鍵匯出！',
+        checks: [3]
       },
       createnormal: {
-        id: 'createnormal',
-        title: '06. CreateNormal（公文士）',
-        role: '公差假上簽草稿・Word產製',
-        badge: '第 06 階段',
-        icon: '📑',
-        color: 'blue',
-        desc: '依專案「公文範本/」、活動資訊與已核對之教師名冊，自動產出標準可編輯的 Word (.docx) 上簽公文或便簽草稿，填入活動公差假依據與報名教師名冊。',
-        inputs: ['公文範本/ 格式', '活動資料.json', '已核對報名人員名單'],
-        outputs: ['活動上簽公文草稿.docx', '公文草稿紀錄.json'],
-        guardrail: '公文草稿完成不等於公文已送簽！未正式送簽前，戰情表「公文已上簽」維持未勾選。',
-        philosophy: '「行政簽辦有其嚴謹程序，AI 負責完美排版草稿，送簽決策留給承辦人。」'
+        icon: '📜',
+        title: '06號 公文小書僮 (CreateNormal)',
+        badge: '省下公差假簽呈排版打字時間',
+        quote: '「報告老大！看戰情表您已經核對完報名名單了，我馬上照著學校公文範本，把所有報名老師的系所姓名排進 Word 簽呈草稿裡！」',
+        oldWay: '❌ 以前：對照 Excel 把老師名字一個一個敲進 Word 公文，超怕打錯字',
+        newWay: '✅ 現在：確認名冊後自動生成標準 Word 公文草稿，直接檢查送簽！',
+        checks: [4]
       },
       sendeventmail: {
-        id: 'sendeventmail',
-        title: '07. SendEventMail（行前嚮導）',
-        role: '已報名教師行前通知・Gmail',
-        badge: '第 07 階段',
         icon: '✉️',
-        color: 'blue',
-        desc: '活動日前透過 Gmail 寄送行前通知給已報名之師長。自動帶入集合時間、地點、承辦人署名，盤點並夾帶「必要附件/」（公差假流程、倫理守則、交通單、公文PDF）。',
-        inputs: ['已報名教師名單與 Email', '必要附件/ 檔案清單', '正式公文文號/PDF'],
-        outputs: ['活動通知信草稿.txt', '活動通知信紀錄.json', 'Gmail 寄送紀錄 (thread_id)'],
-        guardrail: '完整收件名單、寄件帳號、信件全文與全部附件清單，必須先展示給承辦人確認後才可寄送。',
-        philosophy: '「行前通知代表學校專業形象，一人一信或密件副本、附件齊全，絕不容許漏失。」'
+        title: '07號 行前小保母 (SendEventMail)',
+        badge: '省下逐一核對收件人與附件的焦慮',
+        quote: '「出發前要寄行前通知囉！我幫您把報名老師的信箱抓好，連同交通明細表、請假流程、倫理守則跟公文 PDF 全部夾好草稿，等您檢查按寄出！」',
+        oldWay: '❌ 以前：寄行前通知最怕漏複製某位老師 Email，或忘記夾交通費附件',
+        newWay: '✅ 現在：收件人與必備附件自動盤點夾好，草稿給您看過才寄出！',
+        checks: [5]
       },
       collecteventresults: {
-        id: 'collecteventresults',
-        title: '08. CollectEventResults（成果快照兵）',
-        role: '活動成果收件・照片整理',
-        badge: '第 08 階段',
         icon: '📸',
-        color: 'blue',
-        desc: '活動結束後檢查 Gmail 回信，依報名名冊辨識附件與照片歸屬（包含代寄情境），下載至「活動成果/」資料夾妥善保存，可選寄送紙本交通證明繳交提醒。',
-        inputs: ['Gmail 師長回覆郵件', '報名教師名單', '活動成果/ 目錄'],
-        outputs: ['活動成果/ 整理後照片與文件', '收集紀錄.json (含確認繳交與未繳交清單)'],
-        guardrail: '只負責電子附件收集整理，不負責紙本單據收訖之法定認定。',
-        philosophy: '「成果文件辨別作者歸屬，讓辛苦帶回宣導照片的老師們每一份心血都被正確歸檔。」'
+        title: '08號 成果收集狂 (CollectEventResults)',
+        badge: '省下逐封開信下載照片改名的瑣事',
+        quote: '「活動圓滿結束！我去 Gmail 幫您巡視老師們的回信，把每張宣導照片認領好是哪位老師拍的，乖乖存進『活動成果』資料夾！」',
+        oldWay: '❌ 以前：信箱裡幾十封回信，一封一封點開下載附件、改檔名對名單',
+        newWay: '✅ 現在：自動掃描回信、辨識老師歸屬並歸檔，還能提醒繳交紙本單據！',
+        checks: [6]
       },
       'create-report': {
-        id: 'create-report',
-        title: '09. CreateReport（結案總監）',
-        role: '結案報告・成果網站',
-        badge: '第 09 階段',
-        icon: '🏆',
-        color: 'emerald',
-        desc: '整合活動整體資訊、簽到統計、精選活動照片與成果文件說明，自動產出對外展示的活動成果網站或 Markdown 報告，讓長官與全校師長看見招生宣導具體成效。',
-        inputs: ['活動成果/ 照片與說明文件', '報名統計數據', '活動資料.json'],
-        outputs: ['成果網站/ 原始檔與靜態網頁', '成果網站紀錄.json', '線上成果展示站'],
-        guardrail: '來源若無新照片或資料變更時，維持既有網站，不無意義重複重建或洗版。',
-        philosophy: '「從收到第一封邀請到最後結案報告出爐，形成完美的工作流閉環！」'
+        icon: '🎨',
+        title: '09號 結案設計師 (CreateReport)',
+        badge: '省下熬夜排版做成果報告的苦差事',
+        quote: '「最後一步交給我！我把收集好的活動照片跟說明，一鍵編成超精美的『活動成果網站』，戰情表 7 顆燈全亮，您可以開心下班喝咖啡啦！」',
+        oldWay: '❌ 以前：照片貼進 Word 跑版跑到崩潰，做一份結案報告花掉半天',
+        newWay: '✅ 現在：自動擷取照片與圖說生成私人成果網站，完美收工！',
+        checks: [7]
       }
     };
 
-    // 模擬器各步驟資料
-    const SIMULATOR_STEPS = [
+    // 4 組語音指令情境模擬
+    const VOICE_SCENARIOS = [
       {
-        step: 0,
-        title: '專案準備中',
-        agentKey: 'activityagent',
-        agentBadge: '總控就位',
-        agentDesc: 'ActivityAgent 讀取專案 AGENTS.md 與現存資料，以選項優先方式詢問承辦人：「這次要從哪裡開始？」',
-        dashStatus: '尚未建立',
-        dashReaction: '戰情表尚未建立。總控等待承辦人提供招生邀請內容與聯絡資訊。',
-        metric: '0 / 9 技能已調度',
-        percent: '0%'
+        speech: '「幫我建檔 12/3 中興國中博覽會，先把戰情表開起來！」',
+        reply: '收到！馬上派 01 建檔兵 ＋ 02 戰情官 先把本機戰情表架起來！',
+        activeHelper: 'createsite',
+        statusText: '12/3 中興國中 (戰情表已開啟)',
+        unitsText: '30 系母表已就位 (等待開放)',
+        guardText: '本機草稿完成・零依賴秒開',
+        savedMins: 45,
+        coffeeText: '☕ 省下建檔翻找 45 分鐘',
+        litChecks: []
       },
       {
-        step: 1,
-        title: '第 01 步：InitActivity 活動建檔',
-        agentKey: 'initactivity',
-        agentBadge: '建檔兵執勤中',
-        agentDesc: '讀取中興國中升學博覽會邀請信，定錨代號 EVT-20261203-001，確認承辦人許昱祥資訊，建立 1151203中興國中 資料夾。',
-        dashStatus: '準備建立 Mode A',
-        dashReaction: '活動資料與承辦人署名確認完畢！工作進度.json 標記 initialize 完成，下達建立本機戰情表指令。',
-        metric: '1 / 9 技能已完成',
-        percent: '11%'
+        speech: '「幫我做好 30 系報名表，再擬好全校招募信草稿給我審！」',
+        reply: '沒問題！03 表單師已產出短網址與 Sheet，04 廣播員已擬好 ePortal 草稿請您過目！',
+        activeHelper: 'sendgroupmail',
+        statusText: '報名表已發布・戰情表上線',
+        unitsText: '開放報名中 (連結已綁定)',
+        guardText: '✋ 草稿已備妥，等您點頭才寄出',
+        savedMins: 95,
+        coffeeText: '🍰 省下貼選單寫信 95 分鐘',
+        litChecks: [1, 2]
       },
       {
-        step: 2,
-        title: '第 02 步：CreateSite 戰情表先行 (Mode A)',
-        agentKey: 'createsite',
-        agentBadge: '戰情官核心啟動',
-        agentDesc: '【關鍵設計亮點】零依賴！立即在本機生成戰情表 HTML。30 個系所母表全部展開，7 項流程檢核啟動。',
-        dashStatus: 'Mode A (本機草稿)',
-        dashReaction: '✨ 戰情表本機成型！顯示「尚未開放報名」，報名連結標記「等待第03階段」，7 項檢核載入 localStorage。',
-        metric: '2 / 9 技能已完成 (戰情表已亮起)',
-        percent: '25%'
+        speech: '「抓最新報名名單更新戰情表，對完名冊幫我生出公差假公文！」',
+        reply: '遵命！05 偵探兵已更新報名人數，您勾選確認報名後，06 小書僮已排好 Word 簽呈！',
+        activeHelper: 'createnormal',
+        statusText: '名冊已核對・公文草稿完成',
+        unitsText: '已有 18 系報名 (覆蓋率 60%)',
+        guardText: '🔒 報名已核對 ➔ 解鎖公文上簽',
+        savedMins: 140,
+        coffeeText: '🎧 省下對名單排公文 140 分鐘',
+        litChecks: [1, 2, 3, 4]
       },
       {
-        step: 3,
-        title: '第 03 步：CreateGoogleForm 表單設計發布',
-        agentKey: 'creategoogleform',
-        agentBadge: '表單師執勤中',
-        agentDesc: '設計完整報名表題目、30 系所下拉選單、回條一律寄送；檢查通過後發布，並連結 Google Sheet。',
-        dashStatus: '解鎖首次發布門檻',
-        dashReaction: '短網址與 Sheet 網址寫入活動資料！戰情表補上兩連結，觸發首次正式發布至 Sites！',
-        metric: '3 / 9 技能已完成',
-        percent: '38%'
-      },
-      {
-        step: 4,
-        title: '第 04 步：SendGroupMail 全校招募信',
-        agentKey: 'sendgroupmail',
-        agentBadge: '校務信差執勤中',
-        agentDesc: '依活動資料與報名表網址自動擬稿，在 ePortal 填入草稿。承辦人審核內容後，授權提交審核寄發。',
-        dashStatus: '檢核項 1 & 2 勾選',
-        dashReaction: '收到群組信寄發成功通知！戰情表檢核點 1 (sent) 與 2 (success) 勾選完成，等待老師填寫報名。',
-        metric: '4 / 9 技能已完成',
-        percent: '50%'
-      },
-      {
-        step: 5,
-        title: '第 05 步：UpdateNews 最新名冊下載',
-        agentKey: 'updatenews',
-        agentBadge: '情報員執勤中',
-        agentDesc: '自 Sheet 下載最新 XLSX，解析回覆人數與系所分布，更新戰情表 Mode C。承辦人進行名冊人工核對。',
-        dashStatus: '檢核項 3 解鎖',
-        dashReaction: '戰情表即時顯示：已有 3 系報名、覆蓋率 10%、未報名 27 系。承辦人核對無誤，勾選「確認線上表單報名資訊」！',
-        metric: '5 / 9 技能已完成',
-        percent: '62%'
-      },
-      {
-        step: 6,
-        title: '第 06 步：CreateNormal 公差假上簽',
-        agentKey: 'createnormal',
-        agentBadge: '公文士執勤中',
-        agentDesc: '因報名資訊已確認，相依限制解鎖！公文士調取公文範本與師長名單，產出「公差假上簽公文草稿.docx」。',
-        dashStatus: '檢核項 4 允許勾選',
-        dashReaction: '草稿交付承辦人送簽。主管核准並取得正式文號後，戰情表檢核項 4 (officialSubmitted) 正式勾選！',
-        metric: '6 / 9 技能已完成',
-        percent: '75%'
-      },
-      {
-        step: 7,
-        title: '第 07 步：SendEventMail Gmail 行前通知',
-        agentKey: 'sendeventmail',
-        agentBadge: '行前嚮導執勤中',
-        agentDesc: '行前核對公文文號，打包「交通單、請假流程、倫理守則」附件。完整草稿展示給承辦人確認後發送。',
-        dashStatus: '檢核項 5 勾選',
-        dashReaction: 'Gmail 正式寄出！戰情表檢核項 5 (teacherMailSent) 勾選，活動準備就緒，師長如期出訪宣導。',
-        metric: '7 / 9 技能已完成',
-        percent: '85%'
-      },
-      {
-        step: 8,
-        title: '第 08 步：CollectEventResults 成果收件',
-        agentKey: 'collecteventresults',
-        agentBadge: '快照兵執勤中',
-        agentDesc: '活動結束！檢查師長回傳郵件，辨識攤位宣導照片與交通收據，自動歸檔至「活動成果/」目錄。',
-        dashStatus: '檢核項 6 勾選',
-        dashReaction: '成果照片收齊！戰情表檢核項 6 (resultsReceived) 勾選，提示成果資料完整，可啟動結案。',
-        metric: '8 / 9 技能已完成',
-        percent: '93%'
-      },
-      {
-        step: 9,
-        title: '第 09 步：CreateReport 結案成果發布',
-        agentKey: 'create-report',
-        agentBadge: '結案總監執勤中',
-        agentDesc: '讀取成果目錄照片與數據，產出圖文並茂的結案成果展示網站，向全校呈現本次招生宣導成效！',
-        dashStatus: '檢核項 7 圓滿勾選',
-        dashReaction: '🎉 結案網站正式發布！戰情表 7 項檢核全部達標，全專案進度 100% 圓滿閉環！',
-        metric: '9 / 9 全技能圓滿完成',
-        percent: '100%'
+        speech: '「寄行前通知給報名老師，活動後把回傳照片做成成果網站！」',
+        reply: '太棒了！07 保母寄出通知、08 收集狂收齊照片、09 設計師已產出成果網站，全案 100% 搞定！',
+        activeHelper: 'create-report',
+        statusText: '🎉 7 大檢核全亮・完美結案！',
+        unitsText: '全校宣導完成・成果已歸檔',
+        guardText: '🏆 長官點開戰情表一秒看成果',
+        savedMins: 210,
+        coffeeText: '🥳 總共省下 3.5 小時！準時下班！',
+        litChecks: [1, 2, 3, 4, 5, 6, 7]
       }
     ];
 
-    let currentSimStep = 0;
-    let simTimer = null;
+    let autoTourTimer = null;
+    let currentScenarioIdx = 0;
 
-    // 切換分頁
-    function switchTab(tabId) {
-      document.querySelectorAll('nav .tab-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white', 'shadow');
-        btn.classList.add('text-slate-300');
-      });
-      const activeBtn = document.getElementById('tab-' + tabId);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow');
-        activeBtn.classList.remove('text-slate-300');
+    // 點擊小幫手卡片
+    function focusHelper(helperKey) {
+      const info = HELPERS_INFO[helperKey];
+      if (!info) return;
+
+      // 更新卡片高亮
+      document.querySelectorAll('.helper-card').forEach(c => c.classList.remove('active-helper'));
+      const card = document.getElementById('card-' + helperKey);
+      if (card) {
+        card.classList.add('active-helper');
       }
 
-      ['hub', 'dashboard-first', 'simulator', 'matrix'].forEach(id => {
-        const sec = document.getElementById('section-' + id);
-        if (sec) {
-          if (id === tabId) {
-            sec.classList.remove('hidden');
-          } else {
-            sec.classList.add('hidden');
-          }
-        }
-      });
+      // 更新對話氣泡內容並加上彈跳特效
+      const box = document.getElementById('helper-speech-box');
+      box.classList.remove('pop-anim');
+      void box.offsetWidth; // trigger reflow
+      box.classList.add('pop-anim');
+
+      document.getElementById('bubble-icon').textContent = info.icon;
+      document.getElementById('bubble-title').textContent = info.title;
+      document.getElementById('bubble-badge').textContent = info.badge;
+      document.getElementById('bubble-quote').textContent = info.quote;
+      document.getElementById('bubble-old').textContent = info.oldWay;
+      document.getElementById('bubble-new').textContent = info.newWay;
+
+      // 高亮對應的戰情表檢核燈
+      highlightChecks(info.checks);
     }
 
-    // 選擇技能節點
-    function selectSkill(skillKey) {
-      const data = SKILLS_DATA[skillKey];
-      if (!data) return;
-
-      // 移除其他高亮
-      document.querySelectorAll('.skill-node').forEach(node => {
-        node.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-100/60');
-      });
-      const selectedNode = document.getElementById('node-' + skillKey);
-      if (selectedNode && skillKey !== 'activityagent') {
-        selectedNode.classList.add('ring-2', 'ring-blue-500', 'bg-blue-100/60');
-      }
-
-      const panel = document.getElementById('skill-detail-panel');
-      panel.innerHTML = `
-        <div class="flex items-start justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-xl bg-${data.color}-100 text-${data.color}-700 flex items-center justify-center text-2xl font-bold border border-${data.color}-200">
-              ${data.icon}
-            </div>
-            <div>
-              <span class="text-[11px] font-bold text-${data.color}-600 uppercase tracking-wider">${data.badge}</span>
-              <h3 class="text-lg font-black text-slate-900">${data.title}</h3>
-              <div class="text-xs text-slate-500">${data.role}</div>
-            </div>
-          </div>
-        </div>
-
-        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-          ${data.desc}
-        </p>
-
-        <div class="space-y-2">
-          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="text-blue-500">📥</span> 核心輸入 (Inputs)：
-          </div>
-          <ul class="text-xs text-slate-600 list-disc list-inside space-y-1 pl-1">
-            ${data.inputs.map(i => `<li>${i}</li>`).join('')}
-          </ul>
-        </div>
-
-        <div class="space-y-2">
-          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="text-emerald-500">📤</span> 具體產出 (Outputs)：
-          </div>
-          <ul class="text-xs text-slate-600 list-disc list-inside space-y-1 pl-1">
-            ${data.outputs.map(o => `<li>${o}</li>`).join('')}
-          </ul>
-        </div>
-
-        <div class="p-3 rounded-xl bg-red-50/70 border border-red-200/60 space-y-1">
-          <div class="text-xs font-bold text-red-700 flex items-center gap-1">
-            <span>🛡️</span> 人機安全防線 (不可越權)：
-          </div>
-          <p class="text-[11px] text-red-800 leading-relaxed">${data.guardrail}</p>
-        </div>
-
-        <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-100">
-          <div class="text-[11px] text-blue-900 italic font-medium leading-relaxed">
-            💡 設計箴言：${data.philosophy}
-          </div>
-        </div>
-      `;
-    }
-
-    // 模擬器推進渲染
-    function renderSimulator() {
-      const stepData = SIMULATOR_STEPS[currentSimStep];
-      const agent = SKILLS_DATA[stepData.agentKey];
-
-      document.getElementById('sim-current-step-label').textContent = `階段 ${currentSimStep}/9：${stepData.title}`;
-      document.getElementById('sim-progress-percent').textContent = stepData.percent;
-      document.getElementById('sim-progress-bar').style.width = stepData.percent;
-
-      // 步驟點按鈕狀態
-      for (let i = 1; i <= 9; i++) {
-        const dot = document.getElementById('step-node-' + i);
-        if (i < currentSimStep) {
-          dot.className = 'step-dot py-1 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
-        } else if (i === currentSimStep) {
-          dot.className = 'step-dot py-1 rounded text-[10px] font-bold bg-blue-600 text-white shadow';
+    // 點亮戰情表上的 7 顆檢核燈
+    function highlightChecks(checkNumbers) {
+      for (let i = 1; i <= 7; i++) {
+        const el = document.getElementById('chk-' + i);
+        if (!el) continue;
+        if (checkNumbers.includes(i)) {
+          el.className = 'p-2 rounded-lg border-2 border-emerald-400 bg-emerald-500/20 text-xs text-white shadow-md scale-105 transition-all';
         } else {
-          dot.className = 'step-dot py-1 rounded text-[10px] font-bold text-slate-400 hover:bg-slate-100';
+          el.className = 'p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-xs text-slate-400 transition-all';
         }
       }
-
-      // 左卡渲染
-      document.getElementById('sim-active-agent-badge').textContent = stepData.agentBadge;
-      document.getElementById('sim-agent-card').innerHTML = `
-        <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-          <div class="text-3xl">${agent.icon}</div>
-          <div>
-            <div class="text-xs font-bold text-blue-600">${agent.badge}</div>
-            <div class="text-base font-extrabold text-slate-900">${agent.title}</div>
-            <div class="text-xs text-slate-500">${agent.role}</div>
-          </div>
-        </div>
-        <p class="text-xs text-slate-700 leading-relaxed bg-blue-50/50 p-3.5 rounded-xl border border-blue-100">
-          <strong>【任務情境】</strong> ${stepData.agentDesc}
-        </p>
-        <div class="p-3 rounded-lg bg-amber-50 text-amber-900 text-xs border border-amber-200">
-          <strong>防線守護：</strong>${agent.guardrail}
-        </div>
-      `;
-
-      // 右卡渲染
-      document.getElementById('sim-dashboard-status-badge').textContent = stepData.dashStatus;
-      document.getElementById('sim-dashboard-reaction').innerHTML = `
-        <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-          <div class="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
-            <span>⚡</span> 戰情表與工作進度連動反應：
-          </div>
-          <p class="text-xs text-emerald-950 leading-relaxed font-medium">
-            ${stepData.dashReaction}
-          </p>
-        </div>
-        <div class="grid grid-cols-2 gap-3 text-center">
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <div class="text-[10px] text-slate-500">進度指標</div>
-            <div class="font-mono text-sm font-bold text-blue-600 mt-0.5">${stepData.metric}</div>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <div class="text-[10px] text-slate-500">戰情表狀態</div>
-            <div class="font-mono text-sm font-bold text-emerald-600 mt-0.5">${stepData.dashStatus}</div>
-          </div>
-        </div>
-      `;
     }
 
-    function simStepNext() {
-      if (currentSimStep < 9) {
-        currentSimStep++;
-        renderSimulator();
+    // 觸發「用講的下指令」情境
+    function triggerVoiceCommand(idx) {
+      currentScenarioIdx = idx;
+      const sc = VOICE_SCENARIOS[idx];
+
+      // 切換按鈕外觀
+      document.querySelectorAll('.cmd-btn').forEach((btn, i) => {
+        if (i === idx) {
+          btn.className = 'cmd-btn px-3 py-2 rounded-xl bg-orange-500 text-white border-2 border-orange-600 text-xs font-black shadow-md scale-105 transition flex items-center gap-1.5';
+        } else {
+          btn.className = 'cmd-btn px-3 py-2 rounded-xl bg-white hover:bg-orange-100 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm transition flex items-center gap-1.5';
+        }
+      });
+
+      // 更新語音文字與總管回覆
+      document.getElementById('live-voice-text').textContent = sc.speech;
+      document.getElementById('live-agent-reply').textContent = sc.reply;
+
+      // 更新戰情表三大指標與省時數字
+      document.getElementById('dash-metric-status').textContent = sc.statusText;
+      document.getElementById('dash-metric-units').textContent = sc.unitsText;
+      document.getElementById('dash-metric-guard').textContent = sc.guardText;
+      document.getElementById('saved-time-counter').textContent = sc.savedMins;
+      document.getElementById('coffee-badge').textContent = sc.coffeeText;
+
+      // 切回乾淨戰情表視角
+      switchDeskMode('clean');
+
+      // 連動點亮小幫手與檢核燈
+      focusHelper(sc.activeHelper);
+      highlightChecks(sc.litChecks);
+    }
+
+    // 切換「一張戰情表 vs 以前桌面大爆炸」
+    function switchDeskMode(mode) {
+      const cleanView = document.getElementById('desk-clean-view');
+      const messyView = document.getElementById('desk-messy-view');
+      const btnClean = document.getElementById('btn-desk-clean');
+      const btnMessy = document.getElementById('btn-desk-messy');
+
+      if (mode === 'messy') {
+        cleanView.classList.add('hidden');
+        messyView.classList.remove('hidden');
+        btnMessy.className = 'px-2.5 py-1 rounded-lg bg-rose-500 text-white transition';
+        btnClean.className = 'px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition';
       } else {
-        simStopPlay();
+        messyView.classList.add('hidden');
+        cleanView.classList.remove('hidden');
+        btnClean.className = 'px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 transition';
+        btnMessy.className = 'px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition';
       }
     }
 
-    function simStepPrev() {
-      if (currentSimStep > 0) {
-        currentSimStep--;
-        renderSimulator();
-      }
-    }
-
-    function simGoTo(step) {
-      currentSimStep = step;
-      renderSimulator();
-    }
-
-    function simReset() {
-      simStopPlay();
-      currentSimStep = 0;
-      renderSimulator();
-    }
-
-    function simTogglePlay() {
-      if (simTimer) {
-        simStopPlay();
+    // 自動連播導覽
+    function toggleAutoTour() {
+      const icon = document.getElementById('auto-tour-icon');
+      const text = document.getElementById('auto-tour-text');
+      if (autoTourTimer) {
+        clearInterval(autoTourTimer);
+        autoTourTimer = null;
+        icon.textContent = '▶';
+        text.textContent = '自動連播看全員出動';
       } else {
-        if (currentSimStep >= 9) currentSimStep = 0;
-        document.getElementById('sim-play-icon').textContent = '⏸';
-        document.getElementById('sim-play-text').textContent = '暫停';
-        simTimer = setInterval(() => {
-          if (currentSimStep < 9) {
-            simStepNext();
-          } else {
-            simStopPlay();
-          }
-        }, 2500);
+        currentScenarioIdx = (currentScenarioIdx + 1) % VOICE_SCENARIOS.length;
+        triggerVoiceCommand(currentScenarioIdx);
+        icon.textContent = '⏸';
+        text.textContent = '暫停連播';
+        autoTourTimer = setInterval(() => {
+          currentScenarioIdx = (currentScenarioIdx + 1) % VOICE_SCENARIOS.length;
+          triggerVoiceCommand(currentScenarioIdx);
+        }, 3200);
       }
     }
-
-    function simStopPlay() {
-      if (simTimer) {
-        clearInterval(simTimer);
-        simTimer = null;
-      }
-      document.getElementById('sim-play-icon').textContent = '▶';
-      document.getElementById('sim-play-text').textContent = '自動演練';
-    }
-
-    // 初始化矩陣表格
-    function renderMatrix() {
-      const tbody = document.getElementById('matrix-table-body');
-      const keys = [
-        'activityagent', 'initactivity', 'createsite', 'creategoogleform',
-        'sendgroupmail', 'updatenews', 'createnormal', 'sendeventmail',
-        'collecteventresults', 'create-report'
-      ];
-      tbody.innerHTML = keys.map(k => {
-        const item = SKILLS_DATA[k];
-        return `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-bold flex items-center gap-2">
-              <span class="text-base">${item.icon}</span>
-              <div>
-                <div>${item.role}</div>
-                <div class="text-[10px] text-slate-400 font-normal font-mono">${item.badge}</div>
-              </div>
-            </td>
-            <td class="p-3 font-mono font-semibold text-blue-600">${item.id}</td>
-            <td class="p-3 text-xs leading-relaxed max-w-xs">${item.desc}</td>
-            <td class="p-3 text-xs text-emerald-700 max-w-xs font-mono">${item.outputs.join('、')}</td>
-            <td class="p-3 text-xs text-red-600 font-medium max-w-xs">${item.guardrail}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // 初始載入
-    window.addEventListener('DOMContentLoaded', () => {
-      selectSkill('activityagent');
-      renderSimulator();
-      renderMatrix();
-    });
   </script>
 </body>
 </html>
