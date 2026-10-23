@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg-slate: #f8fafc;
+  --ink-primary: #0f172a;
+  --brand-blue: #1d4ed8;
+  --brand-sky: #0284c7;
+  --brand-emerald: #059669;
+  --brand-amber: #d97706;
+  --brand-rose: #e11d48;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* 頂部 Hero 網格與漸層背景（沉穩可信賴的校務行政指揮中心風格） */
+.hero-mesh {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 88% 15%, rgba(245, 158, 11, 0.16) 0%, transparent 38%),
+    radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.15) 0%, transparent 45%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 52%, #0f172a 100%);
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* 動態課表小紙張堆疊動畫 */
+@keyframes sheetPop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sheet-mini-card {
+  animation: sheetPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 導覽高亮外框 */
+@keyframes tourPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65), 0 12px 30px -8px rgba(15, 23, 42, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0), 0 18px 36px -6px rgba(15, 23, 42, 0.35);
+  }
+}
+
+.tour-highlight {
+  outline: 3px solid #f59e0b !important;
+  outline-offset: 4px;
+  animation: tourPulse 1.8s infinite;
+  border-radius: 1rem;
+}
+
+/* 語音聲波動畫 */
+@keyframes soundBarBounce {
+  0%, 100% { height: 5px; }
+  50% { height: 18px; }
+}
+
+.sound-bar {
+  animation: soundBarBounce 0.55s ease-in-out infinite;
+}
+
+/* 戰情表格子過渡與選取狀態 */
+.schedule-cell {
+  transition: all 0.16s ease;
+}
+
+.schedule-cell:hover {
+  transform: translateY(-1px);
+  z-index: 10;
+}
+
+.schedule-cell.active-cell {
+  outline: 3px solid #0f172a;
+  outline-offset: -2px;
+  transform: scale(1.02);
+  z-index: 20;
+}
+
+/* 自訂捲軸美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* 模擬瀏覽器視窗頂部圓點 */
+.window-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  display: inline-block;
+}
