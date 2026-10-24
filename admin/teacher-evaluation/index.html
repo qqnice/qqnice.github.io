@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>透過 AI 協助我們整理評鑑資料的幫手｜從教師評鑑出發，探索 AI 協助行政的日常應用</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css?v=202610250010" />
+</head>
+<body class="antialiased selection:bg-sky-400 selection:text-slate-950 min-h-screen flex flex-col">
+
+  <!-- =====================================================================
+       頂部高辨識度導覽列：返回行政專區 ＋ 字體大小切換器 ＋ 語音導覽控制器
+       ===================================================================== -->
+  <header class="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- 左側：品牌與大標題 -->
+      <div class="flex items-center gap-3.5">
+        <a href="../" class="px-3.5 py-2 rounded-xl hover:bg-slate-800 text-slate-200 text-sm sm:text-base font-bold border border-slate-700 transition-colors">
+          ← 行政專區
+        </a>
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 via-emerald-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-sky-500/20 shrink-0">
+          🗂️
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="font-black text-lg sm:text-2xl tracking-tight text-white">
+              透過 AI 協助我們整理評鑑資料的幫手
+            </h1>
+            <span class="hidden md:inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              大字體高互動版・101 子項單頁直覽
+            </span>
+          </div>
+          <p class="text-sm sm:text-base text-slate-300 mt-0.5">
+            從教師評鑑出發，探索 AI 協助行政的日常應用：資料歸位、附件可找、分類可追溯
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側：字體大小即時調整器 ＋ 語音導覽與自動巡覽 -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- 字體縮放控制組 -->
+        <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl p-1" title="調整全站字體大小">
+          <span class="px-2.5 text-sm font-bold text-slate-300">🔍 字級：</span>
+          <button id="font-btn-normal" onclick="setFontScale('100%')" class="px-2.5 py-1 rounded-lg text-sm font-black bg-sky-400 text-slate-950 transition-all">
+            大字
+          </button>
+          <button id="font-btn-large" onclick="setFontScale('112%')" class="px-2.5 py-1 rounded-lg text-sm font-bold text-slate-300 hover:text-white transition-all">
+            特大+
+          </button>
+          <button id="font-btn-xlarge" onclick="setFontScale('125%')" class="px-2.5 py-1 rounded-lg text-sm font-bold text-slate-300 hover:text-white transition-all">
+            簡報超大++
+          </button>
+        </div>
+
+        <!-- 語音開關 -->
+        <button id="btn-voice-toggle" onclick="toggleVoiceEnabled()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-sm sm:text-base font-bold text-sky-300 transition-all">
+          <span id="voice-icon" class="text-lg">🔊</span>
+          <span id="voice-label">語音：開啟</span>
+        </button>
+
+        <!-- 重聽本步 -->
+        <button onclick="speakCurrentStep(true)" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm sm:text-base font-bold text-slate-200 transition-all">
+          🗣️ 唸本章
+        </button>
+
+        <!-- 全流程自動導覽 -->
+        <button id="btn-auto-tour" onclick="toggleAutoTour()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 transition-all">
+          <span id="tour-icon">▶️</span>
+          <span id="tour-label">一鍵導覽 6 大章節</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       主內容區
+       ===================================================================== -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 flex flex-col gap-10">
+
+    <!-- ===================================================================
+         區塊 1：六大章節互動導覽列 (6-Chapter Interactive Stepper)
+         =================================================================== -->
+    <section aria-label="六大章節切換與3D視覺舞台" class="space-y-5">
+      <div class="bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-3 sm:p-4 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-2 pb-3 mb-2 border-b border-slate-800">
+          <span class="text-base sm:text-lg font-black text-sky-300">
+            🧭 點擊下方 6 大章節（或按鍵盤 ◀ ▶ 方向鍵），逐步探索完整設計脈絡：
+          </span>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="#sec-warroom-sim" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 text-sm sm:text-base font-bold transition-all">
+              👇 跳至「評鑑戰情表實機模擬器」
+            </a>
+            <a href="#sec-case-lab" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-sm sm:text-base font-bold transition-all">
+              🧪 跳至「iPAS 證照 vs 研習」辨識實驗室
+            </a>
+          </div>
+        </div>
+        <div id="step-pills-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          <!-- JS 渲染 6 大章節大字按鈕 -->
+        </div>
+      </div>
+
+      <!-- 當前章節大字體標題、語音字幕與核心重點面板 + 3D 視覺轉換舞台 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+        <!-- 左欄 (5/12)：當前章節深度解析卡（大字體好讀版） -->
+        <div class="lg:col-span-5 bg-slate-900 border-2 border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between gap-3">
+              <span id="banner-step-tag" class="px-3.5 py-1 rounded-full text-sm sm:text-base font-black bg-sky-500/20 text-sky-300 border border-sky-400/40">
+                Chapter 1｜解決真實痛點
+              </span>
+              <div class="flex items-center gap-2">
+                <button onclick="prevStep()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm sm:text-base border border-slate-700 transition-all">
+                  ◀ 上一章
+                </button>
+                <button onclick="nextStep()" class="px-4 py-1.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-slate-950 font-black text-sm sm:text-base shadow-md transition-all">
+                  下一章 ▶
+                </button>
+              </div>
+            </div>
+
+            <h2 id="banner-step-title" class="text-2xl sm:text-3xl font-black text-white leading-snug">
+              一、動機發想：讓平時的成果，成為填報時找得到的資料
+            </h2>
+
+            <!-- 核心提問／金句高亮框 -->
+            <div class="p-4 rounded-2xl bg-amber-500/15 border-l-4 border-amber-400 text-amber-200 font-bold text-base sm:text-lg leading-relaxed">
+              <span id="banner-key-question">
+                「這份資料在哪裡？應該放在哪個評估子項？上傳時需要的附件還找得到嗎？」
+              </span>
+            </div>
+
+            <!-- 本章三大重點條列（大字體） -->
+            <ul id="banner-summary-points" class="space-y-3 text-base sm:text-lg text-slate-200 leading-relaxed">
+              <!-- JS 動態渲染 -->
+            </ul>
+          </div>
+
+          <!-- 底部：語音導覽即時大字幕 -->
+          <div class="mt-5 pt-4 border-t border-slate-800">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-sm font-black uppercase tracking-wider text-sky-400">🔊 語音導覽旁白字幕</span>
+              <span id="speaking-wave" class="hidden items-end gap-1 h-4">
+                <span class="w-1.5 h-3 bg-amber-400 rounded-full sound-bar"></span>
+                <span class="w-1.5 h-4 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+                <span class="w-1.5 h-2.5 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+              </span>
+            </div>
+            <p id="banner-voice-subtitle" class="text-base sm:text-lg text-amber-100/95 font-medium leading-relaxed bg-slate-950/90 p-3.5 rounded-2xl border border-slate-800">
+              「老師每年投入大量教學、研究與服務工作...」
+            </p>
+          </div>
+        </div>
+
+        <!-- 右欄 (7/12)：3D 互動資料整理架構舞台（大字清晰版 SVG） -->
+        <div class="lg:col-span-7 stage-viewport rounded-3xl border-2 border-slate-800 p-5 sm:p-6 flex flex-col justify-between min-h-[520px] shadow-2xl">
+          <!-- 舞台頂部快速體驗列 -->
+          <div class="relative z-20 flex flex-wrap items-center justify-between gap-2.5">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/95 border border-slate-700 text-sm sm:text-base font-bold text-slate-200">
+              <span>🧭 協作路徑：</span>
+              <span class="text-rose-300">分散檔案</span>
+              <span>➔</span>
+              <span class="text-amber-300">AI 判讀 × 人核對</span>
+              <span>➔</span>
+              <span class="text-emerald-300">101 子項戰情表</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="triggerQuickScenario('ipas')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-sm font-bold transition-all">
+                ⚠️ 看 iPAS 名稱陷阱
+              </button>
+              <button onclick="triggerQuickScenario('speaker')" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 text-sm font-bold transition-all">
+                🎭 看講者 vs 學員角色
+              </button>
+              <button onclick="triggerQuickScenario('drop')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 text-sm font-bold transition-all">
+                ➕ 模擬丟入新文件
+              </button>
+            </div>
+          </div>
+
+          <!-- 3D SVG 大字視覺場景 -->
+          <div class="relative z-10 my-auto py-3 flex items-center justify-center">
+            <svg id="iso-stage-svg" viewBox="0 0 880 450" class="w-full h-auto max-h-[430px] drop-shadow-2xl">
+              <defs>
+                <linearGradient id="platformGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1e293b" />
+                  <stop offset="100%" stop-color="#090d16" />
+                </linearGradient>
+                <linearGradient id="warroomScreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#064e3b" />
+                  <stop offset="50%" stop-color="#0f172a" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+                <linearGradient id="aiCoreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#b45309" />
+                </linearGradient>
+                <filter id="neonGlow" x="-25%" y="-25%" width="150%" height="150%">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- 1. 3D 平台底座 -->
+              <g id="command-deck-3d">
+                <polygon points="30,295 450,120 850,275 430,442" fill="#020617" opacity="0.75" transform="translate(0, 10)" />
+                <polygon points="30,295 450,120 850,275 430,442" fill="url(#platformGrad)" stroke="#475569" stroke-width="2" />
+                <line x1="175" y1="235" x2="575" y2="385" stroke="#334155" stroke-width="1" stroke-dasharray="5 5" opacity="0.55" />
+                <line x1="315" y1="175" x2="715" y2="325" stroke="#334155" stroke-width="1" stroke-dasharray="5 5" opacity="0.55" />
+              </g>
+
+              <!-- 2. 動態資料管線 -->
+              <g id="pipeline-wires">
+                <path d="M 225 255 Q 305 205 385 235" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+                <path id="wire-read" d="M 225 255 Q 305 205 385 235" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" class="opacity-30" />
+                <rect x="232" y="186" width="136" height="28" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+                <text x="300" y="205" text-anchor="middle" fill="#bae6fd" font-size="13" font-weight="900">① 讀取內容・辨識角色</text>
+
+                <path d="M 465 235 Q 545 198 625 225" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+                <path id="wire-classify" d="M 465 235 Q 545 198 625 225" fill="none" stroke="#10b981" stroke-width="4.5" stroke-linecap="round" class="opacity-30" />
+                <rect x="478" y="180" width="142" height="28" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+                <text x="549" y="199" text-anchor="middle" fill="#a7f3d0" font-size="13" font-weight="900">② 對照 101 子項歸位</text>
+
+                <path d="M 210 310 Q 430 405 645 305" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round" />
+                <path id="wire-verify" d="M 210 310 Q 430 405 645 305" fill="none" stroke="#fbbf24" stroke-width="4.5" stroke-linecap="round" class="opacity-30" />
+                <rect x="330" y="346" width="216" height="28" rx="8" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5" />
+                <text x="438" y="365" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="900">🛡️ 標示「待確認」保留人工判斷</text>
+              </g>
+
+              <!-- 3. 左側節點：平時散落的 5 份佐證文件與評鑑 PDF -->
+              <g id="node-source-files" class="cursor-pointer" onclick="goToStep(1)" transform="translate(36, 128)">
+                <ellipse id="source-halo" cx="100" cy="145" rx="85" ry="32" fill="#fb7185" opacity="0.25" filter="url(#neonGlow)" />
+
+                <g class="float-slow" transform="translate(0, 0)">
+                  <rect x="8" y="12" width="168" height="48" rx="10" fill="#1e293b" stroke="#fb7185" stroke-width="2" />
+                  <text x="20" y="33" fill="#fecdd3" font-size="13" font-weight="900">📄 iPAS 研習證書.pdf</text>
+                  <text x="20" y="51" fill="#e2e8f0" font-size="11.5">⚠️ 研習時數 ≠ 考過專業證照</text>
+                </g>
+
+                <g class="float-delayed" transform="translate(18, 56)">
+                  <rect x="8" y="12" width="168" height="48" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+                  <text x="20" y="33" fill="#bae6fd" font-size="13" font-weight="900">🎤 AI 工作坊講者感謝狀</text>
+                  <text x="20" y="51" fill="#e2e8f0" font-size="11.5">🎭 角色：主講人 ➔ 服務類</text>
+                </g>
+
+                <g class="float-slow" transform="translate(34, 112)">
+                  <rect x="8" y="12" width="168" height="48" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="2" />
+                  <text x="20" y="33" fill="#fde68a" font-size="13" font-weight="900">📂 計畫核定 / 教材 / 座談</text>
+                  <text x="20" y="51" fill="#e2e8f0" font-size="11.5">散落於資料夾・信箱・網頁</text>
+                </g>
+
+                <g transform="translate(18, 178)">
+                  <rect x="0" y="0" width="168" height="30" rx="15" fill="#be123c" />
+                  <text x="84" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="900">① 日常散落的佐證文件</text>
+                </g>
+              </g>
+
+              <!-- 4. 中央節點：AI 整理幫手 × 101 子項規則 × 教師核對 -->
+              <g id="node-ai-helper" class="cursor-pointer" onclick="goToStep(3)" transform="translate(362, 146)">
+                <ellipse id="ai-halo" cx="68" cy="105" rx="75" ry="30" fill="#fbbf24" opacity="0.25" filter="url(#neonGlow)" />
+
+                <polygon points="12,72 68,46 124,72 68,98" fill="#451a03" stroke="#fbbf24" stroke-width="2" />
+                <polygon points="12,72 68,98 68,130 12,104" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+                <polygon points="68,98 124,72 124,104 68,130" fill="#92400e" stroke="#f59e0b" stroke-width="1.5" />
+
+                <g class="float-slow">
+                  <rect x="32" y="12" width="72" height="54" rx="14" fill="url(#aiCoreGrad)" stroke="#fef08a" stroke-width="2.2" />
+                  <text x="68" y="42" text-anchor="middle" font-size="25">🤖</text>
+                  <text x="68" y="59" text-anchor="middle" fill="#fffbeb" font-size="11" font-weight="900">AI 評鑑幫手</text>
+                </g>
+
+                <!-- 教師真人核對徽章 -->
+                <g transform="translate(92, 68)">
+                  <circle cx="24" cy="24" r="22" fill="#0f172a" stroke="#38bdf8" stroke-width="2.2" />
+                  <text x="24" y="30" text-anchor="middle" font-size="20">👩‍🏫</text>
+                  <rect x="-18" y="42" width="84" height="20" rx="10" fill="#0284c7" />
+                  <text x="24" y="56" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">教師人工確認</text>
+                </g>
+
+                <g id="ai-core-bubble" transform="translate(-26, -24)">
+                  <rect x="0" y="0" width="188" height="28" rx="8" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" />
+                  <text id="ai-core-bubble-text" x="94" y="19" text-anchor="middle" fill="#fde68a" font-size="12" font-weight="900">
+                    101 個評估子項共同架構
+                  </text>
+                </g>
+
+                <g transform="translate(-12, 144)">
+                  <rect x="0" y="0" width="164" height="30" rx="15" fill="#d97706" />
+                  <text x="82" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="900">② AI 判讀 × 教師把關</text>
+                </g>
+              </g>
+
+              <!-- 5. 右側節點：3D 評鑑資料戰情表網站（教學32・研究29・服務40） -->
+              <g id="node-warroom-site" class="cursor-pointer" onclick="goToStep(2)" transform="translate(598, 92)">
+                <ellipse id="warroom-halo" cx="125" cy="195" rx="105" ry="38" fill="#10b981" opacity="0.3" filter="url(#neonGlow)" />
+
+                <rect x="6" y="10" width="236" height="162" rx="16" fill="#020617" transform="translate(6, 8)" opacity="0.65" />
+                <rect x="6" y="10" width="236" height="162" rx="16" fill="url(#warroomScreenGrad)" stroke="#34d399" stroke-width="2.5" />
+
+                <!-- 瀏覽器頂列 -->
+                <rect x="16" y="18" width="216" height="24" rx="6" fill="#090d16" />
+                <circle cx="28" cy="30" r="3.5" fill="#ef4444" />
+                <circle cx="40" cy="30" r="3.5" fill="#f59e0b" />
+                <circle cx="52" cy="30" r="3.5" fill="#10b981" />
+                <text x="132" y="35" text-anchor="middle" fill="#6ee7b7" font-size="11.5" font-weight="900">
+                  🔒 教師評鑑資料入口 (共 101 子項)
+                </text>
+
+                <!-- 三大入口標籤：教學32 / 研究29 / 服務40 -->
+                <rect x="18" y="48" width="68" height="30" rx="7" fill="#0284c7" />
+                <text x="52" y="68" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="900">📘 教學 32</text>
+
+                <rect x="90" y="48" width="68" height="30" rx="7" fill="#4f46e5" />
+                <text x="124" y="68" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="900">🔬 研究 29</text>
+
+                <rect x="162" y="48" width="68" height="30" rx="7" fill="#059669" />
+                <text x="196" y="68" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="900">🤝 服務 40</text>
+
+                <!-- 單頁子項與狀態示意 -->
+                <rect x="18" y="84" width="212" height="28" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.2" />
+                <text x="28" y="103" fill="#a7f3d0" font-size="11.5" font-weight="900">✅ 已有資料：標題＋日期＋原始附件</text>
+
+                <rect x="18" y="116" width="212" height="28" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+                <text x="28" y="135" fill="#fde68a" font-size="11.5" font-weight="900">❓ 待確認：分類理由＋人工判斷空間</text>
+
+                <text id="warroom-screen-tag" x="124" y="162" text-anchor="middle" fill="#e2e8f0" font-size="11.5" font-weight="900">
+                  ✨ 單頁看清全部子項・隨時下載附件
+                </text>
+
+                <g transform="translate(36, 184)">
+                  <rect x="0" y="0" width="176" height="30" rx="15" fill="#059669" />
+                  <text x="88" y="20" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="900">③ 評鑑戰情表私人網站</text>
+                </g>
+              </g>
+
+              <!-- 6. 舞台頂部浮空「大字體核心解說看板」 -->
+              <g id="stage-speech-overlay" transform="translate(155, 8)">
+                <rect id="speech-box-bg" x="0" y="0" width="560" height="82" rx="16" fill="#0f172a" stroke="#38bdf8" stroke-width="2.2" />
+                <text id="speech-box-badge" x="20" y="28" fill="#38bdf8" font-size="14" font-weight="900">
+                  🔍 一、動機發想：把集中在填報前的整理，融入平時累積
+                </text>
+                <text id="speech-box-line1" x="20" y="51" fill="#f8fafc" font-size="13.5" font-weight="700">
+                  平時累積研習、演講、計畫成果 ➔ 交給 AI 辨識歸位與保留附件
+                </text>
+                <text id="speech-box-line2" x="20" y="72" fill="#fde68a" font-size="13.5" font-weight="700">
+                  填報時不再翻箱倒櫃：「有位置、有附件、分類可追溯！」
+                </text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- 舞台底部 3 大節點狀態大字卡 -->
+          <div class="relative z-20 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-800">
+            <div id="hw-card-source" class="rounded-2xl bg-slate-900/95 border border-slate-800 p-3.5 flex items-center gap-3 transition-all">
+              <span class="text-3xl">📂</span>
+              <div>
+                <div class="text-sm text-rose-300 font-bold">日常資料來源</div>
+                <div id="hw-state-source" class="text-base font-black text-white">分散於資料夾 / 信箱</div>
+              </div>
+            </div>
+            <div id="hw-card-ai" class="rounded-2xl bg-slate-900/95 border border-slate-800 p-3.5 flex items-center gap-3 transition-all">
+              <span class="text-3xl">🤖</span>
+              <div>
+                <div class="text-sm text-amber-300 font-bold">AI 整理 × 真人核對</div>
+                <div id="hw-state-ai" class="text-base font-black text-white">辨識角色與名稱差異</div>
+              </div>
+            </div>
+            <div id="hw-card-warroom" class="rounded-2xl bg-slate-900/95 border border-slate-800 p-3.5 flex items-center gap-3 transition-all">
+              <span class="text-3xl">🏛️</span>
+              <div>
+                <div class="text-sm text-emerald-300 font-bold">評鑑資料私人網站</div>
+                <div id="hw-state-warroom" class="text-base font-black text-white">教學32・研究29・服務40</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         區塊 2：實機級「教師評鑑資料戰情表」高互動模擬器 (對應第 二、三、四 節)
+         =================================================================== -->
+    <section id="sec-warroom-sim" class="scroll-mt-24 space-y-5">
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/40 border-2 border-slate-800 p-5 sm:p-8 shadow-2xl">
+
+        <!-- 模擬器標題與「模擬丟入新文件」按鈕 -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div>
+            <div class="flex flex-wrap items-center gap-2.5 mb-2">
+              <span class="px-3.5 py-1 rounded-full text-sm sm:text-base font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                🖥️ 互動體驗區｜教師評鑑資料幫手（實機模擬）
+              </span>
+              <span class="px-3.5 py-1 rounded-full text-sm sm:text-base font-bold bg-slate-800 text-amber-300 border border-amber-500/30">
+                🔒 預設私人網站 (Owner-Private)
+              </span>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-black text-white">
+              親手體驗：「教學 32・研究 29・服務 40」單頁直覽與 AI 歸類理由
+            </h3>
+            <p class="text-base sm:text-lg text-slate-300 mt-1">
+              介面只保留<strong>「教學、研究、服務」三個入口</strong>，不需反覆切換多層選單；初期不處理複雜算分，先把<strong>「資料歸位、附件可找、分類可追溯」</strong>做好！
+            </p>
+          </div>
+
+          <!-- 模擬把新資料交給 AI 的互動按鈕 -->
+          <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              id="btn-drop-new-file"
+              onclick="simulateDropNewFile()"
+              class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-base sm:text-lg shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2"
+            >
+              <span>➕</span>
+              <span id="drop-btn-label">模擬把新證明交給 AI 整理</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 三大類別單頁入口按鈕 (教學 32 / 研究 29 / 服務 40 / 全部 101) -->
+        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3" id="category-tabs-container">
+          <!-- JS 動態渲染大字入口按鈕 -->
+        </div>
+
+        <!-- 搜尋列 ＋「已有資料 / 待確認資料」篩選器 ＋ 顯示尚無資料子項開關 -->
+        <div class="mt-4 bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <!-- 狀態篩選按鈕 -->
+          <div class="flex flex-wrap items-center gap-2" id="status-filter-container">
+            <!-- JS 動態渲染：全部 / 已有資料 / 待確認資料 -->
+          </div>
+
+          <!-- 關鍵字搜尋與空子項展開開關 -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="relative flex-1 sm:w-64">
+              <input
+                id="search-input"
+                type="text"
+                oninput="handleSearchInput(this.value)"
+                placeholder="🔍 搜尋標題、iPAS、講者、計畫..."
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-base text-white placeholder-slate-400 focus:outline-none focus:border-sky-400"
+              />
+            </div>
+            <label class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer text-sm sm:text-base font-bold text-slate-200 hover:border-slate-500">
+              <input type="checkbox" id="toggle-empty-subitems" onchange="toggleEmptySubitems(this.checked)" class="w-4 h-4 accent-sky-400 rounded" />
+              <span>同頁顯示「尚無資料」子項</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 模擬器主體：左欄「評估子項與已收錄佐證清單 (7/12)」＋ 右欄「AI 4步驟判讀與分類理由檢視器 (5/12)」 -->
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+          <!-- 左：單頁評估子項與佐證資料卡片清單 -->
+          <div class="lg:col-span-7 space-y-3.5">
+            <div class="flex items-center justify-between px-1">
+              <span id="current-category-banner" class="text-base sm:text-lg font-black text-sky-300">
+                🗂️ 目前檢視：全部類別（共 101 個評估子項）
+              </span>
+              <span class="text-sm sm:text-base text-amber-300 font-bold">
+                👇 點擊任一佐證卡片，查看右側 AI 判讀理由
+              </span>
+            </div>
+
+            <div id="evidence-cards-container" class="space-y-3.5">
+              <!-- JS 渲染佐證卡片與空子項 -->
+            </div>
+          </div>
+
+          <!-- 右：AI 4 步驟整理流程與人工確認面板 (Sticky) -->
+          <div class="lg:col-span-5 lg:sticky lg:top-24 bg-slate-950 border-2 border-sky-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl">
+            <div id="ai-inspector-panel">
+              <!-- JS 動態渲染選中佐證文件的 AI 4 步驟分析、分類理由、待確認事項與附件預覽按鈕 -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         區塊 3：開發過程兩大關鍵洞察實驗室 (對應第三節：角色辨識 & 名稱陷阱)
+         =================================================================== -->
+    <section id="sec-case-lab" class="scroll-mt-24 space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-8 rounded-full bg-amber-400"></span>
+          <h3 class="text-2xl sm:text-3xl font-black text-white">
+            三、開發過程的兩大關鍵發現：為什麼不能只看檔名就歸類？
+          </h3>
+        </div>
+        <span class="text-base text-slate-300 font-bold">點擊下方卡片可連動上方模擬器並播放語音解說 🔊</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- 關鍵發現 A：文件名稱 ≠ 評鑑資格（iPAS 案例） -->
+        <div onclick="focusEvidenceFromLab('doc-ipas')" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border-2 border-amber-500/40 hover:border-amber-400 p-6 sm:p-7 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="px-3.5 py-1 rounded-full text-sm sm:text-base font-black bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                發現 01｜文件名稱 ≠ 評鑑資格
+              </span>
+              <span class="text-base text-amber-300 font-bold">🔊 點擊聽案例並查看檔案</span>
+            </div>
+
+            <h4 class="text-xl sm:text-2xl font-black text-white leading-snug">
+              案例：「iPAS AI 應用規劃師研習證書」是研習，不是考過專業證照！
+            </h4>
+
+            <p class="text-base sm:text-lg text-slate-200 leading-relaxed">
+              如果只看檔案名稱有「iPAS AI 應用規劃師」，很容易誤放到<strong>「研究類：考取專業證照」</strong>。但 AI 進一步閱讀證書內文後發現：
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-base">
+              <div class="p-4 rounded-2xl bg-rose-950/50 border border-rose-500/40">
+                <div class="font-black text-rose-300 mb-1">❌ 若只看檔名誤判</div>
+                <div class="text-slate-200">誤以為是經濟部核發之「能力鑑定合格證書（專業證照）」，填報後可能遭退件。</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/40">
+                <div class="font-black text-emerald-300 mb-1">✅ AI 閱讀內文後判讀</div>
+                <div class="text-slate-200">辨識為「參與培訓研習 6 小時」，歸入<strong>【教學 T-12 參與研習】</strong>並標註<strong>「❓ 待確認」</strong>。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-base">
+            <span class="text-amber-200 font-bold">💡 留下分類理由與待確認事項，供老師核對</span>
+            <span class="text-white font-black underline">在模擬器中檢視 ▶</span>
+          </div>
+        </div>
+
+        <!-- 關鍵發現 B：活動主題相近，但「教師角色」不同（參與研習 vs 擔任講者） -->
+        <div onclick="focusEvidenceFromLab('doc-speaker')" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/40 border-2 border-sky-500/40 hover:border-sky-400 p-6 sm:p-7 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="px-3.5 py-1 rounded-full text-sm sm:text-base font-black bg-sky-500/20 text-sky-300 border border-sky-400/40">
+                發現 02｜教師角色決定評鑑子項
+              </span>
+              <span class="text-base text-sky-300 font-bold">🔊 點擊聽案例並查看檔案</span>
+            </div>
+
+            <h4 class="text-xl sm:text-2xl font-black text-white leading-snug">
+              案例：同樣是「AI 教學工作坊」，參與學員 vs. 擔任講者分類大不同！
+            </h4>
+
+            <p class="text-base sm:text-lg text-slate-200 leading-relaxed">
+              兩份文件的活動主題都是「生成式 AI 教學應用」，但 AI 會根據內文判斷<strong>教師在活動中的實際角色</strong>，放到正確的評鑑入口：
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-base">
+              <div class="p-4 rounded-2xl bg-sky-950/50 border border-sky-500/40">
+                <div class="font-black text-sky-300 mb-1">📘 角色 A：參與研習學員</div>
+                <div class="text-slate-200">證明持續進修教學知能 ➔ 歸入<strong>【教學類 T-12 參與教學或專業研習】</strong>。</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/40">
+                <div class="font-black text-emerald-300 mb-1">🤝 角色 B：擔任活動講者</div>
+                <div class="text-slate-200">持主辦單位頒發之主講人感謝狀 ➔ 歸入<strong>【服務類 S-08 擔任校內外專業講座講者】</strong>。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-base">
+            <span class="text-sky-200 font-bold">🎭 依「活動性質＋日期＋教師角色」精準歸位</span>
+            <span class="text-white font-black underline">在模擬器中檢視 ▶</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         區塊 4：日常應用 4 步驟 ＆ 誠實清楚的三層能力邊界 (對應第四、五、六節)
+         =================================================================== -->
+    <section class="space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="w-2.5 h-8 rounded-full bg-emerald-400"></span>
+        <h3 class="text-2xl sm:text-3xl font-black text-white">
+          四 & 五、日常整理 4 步驟與「人機協作」清楚邊界
+        </h3>
+      </div>
+
+      <!-- 4 步驟卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+          <div class="text-sm font-black text-sky-400 mb-1">STEP 01</div>
+          <div class="text-xl font-black text-white mb-2">1. 讀取內容</div>
+          <p class="text-base text-slate-300 leading-relaxed">
+            辨識資料主題、活動日期、<strong>教師角色（參訓／主講／主持）</strong>與佐證用途。
+          </p>
+        </div>
+        <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+          <div class="text-sm font-black text-amber-400 mb-1">STEP 02</div>
+          <div class="text-xl font-black text-white mb-2">2. 對照子項</div>
+          <p class="text-base text-slate-300 leading-relaxed">
+            依學校 101 個評鑑子項架構建議歸類，並主動說明<strong>分類理由與不確定之處</strong>。
+          </p>
+        </div>
+        <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+          <div class="text-sm font-black text-emerald-400 mb-1">STEP 03</div>
+          <div class="text-xl font-black text-white mb-2">3. 建立紀錄</div>
+          <p class="text-base text-slate-300 leading-relaxed">
+            整理成容易辨識的標準化標題，完整保留<strong>資料來源與原始附件連結</strong>。
+          </p>
+        </div>
+        <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800">
+          <div class="text-sm font-black text-purple-400 mb-1">STEP 04</div>
+          <div class="text-xl font-black text-white mb-2">4. 更新網站</div>
+          <p class="text-base text-slate-300 leading-relaxed">
+            先確認本機戰情表，再透過 Sites 更新至私人網站，讓平時成果逐步累積。
+          </p>
+        </div>
+      </div>
+
+      <!-- 清楚區分：已完成功能 vs 需要人工確認 vs 尚待開發自動化能力 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="p-6 rounded-3xl bg-emerald-950/30 border-2 border-emerald-500/40">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm sm:text-base font-black mb-3">
+            🟢 目前已完成的功能
+          </div>
+          <ul class="space-y-2.5 text-base sm:text-lg text-slate-200">
+            <li>✅ 建立教學(32)、研究(29)、服務(40) 共 <strong>101 個評估子項</strong>單頁瀏覽</li>
+            <li>✅ 支援<strong>關鍵字即時搜尋</strong>功能</li>
+            <li>✅ 支援<strong>「已有資料」與「待確認資料」</strong>快速篩選</li>
+            <li>✅ 每筆資料附<strong>分類理由說明＋原始附件開啟與下載</strong></li>
+          </ul>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-amber-950/30 border-2 border-amber-500/40">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm sm:text-base font-black mb-3">
+            🟡 保留由人工確認的事項
+          </div>
+          <ul class="space-y-2.5 text-base sm:text-lg text-slate-200">
+            <li>🛡️ <strong>證據不足或條件不明確</strong>時，標示「待確認」由教師判斷</li>
+            <li>🛡️ 區分<strong>「研習證明 vs. 專業證照」</strong>等資格認定</li>
+            <li>🛡️ 由使用者交付新資料後，再請 AI 協助整理並由人核對適用性</li>
+          </ul>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-sky-950/30 border-2 border-sky-500/40">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-300 text-sm sm:text-base font-black mb-3">
+            🔵 尚待開發／初期不處理範圍
+          </div>
+          <ul class="space-y-2.5 text-base sm:text-lg text-slate-200">
+            <li>📌 初期<strong>不處理複雜分數計算</strong>（先把歸位、附件、追溯做好）</li>
+            <li>📌 目前<strong>尚未自動背景監看資料夾</strong>（需由使用者交付觸發）</li>
+            <li>📌 目前<strong>尚未直接串接校方正式填報系統</strong>（提供附件下載供上傳）</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         區塊 5：第六節「後續推廣方向」5 大行政延伸場景切換器 ＋ 一鍵複製提示詞
+         =================================================================== -->
+    <section class="pb-12 space-y-6">
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-sm sm:text-base font-black bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 mb-2">
+              🚀 六、後續推廣方向｜從一份評鑑資料，延伸到更多行政工作
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-black text-white">
+              同樣的「AI 歸位＋保留附件＋待確認護欄」，可以幫你整理哪些日常資料？
+            </h3>
+            <p class="text-base sm:text-lg text-slate-300 mt-1">
+              點擊下方 5 種常見校園與行政場景，查看如何套用同一套人機協作模式，或一鍵複製提示詞開始整理！
+            </p>
+          </div>
+
+          <button
+            onclick="copyEvalPrompt(this)"
+            class="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-base sm:text-lg shadow-lg shadow-amber-500/25 transition-all shrink-0"
+          >
+            📋 一鍵複製「AI 評鑑與日常資料整理」咒語
+          </button>
+        </div>
+
+        <!-- 5 大延伸場景切換按鈕 -->
+        <div id="extension-tabs" class="flex flex-wrap gap-2.5">
+          <!-- JS 動態渲染 -->
+        </div>
+
+        <!-- 延伸場景詳細對照卡 + 提示詞範本 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <div id="extension-detail-card" class="lg:col-span-6 bg-slate-950/90 border border-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col justify-between">
+            <!-- JS 動態渲染選中延伸場景 -->
+          </div>
+
+          <div class="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <span class="text-sm sm:text-base font-bold text-sky-300 font-mono-code">PROMPT // 請 AI 幫我整理評鑑與日常佐證資料</span>
+              <span class="text-sm text-amber-300 font-bold">可直接貼給 AI 助手</span>
+            </div>
+            <pre id="eval-prompt-text" class="text-sm sm:text-base text-slate-200 whitespace-pre-wrap leading-relaxed font-mono-code select-all">請扮演我的「教師評鑑與行政佐證資料整理幫手」。
+我會提供【學校的評鑑項目／分類架構 PDF】以及我平時累積在資料夾裡的【佐證文件（如研習證明、感謝狀、計畫核定函、教材或活動紀錄）】。請依照以下原則協助我整理：
+
+1. 【建立單頁清楚架構】：
+   - 依制度分為「教學、研究、服務」三大入口，列出所有評估子項，讓我在同一頁就能看清各子項與目前已收錄的資料。
+   - 初期不處理分數計算，請專注把「資料歸位、附件可找、分類可追溯」做好。
+
+2. 【逐一讀取與精準判讀（4 步驟）】：
+   - 讀取內容：辨識每份文件的主題、活動日期、以及我在當中的「實際角色」（例如：參與研習學員 vs. 擔任活動講者）。
+   - 對照子項：注意「文件名稱 ≠ 評鑑資格」（例如研習證書不能直接當作考取專業證照），請寫出明確的分類理由。
+   - 建立紀錄：整理為「日期＋清楚標題＋整理說明＋原始附件連結」。
+   - 標示待確認：若遇到證據不足或適用條件不明確的檔案，請標示「❓ 待確認」並說明需補充或確認之處，保留人工判斷空間！</pre>
+          </div>
+        </div>
+
+        <!-- 底部核心理念大字橫幅 -->
+        <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-sky-950/80 via-emerald-950/70 to-indigo-950/80 border-2 border-emerald-400/50 text-center space-y-2 shadow-xl">
+          <div class="text-sm sm:text-base font-black text-emerald-300 uppercase tracking-widest">
+            🌟 我們希望傳達的核心理念
+          </div>
+          <p class="text-xl sm:text-3xl font-black text-white leading-relaxed">
+            「平時把資料交給 AI 協助整理，讓每一份成果都有位置、有附件、找得到，<br class="hidden lg:inline" />逐步減少行政工作中的重複搜尋與整理負擔。」
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       原始附件預覽彈窗 (Modal) — 大字體清楚呈現證書內文與 AI 視覺標註
+       ===================================================================== -->
+  <div id="attachment-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border-2 border-sky-400 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">📎</span>
+          <h4 id="modal-file-name" class="text-lg sm:text-xl font-black text-white">原始附件預覽</h4>
+        </div>
+        <button onclick="closeAttachmentModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base">
+          ✕ 關閉
+        </button>
+      </div>
+
+      <!-- 模擬證書／公文紙張 -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-slate-950 border-2 border-slate-700 space-y-4">
+        <div id="modal-org" class="text-sm sm:text-base font-bold text-slate-400 text-center tracking-widest"></div>
+        <div id="modal-doc-title" class="text-2xl sm:text-3xl font-black text-amber-300 text-center tracking-widest"></div>
+        <p id="modal-content" class="text-lg sm:text-xl text-white leading-relaxed py-3 border-y border-slate-800"></p>
+        <div id="modal-highlight" class="p-3.5 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 font-bold text-base sm:text-lg text-center"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <span class="text-sm sm:text-base text-slate-300">✅ 原始檔案已綁定於戰情表，日後可直接下載上傳校方系統</span>
+        <button onclick="simulateDownloadFile()" class="px-5 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-base transition-all">
+          ⬇️ 模擬下載原始 PDF 附件
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js?v=202610250010"></script>
+  <script src="app.js?v=202610250010"></script>
+</body>
+</html>
