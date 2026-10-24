@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NUTC 高教補助方案公告總覽｜AI 戰情表 3D 語音互動導覽劇場</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css?v=202610242335" />
+</head>
+<body class="antialiased selection:bg-sky-500 selection:text-slate-950 min-h-screen flex flex-col">
+
+  <!-- =====================================================================
+       頂部精簡控制列：標題 ＋ 成果網站直達 ＋ 語音導覽開關 ＋ 自動劇場播放
+       ===================================================================== -->
+  <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- 品牌標題 -->
+      <div class="flex items-center gap-3">
+        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition-colors">← 行政專區</a>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-sky-500 to-indigo-600 flex items-center justify-center text-xl shadow-lg shadow-sky-500/20 shrink-0">
+          📊
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="font-black text-base sm:text-lg tracking-tight text-white">讓每一份支持，都能被看見｜高教補助 AI 戰情表 3D 互動導覽</h1>
+            <span class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              先建戰情表・資訊一眼看清
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">將藏在多層選單的分散公告，透過「爬蟲＋AI 規則判讀＋承辦人核對」匯聚成師生與辦公室共用的單一入口</p>
+        </div>
+      </div>
+
+      <!-- 語音導覽、成果網站與自動巡覽控制器 -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <a
+          href="https://nutc-hesp-subsidies-2026.nutcqqnice.chatgpt.site/"
+          target="_blank"
+          rel="noopener"
+          class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-xs font-black text-emerald-300 transition-all"
+        >
+          <span>🌐</span>
+          <span>開啟成果網站 ↗</span>
+        </a>
+
+        <!-- 語音開關 -->
+        <button id="btn-voice-toggle" onclick="toggleVoiceEnabled()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-500/50 text-xs font-bold text-sky-300 transition-all">
+          <span id="voice-icon" class="text-base">🔊</span>
+          <span id="voice-label">語音導覽：開啟</span>
+        </button>
+
+        <!-- 重聽本步語音 -->
+        <button onclick="speakCurrentStep(true)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition-all" title="重聽目前步驟解說">
+          🗣️ 唸這一步
+        </button>
+
+        <!-- 全流程自動導覽 -->
+        <button id="btn-auto-tour" onclick="toggleAutoTour()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition-all">
+          <span id="tour-icon">▶️</span>
+          <span id="tour-label">一鍵語音導覽全流程</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       主視覺核心：6 步驟大圖釘導航列 (Visual Stepper)
+       ===================================================================== -->
+  <section class="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-5 pb-2">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl">
+      <div id="step-pills-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-2">
+        <!-- 由 JS 渲染 6 個超直覺圖示步驟按鈕 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       3D 互動主舞台：左「高教補助戰情表即時模擬器」＋ 右「3D 戰情中樞轉換舞台」
+       ===================================================================== -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-4 flex-1 flex flex-col gap-6">
+
+    <!-- 語音字幕與當前步驟極簡標題橫幅 -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900 border border-slate-700/80 p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div id="banner-step-badge" class="w-14 h-14 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex flex-col items-center justify-center shrink-0">
+          <span class="text-[10px] font-bold text-sky-300 uppercase tracking-wider">STEP</span>
+          <span id="banner-step-num" class="text-2xl font-black text-white leading-none">1</span>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 id="banner-step-title" class="text-lg sm:text-2xl font-black text-white tracking-tight">
+              痛點：機會藏在多層選單裡，老師與承辦人都得逐頁翻找
+            </h2>
+            <span id="banner-step-tag" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              Step 1｜解決真實問題
+            </span>
+          </div>
+          <!-- 語音導覽即時字幕 -->
+          <div class="mt-1.5 flex items-center gap-2 text-sm sm:text-base text-amber-200 font-medium">
+            <span id="speaking-wave" class="hidden items-end gap-0.5 h-4 shrink-0">
+              <span class="w-1 h-3 bg-amber-400 rounded-full sound-bar"></span>
+              <span class="w-1 h-4 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+              <span class="w-1 h-2.5 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+            </span>
+            <p id="banner-voice-subtitle" class="leading-snug">
+              「第一步：看到真實痛點。我們決定先建一張戰情表，把分散在各選單的補助資訊集中到同一個視野！」
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 上一步 / 下一步 大按鈕 -->
+      <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+        <button onclick="prevStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm border border-slate-700 transition-all">
+          ◀ 上一步
+        </button>
+        <button onclick="nextStep()" class="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-sky-500/20 transition-all">
+          下一步 ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- =================================================================
+         核心 3D 視覺劇場區 (12 欄設計：左 5 欄「戰情表互動預覽與 AI 拆解」、右 7 欄「3D 資料匯聚舞台」)
+         ================================================================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+      <!-- ===============================================================
+           左欄 (5/12)：NUTC 高教補助方案「戰情表」即時互動模擬器
+           =============================================================== -->
+      <div id="panel-warroom-sim" class="lg:col-span-5 bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden transition-all duration-500">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="ml-1.5 text-xs font-black text-slate-200">📊 NUTC 高教補助戰情表（互動預覽）</span>
+            </div>
+            <a
+              href="https://nutc-hesp-subsidies-2026.nutcqqnice.chatgpt.site/"
+              target="_blank"
+              rel="noopener"
+              class="text-[11px] px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold hover:bg-emerald-500/30 transition"
+            >
+              前往線上版 ↗
+            </a>
+          </div>
+
+          <!-- 分類快速篩選列 -->
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div id="warroom-filter-bar" class="flex flex-wrap items-center gap-1.5">
+              <!-- JS 渲染分類按鈕 -->
+            </div>
+            <span class="text-[11px] text-amber-300 font-bold">👇 點擊卡片看 AI 拆解</span>
+          </div>
+
+          <!-- 補助方案卡片清單 -->
+          <div id="subsidy-list" class="space-y-2.5">
+            <!-- JS 動態渲染 -->
+          </div>
+        </div>
+
+        <!-- 底部：AI 結構化拆解與承辦人核對結果區 -->
+        <div class="mt-4 pt-3 border-t border-slate-800/90">
+          <div id="ai-inspector-toast" class="rounded-2xl p-3.5 bg-slate-950 border border-slate-800 transition-all duration-300">
+            <!-- JS 動態渲染選中方案的 AI 規則判讀細節 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ===============================================================
+           右欄 (7/12)：3D 等距「分散公告 ➔ 爬蟲＋AI 規則中樞 ➔ 戰情表大螢幕」全景舞台
+           =============================================================== -->
+      <div class="lg:col-span-7 stage-viewport rounded-3xl border-2 border-slate-800 p-4 sm:p-6 flex flex-col justify-between min-h-[510px] overflow-hidden select-none">
+
+        <div class="relative z-20 flex flex-wrap items-center justify-between gap-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-bold text-slate-300">
+            <span>🧭 戰情表資訊流：</span>
+            <span class="text-rose-400">分散選單</span>
+            <span>➔</span>
+            <span class="text-amber-400">爬蟲＋AI 拆解</span>
+            <span>➔</span>
+            <span class="text-emerald-400">承辦核對・戰情表總覽</span>
+          </div>
+
+          <!-- 3 個真實規則快速體驗按鈕 -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="simulateRuleScenario('14days')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition-all">
+              ⚠️ 體驗：賽前14天規則
+            </button>
+            <button onclick="simulateRuleScenario('rolling')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 text-xs font-bold transition-all">
+              🟢 體驗：隨到隨審
+            </button>
+            <button onclick="simulateRuleScenario('exhausted')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-300 text-xs font-bold transition-all">
+              🔴 體驗：經費用罄比對
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D 等距透視 SVG 互動大場景 -->
+        <div class="relative z-10 my-auto py-2 flex items-center justify-center">
+          <svg id="iso-stage-svg" viewBox="0 0 860 440" class="w-full h-auto max-h-[420px] drop-shadow-2xl">
+            <defs>
+              <linearGradient id="platformGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e293b" />
+                <stop offset="100%" stop-color="#090d16" />
+              </linearGradient>
+              <linearGradient id="warroomScreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#064e3b" />
+                <stop offset="50%" stop-color="#0f172a" />
+                <stop offset="100%" stop-color="#1e1b4b" />
+              </linearGradient>
+              <linearGradient id="aiCoreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#b45309" />
+              </linearGradient>
+              <filter id="neonGlow" x="-25%" y="-25%" width="150%" height="150%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- 1. 3D 數位指揮中心基座 (Isometric Command Deck) -->
+            <g id="command-deck-3d">
+              <polygon points="30,275 450,105 830,255 410,425" fill="#020617" opacity="0.75" transform="translate(0, 14)" />
+              <polygon points="30,275 410,425 410,438 30,288" fill="#0f172a" stroke="#334155" stroke-width="1" />
+              <polygon points="410,425 830,255 830,268 410,438" fill="#1e293b" stroke="#334155" stroke-width="1" />
+              <polygon points="30,275 450,105 830,255 410,425" fill="url(#platformGrad)" stroke="#475569" stroke-width="2" />
+              <!-- 等距格線 -->
+              <line x1="170" y1="218" x2="550" y2="368" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+              <line x1="310" y1="162" x2="690" y2="312" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+              <line x1="220" y1="350" x2="640" y2="180" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" opacity="0.5" />
+              <text x="195" y="378" fill="#94a3b8" font-size="11.5" font-weight="700" transform="rotate(21 195,378)">
+                🏛️ NUTC 高教深耕計畫辦公室・AI 戰情表資料匯聚中樞
+              </text>
+            </g>
+
+            <!-- 2. 動態資料管線層 (Crawler / AI Pipeline / Diff Loop) -->
+            <g id="pipeline-wires">
+              <!-- 管線 A：分散網頁 -> AI 整理中樞 -->
+              <path d="M 205 245 Q 290 195 375 225" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+              <path id="wire-crawler" d="M 205 245 Q 290 195 375 225" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+              <rect x="230" y="185" width="108" height="22" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" />
+              <text x="284" y="200" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="900">① 爬蟲擷取各頁公告</text>
+
+              <!-- 管線 B：AI 整理中樞 -> 戰情表總覽大螢幕 -->
+              <path d="M 455 225 Q 545 190 635 215" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+              <path id="wire-to-warroom" d="M 455 225 Q 545 190 635 215" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+              <rect x="492" y="176" width="116" height="22" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
+              <text x="550" y="191" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="900">② 結構化寫入戰情表</text>
+
+              <!-- 管線 C：官網異動 -> AI Diff 比對迴路 -->
+              <path d="M 190 290 Q 410 385 650 285" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="5 5" stroke-linecap="round" />
+              <path id="wire-diff-feedback" d="M 190 290 Q 410 385 650 285" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" class="opacity-20" />
+              <rect x="355" y="330" width="156" height="22" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+              <text x="433" y="345" text-anchor="middle" fill="#fde68a" font-size="10" font-weight="900">🔄 定期比對差異・同仁核對更新</text>
+            </g>
+
+            <!-- 3. 左側節點：原網站「藏在多層選單裡的分散公告」 -->
+            <g id="node-source-pages" class="cursor-pointer" onclick="goToStep(1)" transform="translate(58, 128)">
+              <ellipse id="source-halo" cx="88" cy="135" rx="75" ry="30" fill="#fb7185" opacity="0.2" filter="url(#neonGlow)" />
+
+              <!-- 浮空分散頁面 1：競賽補助 -->
+              <g class="float-slow" transform="translate(0, 0)">
+                <rect x="10" y="20" width="115" height="44" rx="8" fill="#1e293b" stroke="#fb7185" stroke-width="1.8" />
+                <text x="20" y="37" fill="#fda4af" font-size="9.5" font-weight="900">📄 選單 A：競賽補助公告</text>
+                <text x="20" y="53" fill="#cbd5e1" font-size="8.5">藏在內文：賽前14工作天送件</text>
+              </g>
+
+              <!-- 浮空分散頁面 2：系所補助 -->
+              <g class="float-delayed" transform="translate(24, 42)">
+                <rect x="10" y="20" width="115" height="44" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8" />
+                <text x="20" y="37" fill="#7dd3fc" font-size="9.5" font-weight="900">📄 選單 B：系所發展補助</text>
+                <text x="20" y="53" fill="#cbd5e1" font-size="8.5">藏在內文：隨到隨審用罄為止</text>
+              </g>
+
+              <!-- 浮空分散頁面 3：教師社群 -->
+              <g class="float-slow" transform="translate(48, 84)">
+                <rect x="10" y="20" width="115" height="44" rx="8" fill="#1e293b" stroke="#fbbf24" stroke-width="1.8" />
+                <text x="20" y="37" fill="#fde68a" font-size="9.5" font-weight="900">📄 選單 C：教師成長社群</text>
+                <text x="20" y="53" fill="#fca5a5" font-size="8.5">標題註明：(經費用罄)</text>
+              </g>
+
+              <!-- 節點標籤 -->
+              <g transform="translate(22, 162)">
+                <rect x="0" y="0" width="136" height="26" rx="13" fill="#be123c" />
+                <text x="68" y="17" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">① 原站分散選單與公告</text>
+              </g>
+            </g>
+
+            <!-- 4. 中央節點：3D AI 擷取・規則判讀與承辦人核對中樞 -->
+            <g id="node-ai-core" class="cursor-pointer" onclick="goToStep(3)" transform="translate(352, 142)">
+              <ellipse id="ai-halo" cx="65" cy="95" rx="68" ry="28" fill="#fbbf24" opacity="0.2" filter="url(#neonGlow)" />
+
+              <!-- 3D 六角晶體 / 運算伺服器座 -->
+              <polygon points="15,65 65,42 115,65 65,88" fill="#451a03" stroke="#fbbf24" stroke-width="2" />
+              <polygon points="15,65 65,88 65,118 15,95" fill="#78350f" stroke="#f59e0b" stroke-width="1.5" />
+              <polygon points="65,88 115,65 115,95 65,118" fill="#92400e" stroke="#f59e0b" stroke-width="1.5" />
+
+              <!-- 浮空 AI 核心方塊 -->
+              <g class="float-slow">
+                <rect x="35" y="16" width="60" height="46" rx="12" fill="url(#aiCoreGrad)" stroke="#fef08a" stroke-width="2" />
+                <text x="65" y="42" text-anchor="middle" font-size="22">🤖</text>
+                <text x="65" y="56" text-anchor="middle" fill="#fffbeb" font-size="8.5" font-weight="900">AI PARSER</text>
+              </g>
+
+              <!-- 承辦人真人把關徽章 -->
+              <g transform="translate(88, 66)">
+                <circle cx="22" cy="22" r="20" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+                <text x="22" y="27" text-anchor="middle" font-size="17">👩‍💼</text>
+                <rect x="-12" y="38" width="68" height="16" rx="8" fill="#0284c7" />
+                <text x="22" y="49" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="900">承辦同仁核對</text>
+              </g>
+
+              <!-- 狀態指令泡泡 -->
+              <g id="ai-core-bubble" transform="translate(-14, -22)">
+                <rect x="0" y="0" width="158" height="26" rx="8" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5" />
+                <text id="ai-core-bubble-text" x="79" y="17" text-anchor="middle" fill="#fde68a" font-size="10" font-weight="900" font-family="monospace">
+                  PAIN POINT: 資訊太發散
+                </text>
+              </g>
+
+              <g transform="translate(-6, 132)">
+                <rect x="0" y="0" width="142" height="26" rx="13" fill="#d97706" />
+                <text x="71" y="17" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">② AI 整理 × 真人核對</text>
+              </g>
+            </g>
+
+            <!-- 5. 右側節點：3D 立體「NUTC 高教補助戰情表」總覽大螢幕 -->
+            <g id="node-warroom-screen" class="cursor-pointer" onclick="goToStep(5)" transform="translate(595, 88)">
+              <ellipse id="warroom-halo" cx="115" cy="185" rx="95" ry="36" fill="#10b981" opacity="0.25" filter="url(#neonGlow)" />
+
+              <!-- 螢幕底座 -->
+              <polygon points="85,175 135,155 155,168 105,188" fill="#475569" />
+              <polygon points="102,140 118,134 118,172 102,178" fill="#334155" />
+
+              <!-- 3D 戰情表寬螢幕外框 -->
+              <rect x="10" y="12" width="210" height="145" rx="14" fill="#020617" transform="translate(6, 8)" opacity="0.65" />
+              <rect x="10" y="12" width="210" height="145" rx="14" fill="url(#warroomScreenGrad)" stroke="#34d399" stroke-width="2.5" />
+
+              <!-- 戰情表頂部列 -->
+              <rect x="18" y="20" width="194" height="22" rx="6" fill="#090d16" />
+              <circle cx="28" cy="31" r="3" fill="#ef4444" />
+              <circle cx="38" cy="31" r="3" fill="#f59e0b" />
+              <circle cx="48" cy="31" r="3" fill="#10b981" />
+              <text x="122" y="35" text-anchor="middle" fill="#6ee7b7" font-size="9.5" font-weight="900">
+                📊 NUTC 高教補助公告總覽戰情表
+              </text>
+
+              <!-- 戰情表內建 3 張一目了然狀態卡 -->
+              <!-- Card 1 -->
+              <rect x="20" y="48" width="190" height="26" rx="6" fill="#0f172a" stroke="#fbbf24" stroke-width="1" />
+              <circle cx="31" cy="61" r="4.5" fill="#fbbf24" />
+              <text x="42" y="59" fill="#ffffff" font-size="8.5" font-weight="900">學生全國/國際競賽補助</text>
+              <text x="42" y="70" fill="#fde68a" font-size="7.5">⚠️ 賽前 14 個工作天送件｜🔗 官方公告</text>
+
+              <!-- Card 2 -->
+              <rect x="20" y="78" width="190" height="26" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1" />
+              <circle cx="31" cy="91" r="4.5" fill="#34d399" />
+              <text x="42" y="89" fill="#ffffff" font-size="8.5" font-weight="900">系所專業發展補助方案</text>
+              <text x="42" y="100" fill="#6ee7b7" font-size="7.5">🟢 隨到隨審・開放申請中｜🔗 官方公告</text>
+
+              <!-- Card 3 -->
+              <rect x="20" y="108" width="190" height="26" rx="6" fill="#0f172a" stroke="#fb7185" stroke-width="1" />
+              <circle cx="31" cy="121" r="4.5" fill="#fb7185" />
+              <text x="42" y="119" fill="#ffffff" font-size="8.5" font-weight="900">教師專業成長社群補助</text>
+              <text x="42" y="130" fill="#fda4af" font-size="7.5">🔴 經費用罄（已截止）｜🔗 官方公告</text>
+
+              <!-- 戰情表底部即時狀態列 -->
+              <text id="warroom-screen-tag" x="115" y="148" text-anchor="middle" fill="#a7f3d0" font-size="8.5" font-weight="900">
+                ✨ 戰情表已就緒！一眼看清全校補助全貌
+              </text>
+              <text id="warroom-screen-sub" x="115" y="172" text-anchor="middle" fill="#94a3b8" font-size="8.5" font-weight="700">
+                看見方案 ➔ 理解條件 ➔ 掌握時間 ➔ 前往官方公告
+              </text>
+
+              <g transform="translate(36, 186)">
+                <rect x="0" y="0" width="158" height="26" rx="13" fill="#059669" />
+                <text x="79" y="17" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900">③ 一目了然「補助戰情表」</text>
+              </g>
+            </g>
+
+            <!-- 6. 舞台頂部浮空「核心解說對話框」 -->
+            <g id="stage-speech-overlay" transform="translate(215, 10)">
+              <rect id="speech-box-bg" x="0" y="0" width="445" height="68" rx="16" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+              <text id="speech-box-badge" x="16" y="23" fill="#38bdf8" font-size="11" font-weight="900">
+                🕸️ 原始痛點：高教深耕官網選單多、公告分散各頁
+              </text>
+              <text id="speech-box-line1" x="16" y="43" fill="#f8fafc" font-size="11" font-weight="700">
+                老師心聲：「現在到底有哪些補助可以申請？什麼時候截止？」
+              </text>
+              <text id="speech-box-line2" x="16" y="59" fill="#fde68a" font-size="11" font-weight="700">
+                辦公室心聲：「每次都要重找連結與解釋規則，先建一張戰情表吧！」
+              </text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 舞台底部：3 大角色即時狀態列 -->
+        <div class="relative z-20 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-800/80">
+          <div id="hw-card-source" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">🕸️</span>
+            <div>
+              <div class="text-[11px] text-rose-400 font-bold">官方網站原始公告</div>
+              <div id="hw-state-source" class="text-xs font-black text-white">套裝網站選單分散</div>
+            </div>
+          </div>
+          <div id="hw-card-ai" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">🧠</span>
+            <div>
+              <div class="text-[11px] text-amber-400 font-bold">爬蟲 ＋ AI 整理助手</div>
+              <div id="hw-state-ai" class="text-xs font-black text-white">盤點老師最在意的問題</div>
+            </div>
+          </div>
+          <div id="hw-card-warroom" class="rounded-2xl bg-slate-900/90 border border-slate-800 p-3 flex items-center gap-3 transition-all">
+            <span class="text-2xl">📊</span>
+            <div>
+              <div class="text-[11px] text-emerald-400 font-bold">高教補助戰情表</div>
+              <div id="hw-state-warroom" class="text-xs font-black text-white">一頁總覽・師生與同仁共用</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================================================================
+         中段：為什麼「先建戰情表」能解決發散痛點？三大設計價值（可語音點讀）
+         ================================================================= -->
+    <section class="pt-2">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2 h-6 rounded-full bg-emerald-400"></span>
+          <h3 class="text-lg sm:text-xl font-black text-white">為什麼核心是「先建立一張戰情表」？AI 協助完成的 3 大突破</h3>
+        </div>
+        <span class="text-xs text-slate-400">點擊任一卡片可聽語音解說 🔊</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <!-- 價值 1 -->
+        <div onclick="speakHighlight(0)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/40 border border-slate-800 hover:border-sky-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                突破 01｜從選單迷宮到單一視野
+              </span>
+              <span class="text-xs text-sky-400 font-bold">🔊 聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-2">把藏在選單裡的機會，放到老師眼前</h4>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              原網站受限於套裝系統，老師需逐層點開選單才能拼湊全貌。建立<strong>「高教補助戰情表」</strong>後，老師打開第一眼就能回答 4 個核心問題：
+            </p>
+            <div class="grid grid-cols-2 gap-2 my-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-950/80 border border-sky-500/30 text-sky-200 font-bold">1️⃣ 現在有哪些補助？</div>
+              <div class="p-2.5 rounded-xl bg-slate-950/80 border border-sky-500/30 text-sky-200 font-bold">2️⃣ 哪些方案與我有關？</div>
+              <div class="p-2.5 rounded-xl bg-slate-950/80 border border-sky-500/30 text-sky-200 font-bold">3️⃣ 何時申請、何時截止？</div>
+              <div class="p-2.5 rounded-xl bg-slate-950/80 border border-sky-500/30 text-sky-200 font-bold">4️⃣ 原始公告與表件在哪？</div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-400">辦公室分享 1 個連結就能溝通</span>
+            <span class="text-sky-300 font-black">資訊不再發散 🎯</span>
+          </div>
+        </div>
+
+        <!-- 價值 2 -->
+        <div onclick="speakHighlight(1)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 hover:border-amber-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                突破 02｜理解期限與隱藏條件
+              </span>
+              <span class="text-xs text-amber-400 font-bold">🔊 聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-2">不只找一個日期，讓狀態標示有依據</h4>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              AI 協助閱讀不同寫法的長文公告，區分<strong>「申請期限、活動日期、核銷期限」</strong>，並抓出影響申請資格的關鍵細節：
+            </p>
+            <div class="space-y-1.5 text-xs">
+              <div class="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between">
+                <span class="font-bold text-amber-200">🏆 競賽補助公告</span>
+                <span class="text-[11px] bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded">賽前 14 個工作天送件</span>
+              </div>
+              <div class="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between">
+                <span class="font-bold text-emerald-200">🏛️ 系所發展補助</span>
+                <span class="text-[11px] bg-emerald-400 text-slate-950 font-black px-2 py-0.5 rounded">隨到隨審・用罄為止</span>
+              </div>
+              <div class="p-2 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-between">
+                <span class="font-bold text-rose-200">👩‍🏫 教師成長社群</span>
+                <span class="text-[11px] bg-rose-400 text-slate-950 font-black px-2 py-0.5 rounded">辨識「經費用罄」亮紅燈</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-400">資料不明確時標示「待確認」</span>
+            <span class="text-amber-300 font-black">交由承辦同仁拍板 🛡️</span>
+          </div>
+        </div>
+
+        <!-- 價值 3 -->
+        <div onclick="speakHighlight(2)" class="card-3d cursor-pointer rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 hover:border-emerald-500/60 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                突破 03｜可持續更新與延伸助手
+              </span>
+              <span class="text-xs text-emerald-400 font-bold">🔊 聽解說</span>
+            </div>
+            <h4 class="text-lg font-black text-white mb-2">AI 比對前後差異，陪著辦公室每天工作</h4>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              補助資訊會隨公告更新與經費狀況改變。透過<strong>「重新擷取 ➔ AI 比對前後差異 ➔ 同仁核對更新」</strong>，戰情表能持續長出延伸能力：
+            </p>
+            <div class="grid grid-cols-2 gap-2 my-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 font-bold">⏰ 即將截止清單</div>
+              <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 font-bold">🆕 新公告差異摘要</div>
+              <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 font-bold">❓ 教師常見問題 FAQ</div>
+              <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 font-bold">✉️ 通知信草稿生成</div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-400">保留官方公告作為正式依據</span>
+            <span class="text-emerald-300 font-black">省時・準確・貼心 ⚡</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================================================================
+         下半部：承辦同仁實戰區 — 如何用 AI 把手邊發散的業務資料變成「戰情表」？
+         ================================================================= -->
+    <section class="pt-2 pb-10">
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border-2 border-slate-800 p-5 sm:p-7 shadow-2xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 mb-2">
+              🛠️ 承辦同仁也能自己做・一鍵複製 AI 戰情表咒語
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-white">
+              手邊也有散落在各網頁、公文或表格的業務資訊嗎？交給 AI 整理成戰情表！
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+              無論是「補助方案、獎學金公告、各系所評鑑時程、或活動辦理進度」，只要照著以下 3 步驟，就能讓 AI 幫你把發散資料變成一張清楚的戰情表。
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onclick="copyPromptTemplate(this)"
+              class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition-all"
+            >
+              📋 一鍵複製「AI 戰情表整理咒語」
+            </button>
+            <a
+              href="https://nutc-hesp-subsidies-2026.nutcqqnice.chatgpt.site/"
+              target="_blank"
+              rel="noopener"
+              class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
+            >
+              🌐 參觀 NUTC 高教補助總覽實機網站 ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 items-stretch">
+          <!-- 左：AI 與真人分工護欄 -->
+          <div class="lg:col-span-5 space-y-3 flex flex-col justify-between">
+            <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+              <div class="text-xs font-black text-sky-400 mb-2">🤖 AI 幫承辦同仁代勞什麼？</div>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li>✅ 讀取多篇不同格式的公告文字或網頁內容</li>
+                <li>✅ 抽取統一欄位（方案名稱、對象、申請期限、核銷期限、原始連結）</li>
+                <li>✅ 抓出「前14個工作天、隨到隨審、經費用罄」等關鍵條件</li>
+                <li>✅ 產生卡片式 HTML 戰情表與前後版本差異報告</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-950/80 border border-amber-500/30">
+              <div class="text-xs font-black text-amber-300 mb-2">👩‍💼 承辦同仁負責把關什麼？（安全護欄）</div>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li>🛡️ 核對 AI 標示「待確認」或涉及特殊規定的條文</li>
+                <li>🛡️ 確認經費是否確實用罄或期限是否延長，再發布更新</li>
+                <li>🛡️ 以原始官方公告作為正式依據，戰情表作為導引入口</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- 右：可直接複製的 AI 提示詞範本 -->
+          <div class="lg:col-span-7 bg-slate-950 rounded-2xl border border-slate-800 p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+              <span class="text-xs font-bold text-slate-400 font-mono-code">PROMPT TEMPLATE // 把發散公告整理成戰情表</span>
+              <span class="text-[11px] text-amber-300 font-bold">可直接貼給 ChatGPT / Claude / Gemini</span>
+            </div>
+            <pre id="ai-prompt-template-text" class="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed font-mono-code select-all">請扮演「學校行政辦公室的資料整理與戰情表設計助手」。
+我手邊有多篇分散在不同頁面的官方補助／業務公告（如下方貼上的內容或網址）。請幫我整理成一張讓老師與承辦人都能一眼看懂的「戰情表」：
+
+1. 【統一欄位抽取】：請針對每一項方案整理出：
+   - 方案名稱與分類（如：學生競賽、系所發展、教師成長、教學創新）
+   - 適用對象
+   - 關鍵時程（請務必區分：申請起訖期限、活動辦理日期、經費核銷期限）
+   - 特殊限制條件（如：須於活動前 14 個工作天送件、隨到隨審、經費用罄即止）
+   - 原始官方公告連結
+
+2. 【狀態燈號與依據】：
+   - 請依內容標示「🟢 開放申請中」、「⚠️ 特殊時限注意」或「🔴 經費用罄／已截止」，並寫明判斷依據。
+   - 若公告內文有日期或條件不明確之處，請標示「❓ 待承辦人確認」，絕對不要自行猜測。
+
+3. 【輸出互動式戰情表網頁】：
+   - 請將上述資料製作成單一 HTML 戰情表（含分類篩選按鈕、關鍵字搜尋、狀態燈號卡片，以及直達官方公告的按鈕），方便辦公室分享單一連結給老師查詢！</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="data.js?v=202610242335"></script>
+  <script src="app.js?v=202610242335"></script>
+</body>
+</html>
