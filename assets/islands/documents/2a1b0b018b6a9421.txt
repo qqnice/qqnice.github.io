@@ -1,0 +1,600 @@
+# 實際完成的操作指令
+
+這份文件只記錄這台 VM 上已經做完、而且檢查通過的步驟。數值都是實際使用的值。
+
+| 項目 | 實際值 |
+|---|---|
+| 專案目錄 | `/home/qqnice/webstack` |
+| 系統使用者 | `qqnice` |
+| Public IP | `20.189.73.50` |
+| WordPress | `q1.qqnice.org` |
+| Apache 靜態網站 | `k1.qqnice.org` |
+| 另一個單純網頁 | `k1.kknice.net` |
+| Compose | Docker Compose `2.40.3`，指令是 `docker compose` |
+| Let's Encrypt 信箱 | `qqnice@qqnice.org` |
+
+密碼只放在 `/home/qqnice/webstack/.env`，權限 `600`。這份文件不寫密碼。
+
+三個網域的 DNS A 紀錄都必須先指向 `20.189.73.50`。`dig +short` 沒有回這個 IP 之前，不要對那個網域申請憑證。
+
+```text
+q1.qqnice.org  ──┐
+k1.qqnice.org  ──┼── DNS ── 20.189.73.50 ── Nginx:80/443
+k1.kknice.net  ──┘                              │
+                          ┌─────────────────────┼─────────────────────┐
+                          ▼                     ▼                     ▼
+                    wordpress:80             web:80                knet:80
+                          │              k1.qqnice.org         k1.kknice.net
+                          ▼
+                       db:3306
+```
+
+對外只有 Nginx 的 80 和 443。WordPress、兩個 Apache、MariaDB 都沒有公開 port。
+
+## 1. 環境
+
+主機上的 Apache 佔用 80 和 443，先停掉。這次停的是預設站，原本的憑證仍留在 `/etc/letsencrypt`，沒有刪除。
+
+```bash
+docker --version
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose-v2
+docker compose version
+
+sudo systemctl disable --now apache2
+sudo ss -tlnp | grep -E ':(80|443) ' || echo "80/443 free"
+```
+
+確認 DNS：
+
+```bash
+dig +short q1.qqnice.org A
+dig +short k1.qqnice.org A
+dig +short k1.kknice.net A
+```
+
+三行都要是 `20.189.73.50`。
+
+## 2. 建立專案
+
+```bash
+mkdir -p /home/qqnice/webstack/{site/html,site-knet/html,nginx/conf.d,certbot/www,certbot/conf}
+cd /home/qqnice/webstack
+```
+
+`.env`：
+
+```bash
+DB_PASSWORD=自行產生的強密碼
+DB_ROOT_PASSWORD=另一組強密碼
+LE_EMAIL=qqnice@qqnice.org
+WP_ADMIN_USER=qqnice
+WP_ADMIN_PASSWORD=自行產生的強密碼
+WP_ADMIN_EMAIL=qqnice@qqnice.org
+WP_TITLE=QQLinux
+```
+
+```bash
+chmod 600 .env
+```
+
+`site/Dockerfile` 與 `site-knet/Dockerfile` 相同：
+
+```dockerfile
+FROM httpd:2.4
+COPY ./html/ /usr/local/apache2/htdocs/
+EXPOSE 80
+```
+
+`site/html/index.html`，首頁這一行維持原樣，數字是全形：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QQLinux</title>
+</head>
+
+<body>
+
+    <h1>S１２３４５６　 QQLinux</h1>
+
+    <p>Docker Apache Web Site</p>
+
+    <p>Domain：k1.qqnice.org</p>
+
+</body>
+
+</html>
+```
+
+`site-knet/html/index.html`，頁面只放這一句：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>QQ123456789 QQnice Linux</title>
+</head>
+<body>
+  <h1>QQ123456789 QQnice Linux</h1>
+</body>
+</html>
+```
+
+## 3. Compose
+
+檔案是 `/home/qqnice/webstack/compose.yml`。後端不要寫 `ports`。`certbot` 使用 `profiles: tools`，平常不會被 `up -d` 啟動。
+
+```yaml
+services:
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+    depends_on:
+      - web
+      - knet
+      - wordpress
+
+  web:
+    build: ./site
+    image: k-site:1.0
+    restart: unless-stopped
+
+  knet:
+    build: ./site-knet
+    image: k-net:1.0
+    restart: unless-stopped
+
+  db:
+    image: mariadb:lts
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wpuser
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp-data:/var/www/html
+
+  certbot:
+    image: certbot/certbot
+    profiles:
+      - tools
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+
+volumes:
+  db-data:
+  wp-data:
+```
+
+```bash
+docker compose config --quiet && echo "compose ok"
+```
+
+## 4. 先用 HTTP 設定
+
+憑證檔還沒有之前，Nginx 只能聽 80。下面三個檔先不要寫 `listen 443`。
+
+`nginx/conf.d/00-default.conf`：
+
+```nginx
+server {
+    listen 80 default_server;
+    server_name _;
+    return 444;
+}
+```
+
+`nginx/conf.d/q1.qqnice.org.conf`，這階段先不要轉到 WordPress：
+
+```nginx
+server {
+    listen 80;
+    server_name q1.qqnice.org;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        default_type text/plain;
+        return 200 "q1.qqnice.org HTTP OK\n";
+    }
+}
+```
+
+`nginx/conf.d/k1.qqnice.org.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name k1.qqnice.org;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://web:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+`nginx/conf.d/k1.kknice.net.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name k1.kknice.net;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        proxy_pass http://knet:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+啟動。設定檔是掛進去的，容器已經在跑時，改完要測試再 reload。
+
+```bash
+cd /home/qqnice/webstack
+docker compose up -d --build
+docker compose exec nginx nginx -t
+docker compose exec nginx nginx -s reload
+```
+
+Host 分流，三個結果要不同。未知網域會被 444 直接關閉。
+
+```bash
+curl -H "Host: q1.qqnice.org" http://127.0.0.1/
+curl -H "Host: k1.qqnice.org" http://127.0.0.1/
+curl -H "Host: k1.kknice.net" http://127.0.0.1/
+curl -v http://127.0.0.1/
+```
+
+實際結果：
+
+```text
+q1.qqnice.org   → q1.qqnice.org HTTP OK
+k1.qqnice.org   → 首頁 S１２３４５６　 QQLinux
+k1.kknice.net   → 首頁 QQ123456789 QQnice Linux
+其他            → Empty reply from server
+```
+
+ACME 路徑要從網際網路讀得到。三個網域都回 `acme-test-ok` 之後才申請憑證。
+
+```bash
+mkdir -p certbot/www/.well-known/acme-challenge
+echo acme-test-ok > certbot/www/.well-known/acme-challenge/test.txt
+curl http://q1.qqnice.org/.well-known/acme-challenge/test.txt
+curl http://k1.qqnice.org/.well-known/acme-challenge/test.txt
+curl http://k1.kknice.net/.well-known/acme-challenge/test.txt
+rm certbot/www/.well-known/acme-challenge/test.txt
+```
+
+## 5. 憑證
+
+每個網域都先 staging，確認 `Successfully received certificate.`，刪掉測試憑證，再申請正式憑證。正式憑證列表不可以出現 `TEST_CERT`。
+
+```bash
+cd /home/qqnice/webstack
+set -a
+source .env
+set +a
+
+for domain in q1.qqnice.org k1.qqnice.org k1.kknice.net; do
+  docker compose run --rm certbot certonly --webroot \
+    -w /var/www/certbot \
+    -d "$domain" \
+    --email "$LE_EMAIL" --agree-tos --no-eff-email \
+    --staging
+
+  docker compose run --rm certbot delete \
+    --cert-name "$domain" --non-interactive
+
+  docker compose run --rm certbot certonly --webroot \
+    -w /var/www/certbot \
+    -d "$domain" \
+    --email "$LE_EMAIL" --agree-tos --no-eff-email
+done
+
+docker compose run --rm certbot certificates
+```
+
+實際核發結果都是 `VALID: 89 days`，到期日 2027-01-05。
+
+## 6. 改成 HTTPS
+
+三個設定檔都改成下面的最終版，然後：
+
+```bash
+docker compose exec nginx nginx -t
+docker compose exec nginx nginx -s reload
+```
+
+`nginx -t` 失敗就不要 reload。
+
+`nginx/conf.d/q1.qqnice.org.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name q1.qqnice.org;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name q1.qqnice.org;
+
+    ssl_certificate     /etc/letsencrypt/live/q1.qqnice.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/q1.qqnice.org/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    client_max_body_size 64m;
+
+    location / {
+        proxy_pass http://wordpress:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+`nginx/conf.d/k1.qqnice.org.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name k1.qqnice.org;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name k1.qqnice.org;
+
+    ssl_certificate     /etc/letsencrypt/live/k1.qqnice.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/k1.qqnice.org/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        proxy_pass http://web:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+`nginx/conf.d/k1.kknice.net.conf`：
+
+```nginx
+server {
+    listen 80;
+    server_name k1.kknice.net;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name k1.kknice.net;
+
+    ssl_certificate     /etc/letsencrypt/live/k1.kknice.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/k1.kknice.net/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        proxy_pass http://knet:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+檢查轉址、憑證和首頁：
+
+```bash
+curl -I http://q1.qqnice.org
+curl -I https://q1.qqnice.org
+curl -I http://k1.qqnice.org
+curl -I https://k1.qqnice.org
+curl -I http://k1.kknice.net
+curl -I https://k1.kknice.net
+
+echo | openssl s_client -connect q1.qqnice.org:443 -servername q1.qqnice.org 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+echo | openssl s_client -connect k1.qqnice.org:443 -servername k1.qqnice.org 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+echo | openssl s_client -connect k1.kknice.net:443 -servername k1.kknice.net 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+
+curl -v http://20.189.73.50/
+```
+
+實際結果：
+
+```text
+三個網域的 HTTP        → 301，Location 為對應的 https://
+https://q1.qqnice.org  → 尚未安裝時 302 到 /wp-admin/install.php；安裝後 200
+https://k1.qqnice.org  → 200，內文含 S１２３４５６　 QQLinux
+https://k1.kknice.net  → 200，內文為 QQ123456789 QQnice Linux
+三張憑證 issuer        → Let's Encrypt
+http://20.189.73.50/   → Empty reply from server
+```
+
+## 7. 安裝 WordPress
+
+等 `https://q1.qqnice.org` 會導向 `install.php` 再安裝。安裝後兩個網址都是 `https://q1.qqnice.org`。
+
+```bash
+cd /home/qqnice/webstack
+set -a
+source .env
+set +a
+
+docker compose exec -T -u www-data \
+  -e WP_ADMIN_USER -e WP_ADMIN_PASSWORD -e WP_ADMIN_EMAIL -e WP_TITLE \
+  wordpress bash -lc '
+curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+php /tmp/wp-cli.phar core install \
+  --url="https://q1.qqnice.org" \
+  --title="$WP_TITLE" \
+  --admin_user="$WP_ADMIN_USER" \
+  --admin_password="$WP_ADMIN_PASSWORD" \
+  --admin_email="$WP_ADMIN_EMAIL" \
+  --skip-email
+php /tmp/wp-cli.phar language core install zh_TW
+php /tmp/wp-cli.phar site switch-language zh_TW
+php /tmp/wp-cli.phar option get siteurl
+php /tmp/wp-cli.phar option get home
+'
+```
+
+實際讀到：
+
+```text
+SITEURL=https://q1.qqnice.org
+HOME=https://q1.qqnice.org
+```
+
+後台是 `https://q1.qqnice.org/wp-login.php`，帳號 `qqnice`，密碼是 `.env` 的 `WP_ADMIN_PASSWORD`。
+
+已發佈的文章標題是 `S１２３４５６ Docker WEEK2`。
+
+## 8. 資料還在
+
+不要加 `-v`。`-v` 會刪掉 Named Volume，文章和資料庫會消失。
+
+```bash
+cd /home/qqnice/webstack
+docker compose down
+docker volume ls | grep webstack
+docker compose up -d
+```
+
+`down` 之後 `webstack_db-data` 和 `webstack_wp-data` 還在。再啟動後，`https://q1.qqnice.org` 的文章仍在，憑證也仍有效。
+
+## 9. 續期
+
+先演練。Certbot 非互動續期會先隨機等待，這次大約花了八分鐘，最後兩個當時已存在的憑證都成功。
+
+```bash
+cd /home/qqnice/webstack
+docker compose run --rm certbot renew --dry-run
+```
+
+實際輸出含：
+
+```text
+Congratulations, all simulated renewals succeeded:
+  /etc/letsencrypt/live/k1.qqnice.org/fullchain.pem (success)
+  /etc/letsencrypt/live/q1.qqnice.org/fullchain.pem (success)
+```
+
+`k1.kknice.net` 是這次演練之後才申請的。同一條 cron 會處理 `/etc/letsencrypt/renewal/` 裡的全部憑證，所以這張也會被續期。
+
+已寫入 `qqnice` 的 crontab：
+
+```cron
+17 3 * * * cd /home/qqnice/webstack && /usr/bin/docker compose run --rm certbot renew --quiet && /usr/bin/docker compose exec -T nginx nginx -s reload >> /home/qqnice/webstack/renew.log 2>&1
+```
+
+```bash
+crontab -l
+```
+
+## 10. 完成時的狀態
+
+```bash
+cd /home/qqnice/webstack
+docker compose ps
+```
+
+| 服務 | 對外 port |
+|---|---|
+| nginx | `80`、`443` |
+| web | 無，只在內部 `80` |
+| knet | 無，只在內部 `80` |
+| wordpress | 無，只在內部 `80` |
+| db | 無，只在內部 `3306` |
+| certbot | 不常駐，申請或續期時才執行 |
+
+可以重複使用的檢查：
+
+```bash
+docker compose ps
+docker compose logs --tail=50 nginx
+docker compose exec nginx nginx -t
+docker volume ls
+docker compose run --rm certbot certificates
+curl -I https://q1.qqnice.org
+curl -I https://k1.qqnice.org
+curl -I https://k1.kknice.net
+```

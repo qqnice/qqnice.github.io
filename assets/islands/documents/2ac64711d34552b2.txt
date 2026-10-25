@@ -1,0 +1,84 @@
+# WEEK3 完成檢查
+
+教師與助教用這份清單核對學生是否照手冊做完。報告（`學號_報告.pdf`）要附畫面，每張都要看得到下表的「通過標準」。只貼指令、沒有結果，不算完成。
+
+兩個網站以學生自己的網域為準。手冊範例是 `https://q1.qqnice.org` 與 `https://k1.kknice.net`。帳號以學生自己的為準，不一定是 `azureuser`。
+
+## 必交畫面
+
+| 張 | 畫面內容 | 通過標準 |
+|---|---|---|
+| 1 | `./backup.sh` 的執行結果 | 出現 `完成：/home/帳號/backups/日期時間`，之後列出備份目錄內容。只有 `.partial-` 開頭的目錄，或沒有「完成：」，不算 |
+| 2 | `ls -l "$B"` | 正好 6 個檔，權限都是 `-rw-------`：`db-wordpress.sql`、`posts.tsv`、`wp-data.tar.gz`、`wp-files.sha256`、`config.tar.gz`、`SHA256SUMS` |
+| 3 | 四個版本指令的輸出，加上 `docker compose images`、`docker compose ps` | 映像沒有 `latest`、`lts`、`stable`；db 為 `healthy` |
+| 4 | `echo "$B"` 與 `(cd "$B" && sha256sum -c SHA256SUMS)` | 五行都是 `OK` |
+| 5 | `tar tzf "$B/wp-data.tar.gz" \| grep -cx './wp-config.php'` | 印出 `1` |
+| 6 | `docker compose down -v` 之後的 `docker volume ls` | 看不到 `webstack_db-data` 與 `webstack_wp-data` |
+| 7 | `echo "$B"` 與 `./restore.sh "$B"` 的完整輸出 | 同時出現「檔案比對一致」與「文章比對一致」 |
+| 8 | 還原後的 WordPress 首頁 | 文章還在，文章裡的圖片打得開 |
+| 9 | WordPress 後台 | 已登入後台，不是安裝畫面 |
+| 10 | 還原後的靜態網站 | 顯示學生自己的靜態首頁 |
+| 11 | `sudo sshd -T` 的四行，以及強制只用密碼登入的結果 | 四行值正確（見下方），且出現 `Permission denied (publickey).`；同時金鑰仍可登入。只有設定檔、沒有測試結果，不算 |
+| 12 | `sudo fail2ban-client status sshd` | 出現 `Status for the jail: sshd`。這只證明規則已載入，不代表已實測封鎖效果 |
+
+**同一份備份**：第 4 張與第 7 張的 `echo "$B"` 必須是同一個目錄。還原用的必須是剛通過兩道檢查的那一份，不能用更早的另一份。
+
+## 停損的同學
+
+- **上半場停損**（1:15 還沒做到 STEP 6，本次沒有執行 `down -v`）：第 1～5 張照交。第 6～10 張在課後或下週開頭補做後補交。
+- **下半場停損**（2:40 還沒完成 STEP 9-3，本週沒關密碼登入）：第 11 張改交「新視窗以金鑰登入成功、舊視窗仍連著」的畫面。關閉密碼登入留到下週開頭，在老師在場時完成後補交第 11 張。
+
+## 對照值
+
+版本畫面要對得上 WEEK3 版 `compose.yml`：
+
+| 服務 | 標籤 |
+|---|---|
+| db | `mariadb:12.3` |
+| wordpress | `wordpress:7.1-php8.3-apache` |
+| nginx | `nginx:1.30-alpine` |
+| certbot | `certbot/certbot:v5.8.0` |
+
+學生查到的版本和上表不同時，報告要寫改了哪一行。資料庫不可以改成比目前更舊的版本。`certbot` 屬於 `tools` profile，平時不會出現在 `docker compose images`，以版本指令的輸出為準。
+
+`sshd -T` 預期值：
+
+```text
+permitrootlogin no
+maxauthtries 3
+passwordauthentication no
+kbdinteractiveauthentication no
+```
+
+行的順序可以不同，值要一致。
+
+## 報告要寫的內容
+
+1. 紀錄表每一格都填實際值，不要留範例日期：
+   - 第一次備份目錄
+   - 演練用備份目錄 `B`
+   - MariaDB、PHP、Nginx、Certbot 版本
+   - 自己的連線來源 IP（可遮住最後一段）
+2. 版本對照：查到的版本和固定標籤是否相同。不同時寫改了哪一行，以及為什麼不能把資料庫改得更舊。
+3. 災難演練：寫明刪除前兩道檢查都通過，才執行 `down -v`。還原後寫文章標題、圖片是否還在、靜態網站是否還在。
+4. SSH：寫目前是「金鑰可登入、密碼被拒絕」，或寫明停在 STEP 9、本週沒關密碼。沒有先用新視窗確認金鑰登入，就不可以關密碼登入。
+5. fail2ban：`ignoreip` 放了哪個 IP，以及為什麼要放。全班從教室連線時對外是同一個 IP，沒放就可能整班被封。
+6. 防火牆觀察紀錄表三列都要填，再用三到五句話回答：ufw 只放行 22 時，為什麼 Docker 上的網站還連得到？真正的防線在哪裡？學生的 VM 本週不要啟用 ufw。
+
+## 課後作業
+
+- **A｜備份帶離 VM**：在自己電腦驗證檢查碼的畫面。
+  - macOS／Linux：`shasum -a 256 -c SHA256SUMS`，五行都是 `OK`。
+  - Windows：`Get-FileHash` 的輸出與 `SHA256SUMS` 內容並排，五個檔的雜湊值都相同。
+- **B｜每日自動備份**：`crontab -l` 的畫面，那一行要有 `flock -n /tmp/webstack-backup.lock`。時區是 `UTC` 寫 `30 18 * * *`，是 `Asia/Taipei` 寫 `30 2 * * *`（`timedatectl` 可查）。隔天補交 `tail ~/backups/backup.log`，要看得到「完成：」。
+
+## 不要收
+
+備份檔（`.sql`、`.tar.gz`）、`.env`、憑證私鑰、整包 `~/backups`。這些裡面有資料庫密碼與私鑰。
+
+繳交檔只收：
+
+- WEEK3 版 `compose.yml`（有修改版本的，交修改後的）
+- `10-hardening.conf`
+- `jail.local`（`ignoreip` 可遮蔽）
+- `學號_報告.pdf`
