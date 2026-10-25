@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 時代的評量方式探索與來源交互驗證 | 評量革新實戰指南</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Custom Styles with Cache-Busting -->
+  <link rel="stylesheet" href="styles.css?v=20261025">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+
+  <!-- 頂部導航列 -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="../" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors flex items-center gap-1.5 text-xs font-medium">
+          <i class="fa-solid fa-arrow-left"></i> 行政專區
+        </a>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+            <i class="fa-solid fa-scale-balanced text-sm"></i>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+              AI 時代評量探索與來源交互驗證
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-normal">實戰沙盒版</span>
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷導覽 -->
+      <nav class="hidden md:flex items-center gap-1 text-xs font-medium text-slate-300">
+        <a href="#sec-benchmarks" class="px-3 py-1.5 rounded-lg hover:bg-slate-800/60 hover:text-white transition-colors">政策基準</a>
+        <a href="#sec-sandbox" class="px-3 py-1.5 rounded-lg hover:bg-slate-800/60 hover:text-white transition-colors">三軌驗證沙盒</a>
+        <a href="#sec-models" class="px-3 py-1.5 rounded-lg hover:bg-slate-800/60 hover:text-white transition-colors">五大評量模式</a>
+        <a href="#sec-rubric" class="px-3 py-1.5 rounded-lg hover:bg-slate-800/60 hover:text-white transition-colors">動態規準計分器</a>
+        <a href="#sec-notion" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-file-arrow-down"></i> Notion 文章
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero 英雄區塊 -->
+  <section class="relative overflow-hidden pt-12 pb-16 border-b border-slate-800/60">
+    <div class="absolute inset-0 bg-gradient-to-b from-indigo-950/20 via-transparent to-transparent pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-3xl">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-graduation-cap"></i> 澳洲 TEQSA 評量改革白皮書
+          </span>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-building-columns"></i> 教育部大專校院指引
+          </span>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-brain"></i> Bloom 認知層次倒置重構
+          </span>
+        </div>
+
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
+          告別無效防弊！<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
+            AI 時代的評量革新與三軌來源交互驗證
+          </span>
+        </h2>
+
+        <p class="text-base text-slate-300 leading-relaxed mb-6">
+          當生成式 AI 能在 10 秒內產出一篇看似完美的期末報告，傳統的「防弊圍堵」與「不可靠的 AI 偵測器」已正式宣告失效。
+          真正的學習評量必須轉向<strong>「評價性判斷力（Evaluative Judgment）」</strong>、<strong>「批判性問題定義」</strong>，以及最關鍵的<strong>「三軌來源交叉驗證能力（Source Triangulation）」</strong>！
+        </p>
+
+        <!-- 三大亮點指標卡 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="glass-card p-3.5 rounded-xl border border-slate-700/60">
+            <div class="text-indigo-400 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="text-lg font-bold text-white">放棄 AI 偵測器</div>
+            <div class="text-xs text-slate-400 mt-0.5">高偽陽性陷阱，改採結構性評量改革</div>
+          </div>
+          <div class="glass-card p-3.5 rounded-xl border border-slate-700/60">
+            <div class="text-sky-400 text-lg mb-1"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <div class="text-lg font-bold text-white">三軌來源交互驗證</div>
+            <div class="text-xs text-slate-400 mt-0.5">原始文獻 DOI + 實證數據 + Prompt 思考日誌</div>
+          </div>
+          <div class="glass-card p-3.5 rounded-xl border border-slate-700/60">
+            <div class="text-purple-400 text-lg mb-1"><i class="fa-solid fa-cubes"></i></div>
+            <div class="text-lg font-bold text-white">五大革新評量模式</div>
+            <div class="text-xs text-slate-400 mt-0.5">過程日誌、逆向挑錯、雙軌分流、微型口試、真實情境</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主內容區 -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+    <!-- 區塊一：國內外權威政策與理論基準 -->
+    <section id="sec-benchmarks" class="scroll-mt-20">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <span class="text-xs font-mono text-indigo-400 uppercase tracking-wider font-semibold">THEORETICAL FOUNDATIONS</span>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+            <i class="fa-solid fa-book-bookmark text-indigo-400"></i> 國內外權威政策指引與評量重構基準
+          </h3>
+        </div>
+      </div>
+
+      <div id="benchmark-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 由 app.js 動態渲染 -->
+      </div>
+    </section>
+
+    <!-- 區塊二：三軌來源交互驗證沙盒（核心互動器） -->
+    <section id="sec-sandbox" class="scroll-mt-20">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-2">
+        <div>
+          <span class="text-xs font-mono text-emerald-400 uppercase tracking-wider font-semibold">INTERACTIVE TRIANGULATION LAB</span>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+            <i class="fa-solid fa-flask-vial text-emerald-400"></i> 三軌來源交互驗證沙盒（Source Triangulation）
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">
+            點擊下方學生報告中的「標記文字（Claims）」，即可在右側即時調動【三軌查核儀表板】，檢驗是「真實文獻」、「過度推論」還是「AI 幽靈假引用」！
+          </p>
+        </div>
+
+        <!-- 狀態圖例 -->
+        <div class="flex items-center gap-3 text-xs bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 驗證屬實</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 數據誇大/警示</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span> AI 虛構假文獻</span>
+        </div>
+      </div>
+
+      <!-- 沙盒主舞台（左文章、右三軌分析） -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 左側：學生期末作業模擬檢視區 (7 欄位) -->
+        <div class="lg:col-span-7 glass-panel p-6 rounded-2xl border border-slate-700/80 flex flex-col justify-between">
+          <div id="sandbox-paper-content">
+            <!-- 由 app.js 動態渲染 -->
+          </div>
+
+          <!-- 提示指引 -->
+          <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span><i class="fa-solid fa-hand-pointer text-indigo-400 animate-bounce"></i> 點選帶有標籤的句子進行交互驗證</span>
+            <span class="font-mono text-indigo-300">共 6 處關鍵查核點</span>
+          </div>
+        </div>
+
+        <!-- 右側：三軌查核儀表板 (5 欄位) -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- 宣稱快速清單切換 -->
+          <div class="glass-card p-4 rounded-2xl border border-slate-700/70">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+              <span>查核點清單 (Claim List)</span>
+              <span class="text-[10px] text-slate-400 font-normal">點擊切換</span>
+            </h4>
+            <div id="sandbox-claims-list" class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+              <!-- 由 app.js 動態渲染 -->
+            </div>
+          </div>
+
+          <!-- 三軌詳細查核卡 -->
+          <div id="claim-detail-panel" class="glass-card p-5 rounded-2xl border border-slate-700/70">
+            <!-- 由 app.js 動態渲染選中的宣稱 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊三：五大評量革新模式 -->
+    <section id="sec-models" class="scroll-mt-20">
+      <div class="mb-6">
+        <span class="text-xs font-mono text-indigo-400 uppercase tracking-wider font-semibold">ASSESSMENT PARADIGMS</span>
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+          <i class="fa-solid fa-shapes text-indigo-400"></i> AI 時代五大評量革新實踐模式
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">
+          從關注「單一結果產物」走向「思維歷程與認知能力」的全方位檢核架構。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 左側模式選單 (4 欄) -->
+        <div id="models-tabs-container" class="lg:col-span-4 space-y-2">
+          <!-- 由 app.js 動態渲染 -->
+        </div>
+
+        <!-- 右側模式細節展示 (8 欄) -->
+        <div id="model-detail-container" class="lg:col-span-8">
+          <!-- 由 app.js 動態渲染選取的模式內容 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊四：動態評量規準器 (Rubric Calculator) -->
+    <section id="sec-rubric" class="scroll-mt-20">
+      <div class="mb-6">
+        <span class="text-xs font-mono text-purple-400 uppercase tracking-wider font-semibold">INTERACTIVE RUBRIC</span>
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+          <i class="fa-solid fa-sliders text-purple-400"></i> AI 協同作業動態評量規準器（Rubric Calculator）
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">
+          拖動四大維度得分，系統將自動演算總評級，並動態組裝具建設性的「教師客製化評語回饋」！
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 左側四維度滑桿 (7 欄) -->
+        <div id="rubric-sliders-container" class="lg:col-span-7 space-y-3">
+          <!-- 由 app.js 動態渲染 -->
+        </div>
+
+        <!-- 右側總分結算與評語生成 (5 欄) -->
+        <div class="lg:col-span-5 glass-card p-6 rounded-2xl border border-slate-700/80 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-4 border-b border-slate-700 mb-4">
+              <div>
+                <span class="text-xs text-slate-400">加權總分 (Total Score)</span>
+                <div class="text-4xl font-extrabold text-white mt-1 font-mono">
+                  <span id="rubric-total-score">73</span> <span class="text-sm font-normal text-slate-400">/ 100</span>
+                </div>
+              </div>
+              <div id="rubric-grade-badge">
+                <!-- 由 app.js 動態更新等級 -->
+              </div>
+            </div>
+
+            <!-- 自動生成評語敘述 -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> AI 智能教師反饋評語（動態生成）
+                </span>
+                <button onclick="copyFeedback()" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                  <i class="fa-regular fa-copy"></i> 複製評語
+                </button>
+              </div>
+              <div id="rubric-feedback-narrative" class="text-xs text-slate-200 leading-relaxed bg-slate-900/80 p-3.5 rounded-xl border border-slate-700/60 font-mono">
+                <!-- 由 app.js 動態更新評語內容 -->
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>依據教育部與 TEQSA 規準架構</span>
+            <button onclick="copyFeedback()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors">
+              一鍵套用評語
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊五：Notion 完整文章與相關資源 -->
+    <section id="sec-notion" class="scroll-mt-20 pt-6">
+      <div class="glass-panel p-8 rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-slate-900/90">
+        <div class="max-w-3xl">
+          <span class="text-xs font-mono text-indigo-400 uppercase tracking-wider font-semibold">NOTION KNOWLEDGE BASE</span>
+          <h3 class="text-2xl font-bold text-white mt-1 mb-3">
+            📚 本專題之 Notion 教學專文與完整研習檔案
+          </h3>
+          <p class="text-sm text-slate-300 leading-relaxed mb-6">
+            本互動網頁的所有理論依據、三軌來源查核案例、五大評量範式與檢核表，已同步整理成可直接匯入 Notion 的 Markdown 專文。
+            教師同仁可將此文章轉發予系所會議討論，或直接作為課程大綱（Syllabus）之 AI 評量附錄！
+          </p>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="Notion_AI時代的評量方式探索.md" download class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+              <i class="fa-solid fa-download"></i> 下載 Notion 專用 Markdown 檔 (.md)
+            </a>
+            <a href="https://app.notion.com/p/qqnice/AI-4037d7096624804ea1add156beb0b783" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> 開啟原 Notion 頁面
+            </a>
+            <a href="../" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i> 返回 AI 行政專區首頁
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span>© 2026 國立臺中科技大學 AI 行政與教學推動計畫</span>
+        <span>•</span>
+        <a href="../" class="hover:text-white transition-colors">AI 協助行政自動化專區</a>
+      </div>
+      <div>
+        <span>落實「三軌來源交互驗證」• 培育 AI 時代批判性認知主體性</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts with Cache-Busting -->
+  <script src="data.js?v=20261025"></script>
+  <script src="app.js?v=20261025"></script>
+</body>
+</html>
