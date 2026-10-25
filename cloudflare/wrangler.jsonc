@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "qqnice-site-api",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-25",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qqnice-site-db",
+      "database_id": "46ff55bf-d4f4-467f-8aa4-d7eb73a54539"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "qqnice-site-files"
+    }
+  ]
+}

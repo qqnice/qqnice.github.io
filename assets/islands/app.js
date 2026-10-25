@@ -3,6 +3,7 @@ const $=id=>document.getElementById(id);
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const baseURL=new URL('./',location.href);
 const lessonURL=path=>new URL(path,baseURL).href;
+const catalogAPI='https://qqnice-site-api.qqnice-mb.workers.dev/catalog';
 let catalog=[],scene=null,currentIsland=null,currentTopic=null,currentLesson=null,libraryFilter='all',lastView=null;
 let visited=[];try{visited=JSON.parse(localStorage.getItem('qq-sea-visited')||'[]');if(!Array.isArray(visited))visited=[];}catch{}
 const colorStyle=i=>`--island-color:${i.color}`;
@@ -66,7 +67,21 @@ $('motion-toggle').addEventListener('click',()=>{if(!scene)return;scene.setMotio
 function updateMotion(){const v=scene?.motion??false;$('motion-toggle').setAttribute('aria-pressed',String(v));$('motion-label').textContent='海域動態 '+(v?'開':'關');}
 window.addEventListener('hashchange',applyRoute);window.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)&&!$('library-dialog').open){e.preventDefault();openLibrary();}if(e.key==='Escape'&&!$('library-dialog').open){if(currentLesson)route(currentIsland.id,currentTopic?.id);else if(currentTopic)route(currentIsland.id);else if(currentIsland)route();}});
 renderNavigation();
-try{const response=await fetch(new URL('./catalog.json',import.meta.url));if(!response.ok)throw new Error('教材索引載入失敗');catalog=await response.json();}catch(error){$('library-count').textContent='教材索引暫時無法載入，請從原專區目錄閱讀。';console.error(error);}
+try{
+ const sources=[catalogAPI,new URL('./catalog.json',import.meta.url)];
+ for(const source of sources){
+  try{
+   const options=source===catalogAPI&&AbortSignal.timeout?{signal:AbortSignal.timeout(4000)}:{};
+   const response=await fetch(source,options);
+   if(!response.ok)throw new Error(`教材索引載入失敗：${response.status}`);
+   const lessons=await response.json();
+   if(!Array.isArray(lessons)||!lessons.length||!lessons.every(l=>l.id&&l.path&&l.island&&l.topic))throw new Error('教材索引格式不正確');
+   catalog=lessons;
+   break;
+  }catch(error){console.warn('教材索引來源無法使用',source,error);}
+ }
+ if(!catalog.length)throw new Error('所有教材索引來源皆無法使用');
+}catch(error){$('library-count').textContent='教材索引暫時無法載入，請從原專區目錄閱讀。';console.error(error);}
 applyRoute();
 try{const {createSea}=await import('./scene.js');scene=createSea({container:$('world'),labelLayer:$('world-labels'),onIsland:id=>route(id),onTopic:(id,topic)=>route(id,topic)});lastView=null;applyRoute();scene.setPaused(!!currentLesson);updateMotion();requestAnimationFrame(()=>requestAnimationFrame(()=>{$('scene-loader').classList.add('leaving');setTimeout(()=>$('scene-loader').hidden=true,650);}));}
 catch(error){console.error('3D 場景無法啟動',error);$('scene-loader').hidden=true;$('fallback').hidden=false;$('exploration-hint').textContent='選擇專區，閱讀完整教材';$('zoom-in').disabled=true;$('zoom-out').disabled=true;$('reset-view').disabled=true;$('motion-toggle').disabled=true;updateMotion();}
