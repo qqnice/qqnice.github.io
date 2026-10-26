@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antigravity × GitHub 下 Prompt 串接與網站發佈教學｜學生與教師專用</title>
+  <meta name="description" content="免背繁瑣 Git 指令！在 Google Antigravity 直接複製繁體中文 Prompt，搭配 GitHub 真實網頁一次性授權，自動完成儲存庫建立、推送與 GitHub Pages 發佈。" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至主要教學內容</a>
+
+  <div class="safety-banner" role="region" aria-label="返回專區與教學安全聲明">
+    <div class="container safety-banner-inner" style="justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <a href="../" style="color:#fff; font-weight:800; text-decoration:none; background:rgba(255,255,255,0.16); padding:4px 10px; border-radius:6px;">← 返回 Linux 教學專區</a>
+        <span class="safety-badge">Antigravity × GitHub 實戰教材</span>
+      </div>
+      <p>
+        本頁為互動教學指南，<strong>不收集任何密碼、Token 或驗證碼</strong>。首次使用請先完成 <a href="../github-account-guide/" style="color:#79c0ff; font-weight:700;">GitHub 帳號申請與 2FA 設定 ↗</a>（核對日期：2026-10-26）。
+      </p>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand-area">
+          <div class="eyebrow-row">
+            <span class="pill pill-primary">Google Antigravity 實戰</span>
+            <span class="pill pill-neutral">免背 Git 終端機指令</span>
+            <span class="pill pill-date">內容核對：2026-10-26</span>
+          </div>
+          <h1>Antigravity × GitHub：下 Prompt 就完成串接與網站發佈</h1>
+          <p class="subtitle">
+            專為學生與教師設計：透過 <strong>GitHub CLI 瀏覽器 8 碼一鍵授權（Device Flow）</strong> 搭配 <strong>可自訂的一鍵複製 Prompt 產生器</strong>，讓 Antigravity Agent 自動幫你完成 Git 初始化、建立儲存庫、日常推送與發佈 GitHub Pages！
+          </p>
+        </div>
+
+        <aside class="quick-links-card" aria-label="GitHub 真實頁面直達入口">
+          <h2>GitHub 真實頁面與教材直達入口</h2>
+          <div class="quick-links-grid">
+            <a href="https://github.com/login/device" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+              <span>1. 裝置 8 碼授權真實頁</span>
+              <small>github.com/login/device ↗</small>
+            </a>
+            <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>2. 建立新儲存庫真實頁</span>
+              <small>github.com/new ↗</small>
+            </a>
+            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>3. Personal Access Tokens</span>
+              <small>github.com/settings/tokens ↗</small>
+            </a>
+            <a href="../github-account-guide/" class="btn btn-outline">
+              <span>前置必備：GitHub 帳號與 2FA</span>
+              <small>前往第一份互動教學 →</small>
+            </a>
+          </div>
+          <div class="app-store-bar">
+            <span class="app-store-label">本頁快速跳轉：</span>
+            <a href="#workbench-section" class="store-chip">7 步互動導覽 ↓</a>
+            <a href="#prompt-builder-section" class="store-chip">自訂發佈 Prompt 產生器 ↓</a>
+            <a href="Antigravity與GitHub串接Prompt教學手冊.md" target="_blank" rel="noopener noreferrer" class="store-chip">下載 Markdown 講義 ↗</a>
+          </div>
+        </aside>
+      </div>
+
+      <section class="key-takeaways" aria-label="Antigravity 串接四大重點">
+        <div class="takeaway-card">
+          <div class="takeaway-tag">步驟 01 · CONNECT</div>
+          <h3>瀏覽器 8 碼安全授權</h3>
+          <p>請 Antigravity 啟動 <code>gh auth login --web</code>，再到真實頁面 <code>github.com/login/device</code> 輸入 8 碼按 Authorize，免貼密碼或金鑰。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">步驟 02 · CREATE &amp; PUSH</div>
+          <h3>一句 Prompt 建 Repo 並推送</h3>
+          <p>直接複製本頁 Prompt 貼入 Antigravity，自動建立 <code>.gitignore</code>、完成首次 Commit 並推送到 GitHub 新儲存庫或既有專區。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">步驟 03 · PAGES</div>
+          <h3>自動發佈 GitHub Pages</h3>
+          <p>請 Antigravity 設定從分支發佈 GitHub Pages（或推送到 <code>qqnice.github.io/linux/</code> 等子資料夾），自動取得公開網址。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">步驟 04 · VERIFY</div>
+          <h3>對照真實頁面驗收</h3>
+          <p>推送完成後，核對 Commit 連結、GitHub Actions 部署狀態與公開網址，確認沒有把密碼、Token 或個資上傳公開。</p>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <div class="sticky-nav-wrap" role="navigation" aria-label="步驟進度追蹤列">
+    <div class="container sticky-nav-inner">
+      <div class="module-tabs">
+        <a href="#workbench-section" class="module-tab active" style="text-decoration:none;">
+          <span class="tab-num">1</span>
+          <span class="tab-label">7 步驟：下 Prompt 串接與真實頁面對照</span>
+        </a>
+        <a href="#prompt-builder-section" class="module-tab" style="text-decoration:none;">
+          <span class="tab-num">2</span>
+          <span class="tab-label">互動工具：自訂專案發佈 Prompt 產生器</span>
+        </a>
+        <a href="#faq-section" class="module-tab" style="text-decoration:none;">
+          <span class="tab-num">3</span>
+          <span class="tab-label">常見問題與排解 Prompt 速查表</span>
+        </a>
+      </div>
+
+      <div class="overall-progress" aria-live="polite">
+        <div class="progress-info">
+          <span class="progress-title">串接步驟完成進度</span>
+          <strong id="agy-standalone-progress-text">0 / 7 步 (0%)</strong>
+        </div>
+        <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="agy-standalone-progressbar">
+          <div class="progress-bar-fill" id="agy-standalone-progress-fill" style="width: 0%"></div>
+        </div>
+        <button type="button" id="btn-agy-standalone-reset" class="btn-text-small">重設進度</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content" class="container main-container">
+    <!-- 7 步驟工作台 -->
+    <section id="workbench-section" style="margin-bottom: 44px;">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 1 · 7 步驟實戰導覽（支援鍵盤 ← → 切換）</span>
+          <h2>跟著名單一步一步複製 Prompt 貼給 Antigravity</h2>
+          <p>每一步皆附上<strong>可直接複製的中文 Prompt</strong> 與 <strong>GitHub Docs 官方真實頁面截圖</strong>，讓你清楚對照每個按鈕與設定位置。</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-secondary" id="btn-agy-standalone-all">一鍵勾選全部 7 步</button>
+        </div>
+      </div>
+
+      <div class="interactive-workbench">
+        <nav class="step-sidebar" aria-label="Antigravity 與 GitHub 串接 7 步驟清單">
+          <div class="sidebar-header">
+            <span>點擊切換步驟</span>
+            <strong id="agy-standalone-count">已完成 0 / 7</strong>
+          </div>
+          <ol class="step-nav-list" id="agy-standalone-list"></ol>
+        </nav>
+
+        <article class="step-stage" id="agy-standalone-stage" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <!-- 互動式自訂專案發佈 Prompt 產生器 -->
+    <section id="prompt-builder-section" style="margin-bottom: 44px;">
+      <div class="policy-highlight-box">
+        <div class="policy-header">
+          <span class="badge-policy">Part 2 · 互動提示詞產生器</span>
+          <h3>填入你的儲存庫與資料夾，一鍵產生專屬 Antigravity 發佈 Prompt</h3>
+          <p style="margin:0 0 16px; color:var(--text-secondary);">
+            想把做好的教材發佈到指定儲存庫（例如 <code>qqnice/qqnice.github.io</code> 的 <code>linux/my-guide/</code>，或是學生自己的新儲存庫）？修改下方欄位即可即時組合出完整、安全的繁體中文 Prompt！
+          </p>
+        </div>
+
+        <div class="prep-grid" style="margin-bottom: 16px;">
+          <div class="instruction-box">
+            <label for="pb-repo" style="display:block; font-weight:800; margin-bottom:6px;">1. 目標 GitHub 儲存庫（格式：帳號/儲存庫名稱）</label>
+            <input type="search" id="pb-repo" value="qqnice/qqnice.github.io" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px; font-family:var(--font-mono);" />
+            <small style="color:var(--text-muted); display:block; margin-top:4px;">範例：<code>qqnice/qqnice.github.io</code> 或 <code>你的Username/my-first-repo</code></small>
+          </div>
+
+          <div class="instruction-box">
+            <label for="pb-folder" style="display:block; font-weight:800; margin-bottom:6px;">2. 發佈目標子資料夾（若放根目錄請填 <code>/</code>）</label>
+            <input type="search" id="pb-folder" value="linux/my-new-guide/" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px; font-family:var(--font-mono);" />
+            <small style="color:var(--text-muted); display:block; margin-top:4px;">範例：<code>linux/my-new-guide/</code>（將發佈至 <code>https://qqnice.github.io/linux/my-new-guide/</code>）</small>
+          </div>
+
+          <div class="instruction-box">
+            <label for="pb-title" style="display:block; font-weight:800; margin-bottom:6px;">3. 網站／教材主題名稱</label>
+            <input type="search" id="pb-title" value="Linux 與 GitHub 實作互動教學" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px;" />
+          </div>
+
+          <div class="instruction-box">
+            <label for="pb-branch" style="display:block; font-weight:800; margin-bottom:6px;">4. 發佈分支（Branch）與首頁入口更新</label>
+            <input type="search" id="pb-branch" value="master（或 main），並在 linux/index.html 新增入口卡片" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px;" />
+          </div>
+        </div>
+
+        <div class="prompt-copy-card" style="margin-bottom:0;">
+          <div class="prompt-copy-header">
+            <span class="prompt-copy-badge">🚀 依上方設定即時產生的 Antigravity 專屬發佈 Prompt</span>
+            <button type="button" class="btn-copy-prompt" id="btn-copy-custom-prompt">📋 複製這段專屬發佈 Prompt</button>
+          </div>
+          <pre class="prompt-copy-pre" id="pb-output"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 常見問題與一句話排解 Prompt 速查表 -->
+    <section id="faq-section">
+      <div class="sources-card">
+        <h3>Part 3 · 常見問題與「貼給 Antigravity 的一句話排解 Prompt」速查表</h3>
+        <p class="card-desc">在串接或推送過程中如果遇到錯誤訊息，不需要自己查英文 Stack Overflow，直接複製右欄的 Prompt 貼給 Antigravity 即可自動修復：</p>
+        <div class="table-responsive">
+          <table class="sources-table">
+            <thead>
+              <tr>
+                <th scope="col" style="width:28%;">常見卡關狀況</th>
+                <th scope="col">直接貼給 Antigravity 的排解 Prompt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. 找不到 <code>gh</code> 指令（command not found: gh）</strong></td>
+                <td><code>請幫我檢查系統環境並用 Homebrew 或官方安裝方式安裝 GitHub CLI (gh)，安裝完成後執行 gh --version 確認。</code></td>
+              </tr>
+              <tr>
+                <td><strong>2. 推送時出現 403 或 Permission denied</strong></td>
+                <td><code>我推送到 GitHub 時遇到權限錯誤，請幫我用 gh auth status 檢查目前登入的帳號與 token 權限，並執行 gh auth setup-git 綁定 Git 憑證。</code></td>
+              </tr>
+              <tr>
+                <td><strong>3. 遠端有新變更導致無法直接 Push（Rejected / Non-fast-forward）</strong></td>
+                <td><code>遠端 GitHub 儲存庫有其他人或另一台電腦推上去的更新，請幫我先 git fetch 並用 git pull --rebase 安全整合遠端變更，再重新推送到 GitHub。</code></td>
+              </tr>
+              <tr>
+                <td><strong>4. 不小心把 <code>.DS_Store</code> 或暫存檔加進去了</strong></td>
+                <td><code>請幫我從 Git 追蹤清單中移除 .DS_Store 與不該上傳的暫存檔（保留本機檔案），更新 .gitignore 並重新提交推送。</code></td>
+              </tr>
+              <tr>
+                <td><strong>5. 發佈後點網址卻顯示 404 Not Found</strong></td>
+                <td><code>我剛推送了網頁檔案到 GitHub，請幫我檢查目標儲存庫的 GitHub Pages 發佈分支（main 或 master）、路徑大小寫與 Actions 部署狀態，確認公開網址何時生效。</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Antigravity × GitHub 下 Prompt 串接與網站發佈教學</strong>
+        <p>核對日期：2026 年 10 月 26 日｜<a href="../">返回 Linux 教學專區</a> · <a href="../github-account-guide/">前往 GitHub 帳號申請與 2FA 教學</a></p>
+      </div>
+      <div class="footer-note">
+        <span>本網頁為靜態教學指南，不收集任何帳號、密碼、Token 或驗證碼。</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // 獨立版 Antigravity × GitHub 教學頁面互動控制
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentIdx = 0;
+      const KEY = 'agy_standalone_progress_v1';
+      let doneSet = new Set();
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) doneSet = new Set(JSON.parse(raw));
+      } catch (e) {}
+
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify([...doneSet])); } catch (e) {}
+      }
+
+      function renderStandalone() {
+        const steps = typeof AGY_STEPS !== 'undefined' ? AGY_STEPS : [];
+        if (!steps.length) return;
+        const listEl = document.getElementById('agy-standalone-list');
+        const stageEl = document.getElementById('agy-standalone-stage');
+        const countEl = document.getElementById('agy-standalone-count');
+        const progText = document.getElementById('agy-standalone-progress-text');
+        const progFill = document.getElementById('agy-standalone-progress-fill');
+
+        const doneCount = steps.filter(s => doneSet.has(s.id)).length;
+        const pct = Math.round((doneCount / steps.length) * 100);
+        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${steps.length}`;
+        if (progText) progText.textContent = `${doneCount} / ${steps.length} 步 (${pct}%)`;
+        if (progFill) progFill.style.width = `${pct}%`;
+
+        listEl.innerHTML = steps.map((s, i) => {
+          const isDone = doneSet.has(s.id);
+          const isAct = i === currentIdx;
+          return `
+            <li>
+              <button type="button" class="step-nav-btn ${isAct ? 'active' : ''} ${isDone ? 'done' : ''}" data-s-idx="${i}">
+                <span class="step-index-circle">${isDone ? '✓' : s.num}</span>
+                <span class="step-nav-title">步驟 ${s.num}：${s.shortTitle}</span>
+                ${isDone ? '<span class="step-done-tag">完成</span>' : ''}
+              </button>
+            </li>
+          `;
+        }).join('');
+
+        const cur = steps[currentIdx];
+        const isCurDone = doneSet.has(cur.id);
+        const hasPrev = currentIdx > 0;
+        const hasNext = currentIdx < steps.length - 1;
+
+        stageEl.innerHTML = `
+          <div class="stage-top-bar">
+            <div class="stage-step-badge">
+              <span>Antigravity × GitHub 串接導覽</span><span>｜</span><span>第 ${cur.num} / ${steps.length} 步</span>
+            </div>
+            <label class="stage-check-toggle ${isCurDone ? 'checked' : ''}">
+              <input type="checkbox" data-s-check="${cur.id}" ${isCurDone ? 'checked' : ''} />
+              <span>${isCurDone ? '✓ 本步驟已標記完成' : '勾選標記本步驟完成'}</span>
+            </label>
+          </div>
+          <h3 class="stage-title">${cur.title}</h3>
+          <p class="stage-summary">${cur.summary}</p>
+          <div class="prompt-copy-card">
+            <div class="prompt-copy-header">
+              <span class="prompt-copy-badge">✨ 直接貼給 Antigravity 的 Prompt 模板</span>
+              <button type="button" class="btn-copy-prompt" data-copy-prompt="${encodeURIComponent(cur.promptText)}">📋 一鍵複製這句 Prompt</button>
+            </div>
+            <div style="font-size:0.84rem; color:#8b949e; margin-bottom:6px; font-weight:600;">${cur.promptTitle || ''}</div>
+            <pre class="prompt-copy-pre">${cur.promptText}</pre>
+          </div>
+          <div class="stage-columns">
+            <div class="instruction-box">
+              <h4>操作步驟與核對重點</h4>
+              <ul class="instruction-list">${cur.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+              <div class="ui-terms-row">
+                <span style="font-size:0.78rem; color:#57606a; font-weight:700; width:100%;">指令與 GitHub 真實畫面原文對照：</span>
+                ${cur.uiTerms.map(t => `<span class="ui-term-chip">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div class="visual-preview-card">
+              <div class="visual-preview-banner">
+                <span class="specimen-tag">真實頁面對照</span>
+                <span>GitHub 官方畫面與結構</span>
+              </div>
+              <div class="visual-preview-body">${cur.visualHtml}</div>
+            </div>
+          </div>
+          <div class="stage-callout ${cur.calloutType === 'danger' ? 'callout-danger' : ''}">
+            <strong>⚠️ ${cur.calloutTitle}</strong>
+            <div>${cur.calloutText}</div>
+          </div>
+          <div class="stage-footer-nav">
+            <div class="stage-sources">
+              <strong>官方直達連結：</strong>
+              ${cur.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label} ↗</a>`).join(' · ')}
+            </div>
+            <div class="stage-nav-buttons">
+              <button type="button" class="btn btn-outline" data-s-dir="-1" ${!hasPrev ? 'disabled style="opacity:0.45;"' : ''}>← 上一步</button>
+              <button type="button" class="btn btn-secondary" data-s-done-next="${cur.id}">✓ 勾選完成並下一步</button>
+              ${hasNext ? `<button type="button" class="btn btn-primary" data-s-dir="1">下一步：步驟 ${steps[currentIdx + 1].num} →</button>` : `<a href="#prompt-builder-section" class="btn btn-primary">前往自訂 Prompt 產生器 ↓</a>`}
+            </div>
+          </div>
+        `;
+      }
+
+      document.addEventListener('click', (e) => {
+        const idxBtn = e.target.closest('[data-s-idx]');
+        if (idxBtn) { currentIdx = parseInt(idxBtn.dataset.sIdx, 10); renderStandalone(); return; }
+        const dirBtn = e.target.closest('[data-s-dir]');
+        if (dirBtn && !dirBtn.disabled) {
+          currentIdx = Math.max(0, Math.min(AGY_STEPS.length - 1, currentIdx + parseInt(dirBtn.dataset.sDir, 10)));
+          renderStandalone();
+          return;
+        }
+        const doneNext = e.target.closest('[data-s-done-next]');
+        if (doneNext) {
+          doneSet.add(doneNext.dataset.sDoneNext);
+          save();
+          if (currentIdx < AGY_STEPS.length - 1) currentIdx++;
+          renderStandalone();
+        }
+      });
+
+      document.addEventListener('change', (e) => {
+        const chk = e.target.closest('[data-s-check]');
+        if (chk) {
+          if (chk.checked) doneSet.add(chk.dataset.sCheck);
+          else doneSet.delete(chk.dataset.sCheck);
+          save();
+          renderStandalone();
+        }
+      });
+
+      document.getElementById('btn-agy-standalone-all')?.addEventListener('click', () => {
+        const all = AGY_STEPS.every(s => doneSet.has(s.id));
+        AGY_STEPS.forEach(s => all ? doneSet.delete(s.id) : doneSet.add(s.id));
+        save();
+        renderStandalone();
+      });
+
+      document.getElementById('btn-agy-standalone-reset')?.addEventListener('click', () => {
+        doneSet.clear();
+        save();
+        renderStandalone();
+      });
+
+      // Prompt 產生器即時更新
+      const repoIn = document.getElementById('pb-repo');
+      const folderIn = document.getElementById('pb-folder');
+      const titleIn = document.getElementById('pb-title');
+      const branchIn = document.getElementById('pb-branch');
+      const outPre = document.getElementById('pb-output');
+
+      function updateBuilder() {
+        const repo = (repoIn.value || 'qqnice/qqnice.github.io').trim();
+        const folder = (folderIn.value || 'linux/my-new-guide/').trim();
+        const title = (titleIn.value || '互動教學網站').trim();
+        const branch = (branchIn.value || 'master').trim();
+        const [owner, repoName] = repo.includes('/') ? repo.split('/') : ['qqnice', repo];
+        const cleanFolder = folder === '/' ? '' : folder.replace(/^\/+/, '');
+        const publicUrl = repoName.toLowerCase() === `${owner.toLowerCase()}.github.io`
+          ? `https://${owner}.github.io/${cleanFolder}`
+          : `https://${owner}.github.io/${repoName}/${cleanFolder}`;
+
+        outPre.textContent = `請幫我將目前完成的「${title}」網頁與所需素材發佈到我的 GitHub 儲存庫「${repo}」：
+
+1. 目標位置：儲存庫內的「${folder}」資料夾（請保留儲存庫內原有的其他教材與檔案，不要覆寫無關檔案）。
+2. 分支與入口設定：${branch}。
+3. 安全與完整性檢查：請先確認所有圖片、CSS、JS 相對路徑皆可正常載入，且沒有包含任何密碼、Token、2FA 復原碼或個人隱私資料。
+4. 執行發佈與驗收：請幫我執行 git add、撰寫清楚的繁體中文 Commit 訊息、git push 推送上 GitHub，最後回報 Commit SHA 並確認公開網址 ${publicUrl} 可正常開啟。`;
+      }
+
+      [repoIn, folderIn, titleIn, branchIn].forEach(el => el?.addEventListener('input', updateBuilder));
+      updateBuilder();
+
+      document.getElementById('btn-copy-custom-prompt')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(outPre.textContent).catch(() => {});
+        }
+        btn.textContent = '✓ 已複製專屬發佈 Prompt！';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 複製這段專屬發佈 Prompt';
+          btn.classList.remove('copied');
+        }, 2200);
+      });
+
+      renderStandalone();
+    });
+  </script>
+</body>
+</html>

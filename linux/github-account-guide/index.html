@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub 帳號申請與兩階段驗證（2FA）互動教學指南｜學生與教師專用</title>
+  <meta name="description" content="專為第一次申請 GitHub 個人帳號的學生與教師設計的可實際操作繁體中文互動教學網頁。包含申請前準備、10 步註冊與信箱驗證導覽、獨立兩階段驗證（2FA）完整教學、官方畫面對照、常見問題與驗收檢查表。" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至主要教學內容</a>
+
+  <!-- 非官方網站與隱私安全保護橫幅 -->
+  <div class="safety-banner" role="region" aria-label="安全與非官方網站聲明">
+    <div class="container safety-banner-inner" style="justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <a href="../" style="color:#fff; font-weight:800; text-decoration:none; background:rgba(255,255,255,0.16); padding:4px 10px; border-radius:6px;">← 返回 Linux 教學專區</a>
+        <span class="safety-badge">教學導覽聲明</span>
+      </div>
+      <p>
+        本網頁為<strong>互動式教學導覽</strong>，<strong>不是 GitHub 官方網站，也不會收集、要求或儲存任何帳號、密碼、驗證碼或復原碼</strong>。文內畫面為唯讀示意或 GitHub Docs 官方說明截圖，實際註冊與設定請點擊直達連結前往 <code>github.com</code> 操作（核對日期：2026 年 10 月 26 日）。｜<a href="../antigravity-github-guide/" style="color:#79c0ff; font-weight:700;">前往下一篇：Antigravity × GitHub 下 Prompt 串接教學 →</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- 頁首與直達連結列 -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand-area">
+          <div class="eyebrow-row">
+            <span class="pill pill-primary">學生與教師互動手冊</span>
+            <span class="pill pill-neutral">適用：GitHub.com 個人帳號</span>
+            <span class="pill pill-date">內容核對：2026-10-26</span>
+          </div>
+          <h1>GitHub 帳號申請與兩階段驗證（2FA）互動教學</h1>
+          <p class="subtitle">
+            一步一步完成個人帳號註冊、電子郵件驗證、TOTP 驗證器 App 安裝與兩階段驗證（2FA）復原碼備份。支援進度勾選自動儲存、鍵盤方向鍵導覽与真假表單防呆對照。
+          </p>
+        </div>
+
+        <!-- 快捷官方入口卡片 -->
+        <aside class="quick-links-card" aria-label="官方直達入口">
+          <h2>官方頁面與工具直達入口</h2>
+          <div class="quick-links-grid">
+            <a href="https://github.com/signup" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+              <span>前往 GitHub 官方註冊頁</span>
+              <small>github.com/signup ↗</small>
+            </a>
+            <a href="https://github.com/settings/security" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>GitHub 2FA 安全設定頁</span>
+              <small>Password and authentication ↗</small>
+            </a>
+            <a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>GitHub Docs 2FA 官方文件</span>
+              <small>docs.github.com ↗</small>
+            </a>
+            <a href="GitHub帳號申請與兩階段驗證手冊.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>下載完整 PDF 講義版</span>
+              <small>離線閱讀 / 課堂發放 ↗</small>
+            </a>
+          </div>
+          <div class="app-store-bar">
+            <span class="app-store-label">驗證器 App 官方下載（Google LLC）：</span>
+            <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank" rel="noopener noreferrer" class="store-chip">iOS App Store ↗</a>
+            <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener noreferrer" class="store-chip">Android Google Play ↗</a>
+            <a href="https://keepassxc.org/" target="_blank" rel="noopener noreferrer" class="store-chip">電腦版替代：KeePassXC ↗</a>
+          </div>
+        </aside>
+      </div>
+
+      <!-- 先看結論：四大核心觀念卡片 -->
+      <section class="key-takeaways" aria-label="先看結論與核心提醒">
+        <div class="takeaway-card">
+          <div class="takeaway-tag">核心觀念 1</div>
+          <h3>電子郵件驗證 ≠ 2FA</h3>
+          <p>申請一般個人帳號必須完成註冊表單與<strong>電子郵件驗證</strong>（否則無法建立儲存庫）。GitHub 官方明確說明：<strong>信箱驗證不能充當兩階段驗證（2FA）的第二因素</strong>。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">核心觀念 2</div>
+          <h3>2FA 是否強制？建議當天啟用</h3>
+          <p>GitHub <strong>沒有要求每位新用戶在註冊當下全面強制開啟 2FA</strong>；但對被選入的程式碼貢獻者強制要求（45 天設定期＋7 天寬限期），學校或課程組織也可要求成員開啟。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">核心觀念 3</div>
+          <h3>註冊方式：Email＋密碼為主</h3>
+          <p>本教學以最通用的「電子郵件＋密碼」逐步示範。GitHub 註冊頁上方也提供 <code>Continue with Google</code> 與 <code>Continue with Apple</code> 社群登入選項；學校配發之 EMU 帳號則請依管理員指示登入。</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">核心觀念 4</div>
+          <h3>四不外洩原則（資安底線）</h3>
+          <p><strong>密碼、Email 驗證碼、2FA QR code / setup key、復原碼（Recovery codes）</strong>絕對不可截圖公開、投影給全班或交給老師與同學。</p>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <!-- 黏性主導覽與進度追蹤列 -->
+  <div class="sticky-nav-wrap" role="navigation" aria-label="學習模組切換與進度統計">
+    <div class="container sticky-nav-inner">
+      <div class="module-tabs" role="tablist" aria-label="教學模組選擇">
+        <button type="button" role="tab" id="tab-prep" aria-selected="false" aria-controls="panel-prep" class="module-tab" data-target="prep">
+          <span class="tab-num">0</span>
+          <span class="tab-label">申請前準備</span>
+          <span class="tab-badge" id="badge-prep">0/4</span>
+        </button>
+        <button type="button" role="tab" id="tab-signup" aria-selected="true" aria-controls="panel-signup" class="module-tab active" data-target="signup">
+          <span class="tab-num">1</span>
+          <span class="tab-label">第一部分：申請 GitHub 帳號 (10步)</span>
+          <span class="tab-badge" id="badge-signup">0/10</span>
+        </button>
+        <button type="button" role="tab" id="tab-twofa" aria-selected="false" aria-controls="panel-twofa" class="module-tab" data-target="twofa">
+          <span class="tab-num">2</span>
+          <span class="tab-label">獨立專區：兩階段驗證 2FA 完整教學</span>
+          <span class="tab-badge" id="badge-twofa">0/10</span>
+        </button>
+        <button type="button" role="tab" id="tab-agy" aria-selected="false" aria-controls="panel-agy" class="module-tab" data-target="agy">
+          <span class="tab-num">3</span>
+          <span class="tab-label">實戰專區：Antigravity × GitHub 下 Prompt 串接教學</span>
+          <span class="tab-badge" id="badge-agy">0/7</span>
+        </button>
+        <button type="button" role="tab" id="tab-faq" aria-selected="false" aria-controls="panel-faq" class="module-tab" data-target="faq">
+          <span class="tab-num">4</span>
+          <span class="tab-label">常見問題與排除</span>
+        </button>
+        <button type="button" role="tab" id="tab-verify" aria-selected="false" aria-controls="panel-verify" class="module-tab" data-target="verify">
+          <span class="tab-num">5</span>
+          <span class="tab-label">完成檢查表＆官方來源</span>
+          <span class="tab-badge" id="badge-verify">0/5</span>
+        </button>
+      </div>
+
+      <div class="overall-progress" aria-live="polite">
+        <div class="progress-info">
+          <span class="progress-title">總體完成進度</span>
+          <strong id="overall-progress-text">0 / 36 項 (0%)</strong>
+        </div>
+        <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overall-progressbar" aria-label="總體完成進度條">
+          <div class="progress-bar-fill" id="overall-progress-fill" style="width: 0%"></div>
+        </div>
+        <button type="button" id="btn-reset-progress" class="btn-text-small" title="清除本機儲存的勾選進度">重設進度</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主要內容區 -->
+  <main id="main-content" class="container main-container">
+
+    <!-- ==================== 模組 0：申請前準備 ==================== -->
+    <section id="panel-prep" role="tabpanel" aria-labelledby="tab-prep" class="module-panel" hidden>
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 0 · 課前與申請前必備檢查</span>
+          <h2>申請前準備（4 項環境與工具確認）</h2>
+          <p>在開啟 GitHub 註冊頁面之前，請先逐一勾選確認以下 4 項準備工作，能大幅減少註冊中斷或收不到驗證信的問題。</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-primary" data-goto-module="signup">完成準備，進入第一部分：申請帳號 →</button>
+        </div>
+      </div>
+
+      <div class="prep-grid" id="prep-cards-container">
+        <!-- 由 app.js 動態渲染或預先填充，並綁定勾選狀態 -->
+      </div>
+    </section>
+
+    <!-- ==================== 模組 1：第一部分 申請 GitHub 個人帳號 (10 步導覽) ==================== -->
+    <section id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" class="module-panel active">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 1 · 帳號註冊與信箱驗證逐步導覽</span>
+          <h2>第一部分：申請 GitHub 個人帳號（步驟 1 ～ 步驟 10）</h2>
+          <p>請開著本頁對照，在另一個瀏覽器分頁開啟 <a href="https://github.com/signup" target="_blank" rel="noopener noreferrer"><code>https://github.com/signup</code> ↗</a> 實際操作。可用滑鼠點選左側步驟，或使用鍵盤 <kbd>←</kbd> <kbd>→</kbd> 切換前後步驟。</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-secondary" id="btn-signup-mark-all">一鍵勾選本區全部步驟</button>
+          <a href="https://github.com/signup" target="_blank" rel="noopener noreferrer" class="btn btn-github">開啟真實 GitHub 註冊頁 ↗</a>
+        </div>
+      </div>
+
+      <div class="interactive-workbench">
+        <!-- 左側步驟清單 -->
+        <nav class="step-sidebar" aria-label="申請 GitHub 帳號 10 步驟清單">
+          <div class="sidebar-header">
+            <span>點擊切換步驟（支援鍵盤方向鍵）</span>
+            <strong id="signup-progress-count">已完成 0 / 10</strong>
+          </div>
+          <ol class="step-nav-list" id="signup-step-list">
+            <!-- JS 渲染步驟 1~10 -->
+          </ol>
+        </nav>
+
+        <!-- 右側目前步驟詳情與官方畫面對照 -->
+        <article class="step-stage" id="signup-step-stage" aria-live="polite">
+          <!-- JS 渲染當前選中的註冊步驟內容 -->
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================== 模組 2：獨立呈現 兩階段驗證（2FA）完整教學 ==================== -->
+    <section id="panel-twofa" role="tabpanel" aria-labelledby="tab-twofa" class="module-panel" hidden>
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 2 ~ Part 4 · 獨立兩階段驗證（2FA）教學專區</span>
+          <h2>兩階段驗證（2FA）政策說明、驗證器下載與 10 步設定導覽</h2>
+          <p>本區獨立完整呈現 GitHub 兩階段驗證（Two-Factor Authentication）：包含何時強制啟用、TOTP 驗證器 App 官方下載入口、<code>Settings &gt; Password and authentication</code> 掃描 QR code、輸入 6 位數 TOTP、下載並確認保存復原碼，以及換手機或遺失裝置時的應變處理。</p>
+        </div>
+        <div class="section-actions">
+          <a href="https://github.com/settings/security" target="_blank" rel="noopener noreferrer" class="btn btn-github">前往 GitHub Password and authentication ↗</a>
+        </div>
+      </div>
+
+      <!-- 2FA 子區塊 A：政策與強制規範說明（手冊第二部分） -->
+      <div class="policy-highlight-box" role="region" aria-label="何時需要兩階段驗證政策說明">
+        <div class="policy-header">
+          <span class="badge-policy">手冊第二部分 · 官方政策核對</span>
+          <h3>目前每位新用戶註冊當下都被全面強制啟用 2FA 嗎？</h3>
+        </div>
+        <div class="policy-columns">
+          <div class="policy-col">
+            <h4>1. 新用戶註冊當下：非全面強制，但強烈建議當天啟用</h4>
+            <p>
+              GitHub <strong>並未要求每位新用戶在註冊完成當下都強制開啟 2FA</strong>。剛註冊一般個人帳號時，必須先完成的是「電子郵件驗證」。但為保護個人專案與作業安全，建議在申請當天就完成驗證器 App 與復原碼設定。
+            </p>
+            <div class="inline-alert inline-alert-danger">
+              <strong>關鍵區別：不要把「已驗證電子郵件」當作「已完成 2FA」！</strong><br />
+              GitHub 官方明確說明：電子郵件登入驗證（Email verification）不能充當兩階段驗證的第二因素。
+            </div>
+          </div>
+          <div class="policy-col">
+            <h4>2. 哪些人會被強制要求開啟 2FA？</h4>
+            <ul class="policy-list">
+              <li><strong>被選入強制 2FA 計畫的程式碼貢獻者：</strong>自 2023 年 3 月起，GitHub 分批要求在 GitHub.com 貢獻程式碼的個人帳號啟用至少一種 2FA。被選中者會收到 Email 與網站頂部橫幅通知。</li>
+              <li><strong>45 天設定期＋7 天寬限期：</strong>收到強制通知後有 <strong>45 天設定期</strong>，到期後還有 <strong>7 天寬限期</strong>；若逾期仍未啟用，將無法存取 GitHub.com 直到完成設定。</li>
+              <li><strong>學校課程或專案組織（Organization）要求：</strong>許多學校課程組織或開源團隊會要求成員必須開啟 2FA 才能存取私有儲存庫。</li>
+              <li><strong>28 天檢查期（Check up period）：</strong>開啟 2FA 後會進入 <strong>28 天檢查期</strong>；期間內成功完成一次 2FA 登入即可通過，否則第 28 天會在既有登入工作階段提示驗證。</li>
+            </ul>
+          </div>
+        </div>
+        <p class="policy-source">
+          官方依據：<a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/about-mandatory-two-factor-authentication" target="_blank" rel="noopener noreferrer">About mandatory two-factor authentication (GitHub Docs) ↗</a>
+        </p>
+      </div>
+
+      <!-- 2FA 子區塊 B：驗證器 App 官方下載與安裝（手冊第三部分） -->
+      <div class="authenticator-section" role="region" aria-label="下載與安裝驗證器 App">
+        <div class="sub-header">
+          <span class="badge-sub">手冊第三部分 · 驗證器 App 準備</span>
+          <h3>下載與安裝 TOTP 驗證器 App（以 Google Authenticator 為例）</h3>
+          <p>GitHub 建議以 <strong>TOTP（Time-based One-Time Password）驗證器 App</strong> 作為主要 2FA 方法（比簡訊 SMS 更可靠且不受跨國簡訊延遲影響），並建議後續再加設通行密鑰（Passkey）或安全金鑰（Security Key）作備用。TOTP App 會每 30 秒產生一組六位數代碼，不限特定品牌；若已安裝 1Password、Authy、Microsoft Authenticator 等相容 RFC 6238 的 App 可直接沿用。</p>
+        </div>
+
+        <div class="auth-download-cards">
+          <div class="auth-card">
+            <div class="auth-card-head">
+              <span class="os-badge">iPhone / iPad (iOS)</span>
+              <h4>1. App Store 官方下載</h4>
+            </div>
+            <p>打開 App Store 的 Google Authenticator 頁面，<strong>務必確認開發者為 <code>Google LLC</code></strong>，勿下載名稱相似的付費山寨軟體，按「取得」並安裝。</p>
+            <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-full">
+              前往 App Store (Google Authenticator) ↗
+            </a>
+          </div>
+
+          <div class="auth-card">
+            <div class="auth-card-head">
+              <span class="os-badge">Android 手機 / 平板</span>
+              <h4>2. Google Play 官方下載</h4>
+            </div>
+            <p>打開 Google Play 商店的 Google Authenticator 頁面，<strong>確認開發者為 <code>Google LLC</code></strong>，按「安裝」完成下載。</p>
+            <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-full">
+              前往 Google Play (Google Authenticator) ↗
+            </a>
+          </div>
+
+          <div class="auth-card">
+            <div class="auth-card-head">
+              <span class="os-badge">初始設定與無手機替代方案</span>
+              <h4>3. 初始設定＆電腦版 TOTP 工具</h4>
+            </div>
+            <p>打開 App 完成初始設定。若有雲端帳號同步或備份選項，請先了解自己的保存方式。<strong>即使 App 有雲端同步，GitHub 的復原碼（Recovery codes）仍須另外下載保存！</strong></p>
+            <p class="small-note">若課堂無法使用手機，GitHub 官方推薦電腦版獨立工具 <a href="https://keepassxc.org/" target="_blank" rel="noopener noreferrer">KeePassXC ↗</a> 或瀏覽器擴充套件 <a href="https://support.1password.com/one-time-passwords/" target="_blank" rel="noopener noreferrer">1Password ↗</a>。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2FA 子區塊 C：在 GitHub 開啟驗證器 2FA 10 步驟導覽（手冊第四部分） -->
+      <div class="twofa-workbench-header">
+        <div>
+          <span class="badge-sub">手冊第四部分 · 逐步實作導覽</span>
+          <h3>在 GitHub 開啟驗證器 2FA（步驟 1 ～ 步驟 10）</h3>
+          <p>建議<strong>電腦開著 GitHub 設定頁，手機開著驗證器 App</strong>，最容易掃描 QR code。請依序點擊以下 10 個步驟完成設定並勾選確認：</p>
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-twofa-mark-all">一鍵勾選 2FA 全部步驟</button>
+      </div>
+
+      <div class="interactive-workbench">
+        <nav class="step-sidebar" aria-label="開啟驗證器 2FA 10 步驟清單">
+          <div class="sidebar-header">
+            <span>點擊切換 2FA 步驟</span>
+            <strong id="twofa-progress-count">已完成 0 / 10</strong>
+          </div>
+          <ol class="step-nav-list" id="twofa-step-list">
+            <!-- JS 渲染 2FA 步驟 1~10 -->
+          </ol>
+        </nav>
+
+        <article class="step-stage" id="twofa-step-stage" aria-live="polite">
+          <!-- JS 渲染當前選中的 2FA 步驟內容 -->
+        </article>
+      </div>
+
+      <!-- 2FA 子區塊 D：換手機或遺失裝置時的處理專區 -->
+      <div class="device-loss-panel" role="region" aria-label="換手機或遺失裝置時的處理指南">
+        <div class="device-loss-header">
+          <span class="badge-warning">重要應變指南</span>
+          <h3>換手機、重置手機或遺失驗證器裝置時怎麼辦？</h3>
+          <p>許多學生在換新手機或手機送修時，才發現無法產生 6 位數驗證碼。請依您目前的情況查看標準處理流程：</p>
+        </div>
+        <div class="device-loss-grid">
+          <div class="loss-card">
+            <h4>情境 A：準備換新手機（舊手機還能使用）</h4>
+            <ol>
+              <li><strong>轉移驗證器帳戶：</strong>先在舊手機的 Google Authenticator 使用「轉移帳戶 / 匯出」功能，或確認雲端同步已開啟並在換機後成功顯示 GitHub 六位數代碼。</li>
+              <li><strong>或在 GitHub 重新設定 TOTP：</strong>登入 GitHub → <code>Settings</code> → <code>Password and authentication</code> → 在 <code>Authenticator app</code> 旁按 <strong>Edit</strong>，直接用新手機重新掃描 QR code（無須先停用整個 2FA，可保留既有復原碼與組織成員資格）。</li>
+              <li><strong>切勿先格式化舊手機：</strong>務必確認新手機已能正常通過 GitHub 登入驗證後，再清除舊手機資料。</li>
+            </ol>
+          </div>
+          <div class="loss-card">
+            <h4>情境 B：手機已遺失／故障，但保有 Recovery codes 或備用方法</h4>
+            <ol>
+              <li><strong>使用復原碼登入：</strong>在 GitHub 登入要求輸入 2FA 驗證碼的畫面，點選 <strong>More options</strong> → <strong>Use a recovery code</strong>（或 2FA recovery code），輸入當初下載保存的其中一組 10 字元復原碼（每組只能用一次）。</li>
+              <li><strong>或使用備用驗證方式：</strong>若有設定 Passkey（通行密鑰）、Security key（安全金鑰）或 GitHub Mobile，可直接選擇該備用方法登入。</li>
+              <li><strong>登入後立即重綁新裝置：</strong>進入 <code>Settings &gt; Password and authentication</code> 重新綁定新的驗證器 App，並重新檢查剩餘復原碼數量（必要時產生新的一組復原碼並安全保存）。</li>
+            </ol>
+          </div>
+          <div class="loss-card loss-card-critical">
+            <h4>情境 C：手機遺失，且復原碼與所有備用方法都找不到</h4>
+            <ol>
+              <li><strong>檢查是否有已驗證裝置或金鑰：</strong>若您曾在常用的電腦瀏覽器保留 <code>_device_id</code> cookie（已驗證裝置）、或電腦中留有有效的 SSH key / Personal Access Token (PAT)，可依官方指南嘗試發起帳號復原請求。</li>
+              <li><strong>官方警語：</strong>若所有第二因素與復原碼皆遺失，且無已驗證裝置或金鑰，<strong>GitHub Support 也無法為您繞過 2FA，帳號可能永久無法取回</strong>。這正是為什麼步驟 7 下載並異地保存復原碼至關重要！</li>
+            </ol>
+            <p class="small-link">
+              參考官方文件：<a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/recovering-your-account-if-you-lose-your-2fa-credentials" target="_blank" rel="noopener noreferrer">Recovering your account if you lose your 2FA credentials ↗</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 模組 3：Antigravity × GitHub 下 Prompt 自動完成串接教學 ==================== -->
+    <section id="panel-agy" role="tabpanel" aria-labelledby="tab-agy" class="module-panel" hidden>
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 5 · 免背 Git 指令！貼一句 Prompt 就自動完成 GitHub 串接與發佈</span>
+          <h2>實戰專區：Antigravity × GitHub 下 Prompt 串接教學（7 步驟＋真實頁面對照）</h2>
+          <p>
+            申請好 GitHub 帳號並開啟 2FA 後，怎麼把你在 <strong>Google Antigravity</strong> 做的網站或程式傳上 GitHub？<br>
+            你<strong>不需要死背繁瑣的 Git 終端機指令</strong>！只要在右側「<strong>一鍵複製 Prompt 模板</strong>」貼進 Antigravity 對話框，並對照 GitHub 真實網頁完成一次性授權，Antigravity 就會自動幫你完成環境設定、建立儲存庫、推送程式碼與開啟 GitHub Pages 公開網址。
+          </p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-secondary" id="btn-agy-mark-all">一鍵勾選本區全部步驟</button>
+          <a href="https://github.com/login/device" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+            <span>GitHub 裝置授權真實頁</span>
+            <small>github.com/login/device ↗</small>
+          </a>
+          <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+            <span>建立新儲存庫真實頁</span>
+            <small>github.com/new ↗</small>
+          </a>
+        </div>
+      </div>
+
+      <!-- Antigravity 串接核心觀念與真實頁面捷徑列 -->
+      <div class="policy-highlight-box" role="region" aria-label="Antigravity 與 GitHub 串接核心原則">
+        <div class="policy-header">
+          <span class="badge-policy">為什麼用 Prompt 就能完成串接？</span>
+          <h3>Antigravity Agent 終端機自動化 ＋ GitHub 真實網頁一次性授權</h3>
+        </div>
+        <div class="policy-columns">
+          <div class="policy-col">
+            <h4>1. 告別指令輸入錯誤：讓 Antigravity 幫你跑 Git 與 gh</h4>
+            <p>
+              在 <strong>Antigravity IDE</strong>（側邊欄 Agent Chat）或 <strong>Antigravity 2.0 桌面版</strong>（Chat Canvas）中，Agent 可以直接替你執行專案內的 <code>git</code> 與官方 <code>gh</code>（GitHub CLI）指令。你只需要用<strong>繁體中文 Prompt</strong> 告訴它你的目標，它就會自動檢查狀態、建立 <code>.gitignore</code>、提交變更並回報結果網址。
+            </p>
+          </div>
+          <div class="policy-col">
+            <h4>2. 資安紅線：永遠使用瀏覽器授權，不要把密碼或 Token 貼進程式碼！</h4>
+            <ul class="policy-list">
+              <li><strong>首選方式（Device Flow 網頁授權）：</strong>請 Antigravity 執行 <code>gh auth login --web</code>，再到真實頁面 <a href="https://github.com/login/device" target="_blank" rel="noopener noreferrer"><code>github.com/login/device</code> ↗</a> 輸入 8 碼單次驗證碼點擊 Authorize，全程不必複製貼上任何密碼或長篇金鑰。</li>
+              <li><strong>常用 GitHub 真實頁面直達：</strong>
+                <a href="https://github.com/login/device" target="_blank" rel="noopener noreferrer">裝置授權頁 (/login/device) ↗</a> · 
+                <a href="https://github.com/new" target="_blank" rel="noopener noreferrer">新建儲存庫 (/new) ↗</a> · 
+                <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Personal Access Tokens ↗</a> · 
+                <a href="https://github.com/settings/keys" target="_blank" rel="noopener noreferrer">SSH Keys ↗</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Antigravity × GitHub 7 步驟互動工作台 -->
+      <div class="interactive-workbench">
+        <nav class="step-sidebar" aria-label="Antigravity 與 GitHub 串接 7 步驟清單">
+          <div class="sidebar-header">
+            <span>點擊切換 Prompt 步驟</span>
+            <strong id="agy-progress-count">已完成 0 / 7</strong>
+          </div>
+          <ol class="step-nav-list" id="agy-step-list">
+            <!-- JS 渲染 Antigravity 串接步驟 1~7 -->
+          </ol>
+        </nav>
+
+        <article class="step-stage" id="agy-step-stage" aria-live="polite">
+          <!-- JS 渲染當前選中的 Antigravity Prompt 步驟與真實頁面截圖 -->
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================== 模組 4：常見問題與排除方法（手冊第五部分） ==================== -->
+    <section id="panel-faq" role="tabpanel" aria-labelledby="tab-faq" class="module-panel" hidden>
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 5 · 疑難排解與課堂常見狀況</span>
+          <h2>常見問題與排除方法（支援關鍵字與分類篩選）</h2>
+          <p>遇到收不到驗證信、連結失效、Username 被佔用、2FA 六位數代碼錯誤或換手機問題？請點擊下方分類或展開查看官方處理建議。</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-outline" id="btn-faq-expand-all">全部展開</button>
+          <button type="button" class="btn btn-outline" id="btn-faq-collapse-all">全部收合</button>
+        </div>
+      </div>
+
+      <div class="faq-controls">
+        <div class="faq-filter-group" role="group" aria-label="常見問題分類篩選">
+          <button type="button" class="filter-chip active" data-faq-cat="all">全部問題 (9)</button>
+          <button type="button" class="filter-chip" data-faq-cat="email">信箱與驗證信</button>
+          <button type="button" class="filter-chip" data-faq-cat="account">帳號密碼與真人驗證</button>
+          <button type="button" class="filter-chip" data-faq-cat="twofa">2FA 代碼與手機遺失</button>
+        </div>
+        <div class="faq-search-wrap">
+          <label for="faq-search-input" class="sr-only">搜尋常見問題關鍵字</label>
+          <input type="search" id="faq-search-input" placeholder="搜尋關鍵字（例如：收不到信、24小時、代碼錯誤、手機遺失）..." autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="faq-list" id="faq-list-container">
+        <!-- JS 渲染手冊第五部分全部常見問題與擴充說明 -->
+      </div>
+    </section>
+
+    <!-- ==================== 模組 4：完成檢查表、教師驗收與官方來源清單 ==================== -->
+    <section id="panel-verify" role="tabpanel" aria-labelledby="tab-verify" class="module-panel" hidden>
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 6 · 自我檢核、教師驗收與真實頁面索引</span>
+          <h2>完成檢查表、教師驗收規範與官方來源清單</h2>
+          <p>請學生在完成註冊與 2FA 設定後逐一勾選確認；教師可參考下方安全驗收規範進行課堂檢核。</p>
+        </div>
+      </div>
+
+      <div class="verify-layout">
+        <!-- 完成檢查表 5 項 -->
+        <div class="checklist-card">
+          <h3>學生自我完成檢查表（5 項必備確認）</h3>
+          <p class="card-desc">勾選後會自動計入上方總進度並儲存在您的瀏覽器本機中：</p>
+          <div class="final-checklist" id="final-checklist-container">
+            <!-- JS 渲染 5 個完成檢查表項目 -->
+          </div>
+        </div>
+
+        <!-- 教師驗收建議 -->
+        <div class="teacher-guide-card">
+          <div class="teacher-badge">教師課堂驗收建議</div>
+          <h3>如何安全驗收學生的 GitHub 帳號與 2FA 狀態？</h3>
+          <p>在課堂或作業繳交時，請遵循「<strong>只驗公開帳號與啟用狀態、不收機敏憑證</strong>」的原則：</p>
+          <ul class="teacher-rules-list">
+            <li>
+              <strong>建議展示畫面 1（確認帳號與 Username）：</strong>
+              請學生展示「已登入自己的 GitHub 個人頁（<code>https://github.com/學生Username</code>）」或提交公開個人頁網址。
+            </li>
+            <li>
+              <strong>建議展示畫面 2（確認 2FA 已啟用）：</strong>
+              請學生打開 <code>Settings → Password and authentication</code>，展示畫面中 <strong>Authenticator app</strong> 旁顯示綠色的 <span class="mock-badge-enabled">Enabled</span> 狀態標籤。
+            </li>
+            <li class="rule-danger">
+              <strong>絕對禁止蒐集或拍攝的項目：</strong>
+              <strong>不要蒐集、拍攝或要求學生提交密碼、電子郵件驗證碼、2FA QR code、setup key、六位數動態驗證碼或復原碼（Recovery codes）。</strong>
+            </li>
+            <li>
+              <strong>截圖遮蔽提醒：</strong>
+              若課堂作業需要學生繳交設定頁截圖，請提醒學生先將畫面中的個人電子郵件地址或電話號碼塗黑遮蔽。
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 真實頁面與官方圖像索引表 -->
+      <div class="sources-card">
+        <h3>真實頁面、官方圖像與參考文獻完整索引</h3>
+        <p class="card-desc">
+          本互動教學網站所有步驟、按鈕文字與政策說明皆嚴格核對自 GitHub 官方文件與真實頁面（核對日期：2026 年 10 月 26 日）。官方截圖中的帳號資料與 QR code 經遮蔽處理，僅供辨認欄位與按鈕位置；實際頁面可能隨時間或地區微調，請以 GitHub 現場顯示文字與官方說明為準。
+        </p>
+
+        <div class="table-responsive">
+          <table class="sources-table">
+            <thead>
+              <tr>
+                <th scope="col">分類與用途</th>
+                <th scope="col">官方文件或真實頁面名稱</th>
+                <th scope="col">直達連結與說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>真實註冊表單</strong></td>
+                <td>GitHub.com 個人帳號註冊頁</td>
+                <td><a href="https://github.com/signup" target="_blank" rel="noopener noreferrer">https://github.com/signup ↗</a>（頁面標題：Create your free account / Sign up for GitHub）</td>
+              </tr>
+              <tr>
+                <td><strong>建立帳號說明</strong></td>
+                <td>GitHub Docs：建立個人帳號</td>
+                <td><a href="https://docs.github.com/en/account-and-profile/how-tos/account-management/creating-an-account-on-github" target="_blank" rel="noopener noreferrer">Creating an account on GitHub ↗</a></td>
+              </tr>
+              <tr>
+                <td><strong>服務條款與年齡規定</strong></td>
+                <td>GitHub Terms of Service</td>
+                <td><a href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service" target="_blank" rel="noopener noreferrer">GitHub Terms of Service ↗</a>（至少 13 歲或當地法定年齡、一人一號）</td>
+              </tr>
+              <tr>
+                <td><strong>高強度密碼規範</strong></td>
+                <td>GitHub Docs：建立高強度密碼</td>
+                <td><a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-strong-password" target="_blank" rel="noopener noreferrer">Creating a strong password ↗</a>（至少 15 字元，或至少 8 字元含數字與小寫字母）</td>
+              </tr>
+              <tr>
+                <td><strong>信箱驗證與官方截圖</strong></td>
+                <td>GitHub Docs：驗證電子郵件地址</td>
+                <td>
+                  <a href="https://docs.github.com/en/account-and-profile/how-tos/email-preferences/verifying-your-email-address" target="_blank" rel="noopener noreferrer">Verifying your email address ↗</a> ·
+                  <a href="https://docs.github.com/assets/cb-35722/images/help/settings/email-verify-button.png" target="_blank" rel="noopener noreferrer">官方 Emails 設定頁截圖 ↗</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>信箱疑難排解與更換</strong></td>
+                <td>GitHub Docs：信箱驗證排解 / 更換主信箱</td>
+                <td>
+                  <a href="https://docs.github.com/en/account-and-profile/how-tos/email-preferences/troubleshooting-email-verification" target="_blank" rel="noopener noreferrer">Troubleshooting email verification ↗</a> ·
+                  <a href="https://docs.github.com/en/account-and-profile/how-tos/email-preferences/troubleshooting-adding-an-email" target="_blank" rel="noopener noreferrer">信箱已被使用 ↗</a> ·
+                  <a href="https://docs.github.com/en/account-and-profile/how-tos/email-preferences/changing-your-primary-email-address" target="_blank" rel="noopener noreferrer">更換主要信箱 ↗</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>入門指南與方案比較</strong></td>
+                <td>GitHub Docs：帳號入門與 GitHub Free 方案</td>
+                <td>
+                  <a href="https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account" target="_blank" rel="noopener noreferrer">Getting started with your GitHub account ↗</a> ·
+                  <a href="https://docs.github.com/en/get-started/learning-about-github/githubs-plans" target="_blank" rel="noopener noreferrer">GitHub's plans ↗</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>2FA 是否強制政策</strong></td>
+                <td>GitHub Docs：強制兩階段驗證說明</td>
+                <td><a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/about-mandatory-two-factor-authentication" target="_blank" rel="noopener noreferrer">About mandatory two-factor authentication ↗</a>（貢獻者 45 天設定期＋7 天寬限期）</td>
+              </tr>
+              <tr>
+                <td><strong>2FA 設定與官方掃碼截圖</strong></td>
+                <td>GitHub Docs：設定兩階段驗證 (TOTP)</td>
+                <td>
+                  <a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication" target="_blank" rel="noopener noreferrer">Configuring two-factor authentication ↗</a> ·
+                  <a href="https://docs.github.com/assets/cb-48626/images/help/2fa/ghes-3.8-and-higher-2fa-wizard-app-click-code.png" target="_blank" rel="noopener noreferrer">官方 Scan the QR code 畫面截圖 ↗</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>2FA 復原碼與帳號復原</strong></td>
+                <td>GitHub Docs：復原方法與 2FA 疑難排解</td>
+                <td>
+                  <a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication-recovery-methods" target="_blank" rel="noopener noreferrer">Configuring 2FA recovery methods ↗</a> ·
+                  <a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/troubleshooting-two-factor-authentication-issues" target="_blank" rel="noopener noreferrer">Troubleshooting 2FA issues ↗</a> ·
+                  <a href="https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/recovering-your-account-if-you-lose-your-2fa-credentials" target="_blank" rel="noopener noreferrer">遺失 2FA 憑證復原指南 ↗</a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>驗證器 App 官方下載與說明</strong></td>
+                <td>Google Authenticator / KeePassXC</td>
+                <td>
+                  <a href="https://support.google.com/accounts/answer/1066447" target="_blank" rel="noopener noreferrer">Google Authenticator 官方說明 ↗</a> ·
+                  <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank" rel="noopener noreferrer">iOS App Store ↗</a> ·
+                  <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener noreferrer">Android Google Play ↗</a> ·
+                  <a href="https://keepassxc.org/" target="_blank" rel="noopener noreferrer">KeePassXC 官網 ↗</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>GitHub 帳號申請與兩階段驗證互動教學指南</strong>
+        <p>依據《GitHub帳號申請與兩階段驗證手冊.md》製作｜核對日期：2026 年 10 月 26 日｜適用對象：第一次使用 GitHub 的學生與教師。</p>
+      </div>
+      <div class="footer-note">
+        <span>本網站為純前端靜態教學導覽，零資料蒐集、無追蹤 Cookie，不含任何可輸入真實密碼或驗證碼之表單欄位。</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
