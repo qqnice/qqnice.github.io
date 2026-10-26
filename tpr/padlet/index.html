@@ -27,6 +27,11 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     .title-form button { padding: 9px 14px; border: 1px solid #78e6ce88; border-radius: 9px; background: #78e6ce22; color: #e6fff9; cursor: pointer; font: inherit; }
     .title-form small { color: #a6c9cc; line-height: 1.5; }
     .qr-card { display: flex; align-items: center; gap: 18px; background: #f7fafc; color: #112336; border-radius: 24px; padding: 12px 20px 12px 12px; box-shadow: 0 12px 35px #0005; text-decoration: none; }
+    .qr-card[hidden] { display: none; }
+    .qr-stage { display: grid; justify-items: center; gap: 10px; }
+    .qr-toggle { padding: 10px 16px; border: 1px solid #78e6ce88; border-radius: 999px; color: #e6fff9; background: #78e6ce22; cursor: pointer; font: inherit; font-weight: 700; }
+    .qr-placeholder { width: min(320px, 100%); padding: 26px; border: 1px dashed #78e6ce88; border-radius: 24px; color: #c0d5df; background: #ffffff0b; text-align: center; line-height: 1.6; }
+    .qr-placeholder[hidden] { display: none; }
     .qr-card img { display: block; width: clamp(170px, 14vw, 240px); aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
     .qr-label { font-size: clamp(18px, 1.2vw, 25px); font-weight: 850; white-space: nowrap; }
     .qr-note { display: block; margin-top: 8px; color: #4b6474; font-size: clamp(13px, .95vw, 18px); font-weight: 600; }
@@ -43,14 +48,25 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     .empty { font-size: clamp(22px, 1.8vw, 36px); color: #a6bbcd; line-height: 1.7; max-width: 24em; }
     .empty strong { color: #eef8fb; }
     .footer { padding: 0 24px 18px; color: #8da6bb; font-size: 15px; }
-    .board-frame { display: block; width: 100%; min-height: min(62vh, 690px); border: 0; background: #fff; }
-    .board-link { color: #80e5d1; font-size: 15px; white-space: nowrap; text-decoration: none; }
-    .board-link:hover { text-decoration: underline; }
+    .board-frame { display: block; width: 100%; min-height: min(62vh, 690px); border: 0; background: #fff; pointer-events: none; }
+    .board-view { position: relative; }
+    .board-view::after { content: '此頁僅供觀看'; position: absolute; right: 10px; bottom: 10px; display: grid; place-items: center; min-width: 126px; height: 68px; padding: 8px 12px; border: 1px solid #ffffff55; border-radius: 16px; color: #fff; background: #0b1b2bea; backdrop-filter: blur(10px); font-size: 14px; font-weight: 700; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; color: #9ab1c3; font-size: 14px; }
     .toolbar button { color: #dceef3; border: 1px solid #ffffff38; border-radius: 999px; background: #ffffff16; padding: 8px 15px; cursor: pointer; font: inherit; }
     .toolbar .clear-button { color: #ffd4cc; border-color: #f18d7c77; background: #8b342b55; }
     .clear-help { margin: 12px 0 0; padding: 14px 18px; border: 1px solid #f18d7c66; border-radius: 14px; background: #8b342b33; color: #ffe0d9; font-size: 15px; line-height: 1.6; }
     .clear-help[hidden] { display: none; }
+    .clear-help a { color: #fff; font-weight: 700; }
+    .host-dialog { width: min(420px, calc(100vw - 32px)); border: 1px solid #78e6ce66; border-radius: 20px; padding: 26px; color: #f5f7fb; background: #10283a; box-shadow: 0 24px 80px #0009; }
+    .host-dialog::backdrop { background: #06111fd9; }
+    .host-dialog h2 { margin: 0 0 8px; }
+    .host-dialog p { color: #c1d3df; line-height: 1.6; }
+    .host-dialog label { display: block; margin: 20px 0 8px; font-weight: 750; }
+    .host-dialog input { width: 100%; padding: 12px 14px; border: 1px solid #a6c9cc; border-radius: 10px; font: inherit; }
+    .host-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+    .host-actions button { padding: 10px 16px; border: 1px solid #78e6ce88; border-radius: 10px; color: #f5f7fb; background: #78e6ce22; cursor: pointer; font: inherit; }
+    .host-actions button[type="submit"] { background: #17866f; }
+    .host-error { min-height: 1.5em; margin: 10px 0 0; color: #ffb9a9 !important; }
     @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } .board-frame { min-height: 540px; } }
     @media (max-width: 650px) { .top { grid-template-columns: 1fr; } .qr-card { justify-content: center; } .qr-card img { width: 140px; } .cloud { min-height: 370px; } .panel-head { padding: 16px; } .meta { flex-wrap: wrap; justify-content: end; } }
   </style>
@@ -61,7 +77,7 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       <div>
         <div class="eyebrow-row"><p class="eyebrow">課堂即時回饋 · LIVE WORD CLOUD</p><button id="edit-title" class="title-button" type="button" aria-controls="title-form">✎ 修改標題</button></div>
         <h1 id="page-title">AI 進入課堂後，最大的問題是什麼？</h1>
-        <p class="question">請掃碼，用 2–8 個字寫下一個最困擾你的問題。每人填一項，不填姓名。</p>
+        <p class="question">主持人顯示 QR Code 後，掃碼用 2–8 個字回答；看結果不需要密碼。</p>
         <form id="title-form" class="title-form" hidden>
           <label for="title-input">投影頁標題</label>
           <input id="title-input" name="title" type="text" maxlength="80" required>
@@ -69,10 +85,14 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
           <small>標題會保存在此瀏覽器；儲存後的網址也會帶上標題，可複製到其他裝置使用。Padlet 看板名稱需在 Padlet 修改。</small>
         </form>
       </div>
-      <a class="qr-card" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener" aria-label="掃描或開啟 Padlet 回答">
-        <img src="padlet-qr.png" alt="前往 Padlet 回答的 QR Code">
-        <span><span class="qr-label">掃碼回答</span><span class="qr-note">輸入後立即顯示在 Padlet</span></span>
-      </a>
+      <div class="qr-stage">
+        <div id="qr-placeholder" class="qr-placeholder">投稿 QR Code 尚未顯示。<br>主持人輸入密碼後即可開放掃碼。</div>
+        <a id="qr-card" class="qr-card" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener" aria-label="掃描或開啟 Padlet 回答" hidden>
+          <img src="padlet-qr.png" alt="前往 Padlet 回答的 QR Code">
+          <span><span class="qr-label">掃碼回答</span><span class="qr-note">參與者不需密碼</span></span>
+        </a>
+        <button id="qr-toggle" class="qr-toggle" type="button">主持人：顯示投稿 QR Code</button>
+      </div>
     </header>
 
     <div class="grid">
@@ -86,13 +106,23 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       </section>
 
       <section class="panel" aria-labelledby="board-title">
-        <div class="panel-head"><h2 id="board-title">Padlet 回覆看板</h2><a class="board-link" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener">另開看板 ↗</a></div>
-        <iframe class="board-frame" title="AI 進入課堂後：最大的問題 Padlet 回覆看板" src="https://padlet.com/embed/s024uq8masebj99bufp3" allow="clipboard-write"></iframe>
+        <div class="panel-head"><h2 id="board-title">Padlet 回覆看板</h2><span class="meta">此處僅供觀看</span></div>
+        <div class="board-view"><iframe class="board-frame" title="AI 進入課堂後：最大的問題 Padlet 回覆看板" src="https://padlet.com/embed/s024uq8masebj99bufp3" tabindex="-1"></iframe></div>
       </section>
     </div>
-    <div class="toolbar"><button id="full-screen" type="button">切換全螢幕</button><button id="clear-board" class="clear-button" type="button" aria-controls="clear-help">前往清空貼文…</button><span>投影時請保持這個頁面開啟；參與者只需掃 QR Code。</span></div>
-    <p id="clear-help" class="clear-help" role="status" hidden>已開啟 Padlet。請在看板中點「更多選項（…）」→「清除貼文」，再依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
+    <div class="toolbar"><button id="full-screen" type="button">切換全螢幕</button><button id="clear-board" class="clear-button" type="button" aria-controls="clear-help">前往清空貼文…</button><span>主持人輸入密碼顯示 QR Code；參與者掃碼後可直接匿名回答。</span></div>
+    <p id="clear-help" class="clear-help" role="status" hidden>主持人已驗證。<a href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener">開啟 Padlet 管理貼文 ↗</a>，然後點「更多選項（…）」→「清除貼文」，依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
   </main>
+  <dialog id="host-dialog" class="host-dialog" aria-labelledby="host-title">
+    <h2 id="host-title">主持人密碼</h2>
+    <p id="host-intro">輸入後會在投影頁顯示投稿 QR Code。參與者掃碼時不需要密碼。</p>
+    <form id="host-form">
+      <label for="host-code">密碼</label>
+      <input id="host-code" type="password" autocomplete="off" required>
+      <p id="host-error" class="host-error" role="alert"></p>
+      <div class="host-actions"><button id="cancel-host" type="button">取消</button><button id="confirm-host" type="submit">顯示 QR Code</button></div>
+    </form>
+  </dialog>
   <script>
     const defaultTitle = 'AI 進入課堂後，最大的問題是什麼？';
     const titleKey = 'tpr-padlet-title-v1';
@@ -144,6 +174,60 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       titleForm.hidden = true;
     });
 
+    const hostCodeHash = 'a6157ce0840b79ded3d5abb9850f8fcb9b6b6d45cc95e9b69e21e27d3fa1f9e6';
+    const qrCard = document.getElementById('qr-card');
+    const qrPlaceholder = document.getElementById('qr-placeholder');
+    const qrToggle = document.getElementById('qr-toggle');
+    const hostDialog = document.getElementById('host-dialog');
+    const hostInput = document.getElementById('host-code');
+    const hostError = document.getElementById('host-error');
+    let hostAction = 'qr';
+    function askHost(action) {
+      hostAction = action;
+      hostError.textContent = '';
+      hostInput.value = '';
+      document.getElementById('host-title').textContent = action === 'qr' ? '主持人密碼' : '驗證主持人身分';
+      document.getElementById('host-intro').textContent = action === 'qr'
+        ? '輸入後會在投影頁顯示投稿 QR Code。參與者掃碼時不需要密碼。'
+        : '輸入後才顯示 Padlet 管理連結，並由 Padlet 確認清空貼文。';
+      document.getElementById('confirm-host').textContent = action === 'qr' ? '顯示 QR Code' : '顯示管理連結';
+      hostDialog.showModal();
+      hostInput.focus();
+    }
+    qrToggle.addEventListener('click', () => {
+      if (!qrCard.hidden) {
+        qrCard.hidden = true;
+        qrPlaceholder.hidden = false;
+        qrToggle.textContent = '主持人：顯示投稿 QR Code';
+      } else {
+        askHost('qr');
+      }
+    });
+    document.getElementById('clear-board').addEventListener('click', () => askHost('clear'));
+    document.getElementById('cancel-host').addEventListener('click', () => hostDialog.close());
+    document.getElementById('host-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const bytes = new TextEncoder().encode(hostInput.value.trim().toUpperCase());
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      const hash = [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
+      if (hash !== hostCodeHash) {
+        hostError.textContent = '密碼不正確，請再試一次。';
+        hostInput.select();
+        return;
+      }
+      hostDialog.close();
+      hostInput.value = '';
+      if (hostAction === 'qr') {
+        qrCard.hidden = false;
+        qrPlaceholder.hidden = true;
+        qrToggle.textContent = '隱藏投稿 QR Code';
+      } else {
+        const help = document.getElementById('clear-help');
+        help.hidden = false;
+        help.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+
     const cloud = document.getElementById('cloud');
     const totals = document.getElementById('totals');
     const status = document.getElementById('status');
@@ -169,7 +253,7 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       if (!entries.length) {
         const p = document.createElement('p');
         p.className = 'empty';
-        p.innerHTML = '<strong>等待大家的答案</strong><br>掃描右上角 QR Code，輸入短語即可參與。';
+        p.innerHTML = '<strong>等待大家的答案</strong><br>主持人顯示 QR Code 後，掃描輸入短語即可參與。';
         cloud.append(p);
         return;
       }
@@ -200,10 +284,6 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     document.getElementById('full-screen').addEventListener('click', () => {
       if (document.fullscreenElement) document.exitFullscreen();
       else document.documentElement.requestFullscreen();
-    });
-    document.getElementById('clear-board').addEventListener('click', () => {
-      window.open('https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3', '_blank', 'noopener');
-      document.getElementById('clear-help').hidden = false;
     });
     window.addEventListener('focus', refresh);
     refresh();
