@@ -56,6 +56,7 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     .toolbar .clear-button { color: #ffd4cc; border-color: #f18d7c77; background: #8b342b55; }
     .clear-help { margin: 12px 0 0; padding: 14px 18px; border: 1px solid #f18d7c66; border-radius: 14px; background: #8b342b33; color: #ffe0d9; font-size: 15px; line-height: 1.6; }
     .clear-help[hidden] { display: none; }
+    .clear-help a { color: #fff; font-weight: 700; }
     .host-dialog { width: min(420px, calc(100vw - 32px)); border: 1px solid #78e6ce66; border-radius: 20px; padding: 26px; color: #f5f7fb; background: #10283a; box-shadow: 0 24px 80px #0009; }
     .host-dialog::backdrop { background: #06111fd9; }
     .host-dialog h2 { margin: 0 0 8px; }
@@ -110,16 +111,16 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       </section>
     </div>
     <div class="toolbar"><button id="full-screen" type="button">切換全螢幕</button><button id="clear-board" class="clear-button" type="button" aria-controls="clear-help">前往清空貼文…</button><span>主持人輸入密碼顯示 QR Code；參與者掃碼後可直接匿名回答。</span></div>
-    <p id="clear-help" class="clear-help" role="status" hidden>已開啟 Padlet。請在看板中點「更多選項（…）」→「清除貼文」，再依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
+    <p id="clear-help" class="clear-help" role="status" hidden>主持人已驗證。<a href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener">開啟 Padlet 管理貼文 ↗</a>，然後點「更多選項（…）」→「清除貼文」，依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
   </main>
   <dialog id="host-dialog" class="host-dialog" aria-labelledby="host-title">
     <h2 id="host-title">主持人密碼</h2>
-    <p>輸入後會在投影頁顯示投稿 QR Code。參與者掃碼時不需要密碼。</p>
+    <p id="host-intro">輸入後會在投影頁顯示投稿 QR Code。參與者掃碼時不需要密碼。</p>
     <form id="host-form">
       <label for="host-code">密碼</label>
       <input id="host-code" type="password" autocomplete="off" required>
       <p id="host-error" class="host-error" role="alert"></p>
-      <div class="host-actions"><button id="cancel-host" type="button">取消</button><button type="submit">顯示 QR Code</button></div>
+      <div class="host-actions"><button id="cancel-host" type="button">取消</button><button id="confirm-host" type="submit">顯示 QR Code</button></div>
     </form>
   </dialog>
   <script>
@@ -180,18 +181,29 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     const hostDialog = document.getElementById('host-dialog');
     const hostInput = document.getElementById('host-code');
     const hostError = document.getElementById('host-error');
+    let hostAction = 'qr';
+    function askHost(action) {
+      hostAction = action;
+      hostError.textContent = '';
+      hostInput.value = '';
+      document.getElementById('host-title').textContent = action === 'qr' ? '主持人密碼' : '驗證主持人身分';
+      document.getElementById('host-intro').textContent = action === 'qr'
+        ? '輸入後會在投影頁顯示投稿 QR Code。參與者掃碼時不需要密碼。'
+        : '輸入後才顯示 Padlet 管理連結，並由 Padlet 確認清空貼文。';
+      document.getElementById('confirm-host').textContent = action === 'qr' ? '顯示 QR Code' : '顯示管理連結';
+      hostDialog.showModal();
+      hostInput.focus();
+    }
     qrToggle.addEventListener('click', () => {
       if (!qrCard.hidden) {
         qrCard.hidden = true;
         qrPlaceholder.hidden = false;
         qrToggle.textContent = '主持人：顯示投稿 QR Code';
       } else {
-        hostError.textContent = '';
-        hostInput.value = '';
-        hostDialog.showModal();
-        hostInput.focus();
+        askHost('qr');
       }
     });
+    document.getElementById('clear-board').addEventListener('click', () => askHost('clear'));
     document.getElementById('cancel-host').addEventListener('click', () => hostDialog.close());
     document.getElementById('host-form').addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -205,9 +217,15 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
       }
       hostDialog.close();
       hostInput.value = '';
-      qrCard.hidden = false;
-      qrPlaceholder.hidden = true;
-      qrToggle.textContent = '隱藏投稿 QR Code';
+      if (hostAction === 'qr') {
+        qrCard.hidden = false;
+        qrPlaceholder.hidden = true;
+        qrToggle.textContent = '隱藏投稿 QR Code';
+      } else {
+        const help = document.getElementById('clear-help');
+        help.hidden = false;
+        help.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     });
 
     const cloud = document.getElementById('cloud');
@@ -266,10 +284,6 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     document.getElementById('full-screen').addEventListener('click', () => {
       if (document.fullscreenElement) document.exitFullscreen();
       else document.documentElement.requestFullscreen();
-    });
-    document.getElementById('clear-board').addEventListener('click', () => {
-      window.open('https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3', '_blank', 'noopener');
-      document.getElementById('clear-help').hidden = false;
     });
     window.addEventListener('focus', refresh);
     refresh();
