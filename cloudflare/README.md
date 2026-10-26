@@ -1,6 +1,6 @@
 # QQ 知識海域的 Cloudflare 連線
 
-網站仍部署在 GitHub Pages。教材索引優先向 Cloudflare Worker 讀取；連線失敗時，網站會改讀 `assets/islands/catalog.json`。R2 儲存桶維持私有，Worker 只提供 `public/` 前綴檔案的唯讀網址。
+網站仍部署在 GitHub Pages，改由老師手動發布。五島網站讀取同一發布版本的 `assets/islands/catalog.json`，不再優先讀取 Worker 的獨立目錄。老師更新入口為 `/manage/`；操作說明見 `tools/MANUAL_PUBLISH.md`。R2 儲存桶維持私有，Worker 只提供 `public/` 前綴檔案的唯讀網址。
 
 | 資源 | 名稱 | 用途 |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ API 網址：`https://qqnice-site-api.qqnice-mb.workers.dev`
 - `GET /media/<檔名>`：讀取 R2 中 `public/<檔名>` 的物件。
 - 沒有公開寫入 API；新增或更動資料需從 Cloudflare 控制台或 Wrangler 執行。
 
-## 更新教材索引
+## 維護獨立 D1 教材索引（五島網站已不使用此來源）
 
 修改網站的 `assets/islands/catalog.json` 後，在這個資料夾執行：
 

@@ -4,7 +4,6 @@ const $=id=>document.getElementById(id);
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const baseURL=new URL('./',location.href);
 const lessonURL=path=>new URL(path,baseURL).href;
-const catalogAPI='https://qqnice-site-api.qqnice-mb.workers.dev/catalog';
 let catalog=[],scene=null,currentIsland=null,currentTopic=null,currentLesson=null,libraryFilter='all',lastView=null;
 let visited=[];try{visited=JSON.parse(localStorage.getItem('qq-sea-visited')||'[]');if(!Array.isArray(visited))visited=[];}catch{}
 const colorStyle=i=>`--island-color:${i.color}`;
@@ -69,10 +68,10 @@ function updateMotion(){const v=scene?.motion??false;$('motion-toggle').setAttri
 window.addEventListener('hashchange',applyRoute);window.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)&&!$('library-dialog').open){e.preventDefault();openLibrary();}if(e.key==='Escape'&&!$('library-dialog').open){if(currentLesson)route(currentIsland.id,currentTopic?.id);else if(currentTopic)route(currentIsland.id);else if(currentIsland)route();}});
 renderNavigation();
 try{
- const sources=[catalogAPI,new URL('./catalog.json',import.meta.url)];
+ const sources=[new URL('./catalog.json',import.meta.url)];
  for(const source of sources){
   try{
-   const options=source===catalogAPI&&AbortSignal.timeout?{signal:AbortSignal.timeout(4000)}:{};
+   const options={cache:'no-cache'};
    const response=await fetch(source,options);
    if(!response.ok)throw new Error(`教材索引載入失敗：${response.status}`);
    const lessons=await response.json();

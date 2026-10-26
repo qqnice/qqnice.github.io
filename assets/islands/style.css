@@ -25,3 +25,5 @@ body.video-island .island-panel .panel-topline{margin-bottom:10px}.video-island-
 @media(max-width:620px){.video-island-heading h2{font-size:25px}.video-intro{font-size:9px;line-height:1.8}.video-island-tagline{font-size:9px}.video-filters button{font-size:8px;padding:6px 7px;gap:4px}.video-channel-line{font-size:9px}}
 body.video-island .island-panel .panel-topline{position:absolute;right:24px;top:24px;margin:0}body.video-island .island-panel .panel-topline>span{display:none}
 @media(max-width:620px){body.video-island .island-panel .panel-topline{right:18px;top:18px}}
+
+.teacher-update-link{font-size:9px;color:inherit;text-decoration:none;white-space:nowrap;opacity:.75;padding:10px 4px}.teacher-update-link:hover,.teacher-update-link:focus-visible{opacity:1;text-decoration:underline;text-underline-offset:3px}.sea-footer .exploration-hint{margin-left:auto}@media(max-width:620px){.sea-footer{gap:7px}.teacher-update-link{font-size:8px;padding:10px 2px}}
