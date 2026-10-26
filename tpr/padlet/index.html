@@ -14,9 +14,18 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     body { margin: 0; min-height: 100vh; color: #f5f7fb; background: radial-gradient(circle at 20% 8%, #203c52 0, #0d192a 42%, #08111e 100%); }
     .shell { width: min(1920px, 100%); margin: auto; padding: clamp(16px, 2vw, 32px); }
     .top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; margin-bottom: 24px; }
-    .eyebrow { margin: 0 0 8px; color: #78e6ce; font-size: clamp(15px, 1.1vw, 21px); font-weight: 750; letter-spacing: .16em; }
+    .eyebrow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .eyebrow { margin: 0; color: #78e6ce; font-size: clamp(15px, 1.1vw, 21px); font-weight: 750; letter-spacing: .16em; }
+    .title-button { padding: 5px 11px; border: 1px solid #78e6ce66; border-radius: 999px; background: #78e6ce1c; color: #baf7e9; cursor: pointer; font: inherit; font-size: 13px; }
     h1 { font-size: clamp(30px, 3vw, 58px); line-height: 1.15; margin: 0 0 10px; letter-spacing: .01em; }
     .question { margin: 0; color: #d0dce8; font-size: clamp(18px, 1.45vw, 28px); line-height: 1.5; }
+    .title-form { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; padding: 14px; border: 1px solid #78e6ce66; border-radius: 16px; background: #102a36; }
+    .title-form[hidden] { display: none; }
+    .title-form label, .title-form small { width: 100%; }
+    .title-form label { font-weight: 700; }
+    .title-form input { flex: 1 1 280px; min-width: 0; padding: 9px 12px; border: 1px solid #ffffff77; border-radius: 9px; background: #f7fafc; color: #112336; font: inherit; }
+    .title-form button { padding: 9px 14px; border: 1px solid #78e6ce88; border-radius: 9px; background: #78e6ce22; color: #e6fff9; cursor: pointer; font: inherit; }
+    .title-form small { color: #a6c9cc; line-height: 1.5; }
     .qr-card { display: flex; align-items: center; gap: 18px; background: #f7fafc; color: #112336; border-radius: 24px; padding: 12px 20px 12px 12px; box-shadow: 0 12px 35px #0005; text-decoration: none; }
     .qr-card img { display: block; width: clamp(170px, 14vw, 240px); aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
     .qr-label { font-size: clamp(18px, 1.2vw, 25px); font-weight: 850; white-space: nowrap; }
@@ -50,9 +59,15 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
   <main class="shell">
     <header class="top">
       <div>
-        <p class="eyebrow">課堂即時回饋 · LIVE WORD CLOUD</p>
-        <h1>AI 進入課堂後，最大的問題是什麼？</h1>
+        <div class="eyebrow-row"><p class="eyebrow">課堂即時回饋 · LIVE WORD CLOUD</p><button id="edit-title" class="title-button" type="button" aria-controls="title-form">✎ 修改標題</button></div>
+        <h1 id="page-title">AI 進入課堂後，最大的問題是什麼？</h1>
         <p class="question">請掃碼，用 2–8 個字寫下一個最困擾你的問題。每人填一項，不填姓名。</p>
+        <form id="title-form" class="title-form" hidden>
+          <label for="title-input">投影頁標題</label>
+          <input id="title-input" name="title" type="text" maxlength="80" required>
+          <button type="submit">儲存標題</button><button id="cancel-title" type="button">取消</button><button id="reset-title" type="button">回復預設</button>
+          <small>標題會保存在此瀏覽器；儲存後的網址也會帶上標題，可複製到其他裝置使用。Padlet 看板名稱需在 Padlet 修改。</small>
+        </form>
       </div>
       <a class="qr-card" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener" aria-label="掃描或開啟 Padlet 回答">
         <img src="padlet-qr.png" alt="前往 Padlet 回答的 QR Code">
@@ -79,6 +94,56 @@ description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看
     <p id="clear-help" class="clear-help" role="status" hidden>已開啟 Padlet。請在看板中點「更多選項（…）」→「清除貼文」，再依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
   </main>
   <script>
+    const defaultTitle = 'AI 進入課堂後，最大的問題是什麼？';
+    const titleKey = 'tpr-padlet-title-v1';
+    const pageTitle = document.getElementById('page-title');
+    const titleForm = document.getElementById('title-form');
+    const titleInput = document.getElementById('title-input');
+    const cleanTitle = (value) => String(value || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+
+    function applyTitle(value) {
+      const title = cleanTitle(value) || defaultTitle;
+      pageTitle.textContent = title;
+      document.title = `${title}｜即時文字雲`;
+      titleInput.value = title;
+    }
+
+    let savedTitle = '';
+    try { savedTitle = localStorage.getItem(titleKey) || ''; } catch (_) { /* Storage may be disabled. */ }
+    applyTitle(new URLSearchParams(location.search).get('title') || savedTitle);
+
+    document.getElementById('edit-title').addEventListener('click', () => {
+      titleForm.hidden = false;
+      titleInput.value = pageTitle.textContent;
+      titleInput.focus();
+      titleInput.select();
+    });
+    titleInput.addEventListener('input', () => titleInput.setCustomValidity(''));
+    titleForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const title = cleanTitle(titleInput.value);
+      if (!title) {
+        titleInput.setCustomValidity('請輸入標題');
+        titleInput.reportValidity();
+        return;
+      }
+      applyTitle(title);
+      try { localStorage.setItem(titleKey, title); } catch (_) { /* The URL still saves the title. */ }
+      const url = new URL(location.href);
+      url.searchParams.set('title', title);
+      history.replaceState(null, '', url);
+      titleForm.hidden = true;
+    });
+    document.getElementById('cancel-title').addEventListener('click', () => { titleForm.hidden = true; });
+    document.getElementById('reset-title').addEventListener('click', () => {
+      applyTitle(defaultTitle);
+      try { localStorage.removeItem(titleKey); } catch (_) { /* Storage may be disabled. */ }
+      const url = new URL(location.href);
+      url.searchParams.delete('title');
+      history.replaceState(null, '', url);
+      titleForm.hidden = true;
+    });
+
     const cloud = document.getElementById('cloud');
     const totals = document.getElementById('totals');
     const status = document.getElementById('status');
