@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="從安裝 GitHub 插件、授權儲存庫，到用一段提示詞請 GPT 製作並發佈 GitHub Pages 的繁體中文教學。">
+  <meta name="description" content="學生與教師的 GPT × GitHub 完整教學：連接 GitHub、確認寫入權限、產生網站發佈提示詞、檢查提交與 GitHub Pages。">
   <title>GPT × GitHub｜用提示詞完成網站發佈</title>
   <style>
     :root { color-scheme: light; --ink:#17243b; --muted:#51617a; --line:#d7e2f1; --blue:#2655ca; --cyan:#dcf7f5; --cream:#fff7e9; --bg:#f5f8fd; --white:#fff; }
@@ -70,11 +70,41 @@
     .prompt.large textarea { min-height:360px; }
     .source-list { padding-left:23px; }
     .source-list li + li { margin-top:8px; }
+    .flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:23px 0 3px; }
+    .flow div { border:1px solid var(--line); border-radius:16px; background:#fff; padding:17px; }
+    .flow b { display:block; color:#1749bf; font-size:.88rem; margin-bottom:5px; }
+    .flow strong { display:block; font-size:1.05rem; }
+    .flow small { display:block; color:var(--muted); margin-top:4px; }
+    .mini-tag { display:inline-block; border-radius:7px; background:#eaf1fc; color:#18418a; padding:2px 8px; font-size:.82rem; font-weight:800; }
+    .detail-list { padding-left:23px; margin:12px 0; }
+    .detail-list li + li { margin-top:9px; }
+    .surface-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:17px; }
+    .surface-card { border:1px solid var(--line); border-radius:18px; background:#fff; padding:20px; }
+    .surface-card h3 { margin-bottom:10px; }
+    .surface-card ol { padding-left:22px; margin:8px 0 0; }
+    .builder { border:1px solid #a8c3e6; border-radius:22px; background:linear-gradient(140deg,#fff,#f2f8ff); padding:24px; margin-top:24px; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; margin-top:18px; }
+    .field { display:grid; gap:5px; font-weight:750; color:#213b63; }
+    .field small { font-weight:400; color:var(--muted); }
+    .field.full { grid-column:1/-1; }
+    .field input,.field select,.field textarea { border:1px solid #aac2e0; border-radius:10px; background:#fff; padding:10px 12px; color:var(--ink); width:100%; }
+    .field textarea { min-height:100px; resize:vertical; }
+    .builder-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:17px 0; }
+    .builder-actions button { border:2px solid var(--blue); border-radius:10px; background:var(--blue); color:#fff; padding:10px 17px; font-weight:800; }
+    .builder-actions .copy { background:#fff; color:var(--blue); }
+    .form-status { color:#994b16; font-weight:700; min-height:1.5em; }
+    #generated-prompt { min-height:385px; border:1px solid #b5c9e8; border-radius:12px; }
+    .tiny { font-size:.89rem; color:var(--muted); }
+    .milestones { display:grid; gap:12px; }
+    .milestone { display:grid; grid-template-columns:35px 1fr; gap:12px; align-items:start; border-left:4px solid #33a392; background:#fff; border-radius:0 14px 14px 0; padding:16px; }
+    .milestone .num { width:31px; height:31px; font-size:.95rem; border-radius:8px; }
+    .milestone p { margin:3px 0 0; }
     details { border:1px solid var(--line); border-radius:13px; background:#fff; padding:12px 17px; margin:10px 0; }
     summary { cursor:pointer; font-weight:800; }
     footer { background:#10284e; color:#dfe9f6; padding:28px 0; font-size:.92rem; }
     footer a { color:#fff; }
-    @media (max-width:760px) { .hero-grid,.grid2 { grid-template-columns:1fr; } .hero { padding:42px 0; } .step { grid-template-columns:1fr; } .top nav { gap:11px; } }
+    @media (max-width:760px) { .hero-grid,.grid2,.surface-grid,.form-grid { grid-template-columns:1fr; } .flow { grid-template-columns:repeat(2,minmax(0,1fr)); } .hero { padding:42px 0; } .step { grid-template-columns:1fr; } .top nav { gap:11px; } }
+    @media (max-width:480px) { .flow { grid-template-columns:1fr; } .builder { padding:17px; } }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .progress span { transition:none; } }
   </style>
 </head>
@@ -83,7 +113,7 @@
   <header class="top">
     <div class="wrap">
       <a class="brand" href="../">← TPR 教學實踐專區</a>
-      <nav aria-label="本頁導覽"><a href="#connect">連接步驟</a><a href="#prompts">複製提示詞</a><a href="#faq">常見狀況</a></nav>
+      <nav aria-label="本頁導覽"><a href="#connect">連接步驟</a><a href="#builder">產生提示詞</a><a href="#verify">發佈驗收</a><a href="#faq">常見狀況</a></nav>
     </div>
   </header>
   <div class="hero">
@@ -91,13 +121,13 @@
       <div>
         <span class="eyebrow">學生與老師的操作教學 · 2026-10-26 核對</span>
         <h1>GPT × GitHub<br>一句提示詞，把網頁發佈出去</h1>
-        <p class="lead">先完成一次 GitHub 連接與權限檢查。之後說明目標、儲存庫、檔案位置和驗收條件，讓 ChatGPT Work 或 Codex 協助製作、提交並檢查網站。</p>
-        <div class="chips"><span class="pill">繁體中文步驟</span><span class="pill">可複製 Prompt</span><span class="pill">GitHub Pages 範例</span></div>
-        <div class="actions"><a class="btn" href="#connect">開始連接教學 ↓</a><a class="btn secondary" href="#prompts">直接看提示詞</a></div>
+        <p class="lead">先完成一次 GitHub 連接與權限檢查，再填入網站主題、儲存庫與發佈路徑，產生能直接貼給 GPT 的提示詞。最後依提交紀錄與公開頁面驗收。</p>
+        <div class="chips"><span class="pill">繁體中文步驟</span><span class="pill">互動提示詞產生器</span><span class="pill">GitHub Pages 範例</span></div>
+        <div class="actions"><a class="btn" href="#connect">開始連接教學 ↓</a><a class="btn secondary" href="#builder">產生我的提示詞</a></div>
       </div>
       <aside class="hero-card" aria-label="完整流程摘要">
-        <strong>完整流程只有四段</strong>
-        <ol><li>安裝並連接 GitHub 插件</li><li>確認儲存庫與寫入權限</li><li>貼上清楚的發佈提示詞</li><li>核對提交與公開網址</li></ol>
+        <strong>從第一次連接到公開網址</strong>
+        <ol><li>安裝並連接 GitHub 插件</li><li>用唯讀提示詞確認儲存庫與寫入能力</li><li>產生並送出建站提示詞</li><li>核對提交、Pages 部署與公開網址</li></ol>
       </aside>
     </div>
   </div>
@@ -105,21 +135,43 @@
     <section class="wrap" id="connect" aria-labelledby="connect-title">
       <h2 id="connect-title">首次連接：照順序完成 5 步</h2>
       <p class="intro">以下以 ChatGPT／Codex 目前的插件流程為例。選單名稱、可用插件和可執行動作會因帳號、方案、管理員設定與版本而異。登入與授權畫面須由 GitHub 帳號持有人完成。</p>
-      <div class="notice"><strong>先知道：</strong>「只下一句 Prompt」無法跳過第一次登入、GitHub 授權或儲存庫權限設定。連接完成後，才適合把製作與發佈工作交給 GPT 執行。</div>
+      <div class="notice"><strong>先知道：</strong>「只下一句 Prompt」無法跳過第一次登入、GitHub 授權或儲存庫權限設定。插件若只有讀取權限，提示詞也無法替它取得寫入權限；先完成連接與能力檢查，再要求發佈。</div>
+      <div class="flow" aria-label="連接與發佈四階段"><div><b>01 · CONNECT</b><strong>連接帳號</strong><small>由本人在 GitHub 授權</small></div><div><b>02 · CHECK</b><strong>確認權限</strong><small>先做唯讀測試</small></div><div><b>03 · CREATE</b><strong>產生提示詞</strong><small>填入主題、路徑與驗收條件</small></div><div><b>04 · VERIFY</b><strong>公開驗收</strong><small>檢查 commit、Actions、網址</small></div></div>
       <div class="progress" role="progressbar" aria-label="首次連接進度" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="progress"><span id="progress-fill"></span></div>
       <div class="progress-label" id="progress-label" aria-live="polite">0 / 5 步已完成</div>
       <div class="steps">
         <article class="step"><div class="num">1</div><div><h3>準備 GitHub 帳號與目標儲存庫</h3><p>先登入自己的 GitHub，確認可編輯目標儲存庫。此範例使用 <a href="https://github.com/qqnice/qqnice.github.io">qqnice/qqnice.github.io</a>，教學頁放在 <code>tpr/</code> 下；使用其他帳號時，請改成自己的儲存庫。</p><label class="check"><input type="checkbox" data-step="1"> 我知道要發佈到哪個儲存庫</label></div></article>
-        <article class="step"><div class="num">2</div><div><h3>在 ChatGPT 或 Codex 安裝 GitHub 插件</h3><ol><li>開啟 <a href="https://chatgpt.com/plugins" target="_blank" rel="noopener noreferrer">Plugins 目錄 ↗</a>（或桌面 App 的 Plugins 分頁）。</li><li>搜尋 <strong>GitHub</strong>，查看插件提供的讀取、寫入和發佈動作，然後安裝。</li><li>若畫面顯示 <em>Connect</em>，依指示連接 GitHub；有的插件在首次使用時才要求連接。</li></ol><label class="check"><input type="checkbox" data-step="2"> 我已安裝 GitHub 插件</label></div></article>
-        <article class="step"><div class="num">3</div><div><h3>登入 GitHub 並審核授權</h3><p>在 GitHub 官方授權畫面登入正確帳號，檢查可存取的儲存庫及權限範圍。若儲存庫屬於學校或組織，可能還需要管理員允許。請勿把密碼、個人存取權杖或 2FA 驗證碼貼進聊天訊息。</p><label class="check"><input type="checkbox" data-step="3"> 我已核對帳號與授權範圍</label></div></article>
-        <article class="step"><div class="num">4</div><div><h3>開新對話，先做唯讀測試</h3><p>在 ChatGPT Work 或 Codex 開新對話。可直接說明工作，或在輸入框輸入 <code>@</code> 選擇 GitHub 插件。先複製下方「連接測試」Prompt，確認 GPT 能辨識正確儲存庫、預設分支，以及它具備哪些寫入動作。</p><p><a href="#prompt-check">跳到連接測試 Prompt ↓</a></p><label class="check"><input type="checkbox" data-step="4"> GPT 能讀到正確儲存庫</label></div></article>
-        <article class="step"><div class="num">5</div><div><h3>確認 GitHub Pages 的發佈來源</h3><p>到目標儲存庫的 <strong>Settings → Pages</strong> 看 <em>Build and deployment</em>。若尚未設定，選 <em>Deploy from a branch</em>，再指定分支與來源資料夾（通常為根目錄或 <code>/docs</code>）。若原本網址已在運作，保留原設定並在現有網站目錄新增子頁。</p><label class="check"><input type="checkbox" data-step="5"> 我已確認 Pages 來源或原網站可用</label></div></article>
+        <article class="step"><div class="num">2</div><div><h3>在 ChatGPT 或 Codex 安裝 GitHub 插件</h3><ol><li>開啟 <a href="https://chatgpt.com/plugins" target="_blank" rel="noopener noreferrer">Plugins 目錄 ↗</a>（或桌面 App 的 Plugins 分頁）。</li><li>搜尋 <strong>GitHub</strong>，打開插件說明，確認它能提供哪些讀取或寫入動作，再按加入／安裝。</li><li>若畫面顯示 <em>Connect</em>，依指示連接 GitHub；有的插件在首次使用時才要求連接。安裝後請開啟新對話。</li></ol><p class="tiny">OpenAI 官方流程：Plugins 分頁 → 搜尋插件 → 安裝 → 視需要連接 → 開新對話。</p><label class="check"><input type="checkbox" data-step="2"> 我已安裝 GitHub 插件</label></div></article>
+        <article class="step"><div class="num">3</div><div><h3>登入 GitHub 並審核授權</h3><p>在 GitHub 官方授權畫面登入正確帳號，仔細檢查要開放的儲存庫與權限。若跳出 GitHub 兩階段驗證，可依<a href="../github-account-guide/">原本的 Google Authenticator 教學</a>完成。組織儲存庫可能還需要管理員允許。</p><p><strong>請勿</strong>把密碼、個人存取權杖、驗證碼或復原碼貼進聊天訊息或本網站。</p><label class="check"><input type="checkbox" data-step="3"> 我已核對帳號與授權範圍</label></div></article>
+        <article class="step"><div class="num">4</div><div><h3>開新對話，先做唯讀測試</h3><p>在 ChatGPT Work 或 Codex 開新對話。可直接說明工作，或在輸入框輸入 <code>@</code> 選擇已安裝的 GitHub 插件。先複製下方「連接測試」Prompt，確認 GPT 能辨識正確儲存庫、預設分支，以及連線是否真的具備寫入動作。</p><p><a href="#prompt-check">跳到連接測試 Prompt ↓</a></p><label class="check"><input type="checkbox" data-step="4"> GPT 能讀到正確儲存庫及能力</label></div></article>
+        <article class="step"><div class="num">5</div><div><h3>確認 GitHub Pages 的發佈來源</h3><p>到目標儲存庫的 <strong>Settings → Pages</strong> 看 <em>Build and deployment</em>。若尚未設定，選 <em>Deploy from a branch</em>，再指定分支與來源資料夾（根目錄 <code>/</code> 或 <code>/docs</code>）。若原本網址已在運作，保留原設定並在現有網站目錄新增子頁。</p><p>本範例可直接核對 <a href="https://github.com/qqnice/qqnice.github.io/settings/pages" target="_blank" rel="noopener noreferrer">qqnice 儲存庫的 Pages 設定 ↗</a>；其他人請換成自己的儲存庫網址。</p><label class="check"><input type="checkbox" data-step="5"> 我已確認 Pages 來源或原網站可用</label></div></article>
+      </div>
+      <div class="surface-grid" aria-label="選擇操作介面">
+        <div class="surface-card"><span class="mini-tag">ChatGPT Work</span><h3>適合用自然語言完成整段工作</h3><ol><li>安裝並連接 GitHub 插件，開啟新對話。</li><li>貼上唯讀測試 Prompt，核對回覆。</li><li>附上教材，使用下方產生器建立發佈 Prompt。</li><li>依回報的 commit 和公開網址驗收。</li></ol></div>
+        <div class="surface-card"><span class="mini-tag">Codex 桌面版</span><h3>適合邊看檔案邊修正網頁</h3><ol><li>在 Plugins 分頁安裝 GitHub 插件。</li><li>開啟正確的本機專案或儲存庫工作區。</li><li>告訴 Codex 要編輯的路徑與公開網址。</li><li>檢查檔案變更、提交及 Pages 結果。</li></ol></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="builder" aria-labelledby="builder-title">
+      <h2 id="builder-title">填入資料，產生自己的發佈提示詞</h2>
+      <p class="intro">先用 Prompt 1 確認連線，再填下方五項資訊。本工具只在你的瀏覽器組合文字，不上傳表單內容，也不會代你登入 GitHub。</p>
+      <div class="builder">
+        <div class="form-grid">
+          <label class="field">GitHub 儲存庫 <small>格式：帳號/儲存庫</small><input id="repo-input" value="qqnice/qqnice.github.io" autocomplete="off" spellcheck="false"></label>
+          <label class="field">發佈資料夾 <small>相對路徑，以 / 結尾</small><input id="folder-input" value="tpr/new-guide/" autocomplete="off" spellcheck="false"></label>
+          <label class="field">網站名稱 <small>給學生看得懂的標題</small><input id="title-input" value="我的互動教學網站" autocomplete="off"></label>
+          <label class="field">對象 <small>選擇主要讀者</small><select id="audience-input"><option>學生與教師</option><option>學生</option><option>教師</option><option>一般讀者</option></select></label>
+          <label class="field full">內容與功能 <small>例如：逐步教學、官方來源、進度勾選、手機版</small><textarea id="requirements-input">請將我提供的手冊整理為逐步教學，附官方來源與常見問題；加入進度勾選、可複製範例及手機版排版。</textarea></label>
+        </div>
+        <div class="builder-actions"><button id="generate-button" type="button">產生發佈 Prompt</button><button class="copy" type="button" data-copy="generated-prompt">複製產生結果</button><span class="form-status" id="builder-status" role="status" aria-live="polite"></span></div>
+        <textarea id="generated-prompt" readonly aria-label="依輸入資料產生的發佈提示詞"></textarea>
+        <p class="tiny">請將手冊附在真正的 GPT 對話中；不要在這裡或 Prompt 中填入密碼、Token、2FA 代碼、復原碼或學生個資。</p>
       </div>
     </section>
 
     <section class="wrap" id="prompts" aria-labelledby="prompts-title">
-      <h2 id="prompts-title">直接複製：從測試連接到發佈</h2>
-      <p class="intro">提示詞要寫出目標、來源資料、儲存庫與路徑、保留哪些現有內容，以及如何驗收。把方括號中的文字換成自己的資訊。</p>
+      <h2 id="prompts-title">直接複製：三個常用提示詞</h2>
+      <p class="intro">第一次請先送出 Prompt 1。確認有寫入能力後，可用上方產生器或 Prompt 2 建站；日後修改使用 Prompt 3。方括號中的文字要換成自己的資料。</p>
       <div class="prompt" id="prompt-check"><div class="prompt-head"><strong>Prompt 1｜唯讀確認連接</strong><button class="copy" type="button" data-copy="check">複製提示詞</button></div><textarea id="check" readonly aria-label="唯讀確認連接提示詞">請使用已連線的 GitHub 插件，唯讀檢查我能否存取 [帳號/儲存庫，例如 qqnice/qqnice.github.io]。請回報：儲存庫名稱、預設分支、[網站資料夾，例如 tpr/] 目前有哪些檔案，以及此連線是否提供建立檔案、提交或推送的能力。這一步不要修改或發佈任何內容；若看不到儲存庫或無法確認寫入能力，請明確說明缺少什麼。</textarea></div>
       <div class="prompt large"><div class="prompt-head"><strong>Prompt 2｜讓 GPT 建站、提交、發佈並驗收</strong><button class="copy" type="button" data-copy="publish">複製提示詞</button></div><textarea id="publish" readonly aria-label="建站發佈提示詞">請使用我已連線且具寫入權限的 GitHub 儲存庫 [帳號/儲存庫，例如 qqnice/qqnice.github.io]，依照我附上的手冊或以下需求，製作一個給學生與老師使用的繁體中文互動教學網頁。
 
@@ -131,17 +183,19 @@
 
 完成後請檢查檔案引用、頁面互動與行動版，再提交到正確的發佈分支。最後實際開啟公開網址，確認頁面與素材可載入，並回報：提交連結、公開網址、完成的檢查與任何未完成事項。若連線只有唯讀能力或發佈受阻，請停在可檢查的成品並清楚說明阻礙，不要聲稱已發佈。</textarea></div>
       <div class="prompt"><div class="prompt-head"><strong>Prompt 3｜後續更新已發佈網站</strong><button class="copy" type="button" data-copy="update">複製提示詞</button></div><textarea id="update" readonly aria-label="更新網站提示詞">請更新 [儲存庫/資料夾] 中已發佈的教學網頁。修改內容：[具體列出改動]。先讀目前檔案與 Pages 設定，只更動必要的頁面，保留其他教材。更新後檢查連結與互動，提交變更並確認 [公開網址] 已顯示新版。回報修改摘要、提交連結和公開網址。</textarea></div>
-      <div class="notice info"><strong>實際案例：</strong>本專區使用的儲存庫是 <code>qqnice/qqnice.github.io</code>，公開首頁是 <code>https://qqnice.github.io/tpr/</code>。若要保留首頁，把新教學放在 <code>tpr/新主題/</code>，再新增入口卡片即可。</div>
+      <div class="notice info"><strong>實際案例：</strong>本專區使用的儲存庫是 <code>qqnice/qqnice.github.io</code>，公開首頁是 <a href="https://qqnice.github.io/tpr/">https://qqnice.github.io/tpr/</a>。新教學放在 <code>tpr/新主題/</code>，只需在首頁增加入口卡片；目前這份教學就位於 <code>tpr/gpt-github-guide/</code>。</div>
     </section>
 
     <section class="wrap" id="verify" aria-labelledby="verify-title">
-      <h2 id="verify-title">收到「完成了」之後，要看這 4 件事</h2>
+      <h2 id="verify-title">收到「完成了」之後，逐項驗收</h2>
+      <p class="intro">文字回覆不是部署證據。至少要能找到提交、部署結果與實際公開頁面。</p>
       <div class="grid2">
-        <div class="panel"><h3>1. 看提交</h3><p>開啟 GPT 提供的 commit 或 PR，確認儲存庫、分支、檔案路徑正確，也沒有把無關檔案一起公開。</p></div>
-        <div class="panel"><h3>2. 看 Pages 網址</h3><p>點開公開網址，確認有新頁面。GitHub 官方說明指出，推送後網站更新可能需要數分鐘，最長可到約 10 分鐘。</p></div>
-        <div class="panel"><h3>3. 點互動</h3><p>試用導覽按鈕、進度勾選、手機版版面和外部官方連結。只有檔案上傳成功，不等於網頁功能都能用。</p></div>
-        <div class="panel"><h3>4. 看是否公開了敏感內容</h3><p>GitHub Pages 網站可在網路上公開存取。上傳前檢查資料、圖片、文件與程式碼，避免包含密碼、權杖、學生個資和未取得同意的素材。</p></div>
+        <div class="panel"><h3>1. 看提交紀錄</h3><p>請 GPT 提供 commit 連結與 SHA。開啟後確認儲存庫、分支、檔案路徑及修改範圍正確，沒有把無關檔案一起公開。<a href="https://github.com/qqnice/qqnice.github.io/commits/master/tpr/" target="_blank" rel="noopener noreferrer">查看本範例提交 ↗</a></p></div>
+        <div class="panel"><h3>2. 看 Pages 部署</h3><p>查看 Actions 的 <em>pages build and deployment</em> 是否顯示成功。發佈可能需要數分鐘，GitHub 文件說明最長可到約 10 分鐘。<a href="https://github.com/qqnice/qqnice.github.io/actions" target="_blank" rel="noopener noreferrer">查看本範例 Actions ↗</a></p></div>
+        <div class="panel"><h3>3. 開公開網址實測</h3><p>從首頁點進新頁，試用導覽、進度勾選、複製按鈕、手機版和官方來源連結。若有 PDF 或圖片也要逐一打開。<a href="https://qqnice.github.io/tpr/" target="_blank" rel="noopener noreferrer">查看本範例首頁 ↗</a></p></div>
+        <div class="panel"><h3>4. 檢查公開內容</h3><p>GitHub Pages 可供網路上的人開啟。檢查檔案、圖片、文件和程式碼，確認沒有密碼、權杖、學生個資或不應公開的素材。</p></div>
       </div>
+      <div class="notice info"><strong>完成判定：</strong>能提供正確的 commit、Pages 部署成功，且公開網址實際載入新版並可操作，才算真正發佈完成。若任一步失敗，請把錯誤訊息與對應連結貼回同一段 GPT 對話，要求修正後重新驗收。</div>
     </section>
 
     <section class="wrap" id="faq" aria-labelledby="faq-title">
@@ -150,16 +204,19 @@
       <details><summary>GPT 看不到指定儲存庫？</summary><p>核對登入的 GitHub 帳號、儲存庫名稱、是否是私人庫，以及插件被授權的儲存庫範圍。組織儲存庫可能需要額外批准。先做 Prompt 1 的唯讀測試，不要直接要求發佈。</p></details>
       <details><summary>只能讀取，不能建立檔案或推送？</summary><p>提示詞無法超越連線的權限。改用具寫入能力的連線或具有 Git 推送權限的 Codex 專案；也可以讓 GPT 先產生檔案或 PR，再由有權限的人完成發佈。不要把個人存取權杖貼進聊天訊息。</p></details>
       <details><summary>GPT 說已發佈，但網址仍是舊版？</summary><p>檢查它是否真的建立了 commit、Pages 是否指向該分支與資料夾，並查看 GitHub Actions 的 Pages 部署結果。稍候重新整理公開網址；若仍失敗，請 GPT 根據實際部署錯誤修正，勿只接受文字宣稱。</p></details>
+      <details><summary>連接後又要求 GitHub 兩階段驗證？</summary><p>在 GitHub 官方頁面完成驗證即可。使用原本設定的 Google Authenticator 或復原方法；驗證碼只輸入 GitHub 頁面，不要貼給 GPT。<a href="../github-account-guide/">查看 GitHub 帳號與 2FA 教學</a>。</p></details>
+      <details><summary>可以直接把私人儲存庫、學生資料或 Token 貼給 GPT 嗎？</summary><p>先確認插件的授權範圍和資料使用情境；網站及提示詞不要包含密碼、Token、復原碼或學生個資。若教材原本是私人資料，先整理成可公開版本再發佈。</p></details>
     </section>
 
     <section class="wrap" id="sources" aria-labelledby="sources-title">
       <h2 id="sources-title">官方來源與延伸閱讀</h2>
       <ul class="source-list">
-        <li><a href="https://learn.chatgpt.com/docs/plugins" target="_blank" rel="noopener noreferrer">OpenAI Docs：Plugins</a> — 安裝、連接、<code>@</code> 指定插件與權限說明。</li>
+        <li><a href="https://learn.chatgpt.com/docs/plugins" target="_blank" rel="noopener noreferrer">OpenAI Docs：Plugins</a> — Plugins 分頁、安裝、連接與 <code>@</code> 指定插件。</li>
         <li><a href="https://learn.chatgpt.com/docs/prompting" target="_blank" rel="noopener noreferrer">OpenAI Docs：Prompting</a> — 如何在提示詞中說明來源、目標和邊界。</li>
         <li><a href="https://learn.chatgpt.com/docs/use-chatgpt" target="_blank" rel="noopener noreferrer">OpenAI Docs：Use ChatGPT</a> — Chat、Work、Codex 與插件適用情境。</li>
         <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site" target="_blank" rel="noopener noreferrer">GitHub Docs：設定 Pages 發佈來源</a>。</li>
         <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site" target="_blank" rel="noopener noreferrer">GitHub Docs：建立並查看 Pages 網站</a>。</li>
+        <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/troubleshooting-404-errors-for-github-pages-sites" target="_blank" rel="noopener noreferrer">GitHub Docs：Pages 404 疑難排解</a>。</li>
       </ul>
     </section>
   </main>
@@ -181,8 +238,38 @@
       }
       boxes.forEach(box => box.addEventListener('change', update));
       update();
+      const repoInput = document.getElementById('repo-input');
+      const folderInput = document.getElementById('folder-input');
+      const titleInput = document.getElementById('title-input');
+      const audienceInput = document.getElementById('audience-input');
+      const requirementsInput = document.getElementById('requirements-input');
+      const generatedPrompt = document.getElementById('generated-prompt');
+      const builderStatus = document.getElementById('builder-status');
+      function generatePrompt() {
+        const repo = repoInput.value.trim();
+        const folder = folderInput.value.trim();
+        const title = titleInput.value.trim();
+        const requirements = requirementsInput.value.trim();
+        const validRepo = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo);
+        const validFolder = /^[A-Za-z0-9._/-]+\/$/.test(folder) && !folder.startsWith('/') && !folder.includes('..') && !folder.includes('//');
+        repoInput.setAttribute('aria-invalid', String(!validRepo));
+        folderInput.setAttribute('aria-invalid', String(!validFolder));
+        if (!validRepo || !validFolder || !title || !requirements) {
+          generatedPrompt.value = '';
+          builderStatus.textContent = '請填妥網站名稱與內容，儲存庫用「帳號/儲存庫」，資料夾用相對路徑並以 / 結尾。';
+          return;
+        }
+        const [owner, name] = repo.split('/');
+        const base = name.toLowerCase() === `${owner.toLowerCase()}.github.io` ? `https://${owner}.github.io/` : `https://${owner}.github.io/${name}/`;
+        const expectedUrl = new URL(folder, base).href;
+        generatedPrompt.value = `請使用我已連接的 GitHub 插件與具寫入權限的帳號，完成「${title}」網站，讀者是${audienceInput.value}。\n\n目標儲存庫：${repo}\n目標資料夾：${folder}\n參考公開網址：${expectedUrl}（若儲存庫使用自訂網域或不同 Pages 設定，請以實際設定為準）\n內容與功能：${requirements}\n\n我會在這段對話附上手冊或資料，請先閱讀並核對來源。先唯讀檢查儲存庫、預設分支、Pages 發佈來源、目標資料夾，以及目前連線是否能建立檔案和提交；若沒有寫入權限，請說明限制並交付可檢查的成品，不要聲稱已發佈。\n\n請製作繁體中文、手機可閱讀且鍵盤可操作的網站。沿用現有網站的導覽與風格，保留其他頁面；只修改必要檔案。如需入口，僅在現有首頁加上新頁連結。不得收集或公開密碼、Token、2FA 代碼、復原碼及個人資料。\n\n完成前，請檢查頁面文字、連結、互動功能、手機版與教材檔案。接著提交到正確的發佈分支，等 GitHub Pages 部署成功，再實際開啟公開網址核對新版。最後回報：變更檔案、commit 連結與 SHA、部署結果、公開網址、完成的檢查，以及任何未完成事項。`;
+        builderStatus.textContent = '提示詞已產生。請附上教材，再複製到已連接 GitHub 的 GPT 對話。';
+      }
+      document.getElementById('generate-button').addEventListener('click', generatePrompt);
+      generatePrompt();
       document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', async () => {
         const source = document.getElementById(button.dataset.copy);
+        if (!source.value.trim()) { builderStatus.textContent = '請先修正欄位並產生提示詞。'; return; }
         try {
           await navigator.clipboard.writeText(source.value);
         } catch (_) {
