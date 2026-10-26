@@ -1,0 +1,48 @@
+name: 手動發布五島網站
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 整理教材並檢查發布資料
+        run: python3 tools/prepare_publish.py
+      - name: 檢查網站程式語法
+        run: |
+          for file in assets/islands/app.js assets/islands/islands.js assets/islands/scene.js assets/islands/youtube.js assets/islands/youtube-selection.js manage/publish.js; do
+            node --input-type=module --check < "$file"
+          done
+      - uses: actions/configure-pages@v5
+      - name: 建置網站與原有教材頁面
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 發布網站
+        id: deployment
+        uses: actions/deploy-pages@v4
