@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="從安裝 GitHub 插件、授權儲存庫，到用一段提示詞請 GPT 製作並發佈 GitHub Pages 的繁體中文教學。">
+  <title>GPT × GitHub｜用提示詞完成網站發佈</title>
+  <style>
+    :root { color-scheme: light; --ink:#17243b; --muted:#51617a; --line:#d7e2f1; --blue:#2655ca; --cyan:#dcf7f5; --cream:#fff7e9; --bg:#f5f8fd; --white:#fff; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 -apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:#1749bf; }
+    a:hover { text-decoration-thickness:2px; }
+    button, textarea { font:inherit; }
+    button { cursor:pointer; }
+    :focus-visible { outline:3px solid #ef8b1f; outline-offset:3px; }
+    .skip { position:absolute; left:-999px; top:8px; background:#fff; padding:8px; z-index:9; }
+    .skip:focus { left:8px; }
+    .wrap { width:min(1100px,calc(100% - 36px)); margin:auto; }
+    .top { background:#10284e; color:#fff; }
+    .top .wrap { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; }
+    .top a { color:#fff; }
+    .top .brand { font-weight:800; text-decoration:none; }
+    .top nav { display:flex; gap:18px; flex-wrap:wrap; }
+    .hero { padding:65px 0 54px; background:linear-gradient(125deg,#e9f3ff,#f1fbf9 58%,#fff3dc); border-bottom:1px solid var(--line); }
+    .eyebrow { color:#2454ac; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { font-size:clamp(2.1rem,5vw,4.2rem); line-height:1.14; letter-spacing:-.035em; margin:.25em 0; }
+    h2 { font-size:clamp(1.55rem,3vw,2.35rem); line-height:1.25; margin:0 0 15px; }
+    h3 { font-size:1.18rem; line-height:1.4; margin:0 0 7px; }
+    p { margin:.5em 0 1em; }
+    .lead { max-width:720px; font-size:1.22rem; color:#31415c; }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(275px,.65fr); gap:30px; align-items:center; }
+    .hero-card { background:#10284e; color:#fff; border-radius:24px; padding:26px; box-shadow:0 15px 35px #183c6b22; }
+    .hero-card strong { font-size:1.1rem; }
+    .hero-card ol { padding-left:23px; margin:12px 0 0; }
+    .hero-card li + li { margin-top:10px; }
+    .pill { display:inline-block; border:1px solid #a9c2e6; color:#183d78; background:#fff; padding:4px 12px; border-radius:999px; font-size:.83rem; font-weight:700; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 18px; border-radius:12px; border:2px solid var(--blue); background:var(--blue); color:#fff; text-decoration:none; font-weight:800; }
+    .btn:hover { filter:brightness(.94); }
+    .btn.secondary { background:#fff; color:var(--blue); }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:23px; }
+    main section { padding:45px 0; }
+    main section + section { border-top:1px solid var(--line); }
+    .intro { max-width:790px; color:var(--muted); }
+    .notice { border-radius:16px; border:1px solid #d7bd75; background:var(--cream); padding:17px 20px; margin:20px 0; }
+    .notice strong { color:#694507; }
+    .notice.info { background:#eaf6ff; border-color:#9dc6eb; }
+    .notice.info strong { color:#173d73; }
+    .progress { background:#e5eefa; border-radius:20px; height:12px; overflow:hidden; margin:12px 0 6px; }
+    .progress span { display:block; height:100%; width:0; background:linear-gradient(90deg,#2461d3,#21a895); transition:width .2s ease; }
+    .progress-label { color:var(--muted); font-size:.92rem; }
+    .steps { display:grid; gap:16px; margin-top:25px; }
+    .step { display:grid; grid-template-columns:55px 1fr; gap:16px; border:1px solid var(--line); border-radius:20px; padding:22px; background:#fff; box-shadow:0 3px 14px #233b5c0a; }
+    .num { background:#e7f0ff; color:#20499b; width:46px; height:46px; display:grid; place-items:center; border-radius:13px; font-weight:900; font-size:1.35rem; }
+    .step ol { margin:10px 0 0; padding-left:23px; }
+    .step li + li { margin-top:6px; }
+    .check { display:inline-flex; gap:9px; align-items:center; margin-top:10px; color:#1e4e89; font-weight:700; }
+    .check input { width:20px; height:20px; accent-color:#2563c7; }
+    .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .panel { border:1px solid var(--line); border-radius:20px; background:#fff; padding:23px; }
+    .panel.teal { background:var(--cyan); border-color:#a7dfd8; }
+    .prompt { border:1px solid #b5c9e8; border-radius:20px; background:#fff; overflow:hidden; margin:18px 0; }
+    .prompt-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:15px 18px; background:#eaf1fc; border-bottom:1px solid #c9d9ef; }
+    .prompt-head strong { color:#193d75; }
+    .copy { border:1px solid #3663ba; color:#174aa8; background:#fff; border-radius:9px; font-weight:800; padding:5px 11px; }
+    .copy:hover { background:#eef4ff; }
+    textarea { width:100%; display:block; resize:vertical; min-height:145px; border:0; padding:18px; color:#1a2d49; background:#fff; line-height:1.65; }
+    .prompt.large textarea { min-height:360px; }
+    .source-list { padding-left:23px; }
+    .source-list li + li { margin-top:8px; }
+    details { border:1px solid var(--line); border-radius:13px; background:#fff; padding:12px 17px; margin:10px 0; }
+    summary { cursor:pointer; font-weight:800; }
+    footer { background:#10284e; color:#dfe9f6; padding:28px 0; font-size:.92rem; }
+    footer a { color:#fff; }
+    @media (max-width:760px) { .hero-grid,.grid2 { grid-template-columns:1fr; } .hero { padding:42px 0; } .step { grid-template-columns:1fr; } .top nav { gap:11px; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .progress span { transition:none; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳至主要內容</a>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="../">← TPR 教學實踐專區</a>
+      <nav aria-label="本頁導覽"><a href="#connect">連接步驟</a><a href="#prompts">複製提示詞</a><a href="#faq">常見狀況</a></nav>
+    </div>
+  </header>
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">學生與老師的操作教學 · 2026-10-26 核對</span>
+        <h1>GPT × GitHub<br>一句提示詞，把網頁發佈出去</h1>
+        <p class="lead">先完成一次 GitHub 連接與權限檢查。之後說明目標、儲存庫、檔案位置和驗收條件，讓 ChatGPT Work 或 Codex 協助製作、提交並檢查網站。</p>
+        <div class="chips"><span class="pill">繁體中文步驟</span><span class="pill">可複製 Prompt</span><span class="pill">GitHub Pages 範例</span></div>
+        <div class="actions"><a class="btn" href="#connect">開始連接教學 ↓</a><a class="btn secondary" href="#prompts">直接看提示詞</a></div>
+      </div>
+      <aside class="hero-card" aria-label="完整流程摘要">
+        <strong>完整流程只有四段</strong>
+        <ol><li>安裝並連接 GitHub 插件</li><li>確認儲存庫與寫入權限</li><li>貼上清楚的發佈提示詞</li><li>核對提交與公開網址</li></ol>
+      </aside>
+    </div>
+  </div>
+  <main id="main">
+    <section class="wrap" id="connect" aria-labelledby="connect-title">
+      <h2 id="connect-title">首次連接：照順序完成 5 步</h2>
+      <p class="intro">以下以 ChatGPT／Codex 目前的插件流程為例。選單名稱、可用插件和可執行動作會因帳號、方案、管理員設定與版本而異。登入與授權畫面須由 GitHub 帳號持有人完成。</p>
+      <div class="notice"><strong>先知道：</strong>「只下一句 Prompt」無法跳過第一次登入、GitHub 授權或儲存庫權限設定。連接完成後，才適合把製作與發佈工作交給 GPT 執行。</div>
+      <div class="progress" role="progressbar" aria-label="首次連接進度" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="progress"><span id="progress-fill"></span></div>
+      <div class="progress-label" id="progress-label" aria-live="polite">0 / 5 步已完成</div>
+      <div class="steps">
+        <article class="step"><div class="num">1</div><div><h3>準備 GitHub 帳號與目標儲存庫</h3><p>先登入自己的 GitHub，確認可編輯目標儲存庫。此範例使用 <a href="https://github.com/qqnice/qqnice.github.io">qqnice/qqnice.github.io</a>，教學頁放在 <code>tpr/</code> 下；使用其他帳號時，請改成自己的儲存庫。</p><label class="check"><input type="checkbox" data-step="1"> 我知道要發佈到哪個儲存庫</label></div></article>
+        <article class="step"><div class="num">2</div><div><h3>在 ChatGPT 或 Codex 安裝 GitHub 插件</h3><ol><li>開啟 <a href="https://chatgpt.com/plugins" target="_blank" rel="noopener noreferrer">Plugins 目錄 ↗</a>（或桌面 App 的 Plugins 分頁）。</li><li>搜尋 <strong>GitHub</strong>，查看插件提供的讀取、寫入和發佈動作，然後安裝。</li><li>若畫面顯示 <em>Connect</em>，依指示連接 GitHub；有的插件在首次使用時才要求連接。</li></ol><label class="check"><input type="checkbox" data-step="2"> 我已安裝 GitHub 插件</label></div></article>
+        <article class="step"><div class="num">3</div><div><h3>登入 GitHub 並審核授權</h3><p>在 GitHub 官方授權畫面登入正確帳號，檢查可存取的儲存庫及權限範圍。若儲存庫屬於學校或組織，可能還需要管理員允許。請勿把密碼、個人存取權杖或 2FA 驗證碼貼進聊天訊息。</p><label class="check"><input type="checkbox" data-step="3"> 我已核對帳號與授權範圍</label></div></article>
+        <article class="step"><div class="num">4</div><div><h3>開新對話，先做唯讀測試</h3><p>在 ChatGPT Work 或 Codex 開新對話。可直接說明工作，或在輸入框輸入 <code>@</code> 選擇 GitHub 插件。先複製下方「連接測試」Prompt，確認 GPT 能辨識正確儲存庫、預設分支，以及它具備哪些寫入動作。</p><p><a href="#prompt-check">跳到連接測試 Prompt ↓</a></p><label class="check"><input type="checkbox" data-step="4"> GPT 能讀到正確儲存庫</label></div></article>
+        <article class="step"><div class="num">5</div><div><h3>確認 GitHub Pages 的發佈來源</h3><p>到目標儲存庫的 <strong>Settings → Pages</strong> 看 <em>Build and deployment</em>。若尚未設定，選 <em>Deploy from a branch</em>，再指定分支與來源資料夾（通常為根目錄或 <code>/docs</code>）。若原本網址已在運作，保留原設定並在現有網站目錄新增子頁。</p><label class="check"><input type="checkbox" data-step="5"> 我已確認 Pages 來源或原網站可用</label></div></article>
+      </div>
+    </section>
+
+    <section class="wrap" id="prompts" aria-labelledby="prompts-title">
+      <h2 id="prompts-title">直接複製：從測試連接到發佈</h2>
+      <p class="intro">提示詞要寫出目標、來源資料、儲存庫與路徑、保留哪些現有內容，以及如何驗收。把方括號中的文字換成自己的資訊。</p>
+      <div class="prompt" id="prompt-check"><div class="prompt-head"><strong>Prompt 1｜唯讀確認連接</strong><button class="copy" type="button" data-copy="check">複製提示詞</button></div><textarea id="check" readonly aria-label="唯讀確認連接提示詞">請使用已連線的 GitHub 插件，唯讀檢查我能否存取 [帳號/儲存庫，例如 qqnice/qqnice.github.io]。請回報：儲存庫名稱、預設分支、[網站資料夾，例如 tpr/] 目前有哪些檔案，以及此連線是否提供建立檔案、提交或推送的能力。這一步不要修改或發佈任何內容；若看不到儲存庫或無法確認寫入能力，請明確說明缺少什麼。</textarea></div>
+      <div class="prompt large"><div class="prompt-head"><strong>Prompt 2｜讓 GPT 建站、提交、發佈並驗收</strong><button class="copy" type="button" data-copy="publish">複製提示詞</button></div><textarea id="publish" readonly aria-label="建站發佈提示詞">請使用我已連線且具寫入權限的 GitHub 儲存庫 [帳號/儲存庫，例如 qqnice/qqnice.github.io]，依照我附上的手冊或以下需求，製作一個給學生與老師使用的繁體中文互動教學網頁。
+
+內容來源：[附上手冊或貼上主題與完整步驟]
+發佈位置：[例如 tpr/我的教學主題/]
+網站網址：[例如 https://qqnice.github.io/tpr/我的教學主題/]
+
+請先讀取儲存庫目前的分支、Pages 發佈來源與目標資料夾內容。保留原有頁面和教材；在新資料夾建立 index.html 與必要的 CSS、JavaScript、圖片。若要讓訪客從原首頁找到新頁，僅在首頁新增一個入口連結。頁面應支援手機、鍵盤操作、清楚的導覽與來源連結；不要收集密碼、驗證碼、權杖或其他敏感資料。
+
+完成後請檢查檔案引用、頁面互動與行動版，再提交到正確的發佈分支。最後實際開啟公開網址，確認頁面與素材可載入，並回報：提交連結、公開網址、完成的檢查與任何未完成事項。若連線只有唯讀能力或發佈受阻，請停在可檢查的成品並清楚說明阻礙，不要聲稱已發佈。</textarea></div>
+      <div class="prompt"><div class="prompt-head"><strong>Prompt 3｜後續更新已發佈網站</strong><button class="copy" type="button" data-copy="update">複製提示詞</button></div><textarea id="update" readonly aria-label="更新網站提示詞">請更新 [儲存庫/資料夾] 中已發佈的教學網頁。修改內容：[具體列出改動]。先讀目前檔案與 Pages 設定，只更動必要的頁面，保留其他教材。更新後檢查連結與互動，提交變更並確認 [公開網址] 已顯示新版。回報修改摘要、提交連結和公開網址。</textarea></div>
+      <div class="notice info"><strong>實際案例：</strong>本專區使用的儲存庫是 <code>qqnice/qqnice.github.io</code>，公開首頁是 <code>https://qqnice.github.io/tpr/</code>。若要保留首頁，把新教學放在 <code>tpr/新主題/</code>，再新增入口卡片即可。</div>
+    </section>
+
+    <section class="wrap" id="verify" aria-labelledby="verify-title">
+      <h2 id="verify-title">收到「完成了」之後，要看這 4 件事</h2>
+      <div class="grid2">
+        <div class="panel"><h3>1. 看提交</h3><p>開啟 GPT 提供的 commit 或 PR，確認儲存庫、分支、檔案路徑正確，也沒有把無關檔案一起公開。</p></div>
+        <div class="panel"><h3>2. 看 Pages 網址</h3><p>點開公開網址，確認有新頁面。GitHub 官方說明指出，推送後網站更新可能需要數分鐘，最長可到約 10 分鐘。</p></div>
+        <div class="panel"><h3>3. 點互動</h3><p>試用導覽按鈕、進度勾選、手機版版面和外部官方連結。只有檔案上傳成功，不等於網頁功能都能用。</p></div>
+        <div class="panel"><h3>4. 看是否公開了敏感內容</h3><p>GitHub Pages 網站可在網路上公開存取。上傳前檢查資料、圖片、文件與程式碼，避免包含密碼、權杖、學生個資和未取得同意的素材。</p></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">連接或發佈卡住時</h2>
+      <details><summary>找不到 GitHub 插件或 Connect 按鈕？</summary><p>先確認目前使用的是支援插件的 ChatGPT／Codex 介面，重新開一個對話；可用功能仍取決於方案與工作區管理設定。從 <a href="https://chatgpt.com/plugins">Plugins 目錄</a>檢查是否已安裝。若組織停用插件，需由管理員處理。</p></details>
+      <details><summary>GPT 看不到指定儲存庫？</summary><p>核對登入的 GitHub 帳號、儲存庫名稱、是否是私人庫，以及插件被授權的儲存庫範圍。組織儲存庫可能需要額外批准。先做 Prompt 1 的唯讀測試，不要直接要求發佈。</p></details>
+      <details><summary>只能讀取，不能建立檔案或推送？</summary><p>提示詞無法超越連線的權限。改用具寫入能力的連線或具有 Git 推送權限的 Codex 專案；也可以讓 GPT 先產生檔案或 PR，再由有權限的人完成發佈。不要把個人存取權杖貼進聊天訊息。</p></details>
+      <details><summary>GPT 說已發佈，但網址仍是舊版？</summary><p>檢查它是否真的建立了 commit、Pages 是否指向該分支與資料夾，並查看 GitHub Actions 的 Pages 部署結果。稍候重新整理公開網址；若仍失敗，請 GPT 根據實際部署錯誤修正，勿只接受文字宣稱。</p></details>
+    </section>
+
+    <section class="wrap" id="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">官方來源與延伸閱讀</h2>
+      <ul class="source-list">
+        <li><a href="https://learn.chatgpt.com/docs/plugins" target="_blank" rel="noopener noreferrer">OpenAI Docs：Plugins</a> — 安裝、連接、<code>@</code> 指定插件與權限說明。</li>
+        <li><a href="https://learn.chatgpt.com/docs/prompting" target="_blank" rel="noopener noreferrer">OpenAI Docs：Prompting</a> — 如何在提示詞中說明來源、目標和邊界。</li>
+        <li><a href="https://learn.chatgpt.com/docs/use-chatgpt" target="_blank" rel="noopener noreferrer">OpenAI Docs：Use ChatGPT</a> — Chat、Work、Codex 與插件適用情境。</li>
+        <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site" target="_blank" rel="noopener noreferrer">GitHub Docs：設定 Pages 發佈來源</a>。</li>
+        <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site" target="_blank" rel="noopener noreferrer">GitHub Docs：建立並查看 Pages 網站</a>。</li>
+      </ul>
+    </section>
+  </main>
+  <footer><div class="wrap">本頁為教學示範，非 OpenAI 或 GitHub 官方網站。內容核對日期：2026-10-26。<br><a href="../">返回 TPR 專區</a> · <a href="../github-account-guide/">閱讀 GitHub 帳號申請教學</a></div></footer>
+  <script>
+    (() => {
+      const boxes = [...document.querySelectorAll('[data-step]')];
+      const bar = document.getElementById('progress');
+      const fill = document.getElementById('progress-fill');
+      const label = document.getElementById('progress-label');
+      const key = 'gpt-github-guide-steps-v1';
+      try { const saved = JSON.parse(localStorage.getItem(key) || '[]'); boxes.forEach(box => { box.checked = saved.includes(box.dataset.step); }); } catch (_) {}
+      function update() {
+        const done = boxes.filter(box => box.checked).length;
+        bar.setAttribute('aria-valuenow', String(done));
+        fill.style.width = `${done / boxes.length * 100}%`;
+        label.textContent = `${done} / ${boxes.length} 步已完成`;
+        try { localStorage.setItem(key, JSON.stringify(boxes.filter(box => box.checked).map(box => box.dataset.step))); } catch (_) {}
+      }
+      boxes.forEach(box => box.addEventListener('change', update));
+      update();
+      document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', async () => {
+        const source = document.getElementById(button.dataset.copy);
+        try {
+          await navigator.clipboard.writeText(source.value);
+        } catch (_) {
+          source.select();
+          if (!document.execCommand('copy')) { button.textContent = '請選取文字複製'; return; }
+        }
+        const old = button.textContent;
+        button.textContent = '已複製 ✓';
+        setTimeout(() => { button.textContent = old; }, 1800);
+      }));
+    })();
+  </script>
+</body>
+</html>
