@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Antigravity 開發前置環境準備與官方下載安裝教學｜Python・Node.js・Git 黃金工具箱</title>
+  <meta name="description" content="為什麼用 Antigravity 還要裝 Python 與 Node.js？還需要另外裝編輯器嗎？專為老師與學生設計的 Antigravity 前置環境準備互動指南，一步步完成四大工具安裝並壓軸下載 Google Antigravity。" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳至主要教學內容</a>
+
+  <div class="safety-banner" role="region" aria-label="返回專區與三部曲導覽">
+    <div class="container safety-banner-inner" style="justify-content:space-between; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <a href="../" style="color:#fff; font-weight:800; text-decoration:none; background:rgba(255,255,255,0.16); padding:4px 10px; border-radius:6px;">← 返回 Linux 教學專區</a>
+        <span class="safety-badge">Antigravity 課前環境準備教材</span>
+      </div>
+      <p>
+        <strong>學習三部曲：</strong>
+        <a href="../github-account-guide/" style="color:#79c0ff; font-weight:700;">① GitHub 帳號與 2FA</a> ➔
+        <strong style="color:#fff; text-decoration:underline;">② Antigravity 前置環境與下載（本頁）</strong> ➔
+        <a href="../antigravity-github-guide/" style="color:#79c0ff; font-weight:700;">③ Antigravity × GitHub 串接發佈</a>
+      </p>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand-area">
+          <div class="eyebrow-row">
+            <span class="pill pill-primary">Google Antigravity 課前必備</span>
+            <span class="pill pill-neutral">Windows / macOS 雙平台對照</span>
+            <span class="pill pill-date">內容核對：2026-10-26</span>
+          </div>
+          <h1>Antigravity 開發前置環境準備 ＆ 官方下載安裝教學</h1>
+          <p class="subtitle">
+            解答師生最常見疑問：<strong>為什麼用 Antigravity 還要另外裝 Python 與 Node.js？還需要裝 VS Code 嗎？</strong><br>
+            帶你一次備齊讓 AI 隨時自動調用的<strong>「Git、Python、Node.js、Chrome 四大黃金工具箱」</strong>，並在最後壓軸<strong>下載啟動 Google Antigravity</strong>！
+          </p>
+        </div>
+
+        <aside class="quick-links-card" aria-label="官方下載直達入口">
+          <h2>官方下載入口直達（認明官網）</h2>
+          <div class="quick-links-grid">
+            <a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer" class="btn btn-github">
+              <span>🌟 主角：下載 Google Antigravity</span>
+              <small>antigravity.google (Mac / Win / Linux) ↗</small>
+            </a>
+            <a href="https://www.python.org/downloads/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>🐍 1. 下載 Python (3.12+)</span>
+              <small>python.org/downloads (Win 必勾 PATH) ↗</small>
+            </a>
+            <a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>🟢 2. 下載 Node.js (認明 LTS 版)</span>
+              <small>nodejs.org (內含 npm 與 npx) ↗</small>
+            </a>
+            <a href="https://git-scm.com/downloads" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+              <span>📦 3. 下載 Git 版本控制</span>
+              <small>git-scm.com/downloads ↗</small>
+            </a>
+          </div>
+          <div class="app-store-bar">
+            <span class="app-store-label">本頁快速跳轉：</span>
+            <a href="#workbench-section" class="store-chip">7 步驟環境與下載導覽 ↓</a>
+            <a href="#os-builder-section" class="store-chip">一鍵安裝指令＆健檢 Prompt 產生器 ↓</a>
+            <a href="Antigravity開發前置環境準備與安裝手冊.md" target="_blank" rel="noopener noreferrer" class="store-chip">下載 Markdown 講義 ↗</a>
+          </div>
+        </aside>
+      </div>
+
+      <section class="key-takeaways" aria-label="Antigravity 前置環境四大核心觀念">
+        <div class="takeaway-card">
+          <div class="takeaway-tag">觀念 01 · PYTHON</div>
+          <h3>為什麼要另外裝 Python？</h3>
+          <p>Antigravity 啟動不用 Python，但當 AI 要幫你跑 <code>.py</code> 腳本、啟動 <code>http.server</code> 網頁預覽或使用 Python SDK 時，必須調用系統裡的 Python（建議搭配 <code>uv</code>）！</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">觀念 02 · NODE.JS &amp; MCP</div>
+          <h3>為什麼要裝 Node.js (LTS)？</h3>
+          <p>除了跑現代前端網頁外，<strong>超過 80% 的 MCP 擴充工具（Model Context Protocol）</strong>都是由 AI 在背景透過 Node.js 內附的 <code>npx</code> 指令自動啟動！</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">觀念 03 · BUILT-IN IDE</div>
+          <h3>還需要裝別的編輯器嗎？不用！</h3>
+          <p><strong>Antigravity IDE 本身就是內建 VS Code 核心的專業編輯器</strong>（含語法高亮、終端機、<code>Tab</code> 補全與 <code>Cmd/Ctrl+I</code>），直接拿它當主力編輯器即可！</p>
+        </div>
+        <div class="takeaway-card">
+          <div class="takeaway-tag">觀念 04 · DOWNLOAD &amp; CHECK</div>
+          <h3>壓軸下載 ＋ 開機 AI 自動健檢</h3>
+          <p>到 <code>antigravity.google</code> 下載安裝主程式後，直接貼上本頁提供的<strong>「開機健檢 Prompt」</strong>，讓 AI 自動幫你檢查所有工具並補齊缺漏！</p>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <div class="sticky-nav-wrap" role="navigation" aria-label="步驟進度追蹤列">
+    <div class="container sticky-nav-inner">
+      <div class="module-tabs">
+        <a href="#workbench-section" class="module-tab active" style="text-decoration:none;">
+          <span class="tab-num">1</span>
+          <span class="tab-label">7 步驟：前置工具準備 ➔ 壓軸下載 Antigravity</span>
+        </a>
+        <a href="#os-builder-section" class="module-tab" style="text-decoration:none;">
+          <span class="tab-num">2</span>
+          <span class="tab-label">互動產生器：依作業系統產生安裝指令＆健檢 Prompt</span>
+        </a>
+        <a href="#toolbox-table-section" class="module-tab" style="text-decoration:none;">
+          <span class="tab-num">3</span>
+          <span class="tab-label">黃金工具箱總表與常見問題</span>
+        </a>
+      </div>
+
+      <div class="overall-progress" aria-live="polite">
+        <div class="progress-info">
+          <span class="progress-title">環境準備完成進度</span>
+          <strong id="env-progress-text">0 / 7 步 (0%)</strong>
+        </div>
+        <div class="progress-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="env-progressbar">
+          <div class="progress-bar-fill" id="env-progress-fill" style="width: 0%"></div>
+        </div>
+        <button type="button" id="btn-env-reset" class="btn-text-small">重設進度</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content" class="container main-container">
+    <!-- Part 1: 7 步驟互動工作台 -->
+    <section id="workbench-section" style="margin-bottom: 44px;">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Part 1 · 7 步驟環境準備與主程式下載導覽（支援鍵盤 ← → 切換）</span>
+          <h2>從基礎開發工具到最後下載 Google Antigravity，一步步帶你完成</h2>
+          <p>每一步皆提供<strong>為什麼要裝、圖形化下載連結、終端機一鍵指令</strong>，並在步驟 6 帶出<strong>下載 Antigravity</strong>、步驟 7 進行<strong>開機 AI 自動健檢</strong>。</p>
+        </div>
+        <div class="section-actions">
+          <button type="button" class="btn btn-secondary" id="btn-env-all">一鍵勾選全部 7 步</button>
+        </div>
+      </div>
+
+      <div class="interactive-workbench">
+        <nav class="step-sidebar" aria-label="Antigravity 前置環境與下載 7 步驟清單">
+          <div class="sidebar-header">
+            <span>點擊切換步驟</span>
+            <strong id="env-count">已完成 0 / 7</strong>
+          </div>
+          <ol class="step-nav-list" id="env-list"></ol>
+        </nav>
+
+        <article class="step-stage" id="env-stage" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <!-- Part 2: 互動式跨平台安裝指令 & 開機健檢 Prompt 產生器 -->
+    <section id="os-builder-section" style="margin-bottom: 44px;">
+      <div class="policy-highlight-box">
+        <div class="policy-header">
+          <span class="badge-policy">Part 2 · 互動環境指令＆健檢 Prompt 產生器</span>
+          <h3>選擇你的作業系統與課程用途，即時生成「一鍵安裝指令」與「給 Antigravity 的第一句健檢 Prompt」</h3>
+          <p style="margin:0 0 16px; color:var(--text-secondary);">
+            不論你是用 Windows 10/11、macOS 還是 Ubuntu Linux，在下方切換選項後，即可直接複製專屬的一鍵安裝指令，或在裝好 Antigravity 後貼上專屬健檢 Prompt 請 AI 幫你處理！
+          </p>
+        </div>
+
+        <div class="prep-grid" style="margin-bottom: 16px;">
+          <div class="instruction-box">
+            <label for="os-select" style="display:block; font-weight:800; margin-bottom:6px;">1. 選擇你的電腦作業系統</label>
+            <select id="os-select" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px; font-size:0.95rem; background:#fff;">
+              <option value="win">🪟 Windows 10 / 11（使用內建 winget / PowerShell）</option>
+              <option value="mac">🍎 macOS（Apple Silicon M1~M4 / Intel，使用 Homebrew）</option>
+              <option value="linux">🐧 Ubuntu / Debian Linux（使用 apt / curl）</option>
+            </select>
+          </div>
+
+          <div class="instruction-box">
+            <label for="course-select" style="display:block; font-weight:800; margin-bottom:6px;">2. 你未來主要想讓 Antigravity 幫你做什麼？</label>
+            <select id="course-select" style="width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:6px; font-size:0.95rem; background:#fff;">
+              <option value="all">🌟 全方位標配（互動網頁製作 ＋ Python 腳本 ＋ GitHub 自動發佈 ＋ MCP 工具）</option>
+              <option value="python">🐍 Python 資料科學與 Antigravity Python SDK 開發（加強 uv 與虛擬環境）</option>
+              <option value="web">🌐 互動教學網站與 GitHub Pages 自動發佈（加強 Node.js 與 GitHub CLI）</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stage-columns" style="margin-bottom: 0;">
+          <div class="prompt-copy-card" style="margin-bottom:0;">
+            <div class="prompt-copy-header">
+              <span class="prompt-copy-badge">💻 方式 A：終端機一鍵安裝前置工具指令</span>
+              <button type="button" class="btn-copy-prompt" id="btn-copy-os-cmd">📋 複製終端機安裝指令</button>
+            </div>
+            <pre class="prompt-copy-pre" id="os-cmd-output"></pre>
+          </div>
+
+          <div class="prompt-copy-card" style="margin-bottom:0;">
+            <div class="prompt-copy-header">
+              <span class="prompt-copy-badge">🤖 方式 B：下載打開 Antigravity 後貼上的第一句健檢 Prompt</span>
+              <button type="button" class="btn-copy-prompt" id="btn-copy-os-prompt">📋 複製 AI 環境健檢 Prompt</button>
+            </div>
+            <pre class="prompt-copy-pre" id="os-prompt-output"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Part 3: 黃金工具箱總覽表與常見問題 -->
+    <section id="toolbox-table-section">
+      <div class="sources-card">
+        <h3>Part 3 · Antigravity 開發前置環境「黃金工具箱」一覽表（含最終下載入口）</h3>
+        <p class="card-desc">以下整理所有未來開發時 Antigravity 會自動調用的核心工具、用途與官方唯一下載網址，方便老師放到課程簡報或講義中：</p>
+        <div class="table-responsive">
+          <table class="sources-table">
+            <thead>
+              <tr>
+                <th scope="col" style="width:18%;">工具名稱</th>
+                <th scope="col" style="width:14%;">必備程度</th>
+                <th scope="col" style="width:36%;">為什麼 Antigravity 未來開發會調用它？</th>
+                <th scope="col" style="width:16%;">安裝注意事項</th>
+                <th scope="col" style="width:16%;">官方下載連結</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Git + GitHub CLI (<code>gh</code>)</strong></td>
+                <td><span class="pill pill-primary" style="font-size:0.75rem;">核心必裝</span></td>
+                <td>讓 AI 自動幫你建立版本紀錄（<code>commit</code>）、透過瀏覽器 8 碼完成 GitHub 登入授權、建立 Repo 並發佈 GitHub Pages。</td>
+                <td>裝完後請重開終端機視窗讓 PATH 生效</td>
+                <td><a href="https://git-scm.com/downloads" target="_blank" rel="noopener noreferrer">Git 官網 ↗</a><br><a href="https://cli.github.com/" target="_blank" rel="noopener noreferrer">gh CLI 官網 ↗</a></td>
+              </tr>
+              <tr>
+                <td><strong>2. Python (3.11 / 3.12+) &amp; <code>uv</code></strong></td>
+                <td><span class="pill pill-primary" style="font-size:0.75rem;">核心必裝</span></td>
+                <td>讓 AI 執行 Python 程式、資料分析、啟動本機預覽伺服器（<code>python3 -m http.server</code>）與安裝 <code>google-antigravity</code> SDK。</td>
+                <td>⚠️ <strong>Windows 務必勾選 <code>Add python.exe to PATH</code></strong></td>
+                <td><a href="https://www.python.org/downloads/" target="_blank" rel="noopener noreferrer">Python 官網 ↗</a><br><a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener noreferrer">uv 官方文件 ↗</a></td>
+              </tr>
+              <tr>
+                <td><strong>3. Node.js (LTS 長期支援版)</strong></td>
+                <td><span class="pill pill-primary" style="font-size:0.75rem;">核心必裝</span></td>
+                <td>跑現代前端網頁（Vite/React），且<strong>超過 80% 的 MCP 擴充伺服器都是由 AI 透過內附的 <code>npx</code> 指令自動啟動</strong>！</td>
+                <td>請選擇標示 <strong>LTS</strong> 的長期穩定版本</td>
+                <td><a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">Node.js 官網 ↗</a></td>
+              </tr>
+              <tr>
+                <td><strong>4. Google Chrome 瀏覽器</strong></td>
+                <td><span class="pill pill-neutral" style="font-size:0.75rem;">強烈推薦</span></td>
+                <td>搭配 Antigravity 內建的 Browser Automation 與 Chrome DevTools MCP，讓 AI 自動打開網頁幫你點按鈕、截圖與抓排版 Bug。</td>
+                <td>維持一般最新穩定版即可</td>
+                <td><a href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer">Chrome 官網 ↗</a></td>
+              </tr>
+              <tr style="background:#eef5ff;">
+                <td><strong>🌟 5. Google Antigravity 主程式 (IDE / 2.0)</strong></td>
+                <td><span class="pill pill-primary" style="font-size:0.75rem; background:#0969da; color:#fff;">壓軸主角</span></td>
+                <td><strong>內建完整 VS Code 編輯器核心</strong>（免另外裝其他編輯器！）＋ 側邊欄 AI Agent 協作開發平台，自動調用上方 4 大工具幫你完成專案。</td>
+                <td>Mac 請依晶片選 Apple Silicon 或 Intel；Win 執行 <code>.exe</code></td>
+                <td><a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer" style="font-weight:800;">antigravity.google 下載 ↗</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Google Antigravity 開發前置環境準備與官方下載安裝教學</strong>
+        <p>核對日期：2026 年 10 月 26 日｜<a href="../">返回 Linux 教學專區</a> · <a href="../github-account-guide/">① GitHub 帳號與 2FA 教學</a> · <a href="../antigravity-github-guide/">③ Antigravity × GitHub 串接教學</a></p>
+      </div>
+      <div class="footer-note">
+        <span>本網頁為靜態互動教學指南，不收集任何個人資料或金鑰。</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentIdx = 0;
+      const KEY = 'agy_env_setup_progress_v1';
+      let doneSet = new Set();
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) doneSet = new Set(JSON.parse(raw));
+      } catch (e) {}
+
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify([...doneSet])); } catch (e) {}
+      }
+
+      function copyTextWithFeedback(text, btn, defaultLabel) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        btn.textContent = '✓ 已複製到剪貼簿！';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = defaultLabel;
+          btn.classList.remove('copied');
+        }, 2000);
+      }
+
+      function renderEnvWorkbench() {
+        const steps = typeof ENV_STEPS !== 'undefined' ? ENV_STEPS : [];
+        if (!steps.length) return;
+        const listEl = document.getElementById('env-list');
+        const stageEl = document.getElementById('env-stage');
+        const countEl = document.getElementById('env-count');
+        const progText = document.getElementById('env-progress-text');
+        const progFill = document.getElementById('env-progress-fill');
+
+        const doneCount = steps.filter(s => doneSet.has(s.id)).length;
+        const pct = Math.round((doneCount / steps.length) * 100);
+        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${steps.length}`;
+        if (progText) progText.textContent = `${doneCount} / ${steps.length} 步 (${pct}%)`;
+        if (progFill) progFill.style.width = `${pct}%`;
+
+        listEl.innerHTML = steps.map((s, i) => {
+          const isDone = doneSet.has(s.id);
+          const isAct = i === currentIdx;
+          return `
+            <li>
+              <button type="button" class="step-nav-btn ${isAct ? 'active' : ''} ${isDone ? 'done' : ''}" data-env-idx="${i}">
+                <span class="step-index-circle">${isDone ? '✓' : s.num}</span>
+                <span class="step-nav-title">步驟 ${s.num}：${s.shortTitle}</span>
+                ${isDone ? '<span class="step-done-tag">完成</span>' : ''}
+              </button>
+            </li>
+          `;
+        }).join('');
+
+        const cur = steps[currentIdx];
+        const isCurDone = doneSet.has(cur.id);
+        const hasPrev = currentIdx > 0;
+        const hasNext = currentIdx < steps.length - 1;
+
+        stageEl.innerHTML = `
+          <div class="stage-top-bar">
+            <div class="stage-step-badge">
+              <span>Antigravity 前置環境與下載導覽</span><span>｜</span><span>第 ${cur.num} / ${steps.length} 步</span>
+            </div>
+            <label class="stage-check-toggle ${isCurDone ? 'checked' : ''}">
+              <input type="checkbox" data-env-check="${cur.id}" ${isCurDone ? 'checked' : ''} />
+              <span>${isCurDone ? '✓ 本步驟已標記完成' : '勾選標記本步驟完成'}</span>
+            </label>
+          </div>
+          <h3 class="stage-title">${cur.title}</h3>
+          <p class="stage-summary">${cur.summary}</p>
+          <div class="prompt-copy-card">
+            <div class="prompt-copy-header">
+              <span class="prompt-copy-badge">✨ 一鍵複製指令／Prompt</span>
+              <button type="button" class="btn-copy-prompt" data-env-copy="${encodeURIComponent(cur.promptText)}">📋 複製上方內容</button>
+            </div>
+            <div style="font-size:0.84rem; color:#8b949e; margin-bottom:6px; font-weight:600;">${cur.promptTitle || ''}</div>
+            <pre class="prompt-copy-pre">${cur.promptText}</pre>
+          </div>
+          <div class="stage-columns">
+            <div class="instruction-box">
+              <h4>準備重點與操作說明</h4>
+              <ul class="instruction-list">${cur.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+              <div class="ui-terms-row">
+                <span style="font-size:0.78rem; color:#57606a; font-weight:700; width:100%;">關鍵工具與畫面原文對照：</span>
+                ${cur.uiTerms.map(t => `<span class="ui-term-chip">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div class="visual-preview-card">
+              <div class="visual-preview-banner">
+                <span class="specimen-tag">架構與畫面示意</span>
+                <span>環境配置對照</span>
+              </div>
+              <div class="visual-preview-body">${cur.visualHtml}</div>
+            </div>
+          </div>
+          <div class="stage-callout ${cur.calloutType === 'danger' ? 'callout-danger' : ''}">
+            <strong>⚠️ ${cur.calloutTitle}</strong>
+            <div>${cur.calloutText}</div>
+          </div>
+          <div class="stage-footer-nav">
+            <div class="stage-sources">
+              <strong>官方直達連結：</strong>
+              ${cur.links.map(l => `<a href="${l.url}" ${l.url.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : ''}>${l.label}</a>`).join(' · ')}
+            </div>
+            <div class="stage-nav-buttons">
+              <button type="button" class="btn btn-outline" data-env-dir="-1" ${!hasPrev ? 'disabled style="opacity:0.45;"' : ''}>← 上一步</button>
+              <button type="button" class="btn btn-secondary" data-env-done-next="${cur.id}">✓ 勾選完成並下一步</button>
+              ${hasNext ? `<button type="button" class="btn btn-primary" data-env-dir="1">下一步：步驟 ${steps[currentIdx + 1].num} →</button>` : `<a href="../antigravity-github-guide/" class="btn btn-primary">前往下一關：GitHub 串接實戰 →</a>`}
+            </div>
+          </div>
+        `;
+      }
+
+      document.addEventListener('click', (e) => {
+        const idxBtn = e.target.closest('[data-env-idx]');
+        if (idxBtn) { currentIdx = parseInt(idxBtn.dataset.envIdx, 10); renderEnvWorkbench(); return; }
+        const dirBtn = e.target.closest('[data-env-dir]');
+        if (dirBtn && !dirBtn.disabled) {
+          currentIdx = Math.max(0, Math.min(ENV_STEPS.length - 1, currentIdx + parseInt(dirBtn.dataset.envDir, 10)));
+          renderEnvWorkbench();
+          return;
+        }
+        const doneNext = e.target.closest('[data-env-done-next]');
+        if (doneNext) {
+          doneSet.add(doneNext.dataset.envDoneNext);
+          save();
+          if (currentIdx < ENV_STEPS.length - 1) currentIdx++;
+          renderEnvWorkbench();
+          return;
+        }
+        const copyBtn = e.target.closest('[data-env-copy]');
+        if (copyBtn) {
+          const text = decodeURIComponent(copyBtn.dataset.envCopy);
+          copyTextWithFeedback(text, copyBtn, '📋 複製上方內容');
+        }
+      });
+
+      document.addEventListener('change', (e) => {
+        const chk = e.target.closest('[data-env-check]');
+        if (chk) {
+          if (chk.checked) doneSet.add(chk.dataset.envCheck);
+          else doneSet.delete(chk.dataset.envCheck);
+          save();
+          renderEnvWorkbench();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+        if (e.key === 'ArrowRight' && currentIdx < ENV_STEPS.length - 1) {
+          currentIdx++;
+          renderEnvWorkbench();
+        } else if (e.key === 'ArrowLeft' && currentIdx > 0) {
+          currentIdx--;
+          renderEnvWorkbench();
+        }
+      });
+
+      document.getElementById('btn-env-all')?.addEventListener('click', () => {
+        const all = ENV_STEPS.every(s => doneSet.has(s.id));
+        ENV_STEPS.forEach(s => all ? doneSet.delete(s.id) : doneSet.add(s.id));
+        save();
+        renderEnvWorkbench();
+      });
+
+      document.getElementById('btn-env-reset')?.addEventListener('click', () => {
+        doneSet.clear();
+        save();
+        renderEnvWorkbench();
+      });
+
+      // Part 2: 跨平台環境安裝指令 & 健檢 Prompt 產生器
+      const osSelect = document.getElementById('os-select');
+      const courseSelect = document.getElementById('course-select');
+      const cmdOut = document.getElementById('os-cmd-output');
+      const promptOut = document.getElementById('os-prompt-output');
+
+      function updateOsBuilder() {
+        const os = osSelect.value;
+        const course = courseSelect.value;
+
+        let osLabel = 'Windows 10 / 11';
+        let cmdText = '';
+        if (os === 'win') {
+          osLabel = 'Windows 10 / 11 (PowerShell)';
+          cmdText = `# 1. 在 Windows 打開 PowerShell（建議以系統管理員執行）貼上：
+winget install -e --id Git.Git
+winget install -e --id GitHub.cli
+winget install -e --id Python.Python.3.12
+winget install -e --id OpenJS.NodeJS.LTS
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 2. 安裝完成後，請前往官網下載安裝 Google Antigravity 主程式：
+# https://antigravity.google/`;
+        } else if (os === 'mac') {
+          osLabel = 'macOS (Apple Silicon / Intel)';
+          cmdText = `# 1. 打開 macOS「終端機 (Terminal)」確保已安裝基礎開發工具與四大黃金套件：
+xcode-select --install
+brew install git gh python node uv
+
+# 2. 前往官網下載 Google Antigravity (.dmg) 並拖入 Applications：
+# https://antigravity.google/`;
+        } else {
+          osLabel = 'Ubuntu / Debian Linux';
+          cmdText = `# 1. 在 Ubuntu 終端機更新並安裝基礎套件與 uv：
+sudo apt update && sudo apt install -y git gh python3 python3-pip python3-venv nodejs npm curl
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. 前往官網下載 Google Antigravity Linux 版本或安裝 agy CLI：
+# https://antigravity.google/`;
+        }
+
+        let extraTask = '製作互動式教學網頁、執行 Python 程式並發佈到 GitHub Pages';
+        if (course === 'python') {
+          extraTask = '執行 Python 資料分析腳本、使用 uv 管理虛擬環境，以及測試 google-antigravity Python SDK';
+        } else if (course === 'web') {
+          extraTask = '製作互動式教學網站、用本機 http.server 預覽，並透過 gh CLI 自動發佈到 GitHub Pages';
+        }
+
+        cmdOut.textContent = cmdText;
+        promptOut.textContent = `你好！我的電腦系統是「${osLabel}」，我已經下載並打開 Google Antigravity，接下來希望讓你協助我「${extraTask}」。
+
+請現在幫我執行一次完整的「開發環境自動健檢」：
+1. 請在終端機幫我檢查以下你常需要調用的工具是否都已安裝且在 PATH 環境變數中：
+   - Git (git --version) 與 GitHub CLI (gh --version)
+   - Python (python3 / python --version)、pip 與 uv (uv --version)
+   - Node.js LTS (node -v)、npm (npm -v) 與 MCP 啟動器 npx (npx -v)
+2. 請用繁體中文表格列出每個工具的「安裝狀態、目前版本號、你在什麼時候會調用它」。
+3. 如果發現有任何工具還沒安裝、找不到指令（或 Windows 的 python 指到商店空殼捷徑），請直接幫我執行對應的安裝或設定指令把它補齊！`;
+      }
+
+      osSelect?.addEventListener('change', updateOsBuilder);
+      courseSelect?.addEventListener('change', updateOsBuilder);
+      updateOsBuilder();
+
+      document.getElementById('btn-copy-os-cmd')?.addEventListener('click', (e) => {
+        copyTextWithFeedback(cmdOut.textContent, e.currentTarget, '📋 複製終端機安裝指令');
+      });
+      document.getElementById('btn-copy-os-prompt')?.addEventListener('click', (e) => {
+        copyTextWithFeedback(promptOut.textContent, e.currentTarget, '📋 複製 AI 環境健檢 Prompt');
+      });
+
+      renderEnvWorkbench();
+    });
+  </script>
+</body>
+</html>
