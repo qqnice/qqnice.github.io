@@ -22,3 +22,7 @@ Jekyll 建置保留既有 Liquid includes 與教材頁面。build 失敗時不�
 Cloudflare 的其他服務維持各自用途；本流程不部署 Worker、不寫入 D1 或 R2。網站中的第三方即時資料不屬於靜態發布快照。
 YouTube 精選仍由 `assets/islands/youtube-selection.js` 控制。新教材放在 linux、unreal、tpr、admin 對應資料夾，分類規則位於 tools/build_catalog.py。
 GitHub 推送與 Pages 發布不會自動更新電腦內的 checkout；本機若需同步，請先提交自身修改，再 git pull --ff-only。
+
+## 專區首頁與 3D 島入口同步
+
+四區 index.html 中的 `<a class="card">` 精選會在手動發布時寫入目錄（標題讀取 strong，說明讀取 span.d），並以相同順序在 3D 島登島畫面顯示前六個。僅採用對應專區內、已納入教材目錄的本地連結。其餘教材可由主題、搜尋或原專區完整目錄開啟。修改首頁卡片後不必另外改寫 3D 導覽。

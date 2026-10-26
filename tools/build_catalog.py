@@ -2,6 +2,7 @@
 """Generate the local teaching catalog from actual source pages. No remote access."""
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit, unquote
 import json,re,hashlib
 ROOT=Path(__file__).resolve().parents[1]
 class Metadata(HTMLParser):
@@ -19,6 +20,48 @@ class Metadata(HTMLParser):
    if t=='title':self.title=value
    elif not self.heading:self.heading=value
    self.tag=None
+
+
+class FeaturedLinks(HTMLParser):
+ """Read the curated cards on an original zone homepage."""
+ def __init__(self):
+  super().__init__();self.cards=[];self.card=None;self.field=None;self.field_tag=None;self.parts=[]
+ def handle_starttag(self,t,attrs):
+  a=dict(attrs)
+  if t=='a' and 'card' in a.get('class','').split():
+   self.card={'href':a.get('href',''),'title':'','description':''}
+  if self.card is not None:
+   field='title' if t=='strong' else 'description' if t=='span' and 'd' in a.get('class','').split() else None
+   if field:self.field=field;self.field_tag=t;self.parts=[]
+ def handle_data(self,data):
+  if self.field:self.parts.append(data)
+ def handle_endtag(self,t):
+  if self.field and t==self.field_tag:
+   self.card[self.field]=' '.join(' '.join(self.parts).split());self.field=None;self.field_tag=None
+  if t=='a' and self.card is not None:
+   self.cards.append(self.card);self.card=None;self.field=None;self.field_tag=None
+
+def add_featured_cards(items):
+ by_path={item['path']:item for item in items}
+ for zone in ['linux','unreal','tpr','admin']:
+  homepage=ROOT/zone/'index.html'
+  if not homepage.is_file():continue
+  parser=FeaturedLinks();parser.feed(homepage.read_text(encoding='utf-8'))
+  order=0
+  for card in parser.cards:
+   url=urlsplit(card['href'])
+   if url.scheme or url.netloc or not url.path:continue
+   raw=unquote(url.path)
+   target=(ROOT/raw.lstrip('/') if raw.startswith('/') else ROOT/zone/raw).resolve()
+   if not target.is_relative_to(ROOT/zone) or not target.exists():continue
+   if target.name=='index.html':target=target.parent
+   path=target.relative_to(ROOT).as_posix()+('/' if target.is_dir() else '')
+   item=by_path.get(path)
+   if not item or 'featuredOrder' in item:continue
+   item['featuredOrder']=order
+   item['featuredTitle']=card['title'] or item['title']
+   item['featuredDescription']=card['description'] or item['description']
+   order+=1
 
 def topic_for(zone,path):
  s=path.lower()
@@ -67,7 +110,7 @@ for zone in ['linux','unreal','tpr','admin']:
  for f in sorted((ROOT/zone).rglob('*.html')):
   rel=f.relative_to(ROOT).as_posix()
   if any(x in rel for x in ['_files/','_Gemini','week2-webstack/site/','week2-webstack/site-knet/']):continue
-  if rel==zone+'/index.html' or rel=='tpr/materials/index.html':continue
+  if rel==zone+'/index.html':continue
   text=f.read_text(errors='replace');m=Metadata();m.feed(text)
   fm={}
   if text.startswith('---'):
@@ -108,6 +151,7 @@ priority=['Docker概念與簡介.html','02QQdocker廚房.html','容器Docker-Com
 for item in items:
  rel=item['path']+'index.html' if item['path'].endswith('/') else item['path']
  item['order']=next((i for i,p in enumerate(priority) if rel.endswith('/'+p)),99)
+add_featured_cards(items)
 (ROOT/'assets/islands/catalog.json').write_text(json.dumps(items,ensure_ascii=False,indent=2)+'\n')
 print('Catalog:',len(items),'teaching pages and resources')
 for z in ['linux','unreal','tpr','admin']:print(z,sum(i['island']==z for i in items))
