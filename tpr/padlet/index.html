@@ -1,0 +1,148 @@
+---
+title: Padlet 課堂即時文字雲
+description: 掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看 Padlet 貼文與即時文字雲。
+---
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 進入課堂後｜即時文字雲</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: #f5f7fb; background: radial-gradient(circle at 20% 8%, #203c52 0, #0d192a 42%, #08111e 100%); }
+    .shell { width: min(1920px, 100%); margin: auto; padding: clamp(16px, 2vw, 32px); }
+    .top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 8px; color: #78e6ce; font-size: clamp(15px, 1.1vw, 21px); font-weight: 750; letter-spacing: .16em; }
+    h1 { font-size: clamp(30px, 3vw, 58px); line-height: 1.15; margin: 0 0 10px; letter-spacing: .01em; }
+    .question { margin: 0; color: #d0dce8; font-size: clamp(18px, 1.45vw, 28px); line-height: 1.5; }
+    .qr-card { display: flex; align-items: center; gap: 18px; background: #f7fafc; color: #112336; border-radius: 24px; padding: 12px 20px 12px 12px; box-shadow: 0 12px 35px #0005; text-decoration: none; }
+    .qr-card img { display: block; width: clamp(170px, 14vw, 240px); aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
+    .qr-label { font-size: clamp(18px, 1.2vw, 25px); font-weight: 850; white-space: nowrap; }
+    .qr-note { display: block; margin-top: 8px; color: #4b6474; font-size: clamp(13px, .95vw, 18px); font-weight: 600; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(350px, .8fr); gap: 20px; min-height: min(68vh, 760px); }
+    .panel { min-width: 0; overflow: hidden; border: 1px solid #ffffff24; border-radius: 24px; background: #ffffff0b; box-shadow: 0 14px 45px #0003; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid #ffffff1c; }
+    h2 { font-size: clamp(20px, 1.45vw, 28px); margin: 0; }
+    .meta { display: flex; gap: 16px; align-items: center; color: #a6bbcd; font-size: clamp(13px, .95vw, 17px); }
+    .live-dot { display: inline-block; height: 10px; width: 10px; border-radius: 50%; background: #55dfbe; box-shadow: 0 0 0 5px #55dfbe25; margin-right: 7px; }
+    .live-dot.offline { background: #f5aa6b; box-shadow: 0 0 0 5px #f5aa6b25; }
+    .cloud { min-height: min(57vh, 630px); display: flex; flex-wrap: wrap; align-content: center; align-items: center; justify-content: center; gap: 12px 23px; padding: 24px 26px 36px; text-align: center; }
+    .term { display: inline-block; max-width: 100%; line-height: 1.15; font-weight: 800; letter-spacing: .02em; overflow-wrap: anywhere; text-shadow: 0 3px 18px #0004; transition: font-size .5s ease, transform .4s ease; }
+    .term:hover { transform: scale(1.06); }
+    .empty { font-size: clamp(22px, 1.8vw, 36px); color: #a6bbcd; line-height: 1.7; max-width: 24em; }
+    .empty strong { color: #eef8fb; }
+    .footer { padding: 0 24px 18px; color: #8da6bb; font-size: 15px; }
+    .board-frame { display: block; width: 100%; min-height: min(62vh, 690px); border: 0; background: #fff; }
+    .board-link { color: #80e5d1; font-size: 15px; white-space: nowrap; text-decoration: none; }
+    .board-link:hover { text-decoration: underline; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; color: #9ab1c3; font-size: 14px; }
+    .toolbar button { color: #dceef3; border: 1px solid #ffffff38; border-radius: 999px; background: #ffffff16; padding: 8px 15px; cursor: pointer; font: inherit; }
+    .toolbar .clear-button { color: #ffd4cc; border-color: #f18d7c77; background: #8b342b55; }
+    .clear-help { margin: 12px 0 0; padding: 14px 18px; border: 1px solid #f18d7c66; border-radius: 14px; background: #8b342b33; color: #ffe0d9; font-size: 15px; line-height: 1.6; }
+    .clear-help[hidden] { display: none; }
+    @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } .board-frame { min-height: 540px; } }
+    @media (max-width: 650px) { .top { grid-template-columns: 1fr; } .qr-card { justify-content: center; } .qr-card img { width: 140px; } .cloud { min-height: 370px; } .panel-head { padding: 16px; } .meta { flex-wrap: wrap; justify-content: end; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div>
+        <p class="eyebrow">課堂即時回饋 · LIVE WORD CLOUD</p>
+        <h1>AI 進入課堂後，最大的問題是什麼？</h1>
+        <p class="question">請掃碼，用 2–8 個字寫下一個最困擾你的問題。每人填一項，不填姓名。</p>
+      </div>
+      <a class="qr-card" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener" aria-label="掃描或開啟 Padlet 回答">
+        <img src="padlet-qr.png" alt="前往 Padlet 回答的 QR Code">
+        <span><span class="qr-label">掃碼回答</span><span class="qr-note">輸入後立即顯示在 Padlet</span></span>
+      </a>
+    </header>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="cloud-title">
+        <div class="panel-head">
+          <h2 id="cloud-title">大家的答案</h2>
+          <div class="meta"><span><span id="live-dot" class="live-dot"></span><span id="status">連線中</span></span><span id="totals">0 筆回答</span></div>
+        </div>
+        <div id="cloud" class="cloud" aria-live="polite"><p class="empty">等待第一位參與者掃碼回答…</p></div>
+        <div class="footer">相同短語出現越多次，字會越大。畫面約每 4 秒更新一次。</div>
+      </section>
+
+      <section class="panel" aria-labelledby="board-title">
+        <div class="panel-head"><h2 id="board-title">Padlet 回覆看板</h2><a class="board-link" href="https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3" target="_blank" rel="noopener">另開看板 ↗</a></div>
+        <iframe class="board-frame" title="AI 進入課堂後：最大的問題 Padlet 回覆看板" src="https://padlet.com/embed/s024uq8masebj99bufp3" allow="clipboard-write"></iframe>
+      </section>
+    </div>
+    <div class="toolbar"><button id="full-screen" type="button">切換全螢幕</button><button id="clear-board" class="clear-button" type="button" aria-controls="clear-help">前往清空貼文…</button><span>投影時請保持這個頁面開啟；參與者只需掃 QR Code。</span></div>
+    <p id="clear-help" class="clear-help" role="status" hidden>已開啟 Padlet。請在看板中點「更多選項（…）」→「清除貼文」，再依 Padlet 畫面的驗證數字確認。這會永久刪除看板上的所有貼文；看板與 QR Code 會保留，文字雲會在更新後清空。</p>
+  </main>
+  <script>
+    const cloud = document.getElementById('cloud');
+    const totals = document.getElementById('totals');
+    const status = document.getElementById('status');
+    const dot = document.getElementById('live-dot');
+    const palette = ['#78e6ce', '#ffcb76', '#91baff', '#ef9ecb', '#c5adff', '#f6e59a'];
+    let lastSignature = '';
+
+    function colorFor(text) {
+      let hash = 0;
+      for (const char of text) hash = (hash * 31 + char.codePointAt(0)) >>> 0;
+      return palette[hash % palette.length];
+    }
+
+    function render(data) {
+      const entries = data.counts || [];
+      const signature = JSON.stringify(entries);
+      totals.textContent = `${data.total || 0} 筆回答 · ${data.unique || 0} 種說法`;
+      status.textContent = data.ok ? '即時更新' : '暫用最近資料';
+      dot.classList.toggle('offline', !data.ok);
+      if (signature === lastSignature) return;
+      lastSignature = signature;
+      cloud.replaceChildren();
+      if (!entries.length) {
+        const p = document.createElement('p');
+        p.className = 'empty';
+        p.innerHTML = '<strong>等待大家的答案</strong><br>掃描右上角 QR Code，輸入短語即可參與。';
+        cloud.append(p);
+        return;
+      }
+      const max = Math.max(...entries.map(entry => entry.count));
+      for (const entry of entries.slice(0, 80)) {
+        const term = document.createElement('span');
+        const relative = max === 1 ? .28 : (entry.count - 1) / (max - 1);
+        term.className = 'term';
+        term.style.fontSize = `${Math.round(25 + 62 * Math.pow(relative, .65))}px`;
+        term.style.color = colorFor(entry.phrase);
+        term.title = `${entry.phrase}：${entry.count} 次`;
+        term.textContent = entry.phrase.length > 20 ? `${entry.phrase.slice(0, 19)}…` : entry.phrase;
+        cloud.append(term);
+      }
+    }
+
+    async function refresh() {
+      try {
+        const response = await fetch(`https://qqnice-site-api.qqnice-mb.workers.dev/padlet/words?at=${Date.now()}`, {cache: 'no-store'});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        render(await response.json());
+      } catch (_) {
+        status.textContent = '連線暫停';
+        dot.classList.add('offline');
+      }
+    }
+
+    document.getElementById('full-screen').addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    });
+    document.getElementById('clear-board').addEventListener('click', () => {
+      window.open('https://padlet.com/qqnice2/ai-s024uq8masebj99bufp3', '_blank', 'noopener');
+      document.getElementById('clear-help').hidden = false;
+    });
+    window.addEventListener('focus', refresh);
+    refresh();
+    setInterval(refresh, 4000);
+  </script>
+</body>
+</html>
