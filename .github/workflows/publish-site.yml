@@ -1,7 +1,10 @@
-name: 手動發布五島網站
+name: 發布五島網站
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -21,7 +24,7 @@ jobs:
       - name: 檢查網站程式語法
         run: |
           for file in assets/islands/app.js assets/islands/islands.js assets/islands/scene.js assets/islands/youtube.js assets/islands/youtube-selection.js manage/publish.js; do
-            node --input-type=module --check < "$file"
+            node --input-type=module --check < ""
           done
       - uses: actions/configure-pages@v5
       - name: 建置網站與原有教材頁面
