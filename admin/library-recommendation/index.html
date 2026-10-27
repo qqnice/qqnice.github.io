@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="結合「同班同學正在讀」、「全校即時熱門榜」與「AI 語意喚醒沉睡書庫」的 3D 實境推薦模擬系統與館長提案簡報。" />
+  <title>智慧圖書館 3D 閱讀推薦模擬系統｜同班共讀 × AI 喚醒沉睡書庫</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: #050b14;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    /* Fullscreen 3D Canvas */
+    #canvas3d {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      cursor: grab;
+    }
+    #canvas3d:active { cursor: grabbing; }
+
+    /* Top HUD Bar */
+    .hud-top {
+      position: absolute;
+      top: 14px; left: 18px; right: 18px;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .hud-brand {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 16px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+    .back-link {
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .back-link:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .pulse-dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 12px #38bdf8;
+      animation: pulse 1.5s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.5; }
+    }
+    .hud-title { font-size: 16.5px; font-weight: 800; letter-spacing: 0.3px; color: #fff; }
+    .hud-sub { font-size: 11.5px; color: #94a3b8; }
+
+    /* Scene Switcher Pills */
+    .scene-nav {
+      pointer-events: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+    .scene-btn {
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      padding: 9px 13px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .scene-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    .scene-btn.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.55);
+    }
+    .autoplay-btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c) !important;
+      color: #fff !important;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+      animation: glowBtn 2s infinite alternate;
+    }
+    .proposal-btn {
+      background: rgba(168, 85, 247, 0.22);
+      border: 1px solid rgba(168, 85, 247, 0.55);
+      color: #e9d5ff;
+    }
+    .proposal-btn:hover {
+      background: rgba(168, 85, 247, 0.4);
+      color: #fff;
+    }
+    @keyframes glowBtn {
+      from { box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+      to { box-shadow: 0 0 26px rgba(245, 158, 11, 0.9); }
+    }
+
+    /* Animated Story Subtitle Banner */
+    .story-banner {
+      position: absolute;
+      top: 86px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      border-radius: 999px;
+      padding: 9px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      pointer-events: none;
+      transition: all 0.35s ease;
+      max-width: 92vw;
+    }
+    .story-step-badge {
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .story-text {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #f8fafc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Right Floating 3D Holographic Phone / Kiosk Simulator */
+    .holo-device-wrap {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-52%);
+      z-index: 10;
+      perspective: 1100px;
+      pointer-events: auto;
+    }
+    .holo-phone {
+      width: 310px;
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+      backdrop-filter: blur(16px);
+      border: 2px solid rgba(56, 189, 248, 0.5);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: -15px 25px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(56, 189, 248, 0.22);
+      transform: rotateY(-12deg) rotateX(4deg);
+      transition: transform 0.4s ease, border-color 0.4s ease;
+    }
+    .holo-phone:hover {
+      transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+      border-color: #38bdf8;
+    }
+    .phone-notch {
+      width: 90px; height: 6px;
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+      margin: 0 auto 12px;
+    }
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .student-switch {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .stu-chip {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .stu-chip.active {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+    }
+    .book-holo-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 11px 12px;
+      margin-bottom: 9px;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .book-holo-card:hover {
+      transform: translateX(-4px);
+      border-color: #f59e0b;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+    }
+    .book-holo-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 4px;
+    }
+    .book-holo-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+    .book-holo-meta { font-size: 11.5px; color: #38bdf8; font-weight: 600; }
+    .book-holo-loc { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+    /* Left Interactive Action Panel */
+    .left-panel {
+      position: absolute;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-52%);
+      z-index: 10;
+      width: 270px;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+    .left-panel h3 {
+      font-size: 14px;
+      color: #38bdf8;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sim-toggle {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #e2e8f0;
+      padding: 11px 12px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sim-toggle:hover { background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; }
+    .sim-toggle.on {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: #10b981;
+      color: #fff;
+    }
+    .status-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+    .sim-toggle.on .status-dot {
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+    }
+
+    /* Bottom KPI Bar */
+    .hud-bottom {
+      position: absolute;
+      bottom: 18px; left: 24px; right: 24px;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.86);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 14px 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .kpi-group {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .kpi-metric .k-label { font-size: 11.5px; color: #94a3b8; }
+    .kpi-metric .k-num {
+      font-size: 26px;
+      font-weight: 900;
+      color: #38bdf8;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-metric .k-num.gold { color: #fbbf24; }
+    .kpi-metric .k-num.green { color: #34d399; }
+
+    .approve-btn {
+      border: none;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .approve-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 32px rgba(16, 185, 129, 0.85);
+    }
+
+    .cam-hint {
+      position: absolute;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      font-size: 12px;
+      color: rgba(148, 163, 184, 0.75);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 14px;
+      border-radius: 99px;
+      pointer-events: none;
+    }
+
+    /* Proposal Modal Overlay */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      user-select: text;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 22px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 86vh;
+      overflow-y: auto;
+      padding: 28px 32px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      color: #f8fafc;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .close-modal-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .close-modal-btn:hover { background: #ef4444; border-color: #ef4444; }
+    .prop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .prop-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .prop-card h4 { color: #38bdf8; font-size: 14.5px; margin-bottom: 6px; }
+    .prop-card p { color: #cbd5e1; font-size: 13px; line-height: 1.55; }
+
+    @media (max-width: 960px) {
+      .left-panel { display: none; }
+      .holo-device-wrap { right: 10px; transform: translateY(-50%) scale(0.85); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Interactive WebGL / Canvas Engine -->
+  <canvas id="canvas3d"></canvas>
+
+  <!-- Top Navigation & Auto-Play Tour -->
+  <div class="hud-top">
+    <div class="hud-brand">
+      <a href="../" class="back-link">← 行政專區</a>
+      <div class="pulse-dot"></div>
+      <div>
+        <h1 class="hud-title">🏛️ 智慧圖書館 3D 實境推薦模擬系統</h1>
+        <div class="hud-sub">同班同學正在讀 × AI 喚醒沉睡書庫 ｜ 拖曳畫面可 360° 旋轉視角</div>
+      </div>
+    </div>
+
+    <div class="scene-nav">
+      <button class="scene-btn autoplay-btn" id="btn-tour" onclick="toggleAutoTour()">
+        🎬 一鍵自動播放：30秒館長導覽動畫
+      </button>
+      <button class="scene-btn active" id="scene-1" onclick="setScene(1)">
+        👥 1. 同班共讀網
+      </button>
+      <button class="scene-btn" id="scene-2" onclick="setScene(2)">
+        🔥 2. 熱門免排隊導航
+      </button>
+      <button class="scene-btn" id="scene-3" onclick="setScene(3)">
+        ⚡ 3. AI 喚醒沉睡書庫
+      </button>
+      <button class="scene-btn proposal-btn" onclick="toggleProposalModal(true)">
+        📑 完整提案簡報 & 效益試算
+      </button>
+    </div>
+  </div>
+
+  <!-- Dynamic Story Subtitle -->
+  <div class="story-banner" id="story-banner">
+    <span class="story-step-badge" id="story-badge">即時 3D 模擬中</span>
+    <span class="story-text" id="story-text">當「資工系大二」學生走進圖書館，AI 自動從同班共讀與 3D 書庫發射推薦光束！</span>
+  </div>
+
+  <!-- Left Interactive Control Panel -->
+  <div class="left-panel">
+    <h3>🎛️ 系統核心機制開關（點擊實測）</h3>
+
+    <button class="sim-toggle on" id="tog-peer" onclick="toggleFeature('peer')">
+      <span>👥 同班同學共讀推薦光束</span>
+      <span class="status-dot"></span>
+    </button>
+    <button class="sim-toggle on" id="tog-ai" onclick="toggleFeature('ai')">
+      <span>🤖 AI 喚醒冷門好書引擎</span>
+      <span class="status-dot"></span>
+    </button>
+    <button class="sim-toggle on" id="tog-privacy" onclick="toggleFeature('privacy')">
+      <span>🛡️ 個資去識別化隱私防護罩</span>
+      <span class="status-dot"></span>
+    </button>
+    <button class="sim-toggle on" id="tog-stock" onclick="toggleFeature('stock')">
+      <span>📗 優先推薦「架上現書」過濾</span>
+      <span class="status-dot"></span>
+    </button>
+
+    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+      💡 <strong style="color:#fff;">給館長的重點：</strong><br/>
+      不用改動圖書館舊系統！外掛這套 AI 引擎，就能讓<span style="color:#fbbf24;">沉睡在書庫的 80% 好書</span>主動飛向學生手機！
+    </div>
+  </div>
+
+  <!-- Right 3D Holographic Student Phone / Kiosk -->
+  <div class="holo-device-wrap">
+    <div class="holo-phone" id="holo-phone">
+      <div class="phone-notch"></div>
+      <div class="phone-header">
+        <div>
+          <div style="font-size:13px; font-weight:800; color:#fff;">📱 學生手機 / 館內查詢機</div>
+          <div style="font-size:11px; color:#94a3b8;">點選下方學生身分或書籍看 3D 飛書特效</div>
+        </div>
+        <span style="background:rgba(16,185,129,0.2); color:#34d399; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px;">LIVE 連動</span>
+      </div>
+
+      <div class="student-switch">
+        <div class="stu-chip active" id="chip-cs" onclick="selectStudent('cs')">💻 資工大二</div>
+        <div class="stu-chip" id="chip-biz" onclick="selectStudent('biz')">📊 企管大三</div>
+        <div class="stu-chip" id="chip-fresh" onclick="selectStudent('fresh')">🌱 大一新生</div>
+      </div>
+
+      <div id="phone-books"></div>
+    </div>
+  </div>
+
+  <div class="cam-hint">🖱️ 按住滑鼠左鍵拖曳可 360° 旋轉 3D 圖書館視角 ｜ 點擊右側書單可觸發 3D 尋書雷射導引</div>
+
+  <!-- Bottom Live Metrics & One-Click Approval -->
+  <div class="hud-bottom">
+    <div class="kpi-group">
+      <div class="kpi-metric">
+        <div class="k-label">全校借閱率即時模擬</div>
+        <div class="k-num green" id="kpi-rate">+36.8% ▲</div>
+      </div>
+      <div class="kpi-metric">
+        <div class="k-label">本學期預計新增借閱冊數</div>
+        <div class="k-num" id="kpi-books">+14,280 冊</div>
+      </div>
+      <div class="kpi-metric">
+        <div class="k-label">被 AI 喚醒的「零借閱」館藏</div>
+        <div class="k-num gold" id="kpi-awaken">3,850 本</div>
+      </div>
+      <div class="kpi-metric">
+        <div class="k-label">建置期程與預算風險</div>
+        <div class="k-num" style="font-size:18px; color:#e2e8f0;">6 週上線・免改舊系統</div>
+      </div>
+    </div>
+
+    <button class="approve-btn" onclick="celebrateApproval()">
+      ✨ 館長一鍵核准試辦（點我看全館點亮特效）
+    </button>
+  </div>
+
+  <!-- Proposal & ROI Modal Overlay -->
+  <div class="modal-backdrop" id="proposal-modal" onclick="if(event.target===this)toggleProposalModal(false)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size:20px; font-weight:800;">📑 圖書館讀者服務部：AI 圖書推薦系統建置提案摘要</h2>
+          <p style="font-size:13px; color:#94a3b8; margin-top:4px;">三大核心評估：1. 開發挑戰與資安對策 ｜ 2. 預期效益評估 ｜ 3. AI 三階段落地架構</p>
+        </div>
+        <button class="close-modal-btn" onclick="toggleProposalModal(false)">✕ 返回 3D 模擬場景</button>
+      </div>
+
+      <h3 style="font-size:16px; color:#fbbf24; margin-bottom:10px;">一、系統開發需要面臨什麼問題？（四大挑戰與預先對策）</h3>
+      <div class="prop-grid">
+        <div class="prop-card">
+          <h4>🔒 1. 個資法與閱讀隱私保護</h4>
+          <p><strong>對策：</strong>採用 K-Anonymity 去識別化群體聚合，只顯示「資工系大二近 30 天最多人借閱」，絕不揭露單一學生姓名；人數少於 5 人時自動擴大為全系/全院統計。</p>
+        </div>
+        <div class="prop-card">
+          <h4>🌱 2. 大一新生與新書「冷啟動」</h4>
+          <p><strong>對策：</strong>大一新生 0 借閱紀錄時，自動匹配「系所必修課綱 + 歷屆學長姐大一必讀榜」；新上架圖書透過 AI 語意向量（Embedding）分析簡介，立即媒合潛在讀者。</p>
+        </div>
+        <div class="prop-card">
+          <h4>📗 3. 熱門書排隊塞車（馬太效應）</h4>
+          <p><strong>對策：</strong>導入「即時在館庫存感知（Inventory-Aware）」，當暢銷書預約額滿時，AI 自動推薦館內目前在架上、主題最相近的免排隊好書。</p>
+        </div>
+        <div class="prop-card">
+          <h4>🔌 4. 現有館藏自動化系統老舊封閉</h4>
+          <p><strong>對策：</strong>不需花大錢請原廠改系統！採「定期匯出去識別化借閱 CSV + 外掛網頁組件（Widget）」即可嵌入圖書館官網首頁、OPAC 與校園 LINE 推播。</p>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px; color:#34d399; margin-bottom:10px;">二、評估這樣能帶來多大的效益？</h3>
+      <div class="prop-grid">
+        <div class="prop-card">
+          <h4>📈 全校借閱量提升 +25% ~ 40%</h4>
+          <p>學生對「同班同學正在看的書」好奇心遠高於傳統書單，實測同儕推薦點擊轉換率比一般公告高出 3 倍，預估每年新增逾萬冊借閱。</p>
+        </div>
+        <div class="prop-card">
+          <h4>💎 喚醒 80% 沉睡長尾館藏</h4>
+          <p>打破借閱集中在少數暢銷書的現象，讓各系專業好書與跨域佳作精準找到讀者，最大化每年千萬購書經費的投資報酬率（ROI）。</p>
+        </div>
+        <div class="prop-card">
+          <h4>🏆 高教深耕與校務評鑑亮點</h4>
+          <p>具體展現圖書館「AI 數位轉型」與主動式讀者服務創新，同時為館員節省 60% 人工主題書展策展工時。</p>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px; color:#38bdf8; margin-bottom:10px;">三、如果用 AI 來開發，要怎麼開發？（三引擎 × 三階段低風險落地）</h3>
+      <div class="prop-grid" style="margin-bottom:0;">
+        <div class="prop-card">
+          <h4>🚀 第一階段（1~2月）：MVP 概念驗證</h4>
+          <p>匯出近 2 年去識別化借閱紀錄，用 Python 協同過濾算法建立「各系所年級熱門共讀榜」與「借了此書的人也借了」首頁專區，零軟體採購成本快速驗證。</p>
+        </div>
+        <div class="prop-card">
+          <h4>🧠 第二階段（3~4月）：AI 語意與庫存連動</h4>
+          <p>將館藏書目簡介轉為 Embedding 語意向量，結合即時在館狀態，為登入學生推薦「專屬且現在架上馬上借得到」的 5 本好書。</p>
+        </div>
+        <div class="prop-card">
+          <h4>💬 第三階段（5~6月）：生成式 AI 導讀推播</h4>
+          <p>串接大型語言模型（如 Gemini API）針對不同科系學生自動生成「一句話吸睛推薦理由」，並結合還書通知信與 LINE 官方帳號主動推播。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas3d');
+    const ctx = canvas.getContext('2d');
+    let W = window.innerWidth, H = window.innerHeight;
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * window.devicePixelRatio;
+      canvas.height = H * window.devicePixelRatio;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let camYaw = -0.45;
+    let camPitch = 0.35;
+    let targetYaw = -0.45;
+    let targetPitch = 0.35;
+    let camDist = 680;
+    let isDragging = false, lastX = 0, lastY = 0;
+    let currentScene = 1;
+    let autoTourTimer = null;
+    let tourStep = 0;
+
+    const features = { peer: true, ai: true, privacy: true, stock: true };
+
+    const studentProfiles = {
+      cs: {
+        name: '王同學 (資工二A)',
+        color: '#38bdf8',
+        classmates: ['同班A', '同班B', '同班C', '同系D', '同系E'],
+        books: [
+          { id: 0, badge: '👥 同班 19 人正在看', badgeColor: '#38bdf8', title: '《白話演算法：邏輯思考》', meta: '3樓 A區 02架（尚有 2 本可借）', loc: '剛借過 Python 的同學 82% 也借這本', shelfIdx: 0 },
+          { id: 1, badge: '🔥 全校熱門免排隊替代', badgeColor: '#f59e0b', title: '《晶片戰爭 / 超速習慣》', meta: '1樓 熱門區 01架（架上現書）', loc: '原書預約滿，AI 自動推薦架上同主題好書', shelfIdx: 2 },
+          { id: 2, badge: '🤖 AI 喚醒隱藏好書', badgeColor: '#a855f7', title: '《三體 / 寫給工程師的簡報術》', meta: '4樓 跨域區 05架（沉睡好書活化）', loc: 'AI 語意匹配度 96%，立即點亮書架位置', shelfIdx: 4 }
+        ]
+      },
+      biz: {
+        name: '陳同學 (企管三B)',
+        color: '#f59e0b',
+        classmates: ['企管A', '企管B', '企管C', '管院D', '管院E'],
+        books: [
+          { id: 0, badge: '👥 同班 16 人正在看', badgeColor: '#38bdf8', title: '《一頁紙企劃書：精準提案》', meta: '2樓 商管區 01架（尚有 3 本可借）', loc: '大三商業競賽必備，班上同學都在借', shelfIdx: 1 },
+          { id: 1, badge: '🔥 管院本週飆升 No.1', badgeColor: '#f59e0b', title: '《逆思維：華頓商學院經典》', meta: '1樓 熱門區 02架（尚有 2 本可借）', loc: '實習面試前必讀熱門排行榜冠軍', shelfIdx: 2 },
+          { id: 2, badge: '🤖 AI 喚醒隱藏好書', badgeColor: '#a855f7', title: '《數據敘事：用圖表說故事》', meta: '3樓 跨域區 04架（沉睡好書活化）', loc: '結合你借過的行銷學，強化簡報視覺力', shelfIdx: 3 }
+        ]
+      },
+      fresh: {
+        name: '林同學 (大一新生・0借閱)',
+        color: '#34d399',
+        classmates: ['學長A', '學姐B', '大一C', '大一D', '學長E'],
+        books: [
+          { id: 0, badge: '🌱 學長姐大一必讀榜', badgeColor: '#34d399', title: '《大學生必修12堂時間管理》', meta: '1樓 新生專區（尚有 4 本可借）', loc: '解決新生 0 紀錄冷啟動，歷屆學長姐首推', shelfIdx: 1 },
+          { id: 1, badge: '🔥 全校療癒暢銷冠軍', badgeColor: '#f59e0b', title: '《解憂雜貨店 / 被討厭的勇氣》', meta: '2樓 文學區 03架（架上現書）', loc: '全校跨系所借閱率最高課外讀物', shelfIdx: 2 },
+          { id: 2, badge: '🤖 AI 必修課綱連動推薦', badgeColor: '#a855f7', title: '《漫畫圖解微積分與經濟學》', meta: '3樓 基礎科學區（沉睡好書活化）', loc: '覺得原文書太厚？先看這本 3 小時懂觀念', shelfIdx: 4 }
+        ]
+      }
+    };
+
+    let activeStudentKey = 'cs';
+    let highlightedShelf = 0;
+
+    const shelves = [
+      { x: -240, y: 0, z: -150, label: '3樓 資工與演算法書庫', category: '同班共讀熱區', color: '#38bdf8' },
+      { x: -120, y: 0, z: -210, label: '2樓 商管與大一必讀區', category: '系所熱門書庫', color: '#34d399' },
+      { x: 0,    y: 0, z: -230, label: '1樓 全校即時熱門排行榜區', category: '熱門免排隊現書', color: '#f59e0b' },
+      { x: 120,  y: 0, z: -210, label: '3樓 跨領域沉睡好書區 A', category: 'AI 語意活化書庫', color: '#a855f7' },
+      { x: 240,  y: 0, z: -150, label: '4樓 長尾專業沉睡好書區 B', category: 'AI 語意活化書庫', color: '#ec4899' }
+    ];
+
+    const booksOnShelves = [];
+    shelves.forEach((sh, sIdx) => {
+      for (let floor = 0; floor < 4; floor++) {
+        for (let b = -2; b <= 2; b++) {
+          const isHot = (sIdx === 2) || (floor === 2 && b === 0);
+          const isLongTail = (sIdx >= 3);
+          booksOnShelves.push({
+            shelfIdx: sIdx,
+            x: sh.x + b * 14,
+            y: -10 - floor * 26,
+            z: sh.z,
+            color: sh.color,
+            isHot,
+            isLongTail,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+    });
+
+    const classmateNodes = [
+      { angle: -2.2, dist: 125, label: '同班同學 #1' },
+      { angle: -1.6, dist: 135, label: '同班同學 #2' },
+      { angle: -0.9, dist: 120, label: '同系學長 #3' },
+      { angle: 1.0,  dist: 125, label: '同班同學 #4' },
+      { angle: 1.7,  dist: 135, label: '同系同學 #5' },
+      { angle: 2.3,  dist: 120, label: '同班同學 #6' }
+    ];
+
+    const flyingBooks = [];
+    function spawnFlyingBook(fromShelfIdx, toType) {
+      const sh = shelves[fromShelfIdx % shelves.length];
+      flyingBooks.push({
+        t: 0,
+        speed: 0.009 + Math.random() * 0.006,
+        sx: sh.x + (Math.random() - 0.5) * 40,
+        sy: -40 - Math.random() * 60,
+        sz: sh.z,
+        cx: 0, cy: -95, cz: -10,
+        ex: 0, ey: 10, ez: 175,
+        color: sh.color,
+        toType
+      });
+    }
+    for (let i = 0; i < 14; i++) {
+      spawnFlyingBook(i % 5, 'student');
+      flyingBooks[i].t = Math.random();
+    }
+
+    let celebrationTime = 0;
+    const confetti3D = [];
+
+    function project3D(x, y, z) {
+      const cosY = Math.cos(camYaw), sinY = Math.sin(camYaw);
+      let x1 = x * cosY - z * sinY;
+      let z1 = z * cosY + x * sinY;
+      const cosP = Math.cos(camPitch), sinP = Math.sin(camPitch);
+      let y2 = y * cosP - z1 * sinP;
+      let z2 = z1 * cosP + y * sinP;
+
+      const fov = 560;
+      const depth = z2 + camDist;
+      if (depth < 50) return null;
+      const scale = fov / depth;
+      return {
+        x: W * 0.46 + x1 * scale,
+        y: H * 0.54 + y2 * scale,
+        scale,
+        depth
+      };
+    }
+
+    function draw3DBox(cx, cy, cz, w, h, d, strokeCol, fillCol) {
+      const hw = w / 2, hh = h / 2, hd = d / 2;
+      const pts = [
+        project3D(cx - hw, cy - hh, cz - hd),
+        project3D(cx + hw, cy - hh, cz - hd),
+        project3D(cx + hw, cy + hh, cz - hd),
+        project3D(cx - hw, cy + hh, cz - hd),
+        project3D(cx - hw, cy - hh, cz + hd),
+        project3D(cx + hw, cy - hh, cz + hd),
+        project3D(cx + hw, cy + hh, cz + hd),
+        project3D(cx - hw, cy + hh, cz + hd)
+      ];
+      if (pts.some(p => !p)) return;
+
+      ctx.fillStyle = fillCol;
+      ctx.strokeStyle = strokeCol;
+      ctx.lineWidth = 1.2;
+
+      ctx.beginPath();
+      ctx.moveTo(pts[4].x, pts[4].y);
+      ctx.lineTo(pts[5].x, pts[5].y);
+      ctx.lineTo(pts[6].x, pts[6].y);
+      ctx.lineTo(pts[7].x, pts[7].y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      ctx.lineTo(pts[1].x, pts[1].y);
+      ctx.lineTo(pts[5].x, pts[5].y);
+      ctx.lineTo(pts[4].x, pts[4].y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function draw3DBeam(x1, y1, z1, cx, cy, cz, x2, y2, z2, color, alpha, dashed = false) {
+      const steps = 22;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = 2.2;
+      if (dashed) ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      let started = false;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const inv = 1 - t;
+        const bx = inv * inv * x1 + 2 * inv * t * cx + t * t * x2;
+        const by = inv * inv * y1 + 2 * inv * t * cy + t * t * y2;
+        const bz = inv * inv * z1 + 2 * inv * t * cz + t * t * z2;
+        const p = project3D(bx, by, bz);
+        if (p) {
+          if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+          else ctx.lineTo(p.x, p.y);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    let time = 0;
+    function animate() {
+      time += 0.025;
+      if (!isDragging) {
+        targetYaw += Math.sin(time * 0.35) * 0.0012;
+        camYaw += (targetYaw - camYaw) * 0.08;
+        camPitch += (targetPitch - camPitch) * 0.08;
+      }
+
+      const grad = ctx.createRadialGradient(W * 0.46, H * 0.5, 40, W * 0.46, H * 0.5, Math.max(W, H) * 0.75);
+      grad.addColorStop(0, '#0f223d');
+      grad.addColorStop(0.6, '#071020');
+      grad.addColorStop(1, '#030710');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+      ctx.lineWidth = 1;
+      for (let g = -320; g <= 320; g += 40) {
+        const p1 = project3D(g, 35, -320);
+        const p2 = project3D(g, 35, 320);
+        if (p1 && p2) {
+          ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        }
+        const p3 = project3D(-320, 35, g);
+        const p4 = project3D(320, 35, g);
+        if (p3 && p4) {
+          ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.stroke();
+        }
+      }
+
+      shelves.forEach((sh, idx) => {
+        const isTargetShelf = (idx === highlightedShelf);
+        const shelfActive = (idx <= 2) || features.ai;
+        const strokeC = !shelfActive ? 'rgba(100,116,139,0.35)' : (isTargetShelf ? '#fbbf24' : sh.color);
+        const fillC = !shelfActive ? 'rgba(15,23,42,0.5)' : (isTargetShelf ? 'rgba(251, 191, 36, 0.18)' : 'rgba(15, 23, 42, 0.72)');
+
+        draw3DBox(sh.x, -45, sh.z, 86, 145, 26, strokeC, fillC);
+
+        const lp = project3D(sh.x, -135, sh.z);
+        if (lp) {
+          ctx.save();
+          ctx.font = 'bold 12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = shelfActive ? '#ffffff' : '#64748b';
+          ctx.fillText(sh.label, lp.x, lp.y);
+
+          ctx.font = 'bold 11px sans-serif';
+          ctx.fillStyle = shelfActive ? sh.color : '#475569';
+          ctx.fillText(shelfActive ? `● ${sh.category}` : '💤 未啟動 AI（沉睡中）', lp.x, lp.y + 15);
+          ctx.restore();
+        }
+      });
+
+      booksOnShelves.forEach(b => {
+        const active = (b.shelfIdx <= 2) || features.ai;
+        const glow = active ? (0.55 + 0.45 * Math.sin(time * 2.5 + b.phase)) : 0.15;
+        const p = project3D(b.x, b.y, b.z + 10);
+        if (p) {
+          ctx.save();
+          ctx.fillStyle = active ? b.color : '#334155';
+          ctx.globalAlpha = glow;
+          const bw = Math.max(4, 8 * p.scale);
+          const bh = Math.max(8, 17 * p.scale);
+          ctx.fillRect(p.x - bw / 2, p.y - bh / 2, bw, bh);
+          ctx.restore();
+        }
+      });
+
+      const coreY = -85 + Math.sin(time * 2) * 8;
+      const coreP = project3D(0, coreY, -10);
+      if (coreP) {
+        ctx.save();
+        const r1 = 44 * coreP.scale;
+        const r2 = 62 * coreP.scale;
+        const gradCore = ctx.createRadialGradient(coreP.x, coreP.y, 4, coreP.x, coreP.y, r2);
+        gradCore.addColorStop(0, '#38bdf8');
+        gradCore.addColorStop(0.5, 'rgba(56, 189, 248, 0.35)');
+        gradCore.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        ctx.fillStyle = gradCore;
+        ctx.beginPath();
+        ctx.arc(coreP.x, coreP.y, r2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.arc(coreP.x, coreP.y, r1, time, time + Math.PI * 1.8);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#a855f7';
+        ctx.beginPath();
+        ctx.arc(coreP.x, coreP.y, r1 * 1.25, -time * 1.2, -time * 1.2 + Math.PI * 1.5);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🧠 AI 智慧推薦核心', coreP.x, coreP.y - r1 - 12);
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#bae6fd';
+        ctx.fillText('同儕共讀 × 語意媒合 × 即時在館過濾', coreP.x, coreP.y + r1 + 18);
+        ctx.restore();
+      }
+
+      const stuZ = 175;
+      if (features.peer) {
+        classmateNodes.forEach((cm, idx) => {
+          const cx = Math.sin(cm.angle + Math.sin(time * 0.4 + idx) * 0.08) * cm.dist;
+          const cz = stuZ + Math.cos(cm.angle) * 55 - 40;
+          const cy = 12;
+
+          draw3DBeam(cx, cy, cz, cx * 0.5, -45, cz * 0.5, 0, coreY, -10, '#38bdf8', 0.28, true);
+          draw3DBeam(cx, cy, cz, cx * 0.5, 0, stuZ, 0, 10, stuZ, '#38bdf8', 0.35, false);
+
+          const cp = project3D(cx, cy, cz);
+          if (cp) {
+            ctx.save();
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.arc(cp.x, cp.y, 12 * cp.scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#7dd3fc';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e0f2fe';
+            const displayLabel = features.privacy ? `🔒 同班匿名讀者` : cm.label;
+            ctx.fillText(displayLabel, cp.x, cp.y + 22 * cp.scale);
+            ctx.restore();
+          }
+        });
+      }
+
+      if (features.privacy && features.peer) {
+        const domeP = project3D(0, 10, stuZ - 20);
+        if (domeP) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.45)';
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.ellipse(domeP.x, domeP.y + 8, 165 * domeP.scale, 46 * domeP.scale, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#34d399';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🛡️ K-Anonymity 個資去識別化保護圈（僅統計群體共讀，不洩露個人姓名）', domeP.x, domeP.y + 62 * domeP.scale);
+          ctx.restore();
+        }
+      }
+
+      const stuP = project3D(0, 5, stuZ);
+      if (stuP) {
+        const prof = studentProfiles[activeStudentKey];
+        ctx.save();
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(stuP.x, stuP.y + 24 * stuP.scale, 42 * stuP.scale, 15 * stuP.scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = prof.color;
+        ctx.beginPath();
+        ctx.arc(stuP.x, stuP.y - 6 * stuP.scale, 18 * stuP.scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`🎓 ${prof.name}`, stuP.x, stuP.y - 32 * stuP.scale);
+        ctx.restore();
+      }
+
+      const targetSh = shelves[highlightedShelf];
+      if (targetSh) {
+        draw3DBeam(0, 5, stuZ, targetSh.x * 0.4, -120, 0, targetSh.x, -45, targetSh.z, '#fbbf24', 0.85, false);
+      }
+
+      flyingBooks.forEach(fb => {
+        const shelfAllowed = (fb.sx < 80) || features.ai;
+        if (!shelfAllowed) return;
+
+        fb.t += fb.speed;
+        if (fb.t >= 1) fb.t = 0;
+        const t = fb.t;
+        const inv = 1 - t;
+        const x = inv * inv * fb.sx + 2 * inv * t * fb.cx + t * t * fb.ex;
+        const y = inv * inv * fb.sy + 2 * inv * t * fb.cy + t * t * fb.ey;
+        const z = inv * inv * fb.sz + 2 * inv * t * fb.cz + t * t * fb.ez;
+
+        const fp = project3D(x, y, z);
+        if (fp) {
+          ctx.save();
+          ctx.translate(fp.x, fp.y);
+          ctx.rotate(Math.sin(time * 4 + fb.sx) * 0.25);
+          const w = 16 * fp.scale;
+          const h = 21 * fp.scale;
+          ctx.fillStyle = fb.color;
+          ctx.shadowColor = fb.color;
+          ctx.shadowBlur = 12;
+          ctx.fillRect(-w / 2, -h / 2, w, h);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(-w / 2, -h / 2, w, h);
+          ctx.restore();
+        }
+      });
+
+      if (celebrationTime > 0) {
+        celebrationTime--;
+        confetti3D.forEach(c => {
+          c.y += c.vy;
+          c.x += c.vx;
+          const cp = project3D(c.x, c.y, c.z);
+          if (cp) {
+            ctx.fillStyle = c.color;
+            ctx.fillRect(cp.x, cp.y, 7 * cp.scale, 7 * cp.scale);
+          }
+        });
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      camYaw += dx * 0.006;
+      camPitch = Math.max(0.08, Math.min(0.85, camPitch + dy * 0.005));
+      targetYaw = camYaw;
+      targetPitch = camPitch;
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    function selectStudent(key) {
+      activeStudentKey = key;
+      ['cs', 'biz', 'fresh'].forEach(k => {
+        document.getElementById('chip-' + k).classList.toggle('active', k === key);
+      });
+      const prof = studentProfiles[key];
+      const container = document.getElementById('phone-books');
+      container.innerHTML = prof.books.map(b => `
+        <div class="book-holo-card" onclick="focusShelf(${b.shelfIdx}, '${b.title}')">
+          <span class="book-holo-badge" style="background:${b.badgeColor}25; color:${b.badgeColor}; border:1px solid ${b.badgeColor}60;">
+            ${b.badge}
+          </span>
+          <div class="book-holo-title">${b.title}</div>
+          <div class="book-holo-meta">📍 ${b.meta}</div>
+          <div class="book-holo-loc">${b.loc}</div>
+        </div>
+      `).join('');
+
+      highlightedShelf = prof.books[0].shelfIdx;
+      document.getElementById('story-badge').textContent = '身分切換';
+      document.getElementById('story-text').textContent = `已切換為「${prof.name}」視角：3D 書庫與同班共讀光束已即時重算！`;
+    }
+
+    function focusShelf(shelfIdx, bookTitle) {
+      highlightedShelf = shelfIdx;
+      const sh = shelves[shelfIdx];
+      targetYaw = -sh.x * 0.0018;
+      targetPitch = 0.42;
+      document.getElementById('story-badge').textContent = '📍 3D 尋書雷射導航';
+      document.getElementById('story-text').textContent = `學生點擊 ${bookTitle} → 3D 金色導引光束直接標示「${sh.label}」位置！`;
+    }
+
+    function setScene(num) {
+      currentScene = num;
+      [1, 2, 3].forEach(n => {
+        document.getElementById('scene-' + n).classList.toggle('active', n === num);
+      });
+      if (num === 1) {
+        targetYaw = -0.42; targetPitch = 0.34;
+        features.peer = true; features.ai = true;
+        highlightedShelf = 0;
+        document.getElementById('story-badge').textContent = '場景 1：同班共讀';
+        document.getElementById('story-text').textContent = '藍色光束顯示「同班/同系同學正在讀什麼」，透過群體去識別化激發好奇心！';
+      } else if (num === 2) {
+        targetYaw = 0.0; targetPitch = 0.46;
+        highlightedShelf = 2;
+        document.getElementById('story-badge').textContent = '場景 2：熱門書免排隊';
+        document.getElementById('story-text').textContent = '當熱門書被借光時，AI 自動從架上挑選同主題現書，並發射金色雷射導引位置！';
+      } else if (num === 3) {
+        targetYaw = 0.48; targetPitch = 0.38;
+        highlightedShelf = 4;
+        document.getElementById('story-badge').textContent = '場景 3：喚醒沉睡書庫';
+        document.getElementById('story-text').textContent = '紫色與粉色書庫代表過去無人問津的 80% 館藏，AI 語意引擎將它們精準媒合給需要的學生！';
+      }
+      syncToggleUI();
+      updateMetricsUI();
+    }
+
+    function toggleFeature(key) {
+      features[key] = !features[key];
+      syncToggleUI();
+      updateMetricsUI();
+    }
+
+    function syncToggleUI() {
+      ['peer', 'ai', 'privacy', 'stock'].forEach(k => {
+        document.getElementById('tog-' + k).classList.toggle('on', features[k]);
+      });
+    }
+
+    function updateMetricsUI() {
+      let rate = 12.0;
+      let books = 4200;
+      let awaken = 320;
+      if (features.peer) { rate += 11.5; books += 4800; }
+      if (features.ai) { rate += 9.8; books += 3680; awaken += 3530; }
+      if (features.stock) { rate += 3.5; books += 1600; }
+
+      document.getElementById('kpi-rate').textContent = `+${rate.toFixed(1)}% ▲`;
+      document.getElementById('kpi-books').textContent = `+${books.toLocaleString()} 冊`;
+      document.getElementById('kpi-awaken').textContent = `${awaken.toLocaleString()} 本`;
+    }
+
+    function toggleAutoTour() {
+      const btn = document.getElementById('btn-tour');
+      if (autoTourTimer) {
+        clearInterval(autoTourTimer);
+        autoTourTimer = null;
+        btn.textContent = '🎬 一鍵自動播放：30秒館長導覽動畫';
+        return;
+      }
+      btn.textContent = '⏸️ 導覽播放中（點擊可暫停）';
+      tourStep = 0;
+      runTourStep();
+      autoTourTimer = setInterval(runTourStep, 5500);
+    }
+
+    function runTourStep() {
+      tourStep = (tourStep % 4) + 1;
+      if (tourStep === 1) {
+        setScene(1);
+        selectStudent('cs');
+        document.getElementById('story-badge').textContent = '導覽 1/4：同儕社群力';
+        document.getElementById('story-text').textContent = '【痛點解決】學生進館不知借什麼 → 系統自動顯示「你們班 19 位同學正在看這本」！';
+      } else if (tourStep === 2) {
+        setScene(2);
+        selectStudent('biz');
+        document.getElementById('story-badge').textContent = '導覽 2/4：熱門書免排隊';
+        document.getElementById('story-text').textContent = '【庫存連動】排行榜暢銷書被借光時，AI 一秒推薦「目前在架上免排隊」的同主題好書！';
+      } else if (tourStep === 3) {
+        setScene(3);
+        selectStudent('fresh');
+        document.getElementById('story-badge').textContent = '導覽 3/4：活化千萬館藏';
+        document.getElementById('story-text').textContent = '【沉睡書庫覺醒】AI 語意引擎將深處無人借閱的 3,850 本專業好書，精準飛送到大一新生手機！';
+      } else if (tourStep === 4) {
+        celebrateApproval();
+        document.getElementById('story-badge').textContent = '導覽 4/4：高教深耕亮點';
+        document.getElementById('story-text').textContent = '【結論】免改動舊有系統、100% 個資去識別化，6 週即可上線試辦，讓全校借閱率成長 +36.8%！';
+      }
+    }
+
+    function celebrateApproval() {
+      celebrationTime = 160;
+      confetti3D.length = 0;
+      const colors = ['#fbbf24', '#38bdf8', '#34d399', '#a855f7', '#f43f5e'];
+      for (let i = 0; i < 120; i++) {
+        confetti3D.push({
+          x: (Math.random() - 0.5) * 450,
+          y: -180 - Math.random() * 120,
+          z: (Math.random() - 0.5) * 350,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 1.8 + Math.random() * 2.5,
+          color: colors[i % colors.length]
+        });
+      }
+      document.getElementById('story-badge').textContent = '🎉 感謝館長支持！';
+      document.getElementById('story-text').textContent = '全館 3D 智慧書庫已全數點亮！預計第一學期試辦即可為本校帶來 +36.8% 借閱成長！';
+    }
+
+    function toggleProposalModal(show) {
+      document.getElementById('proposal-modal').classList.toggle('open', show);
+    }
+
+    selectStudent('cs');
+    animate();
+  </script>
+</body>
+</html>

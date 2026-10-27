@@ -83,7 +83,7 @@ def topic_for(zone,path):
   return 'library'
  if any(x in s for x in ['03-safety','ai-assessment']):return 'verify'
  if any(x in s for x in ['admission/','dialer/']):return 'events'
- if any(x in s for x in ['evaluation','subsidies','expense','schedule']):return 'daily'
+ if any(x in s for x in ['evaluation','subsidies','expense','schedule','library']):return 'daily'
  return 'command'
 
 OVERRIDES={
@@ -104,6 +104,7 @@ OVERRIDES={
  'admin/hesp-subsidies/index.html':('高教補助方案公告總覽','把分散的補助公告整理成清楚的戰情表。'),
  'admin/ai-assessment/index.html':('AI 時代評量探索與來源交互驗證','以文獻、數據與思考日誌探索評量革新。'),
  'admin/dialer/index.html':('考生聯絡半自動撥號劇場','以 3D 接線與語音互動展示電腦撥號、真人對話的流程。'),
+ 'admin/library-recommendation/index.html':('智慧圖書館 3D 閱讀推薦模擬系統','同班共讀社群力 × AI 喚醒沉睡書庫 × 3D 實境尋書雷射導航。'),
 }
 items=[]
 for zone in ['linux','unreal','tpr','admin']:

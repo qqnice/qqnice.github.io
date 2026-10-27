@@ -586,7 +586,7 @@
     "description": "用四個面向判斷行政工作是否適合交給生成式 AI，附一份可自行填寫的盤點表",
     "path": "admin/01-task-inventory.html",
     "order": 99,
-    "featuredOrder": 4,
+    "featuredOrder": 5,
     "featuredTitle": "先盤點，再自動化",
     "featuredDescription": "用重複性、規則明確度、出錯成本與資料敏感度四個面向，判斷一項行政工作適不適合交給 AI。"
   },
@@ -598,7 +598,7 @@
     "description": "會議紀錄、通知信、規章問答、表格核對四種行政情境的提示詞寫法，附可複製的範本",
     "path": "admin/02-prompt-templates.html",
     "order": 99,
-    "featuredOrder": 5,
+    "featuredOrder": 6,
     "featuredTitle": "行政工作的提示詞範本",
     "featuredDescription": "會議紀錄、通知信、規章問答、表格核對四種常見任務的指令寫法，可直接複製修改。"
   },
@@ -610,7 +610,7 @@
     "description": "使用生成式 AI 處理行政工作前後的檢核事項，含去識別化做法與一份檢核表",
     "path": "admin/03-safety-checklist.html",
     "order": 99,
-    "featuredOrder": 6,
+    "featuredOrder": 7,
     "featuredTitle": "資料安全與結果查核",
     "featuredDescription": "送給 AI 之前要先處理什麼、拿到結果之後要核對什麼，附一份可列印的檢核表。"
   },
@@ -685,7 +685,7 @@
     "description": "以文獻、數據與思考日誌探索評量革新。",
     "path": "admin/ai-assessment/",
     "order": 99,
-    "featuredOrder": 3,
+    "featuredOrder": 4,
     "featuredTitle": "AI 時代評量探索與來源交互驗證",
     "featuredDescription": "告別無效防弊！落實 TEQSA 兩大範式與三軌來源交叉驗證沙盒（文獻 DOI + 數據核實 + Prompt 審查），重構評量規準。"
   },
@@ -697,7 +697,7 @@
     "description": "戰情表先行（Dashboard-First）掌握全局・ActivityAgent 總控星型調度 9 個小幫手，全流程動態演練模擬器",
     "path": "admin/architecture.html",
     "order": 99,
-    "featuredOrder": 8,
+    "featuredOrder": 9,
     "featuredTitle": "10 個打工仔架構流程",
     "featuredDescription": "4 大視角技術版：戰情表先行理念、星型總控調度與全流程演練模擬器。"
   },
@@ -709,7 +709,7 @@
     "description": "以 3D 接線與語音互動展示電腦撥號、真人對話的流程。",
     "path": "admin/dialer/",
     "order": 99,
-    "featuredOrder": 10,
+    "featuredOrder": 11,
     "featuredTitle": "考生聯絡半自動撥號劇場",
     "featuredDescription": "電腦點選號碼自動撥號、真人拿起話筒對話！3D 語音互動展示桌上實體接線與通話流程。"
   },
@@ -721,7 +721,7 @@
     "description": "交易款與手續費拆分，套用原始 Word 範本。",
     "path": "admin/expense-vouchers/",
     "order": 99,
-    "featuredOrder": 2,
+    "featuredOrder": 3,
     "featuredTitle": "信用卡帳單 ➔ 10 張支出證明單",
     "featuredDescription": "5 筆海外刷卡一鍵拆成 10 頁交易款＋手續費 Word！支援「匿名留白防個資比對」與 100% 原檔套表。"
   },
@@ -733,7 +733,7 @@
     "description": "執行同仁才是真正的大腦！用講的下指令，打開一張戰情表一目了然，讓 10 隻 AI 小幫手幫你把重複瑣事吃光光",
     "path": "admin/helpers.html",
     "order": 99,
-    "featuredOrder": 7,
+    "featuredOrder": 8,
     "featuredTitle": "你是大腦・10 隻小幫手",
     "featuredDescription": "用講的下指令！一張戰情表搞定日常重複瑣事，輕鬆掌握全域進度。"
   },
@@ -745,7 +745,7 @@
     "description": "把分散的補助公告整理成清楚的戰情表。",
     "path": "admin/hesp-subsidies/",
     "order": 99,
-    "featuredOrder": 1,
+    "featuredOrder": 2,
     "featuredTitle": "高教補助方案公告總覽",
     "featuredDescription": "讓每一份支持都能被看見！用爬蟲＋AI 把藏在多層選單的公告匯聚成一目了然的 3D 戰情表。"
   },
@@ -753,28 +753,40 @@
     "id": "71",
     "island": "admin",
     "topic": "daily",
+    "title": "智慧圖書館 3D 閱讀推薦模擬系統",
+    "description": "同班共讀社群力 × AI 喚醒沉睡書庫 × 3D 實境尋書雷射導航。",
+    "path": "admin/library-recommendation/",
+    "order": 99,
+    "featuredOrder": 0,
+    "featuredTitle": "智慧圖書館 3D 閱讀推薦模擬系統",
+    "featuredDescription": "同班同學正在讀 × AI 喚醒沉睡書庫！360° 旋轉 3D 書架、K-Anonymity 個資防護罩與尋書雷射導航，30 秒讓館長秒懂並點頭支持。"
+  },
+  {
+    "id": "72",
+    "island": "admin",
+    "topic": "daily",
     "title": "進階課表比對戰情表",
     "description": "跨單位課表比較、兼職合併與快取重用。",
     "path": "admin/schedule-war-room/",
     "order": 99,
-    "featuredOrder": 9,
+    "featuredOrder": 10,
     "featuredTitle": "進階課表比對戰情表",
     "featuredDescription": "從辦活動延伸到排會議！54 位主管課表跨院比較、兼職去重、排除 Office Hour 與快取重用。"
   },
   {
-    "id": "72",
+    "id": "73",
     "island": "admin",
     "topic": "daily",
     "title": "AI 整理教師評鑑與日常資料",
     "description": "教學、研究、服務資料的整理與查核。",
     "path": "admin/teacher-evaluation/",
     "order": 99,
-    "featuredOrder": 0,
+    "featuredOrder": 1,
     "featuredTitle": "透過 AI 整理教師評鑑與日常資料",
     "featuredDescription": "教學32、研究29、服務40 共101子項單頁直覽！辨識講者角色與 iPAS 證照陷阱，讓平時成果找得到、有依據。"
   },
   {
-    "id": "73",
+    "id": "74",
     "island": "admin",
     "topic": "command",
     "title": "你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事",
@@ -783,7 +795,7 @@
     "order": 99
   },
   {
-    "id": "74",
+    "id": "75",
     "island": "linux",
     "topic": "tools",
     "title": "🐧 QQ 老師的 Linux 教學分享區",
@@ -795,7 +807,7 @@
     "order": 99
   },
   {
-    "id": "75",
+    "id": "76",
     "island": "linux",
     "topic": "tools",
     "title": "Google Antigravity 開發前置環境準備與下載安裝手冊（學生與教師專用）",
@@ -807,7 +819,7 @@
     "order": 99
   },
   {
-    "id": "76",
+    "id": "77",
     "island": "linux",
     "topic": "tools",
     "title": "Antigravity × GitHub 串接與「下 Prompt 自動完成」教學手冊",
@@ -819,7 +831,7 @@
     "order": 99
   },
   {
-    "id": "77",
+    "id": "78",
     "island": "linux",
     "topic": "lab",
     "title": "備份腳本 backup.sh",
@@ -831,7 +843,7 @@
     "order": 99
   },
   {
-    "id": "78",
+    "id": "79",
     "island": "linux",
     "topic": "lab",
     "title": "Docker Compose 部署設定",
@@ -843,7 +855,7 @@
     "order": 99
   },
   {
-    "id": "79",
+    "id": "80",
     "island": "linux",
     "topic": "lab",
     "title": "還原腳本 restore.sh",
@@ -855,7 +867,7 @@
     "order": 99
   },
   {
-    "id": "80",
+    "id": "81",
     "island": "linux",
     "topic": "lab",
     "title": "WEEK3 完成檢查",
@@ -867,7 +879,7 @@
     "order": 99
   },
   {
-    "id": "81",
+    "id": "82",
     "island": "linux",
     "topic": "tools",
     "title": "GitHub帳號申請與兩階段驗證手冊",
@@ -878,7 +890,7 @@
     "order": 99
   },
   {
-    "id": "82",
+    "id": "83",
     "island": "linux",
     "topic": "docker",
     "title": "Docker Compose 部署設定",
@@ -890,7 +902,7 @@
     "order": 99
   },
   {
-    "id": "83",
+    "id": "84",
     "island": "linux",
     "topic": "docker",
     "title": "實際完成的操作指令",
@@ -902,7 +914,7 @@
     "order": 99
   },
   {
-    "id": "84",
+    "id": "85",
     "island": "tpr",
     "topic": "research",
     "title": "從課堂問題到可執行的教學實踐研究計畫",
@@ -914,7 +926,7 @@
     "order": 99
   },
   {
-    "id": "85",
+    "id": "86",
     "island": "tpr",
     "topic": "research",
     "title": "教學實踐研究構想：生成式 AI 開放情境下的真實學習證據",
@@ -926,7 +938,7 @@
     "order": 99
   },
   {
-    "id": "86",
+    "id": "87",
     "island": "tpr",
     "topic": "research",
     "title": "文獻探討：生成式 AI 衝擊、真實學習證據與 PAVET 教學介入",
@@ -938,7 +950,7 @@
     "order": 99
   },
   {
-    "id": "87",
+    "id": "88",
     "island": "tpr",
     "topic": "research",
     "title": "Linux 進階課程 PAVET 教學方法與十八週課程規劃草案",
@@ -950,7 +962,7 @@
     "order": 99
   },
   {
-    "id": "88",
+    "id": "89",
     "island": "tpr",
     "topic": "research",
     "title": "（1）研究方法與實施步驟說明",
@@ -962,7 +974,7 @@
     "order": 99
   },
   {
-    "id": "89",
+    "id": "90",
     "island": "tpr",
     "topic": "research",
     "title": "預期完成工作項目與成果",
@@ -974,7 +986,7 @@
     "order": 99
   },
   {
-    "id": "90",
+    "id": "91",
     "island": "tpr",
     "topic": "research",
     "title": "《文獻探討：生成式 AI 衝擊、真實學習證據與 PAVET 教學介入》引用查核表",
@@ -986,7 +998,7 @@
     "order": 99
   },
   {
-    "id": "91",
+    "id": "92",
     "island": "tpr",
     "topic": "research",
     "title": "近十年 WoS：生成式 AI、真實學習與評量效度之初步文獻盤點",
@@ -998,7 +1010,7 @@
     "order": 99
   },
   {
-    "id": "92",
+    "id": "93",
     "island": "tpr",
     "topic": "research",
     "title": "09-tpr-manifest.csv",
@@ -1010,7 +1022,7 @@
     "order": 99
   },
   {
-    "id": "93",
+    "id": "94",
     "island": "tpr",
     "topic": "research",
     "title": "教學實踐研究成果摘要表",
@@ -1021,7 +1033,7 @@
     "order": 99
   },
   {
-    "id": "94",
+    "id": "95",
     "island": "tpr",
     "topic": "research",
     "title": "11-course-passport.yaml",
@@ -1033,7 +1045,7 @@
     "order": 99
   },
   {
-    "id": "95",
+    "id": "96",
     "island": "tpr",
     "topic": "research",
     "title": "AI 評量設計檢視報告",
@@ -1044,7 +1056,7 @@
     "order": 99
   },
   {
-    "id": "96",
+    "id": "97",
     "island": "tpr",
     "topic": "research",
     "title": "13-download-reports.py",
@@ -1056,7 +1068,7 @@
     "order": 99
   },
   {
-    "id": "97",
+    "id": "98",
     "island": "tpr",
     "topic": "research",
     "title": "14-extract-abstracts.py",
@@ -1068,7 +1080,7 @@
     "order": 99
   },
   {
-    "id": "98",
+    "id": "99",
     "island": "tpr",
     "topic": "outcomes",
     "title": "AI 協助研究的工作流：執行階段與文章發表講義",
@@ -1080,7 +1092,7 @@
     "order": 99
   },
   {
-    "id": "99",
+    "id": "100",
     "island": "tpr",
     "topic": "outcomes",
     "title": "研究執行與文章發表｜教學投影片",
@@ -1091,7 +1103,7 @@
     "order": 99
   },
   {
-    "id": "100",
+    "id": "101",
     "island": "tpr",
     "topic": "library",
     "title": "GitHub帳號申請與兩階段驗證手冊",
@@ -1102,7 +1114,7 @@
     "order": 99
   },
   {
-    "id": "101",
+    "id": "102",
     "island": "admin",
     "topic": "verify",
     "title": "Notion_AI時代的評量方式探索",
@@ -1114,7 +1126,7 @@
     "order": 99
   },
   {
-    "id": "102",
+    "id": "103",
     "island": "admin",
     "topic": "daily",
     "title": "Notion_匯入專用_信用卡支出證明單",
@@ -1126,7 +1138,7 @@
     "order": 99
   },
   {
-    "id": "103",
+    "id": "104",
     "island": "admin",
     "topic": "daily",
     "title": "Notion文章_信用卡支出證明單",
@@ -1138,7 +1150,7 @@
     "order": 99
   },
   {
-    "id": "104",
+    "id": "105",
     "island": "admin",
     "topic": "daily",
     "title": "支出證明單｜可下載技能包",
