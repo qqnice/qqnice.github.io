@@ -1,0 +1,804 @@
+---
+title: 文科生的台積電 2 奈米 3D 語音實驗室
+description: 給準熊本廠（JASM）跨領域新人的零門檻半導體科普：3D 互動旋轉拆解、FinFET 與 GAA 奈米片對比、量子穿隧漏電模擬與中文語音導覽
+---
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="給準熊本廠（JASM）跨領域新人的零門檻半導體科普：3D 互動旋轉拆解、FinFET 與 GAA 奈米片對比、量子穿隧漏電模擬與中文語音導覽" />
+  <title>文科生的台積電 2 奈米 3D 語音實驗室｜TPR 教學實踐專區</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #111827;
+      --card-2: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #38bdf8;
+    }
+    body {
+      background: radial-gradient(circle at 50% 0%, #172554 0%, #0b1120 55%, #020617 100%);
+      color: var(--text);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+    }
+    canvas {
+      touch-action: none;
+      cursor: grab;
+    }
+    canvas:active {
+      cursor: grabbing;
+    }
+    @keyframes pulseBar {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+    .voice-bar {
+      animation: pulseBar 0.65s ease-in-out infinite;
+      transform-origin: bottom;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased pb-16">
+  <!-- Top Nav Bar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <nav class="text-xs sm:text-sm text-slate-400 flex items-center gap-2">
+        <a href="../" class="hover:text-cyan-400 transition">QQ 知識海域首頁</a>
+        <span>›</span>
+        <a href="./" class="hover:text-cyan-400 transition">TPR 教學實踐專區</a>
+        <span>›</span>
+        <span class="text-slate-200 font-medium">台積電 2 奈米 3D 語音實驗室</span>
+      </nav>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/30">
+          跨域科普互動教材
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 pt-6 space-y-8">
+    <!-- Hero Banner & Voice Controller -->
+    <section class="rounded-2xl border border-slate-700/80 bg-slate-900/90 p-5 sm:p-6 shadow-2xl">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+        <div class="space-y-1.5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold">
+            <span>TSMC N2 世代 × 日本熊本廠 JASM 破冰指南</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            文科生的台積電「2 奈米製程」3D 互動語音實驗室
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base">
+            不用懂量子物理！用「微型水龍頭」與「法式千層派」秒懂 2 奈米 GAA 結構、電子穿牆漏電與熊本廠分工。
+          </p>
+        </div>
+
+        <!-- Voice Console -->
+        <div class="flex flex-wrap items-center gap-2 shrink-0 bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
+          <button id="btnSpeak" onclick="toggleSpeech()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 transition shadow-lg shadow-cyan-500/20">
+            <span id="speakIcon">🔊</span>
+            <span id="speakLabel">播放語音導覽</span>
+            <span id="voiceWave" class="hidden items-end gap-0.5 h-3.5 ml-1">
+              <span class="w-1 h-3.5 bg-white rounded-full voice-bar" style="animation-delay:0s"></span>
+              <span class="w-1 h-3.5 bg-white rounded-full voice-bar" style="animation-delay:0.15s"></span>
+              <span class="w-1 h-3.5 bg-white rounded-full voice-bar" style="animation-delay:0.3s"></span>
+            </span>
+          </button>
+          <button id="btnRate" onclick="cycleSpeechRate()" class="px-3 py-2.5 rounded-xl text-xs font-semibold border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition" title="切換語音速度">
+            語速 1.0x
+          </button>
+          <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 px-2 cursor-pointer">
+            <input type="checkbox" id="chkAutoSpeak" checked class="rounded border-slate-600 text-cyan-500 focus:ring-cyan-500" />
+            <span>切換章節自動朗讀</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 4 Chapter Selector Tabs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 my-5">
+        <button onclick="setChapter(0)" id="tab-0" class="chapter-tab p-3 rounded-xl text-left border transition">
+          <div class="text-xs font-bold text-cyan-400 mb-0.5">第 1 章｜基礎概念</div>
+          <div class="text-sm font-bold text-white">「2 奈米」到底是什麼？</div>
+        </button>
+        <button onclick="setChapter(1)" id="tab-1" class="chapter-tab p-3 rounded-xl text-left border transition">
+          <div class="text-xs font-bold text-rose-400 mb-0.5">第 2 章｜技術難點一</div>
+          <div class="text-sm font-bold text-white">量子穿隧：電子會穿牆術！</div>
+        </button>
+        <button onclick="setChapter(2)" id="tab-2" class="chapter-tab p-3 rounded-xl text-left border transition">
+          <div class="text-xs font-bold text-purple-400 mb-0.5">第 3 章｜技術難點二</div>
+          <div class="text-sm font-bold text-white">GAA 千層派微雕與 EUV 曝光</div>
+        </button>
+        <button onclick="setChapter(3)" id="tab-3" class="chapter-tab p-3 rounded-xl text-left border transition">
+          <div class="text-xs font-bold text-amber-400 mb-0.5">第 4 章｜難點三 & 熊本廠</div>
+          <div class="text-sm font-bold text-white">晶背供電 ＋ 熊本廠破冰神知識</div>
+        </button>
+      </div>
+
+      <!-- Main 3D Interactive Stage + Right Explanation Panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- 3D Viewport -->
+        <div class="lg:col-span-7 relative rounded-2xl border border-slate-700/90 overflow-hidden bg-slate-950 flex flex-col justify-between" style="min-height: 420px;">
+          <canvas id="stage3d" class="w-full h-full absolute inset-0 block"></canvas>
+
+          <!-- Top Overlay Badges -->
+          <div class="relative z-10 p-3.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+            <div class="flex flex-wrap gap-1.5">
+              <span id="modelBadge" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-cyan-300 border border-cyan-500/40 shadow">
+                GAA 奈米片 (2nm N2)
+              </span>
+              <span id="statusBadge" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-emerald-300 border border-emerald-500/40 shadow">
+                🛡️ 360° 全包覆・零穿隧漏電
+              </span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg text-xs bg-slate-900/80 text-slate-300 border border-slate-700">
+              🖱️ 拖曳旋轉 3D 模型
+            </span>
+          </div>
+
+          <!-- Bottom Interactive Toolbar -->
+          <div class="relative z-10 p-3.5 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-1 bg-slate-900/95 border border-slate-700 rounded-xl p-1">
+              <button onclick="setArch('planar')" id="arch-planar" class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition">
+                1. 平面 Planar (28nm)
+              </button>
+              <button onclick="setArch('finfet')" id="arch-finfet" class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition">
+                2. 魚鰭 FinFET (16~3nm)
+              </button>
+              <button onclick="setArch('gaa')" id="arch-gaa" class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition">
+                3. 千層派 GAA (2nm)
+              </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button onclick="toggleGatePower()" id="btnGate" class="px-3 py-1.5 rounded-xl text-xs font-bold transition shadow">
+                🔒 水龍頭：關 (測試漏電=0)
+              </button>
+              <button onclick="toggleExplode()" id="btnExplode" class="px-3 py-1.5 rounded-xl text-xs font-bold transition shadow">
+                🔧 拆解結構
+              </button>
+              <button onclick="toggleEuv()" id="btnEuv" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40 hover:bg-slate-700 transition shadow">
+                🔦 EUV 曝光模擬
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Chapter Story & Teleprompter -->
+        <div class="lg:col-span-5 rounded-2xl border border-slate-700/80 bg-slate-950/90 p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span id="chapterTag" class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-500/15 text-blue-300 border border-blue-500/30"></span>
+              <span class="text-xs text-slate-400">點選左側按鈕立即切換結構</span>
+            </div>
+            <h2 id="chapterTitle" class="text-lg sm:text-xl font-bold text-white leading-snug"></h2>
+            <p id="chapterDesc" class="text-sm text-slate-300 leading-relaxed"></p>
+            <div id="chapterKeyPoints" class="space-y-2.5 pt-1"></div>
+          </div>
+
+          <!-- Voice Teleprompter Box -->
+          <div class="rounded-xl bg-slate-900 border border-slate-800 p-3.5 space-y-1.5">
+            <div class="flex items-center justify-between text-xs text-cyan-400 font-semibold">
+              <span>🎙️ 語音導覽逐字稿（點擊上方「播放語音導覽」聆聽）</span>
+            </div>
+            <p id="subtitleText" class="text-xs sm:text-sm text-slate-200 leading-relaxed"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comprehensive Cheat-Sheet Cards for Humanities Students -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/75 p-5 space-y-2.5">
+        <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider">重點 1｜為什麼叫 2 奈米？</div>
+        <h3 class="text-lg font-bold text-white">不是零件尺寸，而是「世代代號」</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          早期「幾奈米」確實指電晶體閘門的物理長度；但到了近代，<strong>「2 奈米（台積電稱 N2）」</strong>就像「iPhone 16」一樣是<strong>技術世代代號</strong>。代表在指甲大小的晶片裡，可以塞進超過 <strong>500 億顆</strong>控制電流 `0` 與 `1` 的微型水龍頭！
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/75 p-5 space-y-2.5">
+        <div class="text-xs font-bold text-rose-400 uppercase tracking-wider">重點 2｜為什麼非換 GAA 不可？</div>
+        <h3 class="text-lg font-bold text-white">對抗「量子穿隧」穿牆漏電</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          當閘門縮小到只剩十幾顆原子厚，電子會施展量子力學的<strong>「穿牆術」</strong>偷溜過去造成發燙漏電。16~3 奈米的 <strong>FinFET（魚鰭式）</strong>只包住三面，底部會漏電；2 奈米改用 <strong>GAA 奈米片（Nanosheet）</strong>，像壽司海苔一樣 <strong>360° 四面全包死</strong>！
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/75 p-5 space-y-2.5">
+        <div class="text-xs font-bold text-amber-400 uppercase tracking-wider">重點 3｜日本熊本廠 JASM 必勝冷知識</div>
+        <h3 class="text-lg font-bold text-white">熊本做車用與相機，台灣做 2 奈米！</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          <strong>熊本一廠（JASM）</strong>主力是 <strong>12/16 奈米與 22/28 奈米</strong>，專門為 Sony 做相機影像感測器、為 Toyota 做車用晶片（最講究耐高溫、15 年零故障的特殊製程）；而最尖端的 <strong>2 奈米（N2）</strong>則是在<strong>台灣新竹寶山與高雄廠</strong>量產！
+        </p>
+      </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="rounded-2xl border border-slate-800 bg-slate-900/75 p-5 sm:p-6 space-y-4">
+      <h2 class="text-xl font-bold text-white">📊 三代電晶體架構與台積電廠區分工一覽表</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-slate-700 text-slate-300 bg-slate-950/60">
+              <th class="py-3 px-4 font-bold">世代與架構</th>
+              <th class="py-3 px-4 font-bold">文科生秒懂比喻</th>
+              <th class="py-3 px-4 font-bold">閘門包覆面數</th>
+              <th class="py-3 px-4 font-bold">主要生產基地與應用</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-300">
+            <tr>
+              <td class="py-3 px-4 font-semibold text-white">平面電晶體 Planar (28nm~)</td>
+              <td class="py-3 px-4">平躺的水管，從正上方拿木板壓住止水</td>
+              <td class="py-3 px-4 text-amber-300">1 面（僅頂部）</td>
+              <td class="py-3 px-4"><strong>日本熊本一廠 (22/28nm)</strong>：車用微控制器、Sony 影像感測器邏輯層</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4 font-semibold text-white">鰭式電晶體 FinFET (16nm~3nm)</td>
+              <td class="py-3 px-4">把水管立起來像「魚背鰭」，從上左右三面夾住</td>
+              <td class="py-3 px-4 text-cyan-300">3 面（上、左、右）</td>
+              <td class="py-3 px-4"><strong>日本熊本一廠 (12/16nm)、熊本二廠 (6/7nm)</strong>、南科 (3nm/5nm)</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4 font-semibold text-white">奈米片電晶體 GAA Nanosheet (2nm N2)</td>
+              <td class="py-3 px-4">三層懸空「法式千層派」，閘門像壽司海苔 360° 包死</td>
+              <td class="py-3 px-4 text-emerald-300 font-bold">4 面（上下左右 360° 全包覆）</td>
+              <td class="py-3 px-4"><strong>台灣新竹寶山 (Fab 20)、高雄 (Fab 22)</strong>：頂級 AI 晶片、最新旗艦手機處理器</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ================== CHAPTER DATA ==================
+    const CHAPTERS = [
+      {
+        tag: "概念一｜什麼是 2 奈米？",
+        title: "不是零件真的只有 2 奈米，而是「水龍頭縮小的世代代號」！",
+        desc: "晶片裡有上百億顆叫「電晶體」的微型水龍頭：通電是 1、斷電是 0。以前幾奈米代表水龍頭的閘門長度，但到了 2 奈米時代，它就像「iPhone 16」一樣是世代名稱（台積電稱 N2），代表能把 500 億顆水龍頭塞進指甲大的空間！",
+        arch: "gaa",
+        gateOn: false,
+        exploded: false,
+        euv: false,
+        points: [
+          "📏 **比例尺有多誇張？** 一根頭髮直徑約 8 萬奈米；人類 DNA 雙螺旋寬度就是 2 奈米（只排得下約 10 顆矽原子）。",
+          "🍣 **結構大革命：** 從立體魚鰭（FinFET）進化成水平疊起來的「GAA 奈米片（Nanosheet）」。"
+        ],
+        speech: "歡迎加入台積電熊本廠！我們先用最白話的方式理解什麼是 2 奈米。晶片其實就是一座超級城市，裡面住了幾百億個叫做「電晶體」的微型水龍頭，負責開關電流，產生電腦的 0 與 1。所謂的 2 奈米，並不是指某個零件真的只有 2 奈米長，而是像 iPhone 16 一樣的技術世代代號。在 2 奈米世代，台積電把水龍頭從原本像魚背鰭一樣的 FinFET，進化成三層懸空的「GAA 奈米片」，在指甲大小裡塞進五百億顆水龍頭，速度更快、卻更省電！"
+      },
+      {
+        tag: "難點一｜物理極限挑戰",
+        title: "當牆壁只剩幾顆原子厚，電子就會「穿牆術」（量子穿隧）！",
+        desc: "水龍頭越做越小，負責擋水的「閘極牆壁」只剩幾顆原子厚。這時會發生恐怖的量子力學現象：明明水龍頭已經關掉（0），調皮的電子卻直接「瞬間移動穿牆」偷跑過去，造成晶片漏電、發燙！",
+        arch: "finfet",
+        gateOn: false,
+        exploded: false,
+        euv: false,
+        points: [
+          "🐟 **舊款 FinFET（看左側紅點）：** 閘極只包住通道的「上、左、右」三面，底部還是會漏抓電子（紅色圓點就是穿牆漏電的電子！）。",
+          "🛡️ **點左下切換「3. 千層派 GAA」：** 像包壽司一樣把通道上下左右「360 度四面全包死」，徹底鎮壓穿牆電子！"
+        ],
+        speech: "為什麼 2 奈米這麼難做？第一個大魔王叫做「量子穿隧效應」。當水龍頭縮小到只剩十幾顆原子寬的時候，我們平常認知的物理定律會失效，電子會施展「穿牆術」！你可以看看左邊的 3D 畫面，在舊的 FinFET 魚鰭結構下，紅色閘極只包住了上、左、右三面，底部沒有包到，所以明明關掉了水龍頭，還是有紅色電子從底部偷溜過去，這就叫漏電，會讓手機發燙耗電。你可以點擊左下角的「千層派 GAA」按鈕看看：台積電 2 奈米改成把三片通道懸空，讓閘極 360 度四面全部包起來，把電子抓得死死的！"
+      },
+      {
+        tag: "難點二｜原子級工藝",
+        title: "在米粒百萬分之一的空間，做「懸空法式千層派」！",
+        desc: "要把閘極 360 度塞進三層奈米片中間，必須先把矽（Si）和矽鍺（SiGe）一層層疊好，再用化學藥水「只洗掉中間的矽鍺夾心」，讓三片薄如蟬翼的矽通道懸空，卻不能塌下來！",
+        arch: "gaa",
+        gateOn: true,
+        exploded: true,
+        euv: true,
+        points: [
+          "🔦 **EUV 極紫外光微影：** 用波長僅 13.5 奈米的光在真空中用鏡子反射雕刻，難度等同「從月球拿雷射筆在地球硬幣上寫字」。",
+          "🍰 **觀察左側拆解結構：** 三片青色奈米片（Nanosheet）懸空穿過閘極包覆層，連一顆原子都不能歪！"
+        ],
+        speech: "第二個大魔王，是怎麼做出這種三層懸空的千層派結構？你可以觀察左邊拆解開來的 3D 模型。工程師必須先把兩種不同材質像千層蛋糕一樣交替疊起來，接著用特殊藥水把中間的夾心洗掉，讓那三片青色的奈米通道懸空架在源極和汲極之間，只要稍微歪掉一顆原子，整座橋就會塌掉！而且為了畫出這麼細的線條，必須出動一台超過台幣五十億的 EUV 極紫外光曝光機，精準度相當於從月球拿雷射筆，在地球上的一枚硬幣刻字！"
+      },
+      {
+        tag: "難點三 & 熊本廠必勝冷知識",
+        title: "五百億人口大塞車！外加「熊本廠 JASM」內行話術",
+        desc: "水龍頭變多後，供應電力的電線跟傳遞信號的電線全擠在晶片頂樓，造成嚴重塞車與發熱！因此 2 奈米世代開始推進「超導電路與晶背供電」。另外，去熊本上班前一定要分清楚熊本廠與台灣廠的分工！",
+        arch: "gaa",
+        gateOn: true,
+        exploded: false,
+        euv: false,
+        points: [
+          "🏯 **熊本一廠 (JASM)：** 主力是 **12/16 奈米與 22/28 奈米**（做 Sony 相機感測器、Toyota 車用晶片，追求極致穩定與耐高溫）。",
+          "🚀 **2 奈米在哪裡？** 台積電最尖端的 2 奈米位於**台灣新竹寶山與高雄廠**！第一天在熊本聊起這個分工，同事馬上對你刮目相看！"
+        ],
+        speech: "最後一個難點是交通大塞車與散熱。五百億顆水龍頭同時運作，上面的奈米電線比東京車站還擠，所以台積電研發把供電管線移到晶片地下室的「晶背供電」技術。最後送你一個去日本熊本廠 JASM 上班的超強冷知識：熊本一廠目前生產的是 12 到 28 奈米的成熟與特殊製程，專門做 Sony 相機感測器跟豐田汽車晶片，因為汽車跟相機不需要硬擠 2 奈米，反而最需要耐高溫跟零故障；而最尖端的 2 奈米則是在台灣新竹寶山跟高雄生產。第一天上班把這句話講出來，工程師絕對會驚呼你超專業！"
+      }
+    ];
+
+    // ================== STATE ==================
+    let currentChapter = 0;
+    let currentArch = 'gaa';
+    let gateOn = false;
+    let isExploded = false;
+    let euvActive = false;
+    let explodeProgress = 0;
+    let euvScanX = -110;
+
+    // 3D Camera Orbit State
+    let rotY = -0.62;
+    let rotX = 0.42;
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let autoRotate = true;
+
+    // Speech State
+    let speechRates = [1.0, 1.15, 0.9];
+    let rateIdx = 0;
+    let isSpeaking = false;
+
+    // Electrons
+    const electrons = [];
+    for (let i = 0; i < 48; i++) {
+      electrons.push({
+        x: -115 + Math.random() * 230,
+        sheet: i % 3,
+        offsetZ: (Math.random() - 0.5) * 26,
+        speed: 1.4 + Math.random() * 0.9,
+        tunneling: i % 4 === 0
+      });
+    }
+
+    // ================== UI CONTROLS ==================
+    function setChapter(idx, userClicked = true) {
+      currentChapter = idx;
+      const ch = CHAPTERS[idx];
+      currentArch = ch.arch;
+      gateOn = ch.gateOn;
+      isExploded = ch.exploded;
+      euvActive = ch.euv;
+
+      for (let i = 0; i < 4; i++) {
+        const tab = document.getElementById(`tab-${i}`);
+        if (i === idx) {
+          tab.className = "chapter-tab p-3 rounded-xl text-left border-2 border-cyan-400 bg-cyan-500/15 shadow-lg shadow-cyan-500/10 transition";
+        } else {
+          tab.className = "chapter-tab p-3 rounded-xl text-left border border-slate-800 bg-slate-950/60 hover:border-slate-600 transition";
+        }
+      }
+
+      document.getElementById('chapterTag').textContent = ch.tag;
+      document.getElementById('chapterTitle').textContent = ch.title;
+      document.getElementById('chapterDesc').textContent = ch.desc;
+
+      const ptsContainer = document.getElementById('chapterKeyPoints');
+      ptsContainer.innerHTML = ch.points.map(p => {
+        const html = p.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+        return `<div class="text-xs sm:text-sm text-slate-300 bg-slate-900/95 border border-slate-800 rounded-xl px-3.5 py-2.5 leading-relaxed">${html}</div>`;
+      }).join('');
+
+      document.getElementById('subtitleText').textContent = ch.speech;
+      syncControlButtons();
+
+      const autoSpeak = document.getElementById('chkAutoSpeak')?.checked;
+      if (userClicked && (isSpeaking || autoSpeak)) {
+        startSpeech(ch.speech);
+      }
+    }
+
+    function setArch(arch) {
+      currentArch = arch;
+      syncControlButtons();
+    }
+
+    function toggleGatePower() {
+      gateOn = !gateOn;
+      syncControlButtons();
+    }
+
+    function toggleExplode() {
+      isExploded = !isExploded;
+      syncControlButtons();
+    }
+
+    function toggleEuv() {
+      euvActive = !euvActive;
+      syncControlButtons();
+    }
+
+    function syncControlButtons() {
+      const archMap = {
+        planar: { name: "平面電晶體 Planar (28nm)", statusOff: "⚠️ 短通道嚴重漏電 (量子穿隧)", statusOn: "⚡ 通電導通 (1)" },
+        finfet: { name: "魚鰭式 FinFET (16nm~3nm)", statusOff: "⚠️ 三面包裹・底部微漏電", statusOn: "⚡ 三面導通 (1)" },
+        gaa: { name: "GAA 奈米片 (2nm N2)", statusOff: "🛡️ 360° 全包覆・零穿隧漏電", statusOn: "🚀 四面極速導通 (1)" }
+      };
+
+      ['planar', 'finfet', 'gaa'].forEach(a => {
+        const btn = document.getElementById(`arch-${a}`);
+        if (a === currentArch) {
+          btn.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 transition shadow";
+        } else {
+          btn.className = "px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition";
+        }
+      });
+
+      document.getElementById('modelBadge').textContent = archMap[currentArch].name;
+      const statusBadge = document.getElementById('statusBadge');
+      statusBadge.textContent = gateOn ? archMap[currentArch].statusOn : archMap[currentArch].statusOff;
+      statusBadge.className = (!gateOn && currentArch !== 'gaa')
+        ? "px-3 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-rose-300 border border-rose-500/50 shadow"
+        : "px-3 py-1 rounded-lg text-xs font-bold bg-slate-900/90 text-emerald-300 border border-emerald-500/40 shadow";
+
+      const btnGate = document.getElementById('btnGate');
+      if (gateOn) {
+        btnGate.textContent = "⚡ 水龍頭：開 (通電=1)";
+        btnGate.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition shadow";
+      } else {
+        btnGate.textContent = "🔒 水龍頭：關 (測試漏電=0)";
+        btnGate.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition shadow";
+      }
+
+      const btnExplode = document.getElementById('btnExplode');
+      btnExplode.textContent = isExploded ? "🔧 組裝復原" : "🔧 拆解結構";
+      btnExplode.className = isExploded
+        ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white border border-purple-400 transition shadow"
+        : "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700 transition shadow";
+
+      const btnEuv = document.getElementById('btnEuv');
+      btnEuv.className = euvActive
+        ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-fuchsia-600 text-white border border-fuchsia-300 transition shadow"
+        : "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-fuchsia-300 border border-fuchsia-500/40 hover:bg-slate-700 transition shadow";
+    }
+
+    // ================== WEB SPEECH API ==================
+    function pickChineseVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      return (
+        voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Meijia') || v.name.includes('Natural') || v.name.includes('Google'))) ||
+        voices.find(v => v.lang === 'zh-TW') ||
+        voices.find(v => v.lang.startsWith('zh')) ||
+        null
+      );
+    }
+
+    function startSpeech(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = pickChineseVoice();
+      if (voice) utter.voice = voice;
+      utter.lang = 'zh-TW';
+      utter.rate = speechRates[rateIdx];
+      utter.pitch = 1.02;
+
+      utter.onstart = () => {
+        isSpeaking = true;
+        updateVoiceUI(true);
+      };
+      utter.onend = () => {
+        isSpeaking = false;
+        updateVoiceUI(false);
+      };
+      utter.onerror = () => {
+        isSpeaking = false;
+        updateVoiceUI(false);
+      };
+
+      document.getElementById('subtitleText').textContent = text;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function toggleSpeech() {
+      if (!('speechSynthesis' in window)) return;
+      if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        updateVoiceUI(false);
+      } else {
+        startSpeech(CHAPTERS[currentChapter].speech);
+      }
+    }
+
+    function cycleSpeechRate() {
+      rateIdx = (rateIdx + 1) % speechRates.length;
+      document.getElementById('btnRate').textContent = '語速 ' + speechRates[rateIdx].toFixed(2).replace(/\.00$/, '.0') + 'x';
+      if (isSpeaking) {
+        startSpeech(CHAPTERS[currentChapter].speech);
+      }
+    }
+
+    function updateVoiceUI(active) {
+      const btn = document.getElementById('btnSpeak');
+      const label = document.getElementById('speakLabel');
+      const wave = document.getElementById('voiceWave');
+      if (active) {
+        btn.className = "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-rose-600 text-white hover:bg-rose-500 transition shadow-lg shadow-rose-500/25";
+        label.textContent = "停止語音導覽";
+        wave.classList.remove('hidden');
+        wave.classList.add('inline-flex');
+      } else {
+        btn.className = "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 transition shadow-lg shadow-cyan-500/20";
+        label.textContent = "播放語音導覽";
+        wave.classList.add('hidden');
+        wave.classList.remove('inline-flex');
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => pickChineseVoice();
+    }
+
+    // ================== 3D ENGINE ==================
+    const canvas = document.getElementById('stage3d');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    canvas.addEventListener('pointerdown', e => {
+      isDragging = true;
+      autoRotate = false;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      rotY += dx * 0.01;
+      rotX = Math.max(-0.25, Math.min(1.15, rotX + dy * 0.01));
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+    canvas.addEventListener('pointerup', () => { isDragging = false; });
+
+    function project3D(x, y, z, w, h) {
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
+      const x1 = x * cosY - z * sinY;
+      const z1 = x * sinY + z * cosY;
+
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = y * sinX + z1 * cosX;
+
+      const fov = Math.min(w, h) * 1.45;
+      const viewerDist = 410;
+      const scale = fov / (viewerDist + z2);
+      return {
+        x: w * 0.5 + x1 * scale,
+        y: h * 0.51 - y2 * scale,
+        z: z2,
+        scale
+      };
+    }
+
+    function addBoxFaces(faces, cx, cy, cz, dx, dy, dz, palette, alpha = 1.0, label = null) {
+      const hx = dx / 2, hy = dy / 2, hz = dz / 2;
+      const v = [
+        [cx - hx, cy - hy, cz - hz],
+        [cx + hx, cy - hy, cz - hz],
+        [cx + hx, cy + hy, cz - hz],
+        [cx - hx, cy + hy, cz - hz],
+        [cx - hx, cy - hy, cz + hz],
+        [cx + hx, cy - hy, cz + hz],
+        [cx + hx, cy + hy, cz + hz],
+        [cx - hx, cy + hy, cz + hz]
+      ];
+      const boxFaces = [
+        { idx: [0, 1, 2, 3], col: palette.front },
+        { idx: [5, 4, 7, 6], col: palette.back },
+        { idx: [3, 2, 6, 7], col: palette.top, isTop: true },
+        { idx: [4, 5, 1, 0], col: palette.bottom },
+        { idx: [4, 0, 3, 7], col: palette.side },
+        { idx: [1, 5, 6, 2], col: palette.side }
+      ];
+      boxFaces.forEach(f => {
+        faces.push({
+          verts: f.idx.map(i => v[i]),
+          color: f.col,
+          alpha,
+          label: f.isTop ? label : null
+        });
+      });
+    }
+
+    const PALETTES = {
+      substrate: { top: '#1e293b', front: '#0f172a', back: '#0f172a', side: '#1e293b', bottom: '#020617' },
+      oxide:     { top: '#334155', front: '#1e293b', back: '#1e293b', side: '#273549', bottom: '#0f172a' },
+      channel:   { top: '#22d3ee', front: '#06b6d4', back: '#0891b2', side: '#0891b2', bottom: '#0e7490' },
+      pad:       { top: '#38bdf8', front: '#0284c7', back: '#0369a1', side: '#0369a1', bottom: '#075985' },
+      gateOff:   { top: '#f43f5e', front: '#e11d48', back: '#be123c', side: '#be123c', bottom: '#9f1239' },
+      gateOn:    { top: '#facc15', front: '#eab308', back: '#ca8a04', side: '#ca8a04', bottom: '#a16207' }
+    };
+
+    function renderLoop() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      if (autoRotate && !isDragging) {
+        rotY += 0.0038;
+      }
+      explodeProgress += ((isExploded ? 1 : 0) - explodeProgress) * 0.12;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const grad = ctx.createRadialGradient(w * 0.5, h * 0.5, 10, w * 0.5, h * 0.5, w * 0.65);
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(1, '#020617');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      const faces = [];
+      const exp = explodeProgress;
+      const gatePal = gateOn ? PALETTES.gateOn : PALETTES.gateOff;
+      const gateAlpha = isExploded ? 0.88 : 0.78;
+
+      // 1. Silicon Substrate Base
+      addBoxFaces(faces, 0, -54 - exp * 18, 0, 236, 18, 124, PALETTES.substrate, 1.0, "矽晶圓基底 Substrate");
+      addBoxFaces(faces, 0, -40 - exp * 12, 0, 224, 8, 112, PALETTES.oxide, 1.0);
+
+      // 2. Source & Drain Pads
+      const padOffset = 94 + exp * 28;
+      addBoxFaces(faces, -padOffset, -2, 0, 36, 66, 74, PALETTES.pad, 0.92, "源極 Source (起點)");
+      addBoxFaces(faces,  padOffset, -2, 0, 36, 66, 74, PALETTES.pad, 0.92, "汲極 Drain (終點)");
+
+      // 3. Architecture Channel & Gate
+      if (currentArch === 'planar') {
+        addBoxFaces(faces, 0, -25, 0, 156, 16, 56, PALETTES.channel, 0.95);
+        addBoxFaces(faces, 0, -4 + exp * 44, 0, 58, 24, 62, gatePal, gateAlpha, "平面閘極 Gate (僅壓住頂部)");
+      } else if (currentArch === 'finfet') {
+        addBoxFaces(faces, 0, -2, 0, 158, 64, 18, PALETTES.channel, 0.95);
+        const gy = exp * 46;
+        addBoxFaces(faces, 0, 36 + gy, 0, 56, 14, 58, gatePal, gateAlpha, "FinFET 閘極 (三面包裹)");
+        addBoxFaces(faces, 0, -2 + gy, -20, 56, 64, 18, gatePal, gateAlpha);
+        addBoxFaces(faces, 0, -2 + gy,  20, 56, 64, 18, gatePal, gateAlpha);
+      } else {
+        const sheetY = [-20, 0, 20];
+        sheetY.forEach((sy, idx) => {
+          const yPos = sy + (idx - 1) * exp * 13;
+          addBoxFaces(faces, 0, yPos, 0, 158, 8, 44, PALETTES.channel, 0.96, idx === 2 ? "GAA 奈米片通道 Nanosheet ×3" : null);
+        });
+
+        const gzOff = exp * 48;
+        const gyTop = exp * 36;
+        [-30, -10, 10, 30].forEach((gy, i) => {
+          const lift = (i === 3) ? gyTop : (i === 0 ? -gyTop * 0.5 : 0);
+          addBoxFaces(faces, 0, gy + lift, 0, 56, 9, 64, gatePal, gateAlpha, i === 3 ? "GAA 閘極 (360° 四面全包覆)" : null);
+        });
+        addBoxFaces(faces, 0, 0, -27 - gzOff, 56, 68, 10, gatePal, gateAlpha);
+        addBoxFaces(faces, 0, 0,  27 + gzOff, 56, 68, 10, gatePal, gateAlpha);
+      }
+
+      const projectedFaces = faces.map(f => {
+        const pts = f.verts.map(v => project3D(v[0], v[1], v[2], w, h));
+        const avgZ = pts.reduce((sum, p) => sum + p.z, 0) / pts.length;
+        return { ...f, pts, avgZ };
+      });
+      projectedFaces.sort((a, b) => b.avgZ - a.avgZ);
+
+      projectedFaces.forEach(f => {
+        ctx.save();
+        ctx.globalAlpha = f.alpha;
+        ctx.beginPath();
+        ctx.moveTo(f.pts[0].x, f.pts[0].y);
+        for (let i = 1; i < f.pts.length; i++) {
+          ctx.lineTo(f.pts[i].x, f.pts[i].y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = f.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 0.85;
+        ctx.stroke();
+
+        if (f.label) {
+          const cx = (f.pts[0].x + f.pts[2].x) * 0.5;
+          const cy = (f.pts[0].y + f.pts[2].y) * 0.5;
+          ctx.globalAlpha = 0.96;
+          ctx.font = '600 12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#f8fafc';
+          ctx.shadowColor = 'rgba(0,0,0,0.95)';
+          ctx.shadowBlur = 5;
+          ctx.fillText(f.label, cx, cy - 4);
+        }
+        ctx.restore();
+      });
+
+      // Electrons simulation
+      electrons.forEach(el => {
+        el.x += el.speed * (gateOn ? 1.55 : 0.92);
+        if (el.x > 105) el.x = -105;
+
+        let isLeaking = false;
+        if (!gateOn) {
+          if (currentArch === 'gaa') {
+            if (el.x > -30 && el.x < 30) {
+              el.x = -32 - Math.random() * 65;
+            }
+          } else if (currentArch === 'finfet') {
+            if (el.x > -28 && el.x < 28 && !el.tunneling) {
+              el.x = -32 - Math.random() * 65;
+            } else if (el.x > -28 && el.tunneling) {
+              isLeaking = true;
+            }
+          } else {
+            if (el.x > -28 && el.x < 28 && (el.sheet === 0)) {
+              el.x = -32 - Math.random() * 65;
+            } else if (el.x > -28) {
+              isLeaking = true;
+            }
+          }
+        }
+
+        let ey = 0;
+        let ez = el.offsetZ * 0.5;
+        if (currentArch === 'planar') {
+          ey = -25;
+        } else if (currentArch === 'finfet') {
+          ey = isLeaking ? -26 : (-18 + el.sheet * 16);
+          ez = 0;
+        } else {
+          const sheetY = [-20, 0, 20];
+          ey = sheetY[el.sheet] + (el.sheet - 1) * exp * 13;
+        }
+
+        const p = project3D(el.x, ey, ez, w, h);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, isLeaking ? 4.5 : 3.4, 0, Math.PI * 2);
+        ctx.fillStyle = isLeaking ? '#fb7185' : (gateOn ? '#fde047' : '#67e8f9');
+        ctx.shadowColor = isLeaking ? '#f43f5e' : '#22d3ee';
+        ctx.shadowBlur = 9;
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // Optional EUV 13.5nm Extreme Ultraviolet Lithography Laser Scan
+      if (euvActive) {
+        euvScanX += 2.2;
+        if (euvScanX > 95) euvScanX = -95;
+        const topOrigin = project3D(0, 145, 0, w, h);
+        const beamLeft = project3D(euvScanX - 6, 15, -35, w, h);
+        const beamRight = project3D(euvScanX + 6, 15, 35, w, h);
+
+        ctx.save();
+        const beamGrad = ctx.createLinearGradient(topOrigin.x, topOrigin.y, beamLeft.x, beamLeft.y);
+        beamGrad.addColorStop(0, 'rgba(232, 121, 249, 0.85)');
+        beamGrad.addColorStop(1, 'rgba(217, 70, 239, 0.12)');
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(topOrigin.x, topOrigin.y);
+        ctx.lineTo(beamLeft.x, beamLeft.y);
+        ctx.lineTo(beamRight.x, beamRight.y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#f0abfc';
+        ctx.textAlign = 'center';
+        ctx.fillText('EUV 13.5nm 極紫外光奈米雕刻束', topOrigin.x, Math.max(54, topOrigin.y - 8));
+        ctx.restore();
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    resizeCanvas();
+    setChapter(0, false);
+    requestAnimationFrame(renderLoop);
+  </script>
+</body>
+</html>

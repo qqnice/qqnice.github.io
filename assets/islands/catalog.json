@@ -7,7 +7,7 @@
     "description": "",
     "path": "linux/01本地 AI 部署.html",
     "order": 99,
-    "featuredOrder": 14,
+    "featuredOrder": 15,
     "featuredTitle": "WSL + Ollama + Open WebUI 本地 AI 部署指南",
     "featuredDescription": "在 Windows 的 WSL 上架設本地 AI。"
   },
@@ -19,7 +19,7 @@
     "description": "",
     "path": "linux/02QQdocker廚房.html",
     "order": 1,
-    "featuredOrder": 6,
+    "featuredOrder": 7,
     "featuredTitle": "QQ Docker 魔法廚房",
     "featuredDescription": "Docker 的互動式學習頁。"
   },
@@ -31,7 +31,7 @@
     "description": "",
     "path": "linux/03多網站部署.html",
     "order": 7,
-    "featuredOrder": 7,
+    "featuredOrder": 8,
     "featuredTitle": "114-2 雲端技術期末實作",
     "featuredDescription": "多網站部署的專案戰情室。"
   },
@@ -43,7 +43,7 @@
     "description": "",
     "path": "linux/04-1Graylog 準備與安裝.html",
     "order": 99,
-    "featuredOrder": 8,
+    "featuredOrder": 9,
     "featuredTitle": "Graylog 6.0 部署指南（Ubuntu 24.04）",
     "featuredDescription": "Graylog 的環境準備與安裝步驟。"
   },
@@ -55,7 +55,7 @@
     "description": "",
     "path": "linux/04Graylog伺服器.html",
     "order": 99,
-    "featuredOrder": 9,
+    "featuredOrder": 10,
     "featuredTitle": "Graylog 資安戰情中心",
     "featuredDescription": "互動體驗模擬。"
   },
@@ -67,7 +67,7 @@
     "description": "",
     "path": "linux/05Windows nxlog_to_graylog.html",
     "order": 99,
-    "featuredOrder": 10,
+    "featuredOrder": 11,
     "featuredTitle": "NXLog to Graylog 整合指南",
     "featuredDescription": "Windows 日誌以 NXLog 送進 Graylog。"
   },
@@ -79,7 +79,7 @@
     "description": "",
     "path": "linux/06Graylog 進階.html",
     "order": 99,
-    "featuredOrder": 13,
+    "featuredOrder": 14,
     "featuredTitle": "Graylog 進階操作與整合實戰",
     "featuredDescription": "互動模擬。"
   },
@@ -91,7 +91,7 @@
     "description": "",
     "path": "linux/07 Ubuntu 24.04 固定 IP 教學器.html",
     "order": 99,
-    "featuredOrder": 15,
+    "featuredOrder": 16,
     "featuredTitle": "Ubuntu 24.04 固定 IP（Netplan）產生器",
     "featuredDescription": "產生 Netplan 設定的互動工具。"
   },
@@ -103,7 +103,7 @@
     "description": "",
     "path": "linux/Aws_shield.html",
     "order": 99,
-    "featuredOrder": 16,
+    "featuredOrder": 17,
     "featuredTitle": "AWS Shield 防禦 DDoS 原理與架構圖解",
     "featuredDescription": "圖解 AWS Shield 的防禦原理與架構。"
   },
@@ -115,7 +115,7 @@
     "description": "以 Nginx 與多個網站練習部署與服務整合。",
     "path": "linux/Docker Compose 雙網站部署實戰.html",
     "order": 3,
-    "featuredOrder": 3,
+    "featuredOrder": 4,
     "featuredTitle": "Docker Compose 雙網站部署流程",
     "featuredDescription": "WEEK2 雙網站部署的互動教材。"
   },
@@ -127,7 +127,7 @@
     "description": "用互動廚房比喻與 Apache、WordPress 實例，理解 Dockerfile、Image、Container、Compose、Volume、Network 與 Port。",
     "path": "linux/Docker概念與簡介.html",
     "order": 0,
-    "featuredOrder": 5,
+    "featuredOrder": 6,
     "featuredTitle": "Docker 廚房｜容器世界入門",
     "featuredDescription": "以廚房比喻介紹容器的基本概念。"
   },
@@ -139,7 +139,7 @@
     "description": "",
     "path": "linux/RsyslogtoGraylog日誌收集.html",
     "order": 99,
-    "featuredOrder": 12,
+    "featuredOrder": 13,
     "featuredTitle": "Rsyslog to Graylog 部署與進階除錯",
     "featuredDescription": "Linux 日誌以 Rsyslog 送進 Graylog 的互動指南。"
   },
@@ -151,7 +151,7 @@
     "description": "",
     "path": "linux/Windows11使netlogtoGraylogServer.html",
     "order": 99,
-    "featuredOrder": 11,
+    "featuredOrder": 12,
     "featuredTitle": "Windows 11 透過 NXLog 傳送日誌至 Graylog",
     "featuredDescription": "實戰教學。"
   },
@@ -159,16 +159,28 @@
     "id": "14",
     "island": "linux",
     "topic": "tools",
+    "title": "Antigravity 開發前置環境準備 ＆ 官方下載安裝教學",
+    "description": "為什麼用 Antigravity 還要裝 Python 與 Node.js？還需要另外裝編輯器嗎？專為老師與學生設計的 Antigravity 前置環境準備互動指南，一步步完成四大工具安裝並壓軸下載 Google Antigravity。",
+    "path": "linux/antigravity-env-setup/",
+    "order": 99,
+    "featuredOrder": 1,
+    "featuredTitle": "Antigravity 開發前置環境準備 ＆ 官方下載安裝教學",
+    "featuredDescription": "解答為什麼要另外裝 Python、Node.js (LTS) 與 Git，免另外裝編輯器的觀念說明，壓軸下載 Google Antigravity 並附上開機 AI 自動健檢 Prompt。"
+  },
+  {
+    "id": "15",
+    "island": "linux",
+    "topic": "tools",
     "title": "Antigravity × GitHub：下 Prompt 就完成串接與網站發佈",
     "description": "免背繁瑣 Git 指令！在 Google Antigravity 直接複製繁體中文 Prompt，搭配 GitHub 真實網頁一次性授權，自動完成儲存庫建立、推送與 GitHub Pages 發佈。",
     "path": "linux/antigravity-github-guide/",
     "order": 99,
-    "featuredOrder": 1,
+    "featuredOrder": 2,
     "featuredTitle": "Antigravity × GitHub：下 Prompt 就完成串接與網站發佈",
     "featuredDescription": "免背繁瑣 Git 指令！結合 GitHub 瀏覽器 8 碼一鍵授權、7 步可複製 Prompt 模板、自訂發佈提示詞產生器與真實頁面對照。"
   },
   {
-    "id": "15",
+    "id": "16",
     "island": "linux",
     "topic": "tools",
     "title": "GitHub 帳號申請與兩階段驗證（2FA）互動教學",
@@ -180,31 +192,31 @@
     "featuredDescription": "給學生與老師的逐步操作指南：申請前準備、10 步註冊與信箱驗證、TOTP 驗證器 App 與復原碼備份，附官方畫面與常見問題。"
   },
   {
-    "id": "16",
+    "id": "17",
     "island": "linux",
     "topic": "lab",
     "title": "WEEK3｜Docker Lab 實作工作台",
     "description": "備份、還原與主機安全的互動式學習工作台。",
     "path": "linux/week3/",
     "order": 5,
-    "featuredOrder": 4,
+    "featuredOrder": 5,
     "featuredTitle": "Docker Lab：WEEK3 實作工作台",
     "featuredDescription": "Docker 系統的備份、還原與主機安全。"
   },
   {
-    "id": "17",
+    "id": "18",
     "island": "linux",
     "topic": "docker",
     "title": "WEEK1｜容器 Docker-Compose 初體驗",
     "description": "從第一個容器開始，建立 Docker 的基本操作能力。",
     "path": "linux/容器Docker-Compose 初體驗.html",
     "order": 2,
-    "featuredOrder": 2,
+    "featuredOrder": 3,
     "featuredTitle": "容器 Docker-Compose 初體驗",
     "featuredDescription": "WEEK1 Docker 入門。"
   },
   {
-    "id": "18",
+    "id": "19",
     "island": "unreal",
     "topic": "start",
     "title": "入門：安裝、建立專案與編輯器介面",
@@ -216,7 +228,7 @@
     "featuredDescription": "安裝引擎、建立第一個專案、認識編輯器各個面板與視埠操作。"
   },
   {
-    "id": "19",
+    "id": "20",
     "island": "unreal",
     "topic": "blueprint",
     "title": "Blueprint 基礎：事件、變數、函數與流程控制",
@@ -228,7 +240,7 @@
     "featuredDescription": "事件、變數、函數、流程控制，以及 Actor 之間如何溝通。附一個可動手做的小練習。"
   },
   {
-    "id": "20",
+    "id": "21",
     "island": "unreal",
     "topic": "debug",
     "title": "速查表：快捷鍵、除錯與常見問題",
@@ -240,7 +252,7 @@
     "featuredDescription": "視埠與 Blueprint 快捷鍵（依官方文件整理）、除錯方法與常見狀況排解。"
   },
   {
-    "id": "21",
+    "id": "22",
     "island": "unreal",
     "topic": "elevator",
     "title": "電梯狀態機｜聲光與藍圖實驗室",
@@ -252,7 +264,7 @@
     "featuredDescription": "結合即時音效、關卡 1～4 漸進切換、Unreal Switch on Int 白線追蹤與「常見接錯線 Bug 診所」，深入理解狀態機與藍圖結構。"
   },
   {
-    "id": "22",
+    "id": "23",
     "island": "unreal",
     "topic": "elevator",
     "title": "電梯狀態實驗室",
@@ -264,7 +276,7 @@
     "featuredDescription": "操作樓層呼叫與擋門，透過動畫、單步觀察與三個實驗，理解五個狀態的動作及切換條件。"
   },
   {
-    "id": "23",
+    "id": "24",
     "island": "unreal",
     "topic": "elevator",
     "title": "ElevatorKit 學生操作手冊",
@@ -276,19 +288,19 @@
     "featuredDescription": "用 Blueprint 寫出兩層樓電梯的行為，分四個關卡：會動、門、燈與顯示器、請求排隊與擋門。手冊以課程提供的 ElevatorKit 檔案為前提。"
   },
   {
-    "id": "24",
+    "id": "25",
     "island": "tpr",
     "topic": "question",
     "title": "教學實踐研究計畫是什麼",
     "description": "教育部「大專校院教學實踐研究計畫」的依據、目的、研究類型與 114 年度公文重點",
     "path": "tpr/01-what-is-tpr.html",
     "order": 99,
-    "featuredOrder": 4,
+    "featuredOrder": 5,
     "featuredTitle": "教學實踐研究計畫是什麼",
     "featuredDescription": "計畫的依據、目的、研究類型，以及 114 年度公文中的重點，附原始文件連結。"
   },
   {
-    "id": "25",
+    "id": "26",
     "island": "tpr",
     "topic": "library",
     "title": "AI 時代的評量與論文答辯",
@@ -297,7 +309,7 @@
     "order": 99
   },
   {
-    "id": "26",
+    "id": "27",
     "island": "tpr",
     "topic": "outcomes",
     "title": "研究執行與文章發表工作台",
@@ -306,43 +318,43 @@
     "order": 99
   },
   {
-    "id": "27",
+    "id": "28",
     "island": "tpr",
     "topic": "research",
     "title": "AI 協助研究的工作流",
     "description": "從研究發想、文獻驗證到計畫撰寫，附研究教材與工具。",
     "path": "tpr/ai-research-workflow/",
     "order": 99,
-    "featuredOrder": 3,
+    "featuredOrder": 4,
     "featuredTitle": "AI協助研究的工作流",
     "featuredDescription": "以教學實踐研究計劃的發想、文獻驗證、計劃撰寫以及日後的投稿為主題。講者：資訊管理系 林文彥。附研究教材、工具與執行投稿工作台。"
   },
   {
-    "id": "28",
+    "id": "29",
     "island": "tpr",
     "topic": "library",
     "title": "GitHub 帳號申請與兩階段驗證（2FA）互動教學",
     "description": "專為第一次申請 GitHub 個人帳號的學生與教師設計的可實際操作繁體中文互動教學網頁。包含申請前準備、10 步註冊與信箱驗證導覽、獨立兩階段驗證（2FA）完整教學、官方畫面對照、常見問題與驗收檢查表。",
     "path": "tpr/github-account-guide/",
     "order": 99,
-    "featuredOrder": 2,
+    "featuredOrder": 3,
     "featuredTitle": "GitHub 帳號申請與兩階段驗證",
     "featuredDescription": "給學生與老師的逐步操作手冊：註冊、電子郵件驗證、驗證器 App 與復原碼，附 GitHub 官方畫面與連結。"
   },
   {
-    "id": "29",
+    "id": "30",
     "island": "tpr",
     "topic": "library",
     "title": "GPT × GitHub 一句提示詞，把網頁發佈出去",
     "description": "學生與教師的 GPT × GitHub 完整教學：連接 GitHub、確認寫入權限、產生網站發佈提示詞、檢查提交與 GitHub Pages。",
     "path": "tpr/gpt-github-guide/",
     "order": 99,
-    "featuredOrder": 1,
+    "featuredOrder": 2,
     "featuredTitle": "GPT × GitHub：用提示詞發佈網站",
     "featuredDescription": "從連接 GitHub 插件、檢查儲存庫權限，到複製提示詞建立與更新 GitHub Pages，附發佈後驗收步驟。"
   },
   {
-    "id": "30",
+    "id": "31",
     "island": "tpr",
     "topic": "library",
     "title": "AI 協作歷程與反思評量",
@@ -351,7 +363,7 @@
     "order": 99
   },
   {
-    "id": "31",
+    "id": "32",
     "island": "tpr",
     "topic": "library",
     "title": "AI 寫作偵測器 v2.0",
@@ -360,7 +372,7 @@
     "order": 99
   },
   {
-    "id": "32",
+    "id": "33",
     "island": "tpr",
     "topic": "library",
     "title": "QQ 達明 TM 協作型機械手臂安全與操作測驗",
@@ -369,7 +381,7 @@
     "order": 99
   },
   {
-    "id": "33",
+    "id": "34",
     "island": "tpr",
     "topic": "library",
     "title": "Q 老師的 AI 考古題",
@@ -378,7 +390,7 @@
     "order": 99
   },
   {
-    "id": "34",
+    "id": "35",
     "island": "tpr",
     "topic": "library",
     "title": "AIATC™ 素養級認證 (AIATCL)",
@@ -387,7 +399,7 @@
     "order": 99
   },
   {
-    "id": "35",
+    "id": "36",
     "island": "tpr",
     "topic": "library",
     "title": "台灣人工智慧學校 素養認證 模擬測驗",
@@ -396,7 +408,7 @@
     "order": 99
   },
   {
-    "id": "36",
+    "id": "37",
     "island": "tpr",
     "topic": "library",
     "title": "AIATCL 素養認證｜30題互動模擬測驗",
@@ -405,7 +417,7 @@
     "order": 99
   },
   {
-    "id": "37",
+    "id": "38",
     "island": "tpr",
     "topic": "library",
     "title": "Gemini 引導學習模式",
@@ -414,7 +426,7 @@
     "order": 99
   },
   {
-    "id": "38",
+    "id": "39",
     "island": "tpr",
     "topic": "library",
     "title": "免費上架你的 AI 靜態網頁",
@@ -423,7 +435,7 @@
     "order": 99
   },
   {
-    "id": "39",
+    "id": "40",
     "island": "tpr",
     "topic": "library",
     "title": "Generative Canvas 開發工作流",
@@ -432,7 +444,7 @@
     "order": 99
   },
   {
-    "id": "40",
+    "id": "41",
     "island": "tpr",
     "topic": "outcomes",
     "title": "中歐與巴爾幹 史詩壯遊",
@@ -441,7 +453,7 @@
     "order": 99
   },
   {
-    "id": "41",
+    "id": "42",
     "island": "tpr",
     "topic": "outcomes",
     "title": "斯洛維尼亞的深呼吸， 學術與自然交織的 9 天深度之旅。",
@@ -450,7 +462,7 @@
     "order": 99
   },
   {
-    "id": "42",
+    "id": "43",
     "island": "tpr",
     "topic": "outcomes",
     "title": "斯洛維尼亞自駕行程",
@@ -459,7 +471,7 @@
     "order": 99
   },
   {
-    "id": "43",
+    "id": "44",
     "island": "tpr",
     "topic": "library",
     "title": "Gemini Canvas",
@@ -468,7 +480,7 @@
     "order": 99
   },
   {
-    "id": "44",
+    "id": "45",
     "island": "tpr",
     "topic": "library",
     "title": "探索 Google AI Quests",
@@ -477,19 +489,19 @@
     "order": 99
   },
   {
-    "id": "45",
+    "id": "46",
     "island": "tpr",
     "topic": "library",
     "title": "其他教學資料",
     "description": "從 Linux 專區移入、與 Linux 無關的教材與頁面（AI 協作與評量、Gemini 學習模式、Notion、AI 題庫等）",
     "path": "tpr/materials/",
     "order": 99,
-    "featuredOrder": 5,
+    "featuredOrder": 6,
     "featuredTitle": "其他教學資料",
     "featuredDescription": "AI 協作與反思評量、Gemini 引導學習模式、Notion 指南、AI 題庫等，從 Linux 專區移入。"
   },
   {
-    "id": "46",
+    "id": "47",
     "island": "tpr",
     "topic": "library",
     "title": "歡迎來到 Notion",
@@ -498,7 +510,7 @@
     "order": 99
   },
   {
-    "id": "47",
+    "id": "48",
     "island": "tpr",
     "topic": "library",
     "title": "Notion 筆記軟體特色一頁通",
@@ -507,7 +519,7 @@
     "order": 99
   },
   {
-    "id": "48",
+    "id": "49",
     "island": "tpr",
     "topic": "outcomes",
     "title": "達明 AI 初階 協作型機械手臂安全與操作測驗",
@@ -516,7 +528,7 @@
     "order": 99
   },
   {
-    "id": "49",
+    "id": "50",
     "island": "tpr",
     "topic": "outcomes",
     "title": "Q 老師的 Other",
@@ -525,7 +537,7 @@
     "order": 99
   },
   {
-    "id": "50",
+    "id": "51",
     "island": "tpr",
     "topic": "outcomes",
     "title": "Q 老師的 AI 考古題",
@@ -534,7 +546,7 @@
     "order": 99
   },
   {
-    "id": "51",
+    "id": "52",
     "island": "tpr",
     "topic": "outcomes",
     "title": "QQnice 聽覺障礙 可能的原因",
@@ -543,19 +555,31 @@
     "order": 99
   },
   {
-    "id": "52",
+    "id": "53",
     "island": "tpr",
     "topic": "library",
     "title": "Padlet 課堂即時文字雲",
     "description": "掃 QR Code 回答 AI 介入課堂後的最大問題，同頁觀看 Padlet 貼文與即時文字雲。",
     "path": "tpr/padlet/",
     "order": 99,
-    "featuredOrder": 0,
+    "featuredOrder": 1,
     "featuredTitle": "Padlet 即時文字雲",
     "featuredDescription": "掃 QR Code 回答「AI 介入後，課堂上最大的問題是什麼？」；同頁查看 Padlet 回覆與依出現次數放大的文字雲。"
   },
   {
-    "id": "53",
+    "id": "54",
+    "island": "tpr",
+    "topic": "library",
+    "title": "文科生的台積電 2 奈米 3D 語音實驗室",
+    "description": "給準熊本廠（JASM）跨領域新人的零門檻半導體科普：3D 互動旋轉拆解、FinFET 與 GAA 奈米片對比、量子穿隧漏電模擬與中文語音導覽",
+    "path": "tpr/tsmc-2nm-3d-guide.html",
+    "order": 99,
+    "featuredOrder": 0,
+    "featuredTitle": "文科生的台積電 2 奈米 3D 語音實驗室",
+    "featuredDescription": "給準熊本廠（JASM）跨領域新人的零門檻半導體科普：3D 互動旋轉拆解、FinFET 與 GAA 奈米片對比、量子穿隧漏電模擬與中文語音導覽。"
+  },
+  {
+    "id": "55",
     "island": "admin",
     "topic": "command",
     "title": "先盤點，再自動化：哪些行政工作適合 AI 協助",
@@ -567,7 +591,7 @@
     "featuredDescription": "用重複性、規則明確度、出錯成本與資料敏感度四個面向，判斷一項行政工作適不適合交給 AI。"
   },
   {
-    "id": "54",
+    "id": "56",
     "island": "admin",
     "topic": "command",
     "title": "行政工作的提示詞範本",
@@ -579,7 +603,7 @@
     "featuredDescription": "會議紀錄、通知信、規章問答、表格核對四種常見任務的指令寫法，可直接複製修改。"
   },
   {
-    "id": "55",
+    "id": "57",
     "island": "admin",
     "topic": "verify",
     "title": "資料安全與結果查核",
@@ -591,7 +615,7 @@
     "featuredDescription": "送給 AI 之前要先處理什麼、拿到結果之後要核對什麼，附一份可列印的檢核表。"
   },
   {
-    "id": "56",
+    "id": "58",
     "island": "admin",
     "topic": "events",
     "title": "招生行政 10 個 AI 打工仔：高互動架構與流程展示平台",
@@ -600,7 +624,7 @@
     "order": 99
   },
   {
-    "id": "57",
+    "id": "59",
     "island": "admin",
     "topic": "events",
     "title": "考生聯絡「半自動撥號」3D 互動劇場",
@@ -609,7 +633,7 @@
     "order": 99
   },
   {
-    "id": "58",
+    "id": "60",
     "island": "admin",
     "topic": "events",
     "title": "你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事",
@@ -618,7 +642,7 @@
     "order": 99
   },
   {
-    "id": "59",
+    "id": "61",
     "island": "admin",
     "topic": "events",
     "title": "十個 AI 小幫手｜招生行政工作流",
@@ -627,7 +651,7 @@
     "order": 99
   },
   {
-    "id": "60",
+    "id": "62",
     "island": "admin",
     "topic": "events",
     "title": "五十幾位主管的課表， 不必再一張一張對。",
@@ -636,7 +660,7 @@
     "order": 99
   },
   {
-    "id": "61",
+    "id": "63",
     "island": "admin",
     "topic": "events",
     "title": "你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事",
@@ -645,7 +669,7 @@
     "order": 99
   },
   {
-    "id": "62",
+    "id": "64",
     "island": "admin",
     "topic": "events",
     "title": "考生聯絡「半自動撥號」3D 互動劇場",
@@ -654,7 +678,7 @@
     "order": 99
   },
   {
-    "id": "63",
+    "id": "65",
     "island": "admin",
     "topic": "verify",
     "title": "AI 時代評量探索與來源交互驗證",
@@ -666,7 +690,7 @@
     "featuredDescription": "告別無效防弊！落實 TEQSA 兩大範式與三軌來源交叉驗證沙盒（文獻 DOI + 數據核實 + Prompt 審查），重構評量規準。"
   },
   {
-    "id": "64",
+    "id": "66",
     "island": "admin",
     "topic": "command",
     "title": "招生行政 10 個 AI 打工仔：高互動架構與流程展示平台",
@@ -678,7 +702,7 @@
     "featuredDescription": "4 大視角技術版：戰情表先行理念、星型總控調度與全流程演練模擬器。"
   },
   {
-    "id": "65",
+    "id": "67",
     "island": "admin",
     "topic": "events",
     "title": "考生聯絡半自動撥號劇場",
@@ -690,7 +714,7 @@
     "featuredDescription": "電腦點選號碼自動撥號、真人拿起話筒對話！3D 語音互動展示桌上實體接線與通話流程。"
   },
   {
-    "id": "66",
+    "id": "68",
     "island": "admin",
     "topic": "daily",
     "title": "信用卡帳單與支出證明單",
@@ -702,7 +726,7 @@
     "featuredDescription": "5 筆海外刷卡一鍵拆成 10 頁交易款＋手續費 Word！支援「匿名留白防個資比對」與 100% 原檔套表。"
   },
   {
-    "id": "67",
+    "id": "69",
     "island": "admin",
     "topic": "command",
     "title": "你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事",
@@ -714,7 +738,7 @@
     "featuredDescription": "用講的下指令！一張戰情表搞定日常重複瑣事，輕鬆掌握全域進度。"
   },
   {
-    "id": "68",
+    "id": "70",
     "island": "admin",
     "topic": "daily",
     "title": "高教補助方案公告總覽",
@@ -726,7 +750,7 @@
     "featuredDescription": "讓每一份支持都能被看見！用爬蟲＋AI 把藏在多層選單的公告匯聚成一目了然的 3D 戰情表。"
   },
   {
-    "id": "69",
+    "id": "71",
     "island": "admin",
     "topic": "daily",
     "title": "進階課表比對戰情表",
@@ -738,7 +762,7 @@
     "featuredDescription": "從辦活動延伸到排會議！54 位主管課表跨院比較、兼職去重、排除 Office Hour 與快取重用。"
   },
   {
-    "id": "70",
+    "id": "72",
     "island": "admin",
     "topic": "daily",
     "title": "AI 整理教師評鑑與日常資料",
@@ -750,7 +774,7 @@
     "featuredDescription": "教學32、研究29、服務40 共101子項單頁直覽！辨識講者角色與 iPAS 證照陷阱，讓平時成果找得到、有依據。"
   },
   {
-    "id": "71",
+    "id": "73",
     "island": "admin",
     "topic": "command",
     "title": "你是大腦，AI 是你養的 10 隻勤勞小幫手！｜一張戰情表搞定行政瑣事",
@@ -759,7 +783,7 @@
     "order": 99
   },
   {
-    "id": "72",
+    "id": "74",
     "island": "linux",
     "topic": "tools",
     "title": "🐧 QQ 老師的 Linux 教學分享區",
@@ -771,7 +795,19 @@
     "order": 99
   },
   {
-    "id": "73",
+    "id": "75",
+    "island": "linux",
+    "topic": "tools",
+    "title": "Google Antigravity 開發前置環境準備與下載安裝手冊（學生與教師專用）",
+    "description": "課程講義，可直接閱讀與下載原始文字。",
+    "path": "linux/antigravity-env-setup/Antigravity開發前置環境準備與安裝手冊.md",
+    "textPath": "assets/islands/documents/05e9191de5d29197.txt",
+    "kind": "markdown",
+    "format": "MD",
+    "order": 99
+  },
+  {
+    "id": "76",
     "island": "linux",
     "topic": "tools",
     "title": "Antigravity × GitHub 串接與「下 Prompt 自動完成」教學手冊",
@@ -783,7 +819,7 @@
     "order": 99
   },
   {
-    "id": "74",
+    "id": "77",
     "island": "linux",
     "topic": "lab",
     "title": "備份腳本 backup.sh",
@@ -795,7 +831,7 @@
     "order": 99
   },
   {
-    "id": "75",
+    "id": "78",
     "island": "linux",
     "topic": "lab",
     "title": "Docker Compose 部署設定",
@@ -807,7 +843,7 @@
     "order": 99
   },
   {
-    "id": "76",
+    "id": "79",
     "island": "linux",
     "topic": "lab",
     "title": "還原腳本 restore.sh",
@@ -819,7 +855,7 @@
     "order": 99
   },
   {
-    "id": "77",
+    "id": "80",
     "island": "linux",
     "topic": "lab",
     "title": "WEEK3 完成檢查",
@@ -831,7 +867,7 @@
     "order": 99
   },
   {
-    "id": "78",
+    "id": "81",
     "island": "linux",
     "topic": "tools",
     "title": "GitHub帳號申請與兩階段驗證手冊",
@@ -842,7 +878,7 @@
     "order": 99
   },
   {
-    "id": "79",
+    "id": "82",
     "island": "linux",
     "topic": "docker",
     "title": "Docker Compose 部署設定",
@@ -854,7 +890,7 @@
     "order": 99
   },
   {
-    "id": "80",
+    "id": "83",
     "island": "linux",
     "topic": "docker",
     "title": "實際完成的操作指令",
@@ -866,7 +902,7 @@
     "order": 99
   },
   {
-    "id": "81",
+    "id": "84",
     "island": "tpr",
     "topic": "research",
     "title": "從課堂問題到可執行的教學實踐研究計畫",
@@ -878,7 +914,7 @@
     "order": 99
   },
   {
-    "id": "82",
+    "id": "85",
     "island": "tpr",
     "topic": "research",
     "title": "教學實踐研究構想：生成式 AI 開放情境下的真實學習證據",
@@ -890,7 +926,7 @@
     "order": 99
   },
   {
-    "id": "83",
+    "id": "86",
     "island": "tpr",
     "topic": "research",
     "title": "文獻探討：生成式 AI 衝擊、真實學習證據與 PAVET 教學介入",
@@ -902,7 +938,7 @@
     "order": 99
   },
   {
-    "id": "84",
+    "id": "87",
     "island": "tpr",
     "topic": "research",
     "title": "Linux 進階課程 PAVET 教學方法與十八週課程規劃草案",
@@ -914,7 +950,7 @@
     "order": 99
   },
   {
-    "id": "85",
+    "id": "88",
     "island": "tpr",
     "topic": "research",
     "title": "（1）研究方法與實施步驟說明",
@@ -926,7 +962,7 @@
     "order": 99
   },
   {
-    "id": "86",
+    "id": "89",
     "island": "tpr",
     "topic": "research",
     "title": "預期完成工作項目與成果",
@@ -938,7 +974,7 @@
     "order": 99
   },
   {
-    "id": "87",
+    "id": "90",
     "island": "tpr",
     "topic": "research",
     "title": "《文獻探討：生成式 AI 衝擊、真實學習證據與 PAVET 教學介入》引用查核表",
@@ -950,7 +986,7 @@
     "order": 99
   },
   {
-    "id": "88",
+    "id": "91",
     "island": "tpr",
     "topic": "research",
     "title": "近十年 WoS：生成式 AI、真實學習與評量效度之初步文獻盤點",
@@ -962,7 +998,7 @@
     "order": 99
   },
   {
-    "id": "89",
+    "id": "92",
     "island": "tpr",
     "topic": "research",
     "title": "09-tpr-manifest.csv",
@@ -974,7 +1010,7 @@
     "order": 99
   },
   {
-    "id": "90",
+    "id": "93",
     "island": "tpr",
     "topic": "research",
     "title": "教學實踐研究成果摘要表",
@@ -985,7 +1021,7 @@
     "order": 99
   },
   {
-    "id": "91",
+    "id": "94",
     "island": "tpr",
     "topic": "research",
     "title": "11-course-passport.yaml",
@@ -997,7 +1033,7 @@
     "order": 99
   },
   {
-    "id": "92",
+    "id": "95",
     "island": "tpr",
     "topic": "research",
     "title": "AI 評量設計檢視報告",
@@ -1008,7 +1044,7 @@
     "order": 99
   },
   {
-    "id": "93",
+    "id": "96",
     "island": "tpr",
     "topic": "research",
     "title": "13-download-reports.py",
@@ -1020,7 +1056,7 @@
     "order": 99
   },
   {
-    "id": "94",
+    "id": "97",
     "island": "tpr",
     "topic": "research",
     "title": "14-extract-abstracts.py",
@@ -1032,7 +1068,7 @@
     "order": 99
   },
   {
-    "id": "95",
+    "id": "98",
     "island": "tpr",
     "topic": "outcomes",
     "title": "AI 協助研究的工作流：執行階段與文章發表講義",
@@ -1044,7 +1080,7 @@
     "order": 99
   },
   {
-    "id": "96",
+    "id": "99",
     "island": "tpr",
     "topic": "outcomes",
     "title": "研究執行與文章發表｜教學投影片",
@@ -1055,7 +1091,7 @@
     "order": 99
   },
   {
-    "id": "97",
+    "id": "100",
     "island": "tpr",
     "topic": "library",
     "title": "GitHub帳號申請與兩階段驗證手冊",
@@ -1066,7 +1102,7 @@
     "order": 99
   },
   {
-    "id": "98",
+    "id": "101",
     "island": "admin",
     "topic": "verify",
     "title": "Notion_AI時代的評量方式探索",
@@ -1078,7 +1114,7 @@
     "order": 99
   },
   {
-    "id": "99",
+    "id": "102",
     "island": "admin",
     "topic": "daily",
     "title": "Notion_匯入專用_信用卡支出證明單",
@@ -1090,7 +1126,7 @@
     "order": 99
   },
   {
-    "id": "100",
+    "id": "103",
     "island": "admin",
     "topic": "daily",
     "title": "Notion文章_信用卡支出證明單",
@@ -1102,7 +1138,7 @@
     "order": 99
   },
   {
-    "id": "101",
+    "id": "104",
     "island": "admin",
     "topic": "daily",
     "title": "支出證明單｜可下載技能包",
