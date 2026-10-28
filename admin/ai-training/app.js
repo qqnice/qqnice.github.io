@@ -1,815 +1,970 @@
 // ============================================================================
-// AI 工作應用圖文手冊｜極簡大字「動態圖說版」互動與動畫引擎 (app.js)
+// AI 工作應用圖文手冊 × ChatGPT 服務與頁面對照（具體圖說互動版主程式）
+// 支援：5 大頁面切換、具體 UI 入口＋辦研習 SVG 動畫圖解、單行圖說、一鍵複製課堂指令、語音導覽
 // ============================================================================
 
 let currentPageId = 'prompt'; // 'prompt' | 'skill' | 'tool' | 'agent' | 'bot' | 'overview'
-let currentStep = 1;          // 1 ~ 4
-let isPlayingAnim = false;
+let currentStepIdx = 0;       // 0, 1, 2
 let animTimer = null;
 let voiceEnabled = true;
-let audioCtx = null;
+let fontSizeMode = 'normal';  // 'normal' | 'large' | 'xlarge'
 
-// ----------------------------------------------------------------------------
-// 1. 字體大小切換（標準大字 / 特大字 / 投影超大）
-// ----------------------------------------------------------------------------
-function setFontSizeMode(mode) {
-  const htmlEl = document.documentElement;
-  htmlEl.classList.remove('font-mode-normal', 'font-mode-large', 'font-mode-xlarge');
-  htmlEl.classList.add(`font-mode-${mode}`);
-
-  ['normal', 'large', 'xlarge'].forEach((m) => {
-    const btn = document.getElementById(`btn-font-${m}`);
-    if (!btn) return;
-    btn.className =
-      m === mode
-        ? 'px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 font-black text-sm shadow transition-all'
-        : 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition-all';
-  });
-  playSound('click');
-}
-
-// ----------------------------------------------------------------------------
-// 2. 音效與語音導覽
-// ----------------------------------------------------------------------------
-function getAudioCtx() {
-  if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (AudioContext) audioCtx = new AudioContext();
+const COLOR_STYLES = {
+  sky: {
+    border: 'border-sky-400',
+    bgSoft: 'bg-sky-500/15',
+    text: 'text-sky-300',
+    btn: 'bg-sky-400 hover:bg-sky-300 text-slate-950',
+    badge: 'bg-sky-500/20 text-sky-200 border-sky-400/50',
+    glow: 'shadow-[0_0_30px_rgba(56,189,248,0.28)]'
+  },
+  emerald: {
+    border: 'border-emerald-400',
+    bgSoft: 'bg-emerald-500/15',
+    text: 'text-emerald-300',
+    btn: 'bg-emerald-400 hover:bg-emerald-300 text-slate-950',
+    badge: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/50',
+    glow: 'shadow-[0_0_30px_rgba(16,185,129,0.28)]'
+  },
+  amber: {
+    border: 'border-amber-400',
+    bgSoft: 'bg-amber-500/15',
+    text: 'text-amber-300',
+    btn: 'bg-amber-400 hover:bg-amber-300 text-slate-950',
+    badge: 'bg-amber-500/20 text-amber-200 border-amber-400/50',
+    glow: 'shadow-[0_0_30px_rgba(245,158,11,0.28)]'
+  },
+  purple: {
+    border: 'border-purple-400',
+    bgSoft: 'bg-purple-500/15',
+    text: 'text-purple-300',
+    btn: 'bg-purple-400 hover:bg-purple-300 text-slate-950',
+    badge: 'bg-purple-500/20 text-purple-200 border-purple-400/50',
+    glow: 'shadow-[0_0_30px_rgba(168,85,247,0.28)]'
+  },
+  rose: {
+    border: 'border-rose-400',
+    bgSoft: 'bg-rose-500/15',
+    text: 'text-rose-300',
+    btn: 'bg-rose-400 hover:bg-rose-300 text-slate-950',
+    badge: 'bg-rose-500/20 text-rose-200 border-rose-400/50',
+    glow: 'shadow-[0_0_30px_rgba(244,63,94,0.28)]'
   }
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
+};
 
-function playSound(type = 'click') {
-  const ctx = getAudioCtx();
-  if (!ctx) return;
-  const freqs = type === 'step' ? [523.25, 659.25, 783.99] : [660, 880];
-  freqs.forEach((f, idx) => {
-    const start = ctx.currentTime + idx * 0.05;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = f;
-    gain.gain.setValueAtTime(0.045, start);
-    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.075);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(start);
-    osc.stop(start + 0.08);
-  });
-}
+// ----------------------------------------------------------------------------
+// 1. 語音導覽 (Web Speech API)
+// ----------------------------------------------------------------------------
+function speakText(text, force = false) {
+  const statusEl = document.getElementById('voice-status-text');
+  const waveEl = document.getElementById('speaking-wave');
+  if (statusEl) statusEl.textContent = text;
 
-function setSpeakingWave(active, text = '') {
-  const wave = document.getElementById('speaking-wave');
-  const sub = document.getElementById('voice-status-text');
-  if (wave) {
-    wave.classList.toggle('hidden', !active);
-    wave.classList.toggle('inline-flex', active);
-  }
-  if (sub && text) sub.textContent = text;
-}
-
-function speakText(text, onEnd = null) {
-  if (!('speechSynthesis' in window)) {
-    if (onEnd) setTimeout(onEnd, 2400);
-    return;
-  }
+  if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  setSpeakingWave(true, text);
-
-  if (!voiceEnabled) {
-    setSpeakingWave(false, text);
-    if (onEnd) setTimeout(onEnd, 2400);
+  if (!voiceEnabled && !force) {
+    if (waveEl) waveEl.classList.add('hidden');
     return;
   }
 
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = 'zh-TW';
-  utter.rate = 1.04;
-  const voices = window.speechSynthesis.getVoices();
-  const twVoice =
-    voices.find((v) => v.lang.includes('zh-TW') && (v.name.includes('Meijia') || v.name.includes('Google') || v.name.includes('Microsoft'))) ||
-    voices.find((v) => v.lang.includes('zh-TW')) ||
-    voices.find((v) => v.lang.includes('zh'));
-  if (twVoice) utter.voice = twVoice;
+  utter.rate = 1.03;
 
+  const voices = window.speechSynthesis.getVoices();
+  const zhVoice =
+    voices.find(v => v.lang.includes('zh-TW') && (v.name.includes('Meijia') || v.name.includes('Google') || v.name.includes('Microsoft'))) ||
+    voices.find(v => v.lang.includes('zh-TW') || v.lang.includes('zh_TW')) ||
+    voices.find(v => v.lang.includes('zh'));
+  if (zhVoice) utter.voice = zhVoice;
+
+  utter.onstart = () => {
+    if (waveEl) {
+      waveEl.classList.remove('hidden');
+      waveEl.classList.add('inline-flex');
+    }
+  };
   utter.onend = () => {
-    setSpeakingWave(false);
-    if (onEnd) onEnd();
+    if (waveEl) {
+      waveEl.classList.add('hidden');
+      waveEl.classList.remove('inline-flex');
+    }
   };
   utter.onerror = () => {
-    setSpeakingWave(false);
-    if (onEnd) onEnd();
+    if (waveEl) waveEl.classList.add('hidden');
   };
+
   window.speechSynthesis.speak(utter);
 }
 
 function toggleVoiceEnabled() {
   voiceEnabled = !voiceEnabled;
-  const icon = document.getElementById('voice-icon');
-  const label = document.getElementById('voice-label');
-  const btn = document.getElementById('btn-voice-toggle');
+  const iconEl = document.getElementById('voice-icon');
+  const labelEl = document.getElementById('voice-label');
+  const btnEl = document.getElementById('btn-voice-toggle');
   if (voiceEnabled) {
-    if (icon) icon.textContent = '🔊';
-    if (label) label.textContent = '語音：開';
-    if (btn) btn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border-2 border-sky-400 text-sm font-black text-sky-300 transition-all';
+    if (iconEl) iconEl.textContent = '🔊';
+    if (labelEl) labelEl.textContent = '語音：開啟';
+    if (btnEl) btnEl.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border-2 border-sky-400 text-sm font-black text-sky-300 transition-all';
     speakCurrentPageIntro();
   } else {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    setSpeakingWave(false);
-    if (icon) icon.textContent = '🔇';
-    if (label) label.textContent = '語音：關';
-    if (btn) btn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border-2 border-slate-700 text-sm font-bold text-slate-400 transition-all';
+    if (iconEl) iconEl.textContent = '🔇';
+    if (labelEl) labelEl.textContent = '語音：靜音';
+    if (btnEl) btnEl.className = 'flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-slate-700 text-sm font-bold text-slate-400 transition-all';
   }
 }
 
 function speakCurrentPageIntro() {
   if (currentPageId === 'overview') {
-    speakText('五站總覽圖說：Prompt 交代一次任務，Skill 保存工作方法，Tool 取得執行能力，Agent 委派目標與調整，Bot 提供互動服務。');
+    speakText('五站總覽圖：這五個概念是理解工作的五個角度，不是 ChatGPT 的五種付費等級，也不是五個互斥按鈕。我們用「辦一場校內研習」串聯五個概念與實際操作入口！', true);
     return;
   }
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId) || FIVE_PAGES[0];
-  speakText(page.pageVoice);
+  const page = FIVE_PAGES.find(p => p.id === currentPageId);
+  if (page) speakText(page.voiceIntro, true);
 }
 
 // ----------------------------------------------------------------------------
-// 3. 頂部 5 大頁面切換列 (Prompt / Skill / Tool / Agent / Bot + 五站總覽)
+// 2. 字體大小切換
+// ----------------------------------------------------------------------------
+function setFontSizeMode(mode) {
+  fontSizeMode = mode;
+  const htmlEl = document.documentElement;
+  htmlEl.classList.remove('font-mode-normal', 'font-mode-large', 'font-mode-xlarge');
+  htmlEl.classList.add(`font-mode-${mode}`);
+
+  ['normal', 'large', 'xlarge'].forEach(m => {
+    const btn = document.getElementById(`btn-font-${m}`);
+    if (!btn) return;
+    if (m === mode) {
+      btn.className = 'px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 font-black text-sm shadow transition-all';
+    } else {
+      btn.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition-all';
+    }
+  });
+}
+
+// ----------------------------------------------------------------------------
+// 3. 頂部 5 大頁面切換列
 // ----------------------------------------------------------------------------
 function renderTopTabs() {
   const container = document.getElementById('five-page-tabs');
   if (!container) return;
 
-  const activeColor = {
-    sky: 'bg-sky-500 text-slate-950 border-sky-200 shadow-lg shadow-sky-500/30 scale-[1.02]',
-    emerald: 'bg-emerald-500 text-slate-950 border-emerald-200 shadow-lg shadow-emerald-500/30 scale-[1.02]',
-    amber: 'bg-amber-400 text-slate-950 border-amber-200 shadow-lg shadow-amber-400/30 scale-[1.02]',
-    purple: 'bg-purple-500 text-white border-purple-200 shadow-lg shadow-purple-500/30 scale-[1.02]',
-    rose: 'bg-rose-500 text-white border-rose-200 shadow-lg shadow-rose-500/30 scale-[1.02]'
-  };
-
-  const html = FIVE_PAGES.map((p) => {
-    const active = currentPageId === p.id;
-    const cls = active
-      ? activeColor[p.color]
-      : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700';
-
+  const pageButtons = FIVE_PAGES.map(p => {
+    const isActive = currentPageId === p.id;
+    const st = COLOR_STYLES[p.color];
     return `
-      <button
-        onclick="switchPage('${p.id}', true)"
-        class="rounded-2xl border-2 px-4 py-3 text-left transition-all flex items-center gap-3 ${cls}"
-      >
+      <button onclick="switchPage('${p.id}')"
+        class="page-tab-btn text-left px-4 py-3 rounded-2xl border-2 transition-all flex items-center gap-3 ${
+          isActive
+            ? `${st.bgSoft} ${st.border} ${st.glow} scale-[1.01]`
+            : 'bg-slate-900/90 border-slate-800 hover:border-slate-600 opacity-85 hover:opacity-100'
+        }">
         <span class="text-3xl shrink-0">${p.icon}</span>
-        <div class="min-w-0">
-          <div class="text-lg sm:text-xl font-black leading-tight truncate">${p.num} ${p.name}</div>
-          <div class="text-xs sm:text-sm font-bold truncate ${active ? 'opacity-95' : 'text-slate-400'}">${p.zhTitle}</div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black px-2 py-0.5 rounded-md bg-slate-950/90 ${st.text}">${p.stepNum}</span>
+            <span class="font-black text-base sm:text-lg text-white truncate">${p.name}</span>
+          </div>
+          <div class="text-xs sm:text-sm font-bold text-slate-300 truncate mt-0.5">${p.zhName}</div>
         </div>
       </button>
     `;
   }).join('');
 
-  const isOv = currentPageId === 'overview';
-  const ovBtn = `
-    <button
-      onclick="switchPage('overview', true)"
-      class="rounded-2xl border-2 px-4 py-3 text-left transition-all flex items-center gap-3 ${
-        isOv
-          ? 'bg-gradient-to-r from-indigo-500 to-sky-400 text-slate-950 border-white shadow-lg scale-[1.02]'
-          : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
-      }"
-    >
+  const isOverview = currentPageId === 'overview';
+  const overviewBtn = `
+    <button onclick="switchPage('overview')"
+      class="page-tab-btn text-left px-4 py-3 rounded-2xl border-2 transition-all flex items-center gap-3 ${
+        isOverview
+          ? 'bg-amber-500/20 border-amber-400 shadow-[0_0_28px_rgba(245,158,11,0.28)] scale-[1.01]'
+          : 'bg-slate-900/90 border-slate-800 hover:border-slate-600 opacity-85 hover:opacity-100'
+      }">
       <span class="text-3xl shrink-0">🗺️</span>
-      <div class="min-w-0">
-        <div class="text-lg sm:text-xl font-black leading-tight truncate">五站總覽圖</div>
-        <div class="text-xs sm:text-sm font-bold truncate ${isOv ? 'opacity-95' : 'text-amber-300'}">同場研習五種用法</div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-black px-2 py-0.5 rounded-md bg-slate-950/90 text-amber-300">總覽</span>
+          <span class="font-black text-base sm:text-lg text-white truncate">五站對照</span>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-300 truncate mt-0.5">辦研習串聯五概念</div>
       </div>
     </button>
   `;
 
-  container.innerHTML = html + ovBtn;
+  container.innerHTML = pageButtons + overviewBtn;
 }
 
-function switchPage(pageId, shouldSpeak = true) {
-  stopAnim();
+function switchPage(pageId) {
+  if (animTimer) {
+    clearInterval(animTimer);
+    animTimer = null;
+  }
   currentPageId = pageId;
-  currentStep = 1;
-  playSound('step');
+  currentStepIdx = 0;
   renderTopTabs();
   renderMainPage();
-  if (shouldSpeak) speakCurrentPageIntro();
-}
 
-function prevPage() {
-  const order = ['prompt', 'skill', 'tool', 'agent', 'bot', 'overview'];
-  const idx = order.indexOf(currentPageId);
-  switchPage(order[idx > 0 ? idx - 1 : order.length - 1], true);
-}
-
-function nextPage() {
-  const order = ['prompt', 'skill', 'tool', 'agent', 'bot', 'overview'];
-  const idx = order.indexOf(currentPageId);
-  switchPage(order[idx < order.length - 1 ? idx + 1 : 0], true);
-}
-
-// ----------------------------------------------------------------------------
-// 4. 動畫播放控制（自動步進 1 ➔ 2 ➔ 3 ➔ 4 並朗讀圖說）
-// ----------------------------------------------------------------------------
-function toggleAnim() {
-  if (isPlayingAnim) {
-    stopAnim();
+  if (pageId === 'overview') {
+    speakText('五站對照總覽：這五個概念不是五種付費等級，也不是五個互斥按鈕。點擊下方「辦一場校內研習」的任一階段，即可查看在 ChatGPT 哪裡操作！');
   } else {
-    startAnim();
+    const page = FIVE_PAGES.find(p => p.id === pageId);
+    if (page) speakText(page.voiceIntro);
   }
 }
 
-function startAnim() {
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId);
-  if (!page) return;
-  isPlayingAnim = true;
-  renderMainPage();
-  runStepLoop(1);
-}
-
-function stopAnim() {
-  isPlayingAnim = false;
-  if (animTimer) clearTimeout(animTimer);
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  setSpeakingWave(false);
-  const btn = document.getElementById('btn-play-anim');
-  if (btn) {
-    btn.innerHTML = '▶️ 播放動畫＋語音圖說';
-    btn.className = 'px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-base shadow-lg transition-all';
-  }
-}
-
-function runStepLoop(stepNum) {
-  if (!isPlayingAnim) return;
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId);
-  if (!page) return;
-
-  selectStep(stepNum, false);
-  const st = page.steps.find((s) => s.step === stepNum) || page.steps[0];
-  speakText(st.voice, () => {
-    if (!isPlayingAnim) return;
-    animTimer = setTimeout(() => {
-      if (!isPlayingAnim) return;
-      if (stepNum < page.steps.length) {
-        runStepLoop(stepNum + 1);
-      } else {
-        stopAnim();
-      }
-    }, 650);
-  });
-}
-
-function selectStep(stepNum, shouldSpeak = true) {
-  currentStep = stepNum;
-  playSound('click');
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId);
-  if (!page) return;
-
-  const svgWrap = document.getElementById('svg-diagram-container');
-  if (svgWrap) svgWrap.innerHTML = renderCustomSVG(page.id, currentStep);
-
-  const pillsWrap = document.getElementById('step-pills-bar');
-  if (pillsWrap) pillsWrap.innerHTML = renderStepPillsHtml(page);
-
-  const st = page.steps.find((s) => s.step === currentStep) || page.steps[0];
-  const capEl = document.getElementById('main-caption-box');
-  if (capEl) capEl.textContent = st.caption;
-
-  if (shouldSpeak) speakText(st.voice);
-}
-
 // ----------------------------------------------------------------------------
-// 5. 每一頁專屬的「大型動態 SVG 圖解」（完全對應手冊 圖 3 ~ 圖 7）
+// 4. 針對 5 大頁面繪製「ChatGPT 具體畫面入口 ＋ 辦研習流程 ＋ 驗收成果」SVG 圖解
 // ----------------------------------------------------------------------------
-function renderCustomSVG(pageId, step) {
-  const activeStroke = (n, colorHex) => (step === n ? colorHex : '#475569');
-  const activeWidth = (n) => (step === n ? '4.5' : '2');
-  const activeFill = (n, activeBg) => (step === n ? activeBg : '#0f172a');
+function renderCustomSVG(pageId, activeStep) {
+  const s1 = activeStep === 0;
+  const s2 = activeStep === 1;
+  const s3 = activeStep === 2;
 
-  // === 圖 3：01 Prompt 單次內容小循環 ===
+  const boxStyle = (active, hex) =>
+    active
+      ? `stroke="${hex}" stroke-width="4" fill="#0f172a" filter="url(#glow)"`
+      : `stroke="#334155" stroke-width="2.5" fill="#0f172a" opacity="0.88"`;
+
+  // 01 PROMPT：Chat 新對話輸入框 ➔ 3 條件要求 ➔ 250 字摘要＋待確認事項
   if (pageId === 'prompt') {
     return `
-      <svg viewBox="0 0 1000 300" class="w-full h-auto max-h-[340px] select-none">
-        <!-- 動態箭頭連線 -->
-        <line x1="225" y1="145" x2="275" y2="145" stroke="#38bdf8" stroke-width="5" class="${step >= 2 ? 'flow-line-active' : 'opacity-30'}" />
-        <polygon points="275,145 263,137 263,153" fill="#38bdf8" />
-        <line x1="475" y1="145" x2="525" y2="145" stroke="#38bdf8" stroke-width="5" class="${step >= 3 ? 'flow-line-active' : 'opacity-30'}" />
-        <polygon points="525,145 513,137 513,153" fill="#38bdf8" />
-        <line x1="725" y1="145" x2="775" y2="145" stroke="#38bdf8" stroke-width="5" class="${step >= 4 ? 'flow-line-active' : 'opacity-30'}" />
-        <polygon points="775,145 763,137 763,153" fill="#38bdf8" />
+      <svg viewBox="0 0 1050 370" class="w-full h-auto select-none">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arr-sky" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
 
-        <!-- Node 1: 提供材料 -->
-        <g class="cursor-pointer" onclick="selectStep(1, true)" transform="translate(25, 45)">
-          <rect width="200" height="190" rx="22" fill="${activeFill(1, '#0c4a6e')}" stroke="${activeStroke(1, '#38bdf8')}" stroke-width="${activeWidth(1)}" />
-          <text x="100" y="58" text-anchor="middle" font-size="38">📄</text>
-          <text x="100" y="102" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">① 提供材料</text>
-          <text x="100" y="135" text-anchor="middle" fill="#7dd3fc" font-size="16" font-weight="700">公告・筆記・數據</text>
-          <text x="100" y="165" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="700">例：11/20 研習資料</text>
+        <!-- Step 1: 左側 ChatGPT 畫面入口 -->
+        <g onclick="selectStep(0)" class="cursor-pointer">
+          <rect x="20" y="22" width="315" height="325" rx="18" ${boxStyle(s1, '#38bdf8')}/>
+          <rect x="20" y="22" width="315" height="44" rx="18" fill="#0284c7"/>
+          <text x="177" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">① 在哪裡按：Chat 新對話輸入框</text>
+          
+          <!-- 模擬 ChatGPT 頂部切換與輸入框 -->
+          <rect x="40" y="82" width="275" height="36" rx="10" fill="#1e293b" stroke="#475569"/>
+          <text x="177" y="105" text-anchor="middle" fill="#bae6fd" font-size="15" font-weight="800">🌐 chatgpt.com ➔ 建立「新對話」</text>
+
+          <rect x="40" y="132" width="275" height="145" rx="14" fill="#090d16" stroke="#38bdf8" stroke-width="2"/>
+          <text x="55" y="160" fill="#38bdf8" font-size="15" font-weight="900">💬 訊息輸入框（直接打字）：</text>
+          <text x="55" y="188" fill="#e2e8f0" font-size="14" font-weight="700">「請根據下方公告，整理給</text>
+          <text x="55" y="212" fill="#e2e8f0" font-size="14" font-weight="700">校內同仁閱讀的研習摘要...」</text>
+          <rect x="55" y="228" width="185" height="32" rx="8" fill="#1e293b"/>
+          <text x="68" y="249" fill="#94a3b8" font-size="13" font-weight="700">📄 ［貼上教學用研習公告］</text>
+          <circle cx="290" cy="252" r="14" fill="#38bdf8"/>
+          <text x="290" y="257" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">↑</text>
+
+          <text x="177" y="312" text-anchor="middle" fill="#7dd3fc" font-size="14" font-weight="800">💡 Work 交辦工作時同樣需要 Prompt</text>
         </g>
 
-        <!-- Node 2: 交代要求 -->
-        <g class="cursor-pointer" onclick="selectStep(2, true)" transform="translate(275, 45)">
-          <rect width="200" height="190" rx="22" fill="${activeFill(2, '#0c4a6e')}" stroke="${activeStroke(2, '#38bdf8')}" stroke-width="${activeWidth(2)}" />
-          <text x="100" y="58" text-anchor="middle" font-size="38">🎯</text>
-          <text x="100" y="102" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">② 交代要求</text>
-          <text x="100" y="135" text-anchor="middle" fill="#7dd3fc" font-size="16" font-weight="700">對象・格式・限制</text>
-          <text x="100" y="165" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="700">缺資料標「待補」</text>
+        <!-- 連接箭頭 1 -> 2 -->
+        <line x1="338" y1="185" x2="375" y2="185" stroke="#38bdf8" stroke-width="4" stroke-dasharray="7 5" class="${s1 || s2 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-sky)"/>
+
+        <!-- Step 2: 中間 Prompt 三大條件 -->
+        <g onclick="selectStep(1)" class="cursor-pointer">
+          <rect x="382" y="22" width="290" height="325" rx="18" ${boxStyle(s2, '#38bdf8')}/>
+          <rect x="382" y="22" width="290" height="44" rx="18" fill="#0369a1"/>
+          <text x="527" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">② 怎麼交代：說清楚 3 件事</text>
+
+          <rect x="402" y="84" width="250" height="70" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="418" y="110" fill="#38bdf8" font-size="16" font-weight="900">🎯 1. 指定 6 個必填欄位</text>
+          <text x="418" y="135" fill="#e2e8f0" font-size="13" font-weight="700">名稱、日期、地點、對象、期限、方式</text>
+
+          <rect x="402" y="168" width="250" height="70" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="418" y="194" fill="#38bdf8" font-size="16" font-weight="900">📏 2. 限制格式與字數</text>
+          <text x="418" y="219" fill="#e2e8f0" font-size="13" font-weight="700">全文 ≤ 250 字 ＋ 另列待確認事項</text>
+
+          <rect x="402" y="252" width="250" height="74" rx="12" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+          <text x="418" y="279" fill="#fbbf24" font-size="16" font-weight="900">🛡️ 3. 防亂編邊界（關鍵！）</text>
+          <text x="418" y="305" fill="#fde68a" font-size="13" font-weight="800">沒寫的標示「未提供」，不自行補上</text>
         </g>
 
-        <!-- Node 3: AI 產生內容 -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)" transform="translate(525, 45)">
-          <rect width="200" height="190" rx="22" fill="${activeFill(3, '#0c4a6e')}" stroke="${activeStroke(3, '#38bdf8')}" stroke-width="${activeWidth(3)}" />
-          <text x="100" y="58" text-anchor="middle" font-size="38">🤖</text>
-          <text x="100" y="102" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">③ AI 產生內容</text>
-          <text x="100" y="135" text-anchor="middle" fill="#7dd3fc" font-size="16" font-weight="700">草稿・摘要・比較</text>
-          <text x="100" y="165" text-anchor="middle" fill="#6ee7b7" font-size="14" font-weight="700">產出通知＋待確認項</text>
-        </g>
+        <!-- 連接箭頭 2 -> 3 -->
+        <line x1="675" y1="185" x2="712" y2="185" stroke="#38bdf8" stroke-width="4" stroke-dasharray="7 5" class="${s2 || s3 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-sky)"/>
 
-        <!-- Node 4: 由人核對 -->
-        <g class="cursor-pointer" onclick="selectStep(4, true)" transform="translate(775, 45)">
-          <rect width="200" height="190" rx="22" fill="${activeFill(4, '#0c4a6e')}" stroke="${activeStroke(4, '#38bdf8')}" stroke-width="${activeWidth(4)}" />
-          <text x="100" y="58" text-anchor="middle" font-size="38">👩‍💼</text>
-          <text x="100" y="102" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">④ 由人核對</text>
-          <text x="100" y="135" text-anchor="middle" fill="#7dd3fc" font-size="16" font-weight="700">事實・語氣・缺漏</text>
-          <text x="100" y="165" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="700">補齊連結後才發布</text>
-        </g>
+        <!-- Step 3: 右側 預期成果與驗收 -->
+        <g onclick="selectStep(2)" class="cursor-pointer">
+          <rect x="720" y="22" width="310" height="325" rx="18" ${boxStyle(s3, '#10b981')}/>
+          <rect x="720" y="22" width="310" height="44" rx="18" fill="#059669"/>
+          <text x="875" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">③ 驗收成果：摘要＋缺漏清單</text>
 
-        <!-- 底部一句話圖說 -->
-        <text x="500" y="278" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">
-          圖 3｜提供資料與要求，讓本次回覆接近你的需要（寫出文字 ≠ 實際完成動作）
-        </text>
+          <rect x="740" y="84" width="270" height="150" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <text x="756" y="110" fill="#34d399" font-size="16" font-weight="900">📋 產出：校內研習摘要（≤250字）</text>
+          <text x="756" y="136" fill="#e2e8f0" font-size="14" font-weight="700">• 活動名稱、日期時間、地點</text>
+          <text x="756" y="160" fill="#e2e8f0" font-size="14" font-weight="700">• 參加對象、報名期限與方式</text>
+          <text x="756" y="190" fill="#fbbf24" font-size="14" font-weight="800">⚠️ 承辦人待確認：報名連結［未提供］</text>
+          <text x="756" y="215" fill="#94a3b8" font-size="13" font-weight="700">（人工核對日期、地點、對象是否正確）</text>
+
+          <rect x="740" y="250" width="270" height="76" rx="12" fill="#450a0a" stroke="#f87171" stroke-width="2"/>
+          <text x="875" y="278" text-anchor="middle" fill="#fca5a5" font-size="15" font-weight="900">🚨 課堂必講觀念：</text>
+          <text x="875" y="305" text-anchor="middle" fill="#fecaca" font-size="14" font-weight="800">請它寫出通知草稿 ≠ 已經寄出通知！</text>
+        </g>
       </svg>
     `;
   }
 
-  // === 圖 4：02 Skill 同一方法處理不同資料 ===
+  // 02 SKILL：側邊欄 Skills ＋ @skill-creator ➔ 輸入 @ 呼叫 ➔ 換新活動自動套用與抓漏
   if (pageId === 'skill') {
     return `
-      <svg viewBox="0 0 1000 320" class="w-full h-auto max-h-[350px] select-none">
-        <!-- 左到中連線 -->
-        <line x1="250" y1="65" x2="355" y2="145" stroke="#10b981" stroke-width="4" class="${step >= 2 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="250" y1="150" x2="355" y2="150" stroke="#10b981" stroke-width="4" class="${step >= 2 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="250" y1="235" x2="355" y2="155" stroke="#10b981" stroke-width="4" class="${step >= 2 ? 'flow-line-active' : 'opacity-35'}" />
+      <svg viewBox="0 0 1050 370" class="w-full h-auto select-none">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arr-em" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+          </marker>
+        </defs>
 
-        <!-- 中到右連線 -->
-        <line x1="645" y1="145" x2="750" y2="65" stroke="#10b981" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="645" y1="150" x2="750" y2="150" stroke="#10b981" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="645" y1="155" x2="750" y2="235" stroke="#10b981" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
+        <!-- Step 1: 建立與保存方法 -->
+        <g onclick="selectStep(0)" class="cursor-pointer">
+          <rect x="20" y="22" width="315" height="325" rx="18" ${boxStyle(s1, '#10b981')}/>
+          <rect x="20" y="22" width="315" height="44" rx="18" fill="#059669"/>
+          <text x="177" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">① 怎麼存：呼叫 @skill-creator</text>
 
-        <!-- 左側：研習 A / B / C 資料 (Step 1) -->
-        <g class="cursor-pointer" onclick="selectStep(1, true)">
-          <rect x="30" y="32" width="220" height="62" rx="14" fill="${activeFill(1, '#064e3b')}" stroke="${activeStroke(1, '#10b981')}" stroke-width="${activeWidth(1)}" />
-          <text x="140" y="70" text-anchor="middle" fill="#ffffff" font-size="19" font-weight="900">📥 研習 A 資料 (完整)</text>
+          <rect x="40" y="84" width="275" height="65" rx="12" fill="#1e293b" stroke="#10b981"/>
+          <text x="56" y="110" fill="#6ee7b7" font-size="15" font-weight="900">Step A：先完成 1 次滿意的通知</text>
+          <text x="56" y="134" fill="#cbd5e1" font-size="13" font-weight="700">確認欄位、文字風格與檢查規則都正確</text>
 
-          <rect x="30" y="118" width="220" height="62" rx="14" fill="${activeFill(1, '#064e3b')}" stroke="${activeStroke(1, '#10b981')}" stroke-width="${activeWidth(1)}" />
-          <text x="140" y="156" text-anchor="middle" fill="#ffffff" font-size="19" font-weight="900">📥 研習 B 資料 (缺連結)</text>
-
-          <rect x="30" y="204" width="220" height="62" rx="14" fill="${activeFill(1, '#064e3b')}" stroke="${activeStroke(1, '#10b981')}" stroke-width="${activeWidth(1)}" />
-          <text x="140" y="242" text-anchor="middle" fill="#ffffff" font-size="19" font-weight="900">📥 研習 C 資料 (日衝突)</text>
+          <rect x="40" y="164" width="275" height="160" rx="12" fill="#090d16" stroke="#10b981" stroke-width="2"/>
+          <text x="56" y="192" fill="#34d399" font-size="16" font-weight="900">Step B：在 Work 輸入</text>
+          <rect x="56" y="204" width="160" height="28" rx="6" fill="#065f46"/>
+          <text x="66" y="223" fill="#a7f3d0" font-size="15" font-weight="900">@skill-creator</text>
+          <text x="56" y="255" fill="#e2e8f0" font-size="14" font-weight="700">📦 封裝成「研習通知」技能：</text>
+          <text x="56" y="279" fill="#94a3b8" font-size="13" font-weight="700">• 步驟：檢查欄位→列缺漏→寫通知</text>
+          <text x="56" y="302" fill="#fbbf24" font-size="13" font-weight="800">• 限制：沒給講師/時數不得自行補寫</text>
         </g>
 
-        <!-- 中央：研習通知 Skill 核心盒 (Step 2 & Step 4) -->
-        <g class="cursor-pointer" onclick="selectStep(2, true)" transform="translate(355, 28)">
-          <rect width="290" height="240" rx="24" fill="${step === 2 || step === 4 ? '#064e3b' : '#0f172a'}" stroke="${step === 2 || step === 4 ? '#34d399' : '#475569'}" stroke-width="${step === 2 || step === 4 ? '4.5' : '2.5'}" />
-          <text x="145" y="48" text-anchor="middle" fill="#6ee7b7" font-size="24" font-weight="900">📘 研習通知 Skill</text>
-          <text x="40" y="92" fill="#f8fafc" font-size="17" font-weight="700">✔ 適用情境與操作步驟</text>
-          <text x="40" y="126" fill="#f8fafc" font-size="17" font-weight="700">✔ 單位通知公版範本</text>
-          <text x="40" y="160" fill="#f8fafc" font-size="17" font-weight="700">✔ 必查欄位清單</text>
-          <text x="40" y="194" fill="#fde68a" font-size="17" font-weight="700">✔ 缺漏與衝突檢查標準</text>
-          <text x="145" y="224" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">(SKILL.md ＋ 範本資源)</text>
+        <line x1="338" y1="185" x2="375" y2="185" stroke="#10b981" stroke-width="4" stroke-dasharray="7 5" class="${s1 || s2 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-em)"/>
+
+        <!-- Step 2: 在哪裡按：側邊欄 Skills 與 @ 選單 -->
+        <g onclick="selectStep(1)" class="cursor-pointer">
+          <rect x="382" y="22" width="290" height="325" rx="18" ${boxStyle(s2, '#10b981')}/>
+          <rect x="382" y="22" width="290" height="44" rx="18" fill="#047857"/>
+          <text x="527" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">② 在哪裡按：Skills 側欄與 @</text>
+
+          <!-- 模擬桌面版左側邊欄 -->
+          <rect x="402" y="84" width="250" height="95" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="1.5"/>
+          <text x="418" y="110" fill="#6ee7b7" font-size="15" font-weight="900">🖥️ 桌面版左側邊欄 ➔「Skills」</text>
+          <text x="418" y="135" fill="#e2e8f0" font-size="13" font-weight="700">• 查看與啟用獨立 Skill</text>
+          <text x="418" y="158" fill="#94a3b8" font-size="13" font-weight="700">• 或使用 Plugin 附帶的 Skill</text>
+
+          <!-- 模擬對話框輸入 @ 彈出選單 -->
+          <rect x="402" y="195" width="250" height="130" rx="12" fill="#090d16" stroke="#10b981" stroke-width="2"/>
+          <text x="418" y="222" fill="#34d399" font-size="15" font-weight="900">💬 對話框輸入「@」跳出選單：</text>
+          <rect x="418" y="234" width="218" height="34" rx="8" fill="#065f46" stroke="#34d399"/>
+          <text x="430" y="256" fill="#ffffff" font-size="15" font-weight="900">📦 @研習通知（已啟用技能）</text>
+          <text x="418" y="294" fill="#cbd5e1" font-size="13" font-weight="700">➕ 貼入「第二場研習活動資料」</text>
+          <text x="418" y="314" fill="#94a3b8" font-size="12" font-weight="700">（不必再重貼整串規則！）</text>
         </g>
 
-        <!-- 右側：A / B / C 通知草稿 (Step 3) -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)">
-          <rect x="750" y="32" width="220" height="62" rx="14" fill="${activeFill(3, '#064e3b')}" stroke="${activeStroke(3, '#10b981')}" stroke-width="${activeWidth(3)}" />
-          <text x="860" y="70" text-anchor="middle" fill="#6ee7b7" font-size="19" font-weight="900">📋 A 通知草稿 (不混舊)</text>
+        <line x1="675" y1="185" x2="712" y2="185" stroke="#10b981" stroke-width="4" stroke-dasharray="7 5" class="${s2 || s3 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-em)"/>
 
-          <rect x="750" y="118" width="220" height="62" rx="14" fill="${activeFill(3, '#064e3b')}" stroke="${activeStroke(3, '#10b981')}" stroke-width="${activeWidth(3)}" />
-          <text x="860" y="156" text-anchor="middle" fill="#fde68a" font-size="19" font-weight="900">📋 B 通知草稿 (標待補)</text>
+        <!-- Step 3: 換場次重用與抓漏驗收 -->
+        <g onclick="selectStep(2)" class="cursor-pointer">
+          <rect x="720" y="22" width="310" height="325" rx="18" ${boxStyle(s3, '#f59e0b')}/>
+          <rect x="720" y="22" width="310" height="44" rx="18" fill="#d97706"/>
+          <text x="875" y="50" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="900">③ 驗收成果：換資料重用＋抓漏</text>
 
-          <rect x="750" y="204" width="220" height="62" rx="14" fill="${activeFill(3, '#064e3b')}" stroke="${activeStroke(3, '#10b981')}" stroke-width="${activeWidth(3)}" />
-          <text x="860" y="242" text-anchor="middle" fill="#fda4af" font-size="19" font-weight="900">📋 C 並列衝突交回人</text>
+          <rect x="740" y="84" width="270" height="115" rx="12" fill="#1e293b" stroke="#10b981"/>
+          <text x="756" y="112" fill="#34d399" font-size="16" font-weight="900">🔄 每次變的 vs 固定不變的</text>
+          <text x="756" y="138" fill="#e2e8f0" font-size="14" font-weight="700">• 每次換：日期、地點、報名連結</text>
+          <text x="756" y="164" fill="#6ee7b7" font-size="14" font-weight="800">• 保持一致：欄位、風格、缺漏檢查</text>
+
+          <rect x="740" y="215" width="270" height="110" rx="12" fill="#451a03" stroke="#fbbf24" stroke-width="2"/>
+          <text x="756" y="242" fill="#fbbf24" font-size="15" font-weight="900">🧪 課堂驗收絕招（防呆測試）：</text>
+          <text x="756" y="268" fill="#fde68a" font-size="14" font-weight="700">故意給一份「漏掉報名連結」的資料</text>
+          <text x="756" y="294" fill="#ffffff" font-size="14" font-weight="900">➔ 確認 Skill 會主動指出缺漏！</text>
         </g>
-
-        <text x="500" y="302" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">
-          圖 4｜同一方法處理不同資料：方法可以重用，活動資料每次更新；結果仍要驗收
-        </text>
       </svg>
     `;
   }
 
-  // === 圖 5：03 Tool 讀取 ➔ 計算與轉換 ➔ 寫入與建立 ===
+  // 03 TOOL：上傳報名 Excel / Plugins 頁面 ➔ 去重與計算（區分 Tool/MCP/Plugin） ➔ 產出可核對統計檔
   if (pageId === 'tool') {
     return `
-      <svg viewBox="0 0 1000 310" class="w-full h-auto max-h-[340px] select-none">
-        <line x1="305" y1="145" x2="365" y2="145" stroke="#f59e0b" stroke-width="5" class="${step >= 2 ? 'flow-line-active' : 'opacity-30'}" />
-        <polygon points="365,145 352,137 352,153" fill="#f59e0b" />
-        <line x1="635" y1="145" x2="695" y2="145" stroke="#f59e0b" stroke-width="5" class="${step >= 3 ? 'flow-line-active' : 'opacity-30'}" />
-        <polygon points="695,145 682,137 682,153" fill="#f59e0b" />
+      <svg viewBox="0 0 1050 370" class="w-full h-auto select-none">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arr-am" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"/>
+          </marker>
+        </defs>
 
-        <!-- Box 1: 讀取 -->
-        <g class="cursor-pointer" onclick="selectStep(1, true)" transform="translate(30, 35)">
-          <rect width="275" height="210" rx="22" fill="${activeFill(1, '#78350f')}" stroke="${activeStroke(1, '#fbbf24')}" stroke-width="${activeWidth(1)}" />
-          <text x="137" y="55" text-anchor="middle" font-size="40">🔍</text>
-          <text x="137" y="100" text-anchor="middle" fill="#ffffff" font-size="24" font-weight="900">① 讀取 (Read)</text>
-          <text x="137" y="135" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="700">查資料與取得 6 列名單</text>
-          <text x="137" y="170" text-anchor="middle" fill="#cbd5e1" font-size="14.5" font-weight="700">T001~T005 (含重複/取消/待確認)</text>
-          <text x="137" y="194" text-anchor="middle" fill="#7dd3fc" font-size="13.5" font-weight="700">🔑 最小讀取權限・不改原表</text>
+        <!-- Step 1: 內建工具與 Plugins 頁面 -->
+        <g onclick="selectStep(0)" class="cursor-pointer">
+          <rect x="20" y="22" width="315" height="325" rx="18" ${boxStyle(s1, '#f59e0b')}/>
+          <rect x="20" y="22" width="315" height="44" rx="18" fill="#d97706"/>
+          <text x="177" y="50" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="900">① 在哪裡按：讀檔與 Plugins</text>
+
+          <rect x="40" y="84" width="275" height="98" rx="12" fill="#1e293b" stroke="#f59e0b"/>
+          <text x="56" y="110" fill="#fbbf24" font-size="15" font-weight="900">📎 入口 A：對話內建能力</text>
+          <text x="56" y="136" fill="#e2e8f0" font-size="14" font-weight="700">• 直接上傳「研習報名名單.xlsx」</text>
+          <text x="56" y="160" fill="#94a3b8" font-size="13" font-weight="700">• 內建搜尋、檔案讀取與資料計算</text>
+
+          <rect x="40" y="198" width="275" height="128" rx="12" fill="#090d16" stroke="#f59e0b" stroke-width="2"/>
+          <text x="56" y="224" fill="#fbbf24" font-size="15" font-weight="900">🔌 入口 B：chatgpt.com/plugins</text>
+          <text x="56" y="250" fill="#e2e8f0" font-size="13" font-weight="700">安裝並連接帳號，在對話打「@」呼叫：</text>
+          <text x="56" y="274" fill="#fde68a" font-size="13" font-weight="800">• Google Drive（查雲端文件）</text>
+          <text x="56" y="295" fill="#fde68a" font-size="13" font-weight="800">• Gmail（擬草稿）／ Calendar（查行程）</text>
         </g>
 
-        <!-- Box 2: 計算與轉換 -->
-        <g class="cursor-pointer" onclick="selectStep(2, true)" transform="translate(365, 35)">
-          <rect width="270" height="210" rx="22" fill="${activeFill(2, '#78350f')}" stroke="${activeStroke(2, '#fbbf24')}" stroke-width="${activeWidth(2)}" />
-          <text x="135" y="55" text-anchor="middle" font-size="40">🧮</text>
-          <text x="135" y="100" text-anchor="middle" fill="#ffffff" font-size="24" font-weight="900">② 計算與轉換</text>
-          <text x="135" y="135" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="700">篩選「有效」＋代碼去重</text>
-          <text x="135" y="168" text-anchor="middle" fill="#6ee7b7" font-size="15.5" font-weight="900">✅ 有效 3 人 (教務2・業務1)</text>
-          <text x="135" y="194" text-anchor="middle" fill="#fda4af" font-size="13.5" font-weight="700">排除：T001重複、T003取消、T005待確</text>
+        <line x1="338" y1="185" x2="375" y2="185" stroke="#f59e0b" stroke-width="4" stroke-dasharray="7 5" class="${s1 || s2 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-am)"/>
+
+        <!-- Step 2: 執行計算 ＋ 區分 Tool / MCP / Plugin -->
+        <g onclick="selectStep(1)" class="cursor-pointer">
+          <rect x="382" y="22" width="290" height="325" rx="18" ${boxStyle(s2, '#f59e0b')}/>
+          <rect x="382" y="22" width="290" height="44" rx="18" fill="#b45309"/>
+          <text x="527" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">② 怎麼執行：實際計算＋秒懂區別</text>
+
+          <rect x="402" y="84" width="250" height="105" rx="12" fill="#1e293b" stroke="#fbbf24"/>
+          <text x="418" y="110" fill="#fbbf24" font-size="15" font-weight="900">⚙️ 辦研習：核對報名名單</text>
+          <text x="418" y="135" fill="#e2e8f0" font-size="13" font-weight="700">1. 只篩選狀態＝「有效」的紀錄</text>
+          <text x="418" y="157" fill="#e2e8f0" font-size="13" font-weight="700">2. 依「報名編號」去除重複</text>
+          <text x="418" y="179" fill="#34d399" font-size="13" font-weight="800">3. 保護原檔：絕不修改原始 Excel</text>
+
+          <rect x="402" y="203" width="250" height="123" rx="12" fill="#090d16" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="418" y="228" fill="#38bdf8" font-size="15" font-weight="900">🧭 3 個名詞一眼分清：</text>
+          <text x="418" y="253" fill="#e2e8f0" font-size="13" font-weight="700">• <tspan fill="#fbbf24" font-weight="900">Tool</tspan>：具體功能（讀檔/算人數）</text>
+          <text x="418" y="277" fill="#e2e8f0" font-size="13" font-weight="700">• <tspan fill="#38bdf8" font-weight="900">MCP</tspan>：連接外部服務的協定</text>
+          <text x="418" y="301" fill="#e2e8f0" font-size="13" font-weight="700">• <tspan fill="#34d399" font-weight="900">Plugin</tspan>：打包 Skill/MCP 的套件</text>
         </g>
 
-        <!-- Box 3: 寫入與建立 (Step 3 & 4) -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)" transform="translate(695, 35)">
-          <rect width="275" height="210" rx="22" fill="${step >= 3 ? '#78350f' : '#0f172a'}" stroke="${step >= 3 ? '#fbbf24' : '#475569'}" stroke-width="${step >= 3 ? '4.5' : '2'}" />
-          <text x="137" y="55" text-anchor="middle" font-size="40">📂</text>
-          <text x="137" y="100" text-anchor="middle" fill="#ffffff" font-size="24" font-weight="900">③ 寫入與查驗產物</text>
-          <text x="137" y="135" text-anchor="middle" fill="#fde68a" font-size="17" font-weight="700">建立「報名摘要」檔案</text>
-          <text x="137" y="168" text-anchor="middle" fill="#6ee7b7" font-size="15" font-weight="900">✔ 實際開啟檔案核對總數 = 3</text>
-          <text x="137" y="194" text-anchor="middle" fill="#fca5a5" font-size="13.5" font-weight="700">⚠️ 聊天寫出檔名 ≠ 檔案已存在</text>
-        </g>
+        <line x1="675" y1="185" x2="712" y2="185" stroke="#f59e0b" stroke-width="4" stroke-dasharray="7 5" class="${s2 || s3 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-am)"/>
 
-        <text x="500" y="288" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">
-          圖 5｜工具要已提供且取得授權；AI 說「已完成」後，還要能實際找到成果檔案並核對數字
-        </text>
+        <!-- Step 3: 交付統計成果與驗收 -->
+        <g onclick="selectStep(2)" class="cursor-pointer">
+          <rect x="720" y="22" width="310" height="325" rx="18" ${boxStyle(s3, '#10b981')}/>
+          <rect x="720" y="22" width="310" height="44" rx="18" fill="#059669"/>
+          <text x="875" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">③ 驗收成果：統計表＋實體檔案</text>
+
+          <rect x="740" y="84" width="270" height="145" rx="12" fill="#1e293b" stroke="#10b981"/>
+          <text x="756" y="110" fill="#34d399" font-size="15" font-weight="900">📊 產出可核對的統計結果：</text>
+          <text x="756" y="136" fill="#e2e8f0" font-size="13" font-weight="700">• 原始筆數 / 有效筆數 / 去重後人數</text>
+          <text x="756" y="160" fill="#e2e8f0" font-size="13" font-weight="700">• 各單位報名人數統計表</text>
+          <text x="756" y="184" fill="#fbbf24" font-size="13" font-weight="800">• 異常清單：重複編號、取消、待確認</text>
+          <text x="756" y="210" fill="#6ee7b7" font-size="13" font-weight="800">💾 另存實際可開啟的統計結果檔</text>
+
+          <rect x="740" y="245" width="270" height="80" rx="12" fill="#450a0a" stroke="#f87171" stroke-width="2"/>
+          <text x="875" y="273" text-anchor="middle" fill="#fca5a5" font-size="15" font-weight="900">🚨 驗收時必分清楚：</text>
+          <text x="875" y="300" text-anchor="middle" fill="#fecaca" font-size="14" font-weight="800">「說明如何做」≠「工具已真正執行」</text>
+        </g>
       </svg>
     `;
   }
 
-  // === 圖 6：04 Agent 動態控制與查核迴路 ===
+  // 04 AGENT：頂部切換到 ChatGPT Work ➔ 比對 3 份衝突資料追查依據 ➔ 觸發停止條件交回差異表
   if (pageId === 'agent') {
     return `
-      <svg viewBox="0 0 1000 330" class="w-full h-auto max-h-[360px] select-none">
-        <!-- 1 -> 2 -->
-        <line x1="275" y1="85" x2="365" y2="85" stroke="#c084fc" stroke-width="4.5" class="${step >= 2 ? 'flow-line-active' : 'opacity-35'}" />
-        <polygon points="365,85 353,77 353,93" fill="#c084fc" />
-        <!-- 2 -> 3 -->
-        <line x1="635" y1="85" x2="715" y2="85" stroke="#c084fc" stroke-width="4.5" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <polygon points="715,85 703,77 703,93" fill="#c084fc" />
-        <!-- 3 -> 觀察新結果 -->
-        <line x1="845" y1="145" x2="845" y2="185" stroke="#c084fc" stroke-width="4.5" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <polygon points="845,185 837,173 853,173" fill="#c084fc" />
-        <!-- 觀察新結果 -> 需要時調整 (回 2) -->
-        <path d="M 715 225 L 500 225 L 500 145" fill="none" stroke="#fbbf24" stroke-width="4" stroke-dasharray="8 6" class="${step === 3 ? 'flow-line-active' : 'opacity-45'}" />
-        <polygon points="500,145 492,157 508,157" fill="#fbbf24" />
-        <text x="605" y="213" text-anchor="middle" fill="#fde68a" font-size="15" font-weight="900">🔄 需要時動態調整下一步</text>
+      <svg viewBox="0 0 1050 370" class="w-full h-auto select-none">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arr-pu" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#a855f7"/>
+          </marker>
+        </defs>
 
-        <!-- 觀察新結果 -> 4 交付或交回人處理 -->
-        <line x1="715" y1="255" x2="275" y2="255" stroke="#fb7185" stroke-width="4.5" class="${step === 4 ? 'flow-line-active' : 'opacity-40'}" />
-        <polygon points="275,255 287,247 287,263" fill="#fb7185" />
+        <!-- Step 1: 頂部切換到 Work -->
+        <g onclick="selectStep(0)" class="cursor-pointer">
+          <rect x="20" y="22" width="315" height="325" rx="18" ${boxStyle(s1, '#a855f7')}/>
+          <rect x="20" y="22" width="315" height="44" rx="18" fill="#7e22ce"/>
+          <text x="177" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">① 在哪裡按：切換到 Work</text>
 
-        <!-- Box 1: 目標與邊界 -->
-        <g class="cursor-pointer" onclick="selectStep(1, true)" transform="translate(25, 25)">
-          <rect width="250" height="120" rx="20" fill="${activeFill(1, '#3b0764')}" stroke="${activeStroke(1, '#c084fc')}" stroke-width="${activeWidth(1)}" />
-          <text x="125" y="45" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="900">🎯 ① 目標與邊界</text>
-          <text x="125" y="75" text-anchor="middle" fill="#e9d5ff" font-size="15.5" font-weight="700">查清研習日期・限讀三來源</text>
-          <text x="125" y="102" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="700">不改原始資料・不擅自寄信</text>
+          <!-- 模擬 Chat / Work 切換器 -->
+          <rect x="45" y="84" width="265" height="50" rx="25" fill="#090d16" stroke="#a855f7" stroke-width="2"/>
+          <text x="110" y="115" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">Chat</text>
+          <rect x="165" y="90" width="138" height="38" rx="19" fill="#9333ea"/>
+          <text x="234" y="115" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900">● Work 入口</text>
+
+          <rect x="40" y="150" width="275" height="175" rx="12" fill="#1e293b" stroke="#c084fc"/>
+          <text x="56" y="178" fill="#e9d5ff" font-size="15" font-weight="900">🧭 交辦 Work 的 4 大要素：</text>
+          <text x="56" y="204" fill="#e2e8f0" font-size="13" font-weight="700">1. <tspan fill="#c084fc" font-weight="900">目標成果</tspan>：來源、差異與待確認表</text>
+          <text x="56" y="228" fill="#e2e8f0" font-size="13" font-weight="700">2. <tspan fill="#c084fc" font-weight="900">授權範圍</tspan>：只用指定且已授權來源</text>
+          <text x="56" y="252" fill="#fbbf24" font-size="13" font-weight="800">3. <tspan fill="#fbbf24" font-weight="900">停止條件</tspan>：無依據時停下交回人工</text>
+          <text x="56" y="276" fill="#fca5a5" font-size="13" font-weight="800">4. <tspan fill="#fca5a5" font-weight="900">禁止越權</tspan>：不改公告、不寄送訊息</text>
+          <text x="56" y="306" fill="#94a3b8" font-size="12" font-weight="700">（註：程式與版本測試可選桌面版 Codex）</text>
         </g>
 
-        <!-- Box 2: AI 選擇下一步 -->
-        <g class="cursor-pointer" onclick="selectStep(2, true)" transform="translate(365, 25)">
-          <rect width="270" height="120" rx="20" fill="${activeFill(2, '#3b0764')}" stroke="${activeStroke(2, '#c084fc')}" stroke-width="${activeWidth(2)}" />
-          <text x="135" y="45" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="900">🧠 ② AI 選擇下一步</text>
-          <text x="135" y="75" text-anchor="middle" fill="#e9d5ff" font-size="15.5" font-weight="700">決定先查什麼或做什麼</text>
-          <text x="135" y="102" text-anchor="middle" fill="#7dd3fc" font-size="14" font-weight="700">A公告(11/20) ≠ B網站(11/21)</text>
+        <line x1="338" y1="185" x2="375" y2="185" stroke="#a855f7" stroke-width="4" stroke-dasharray="7 5" class="${s1 || s2 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-pu)"/>
+
+        <!-- Step 2: 發現衝突並依結果調整下一步 -->
+        <g onclick="selectStep(1)" class="cursor-pointer">
+          <rect x="382" y="22" width="290" height="325" rx="18" ${boxStyle(s2, '#a855f7')}/>
+          <rect x="382" y="22" width="290" height="44" rx="18" fill="#6b21a8"/>
+          <text x="527" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">② 怎麼運作：發現衝突自動追查</text>
+
+          <rect x="402" y="82" width="250" height="110" rx="12" fill="#1e293b" stroke="#c084fc"/>
+          <text x="418" y="106" fill="#e9d5ff" font-size="15" font-weight="900">📂 比對 3 份研習資料發現矛盾：</text>
+          <text x="418" y="130" fill="#e2e8f0" font-size="13" font-weight="700">• 核定公告：11/15（五）14:00</text>
+          <text x="418" y="152" fill="#fbbf24" font-size="13" font-weight="800">• 活動網頁：11/16（六）⚡日期衝突</text>
+          <text x="418" y="174" fill="#fbbf24" font-size="13" font-weight="800">• 主辦信件：11/15 但地點不同⚡</text>
+
+          <rect x="402" y="206" width="250" height="120" rx="12" fill="#090d16" stroke="#a855f7" stroke-width="2"/>
+          <text x="418" y="232" fill="#d8b4fe" font-size="15" font-weight="900">🔄 Agent 依中途結果調整步驟：</text>
+          <text x="418" y="256" fill="#e2e8f0" font-size="13" font-weight="700">• 不只是機械式逐份摘要</text>
+          <text x="418" y="280" fill="#e2e8f0" font-size="13" font-weight="700">• 判斷還需查哪份授權依據</text>
+          <text x="418" y="304" fill="#fde68a" font-size="13" font-weight="800">• 不因信件較新就擅自認定已核定！</text>
         </g>
 
-        <!-- Box 3 Top: 使用允許的工具 -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)" transform="translate(715, 25)">
-          <rect width="260" height="120" rx="20" fill="${activeFill(3, '#3b0764')}" stroke="${activeStroke(3, '#c084fc')}" stroke-width="${activeWidth(3)}" />
-          <text x="130" y="45" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="900">🛠️ ③ 使用允許的工具</text>
-          <text x="130" y="75" text-anchor="middle" fill="#e9d5ff" font-size="15.5" font-weight="700">再去查 C 主辦單位信件</text>
-          <text x="130" y="102" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="700">發現信件寫「時間調整中」</text>
-        </g>
+        <line x1="675" y1="185" x2="712" y2="185" stroke="#a855f7" stroke-width="4" stroke-dasharray="7 5" class="${s2 || s3 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-pu)"/>
 
-        <!-- Box 3 Bottom: 觀察新結果 -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)" transform="translate(715, 185)">
-          <rect width="260" height="100" rx="20" fill="${activeFill(3, '#3b0764')}" stroke="${activeStroke(3, '#c084fc')}" stroke-width="${activeWidth(3)}" />
-          <text x="130" y="42" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="900">👀 觀察新結果</text>
-          <text x="130" y="72" text-anchor="middle" fill="#fda4af" font-size="15" font-weight="700">三方衝突・仍缺正式確認</text>
-        </g>
+        <!-- Step 3: 停止條件與人工核決 -->
+        <g onclick="selectStep(2)" class="cursor-pointer">
+          <rect x="720" y="22" width="310" height="325" rx="18" ${boxStyle(s3, '#10b981')}/>
+          <rect x="720" y="22" width="310" height="44" rx="18" fill="#059669"/>
+          <text x="875" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">③ 驗收成果：附來源差異查核表</text>
 
-        <!-- Box 4: 交付或交回人處理 -->
-        <g class="cursor-pointer" onclick="selectStep(4, true)" transform="translate(25, 185)">
-          <rect width="250" height="100" rx="20" fill="${activeFill(4, '#4c0519')}" stroke="${activeStroke(4, '#fb7185')}" stroke-width="${activeWidth(4)}" />
-          <text x="125" y="42" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="900">🛑 ④ 交付或交回人處理</text>
-          <text x="125" y="72" text-anchor="middle" fill="#fda4af" font-size="14.5" font-weight="900">不亂猜日期！交衝突表給承辦</text>
-        </g>
+          <rect x="740" y="84" width="270" height="145" rx="12" fill="#1e293b" stroke="#10b981"/>
+          <text x="756" y="110" fill="#34d399" font-size="15" font-weight="900">📑 交付《來源、差異與待確認表》</text>
+          <text x="756" y="136" fill="#e2e8f0" font-size="13" font-weight="700">• 每個結論均清楚標註文件來源</text>
+          <text x="756" y="160" fill="#fbbf24" font-size="13" font-weight="800">• 找不到判定依據 ➔ 觸發停止條件</text>
+          <text x="756" y="184" fill="#e2e8f0" font-size="13" font-weight="700">• 列出待確認問題，交回承辦人裁決</text>
+          <text x="756" y="210" fill="#6ee7b7" font-size="13" font-weight="800">✅ 未經核准，絕不修改公告或寄信</text>
 
-        <text x="500" y="316" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">
-          圖 6｜Agent 的特徵是動態控制流程；遇到資訊不足或越界時，必須停下來交回人處理
-        </text>
+          <rect x="740" y="245" width="270" height="80" rx="12" fill="#1e1b4b" stroke="#818cf8" stroke-width="2"/>
+          <text x="875" y="273" text-anchor="middle" fill="#c7d2fe" font-size="15" font-weight="900">💡 教材精準觀念：</text>
+          <text x="875" y="299" text-anchor="middle" fill="#e0e7ff" font-size="13" font-weight="800">固定加總用公式即可；需追查調整才用 Agent</text>
+        </g>
       </svg>
     `;
   }
 
-  // === 圖 7：05 Bot 聊天服務與三種後端分流 ===
-  if (pageId === 'bot') {
-    return `
-      <svg viewBox="0 0 1000 320" class="w-full h-auto max-h-[350px] select-none">
-        <line x1="215" y1="150" x2="295" y2="150" stroke="#fb7185" stroke-width="5" class="${step >= 2 ? 'flow-line-active' : 'opacity-35'}" />
-        <polygon points="295,150 282,142 282,158" fill="#fb7185" />
+  // 05 BOT：Slack / Teams 輸入 @ChatGPT ➔ 區分 Slack Plugin vs Slack Bot ➔ 群組回覆與權限可見範圍
+  return `
+    <svg viewBox="0 0 1050 370" class="w-full h-auto select-none">
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="arr-ro" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e"/>
+        </marker>
+      </defs>
 
-        <line x1="590" y1="135" x2="685" y2="62" stroke="#fb7185" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="590" y1="150" x2="685" y2="150" stroke="#fb7185" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
-        <line x1="590" y1="165" x2="685" y2="238" stroke="#fb7185" stroke-width="4" class="${step >= 3 ? 'flow-line-active' : 'opacity-35'}" />
+      <!-- Step 1: 同仁在 Slack / Teams 輸入 @ChatGPT -->
+      <g onclick="selectStep(0)" class="cursor-pointer">
+        <rect x="20" y="22" width="315" height="325" rx="18" ${boxStyle(s1, '#f43f5e')}/>
+        <rect x="20" y="22" width="315" height="44" rx="18" fill="#e11d48"/>
+        <text x="177" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">① 在哪裡按：群組打 @ChatGPT</text>
 
-        <!-- Node 1: 同仁提問 -->
-        <g class="cursor-pointer" onclick="selectStep(1, true)" transform="translate(25, 65)">
-          <rect width="190" height="170" rx="22" fill="${activeFill(1, '#4c0519')}" stroke="${activeStroke(1, '#fb7185')}" stroke-width="${activeWidth(1)}" />
-          <text x="95" y="58" text-anchor="middle" font-size="42">🙋</text>
-          <text x="95" y="102" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="900">① 同仁提問</text>
-          <text x="95" y="132" text-anchor="middle" fill="#fda4af" font-size="14.5" font-weight="700">問時間 / 問報名狀態</text>
-          <text x="95" y="154" text-anchor="middle" fill="#fde68a" font-size="13.5" font-weight="700">或問網站日期哪個對</text>
-        </g>
+        <rect x="40" y="84" width="275" height="150" rx="12" fill="#090d16" stroke="#f43f5e" stroke-width="2"/>
+        <text x="56" y="110" fill="#fda4af" font-size="15" font-weight="900">💬 Slack ／ Teams 研習工作頻道：</text>
+        <rect x="56" y="122" width="105" height="26" rx="6" fill="#881337"/>
+        <text x="65" y="140" fill="#fecdd3" font-size="14" font-weight="900">@ChatGPT</text>
+        <text x="56" y="168" fill="#e2e8f0" font-size="13" font-weight="700">「請依本對話提供的核定公告，說明</text>
+        <text x="56" y="190" fill="#e2e8f0" font-size="13" font-weight="700">研習日期、地點與報名期限並附來源；</text>
+        <text x="56" y="212" fill="#fbbf24" font-size="13" font-weight="800">沒提到的請回答『目前無法確認』。」</text>
 
-        <!-- Node 2: 聊天 Bot 服務入口 -->
-        <g class="cursor-pointer" onclick="selectStep(2, true)" transform="translate(295, 50)">
-          <rect width="295" height="200" rx="24" fill="${step === 2 || step === 4 ? '#4c0519' : '#0f172a'}" stroke="${step === 2 || step === 4 ? '#fb7185' : '#475569'}" stroke-width="${step === 2 || step === 4 ? '4.5' : '2.5'}" />
-          <text x="147" y="52" text-anchor="middle" font-size="38">🤖</text>
-          <text x="147" y="92" text-anchor="middle" fill="#ffffff" font-size="23" font-weight="900">② 聊天 Bot 服務入口</text>
-          <text x="147" y="125" text-anchor="middle" fill="#fda4af" font-size="16" font-weight="700">接收訊息・辨識請求</text>
-          <text x="147" y="155" text-anchor="middle" fill="#fde68a" font-size="15.5" font-weight="900">🔐 查個人狀態必先驗證本人身分</text>
-          <text x="147" y="182" text-anchor="middle" fill="#6ee7b7" font-size="14" font-weight="700">公開回答必附［來源與版本］</text>
-        </g>
+        <rect x="40" y="248" width="275" height="78" rx="12" fill="#1e293b" stroke="#475569"/>
+        <text x="56" y="274" fill="#cbd5e1" font-size="14" font-weight="900">⚙️ 管理員後台設定入口：</text>
+        <text x="56" y="298" fill="#94a3b8" font-size="13" font-weight="700">admin.openai.com ➔ Agents 設定權限</text>
+      </g>
 
-        <!-- Node 3 & 4: 三種後端做法 -->
-        <g class="cursor-pointer" onclick="selectStep(3, true)">
-          <rect x="685" y="25" width="285" height="72" rx="16" fill="${step >= 3 ? '#4c0519' : '#0f172a'}" stroke="${step >= 3 ? '#fb7185' : '#475569'}" stroke-width="${step >= 3 ? '3.5' : '2'}" />
-          <text x="827" y="55" text-anchor="middle" fill="#ffffff" font-size="19" font-weight="900">A. 固定規則</text>
-          <text x="827" y="80" text-anchor="middle" fill="#cbd5e1" font-size="14.5" font-weight="700">輸入關鍵字就回覆（如回地址）</text>
+      <line x1="338" y1="185" x2="375" y2="185" stroke="#f43f5e" stroke-width="4" stroke-dasharray="7 5" class="${s1 || s2 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-ro)"/>
 
-          <rect x="685" y="114" width="285" height="72" rx="16" fill="${step >= 3 ? '#4c0519' : '#0f172a'}" stroke="${step >= 3 ? '#fb7185' : '#475569'}" stroke-width="${step >= 3 ? '3.5' : '2'}" />
-          <text x="827" y="144" text-anchor="middle" fill="#6ee7b7" font-size="19" font-weight="900">B. AI 問答 (讀核定公告)</text>
-          <text x="827" y="169" text-anchor="middle" fill="#cbd5e1" font-size="14.5" font-weight="700">答 11/20 14:00 並附公告來源連結</text>
+      <!-- Step 2: 最容易混淆對照：Slack Plugin (Tool) vs Slack @ChatGPT (Bot) -->
+      <g onclick="selectStep(1)" class="cursor-pointer">
+        <rect x="382" y="22" width="290" height="325" rx="18" ${boxStyle(s2, '#f43f5e')}/>
+        <rect x="382" y="22" width="290" height="44" rx="18" fill="#be123c"/>
+        <text x="527" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">② 秒懂區別：看「人在哪裡輸入」</text>
 
-          <rect x="685" y="203" width="285" height="72" rx="16" fill="${step >= 3 ? '#4c0519' : '#0f172a'}" stroke="${step >= 3 ? '#fb7185' : '#475569'}" stroke-width="${step >= 3 ? '3.5' : '2'}" />
-          <text x="827" y="233" text-anchor="middle" fill="#fde68a" font-size="19" font-weight="900">C. 含 Agent 流程 / 轉人工</text>
-          <text x="827" y="258" text-anchor="middle" fill="#fda4af" font-size="14.5" font-weight="700">遇 20日/21日衝突 ➔ 保留兩來源轉承辦</text>
-        </g>
+        <rect x="402" y="84" width="250" height="112" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="418" y="110" fill="#fbbf24" font-size="15" font-weight="900">🔌 在 ChatGPT 用 Slack Plugin</text>
+        <text x="418" y="134" fill="#e2e8f0" font-size="13" font-weight="700">• 人在哪裡輸入：<tspan fill="#fde68a" font-weight="900">ChatGPT 對話框</tspan></text>
+        <text x="418" y="156" fill="#e2e8f0" font-size="13" font-weight="700">• 說法：「請讀取 Slack 討論並摘要」</text>
+        <text x="418" y="178" fill="#fbbf24" font-size="13" font-weight="900">➔ 教材對應：Tool（連接資料與動作）</text>
 
-        <text x="500" y="304" text-anchor="middle" fill="#94a3b8" font-size="16" font-weight="800">
-          圖 7｜背後做法依任務選擇：Bot 可以很簡單（固定規則或 AI 問答），不一定需要 Agent
-        </text>
-      </svg>
-    `;
-  }
+        <rect x="402" y="210" width="250" height="116" rx="12" fill="#1e293b" stroke="#f43f5e" stroke-width="2"/>
+        <text x="418" y="236" fill="#fda4af" font-size="15" font-weight="900">🤖 在 Slack 裡叫 @ChatGPT</text>
+        <text x="418" y="260" fill="#e2e8f0" font-size="13" font-weight="700">• 人在哪裡輸入：<tspan fill="#fecdd3" font-weight="900">Slack 的對話串</tspan></text>
+        <text x="418" y="282" fill="#e2e8f0" font-size="13" font-weight="700">• 說法：「@ChatGPT 請整理這段討論」</text>
+        <text x="418" y="304" fill="#fda4af" font-size="13" font-weight="900">➔ 教材對應：Bot（訊息服務入口）</text>
+      </g>
 
-  return '';
-}
+      <line x1="675" y1="185" x2="712" y2="185" stroke="#f43f5e" stroke-width="4" stroke-dasharray="7 5" class="${s2 || s3 ? 'svg-flow-line' : 'opacity-40'}" marker-end="url(#arr-ro)"/>
 
-function renderStepPillsHtml(page) {
-  const activeBg = {
-    sky: 'bg-sky-500 text-slate-950 border-sky-200 shadow-lg',
-    emerald: 'bg-emerald-500 text-slate-950 border-emerald-200 shadow-lg',
-    amber: 'bg-amber-400 text-slate-950 border-amber-200 shadow-lg',
-    purple: 'bg-purple-500 text-white border-purple-200 shadow-lg',
-    rose: 'bg-rose-500 text-white border-rose-200 shadow-lg'
-  };
+      <!-- Step 3: 群組回覆與權限驗收 -->
+      <g onclick="selectStep(2)" class="cursor-pointer">
+        <rect x="720" y="22" width="310" height="325" rx="18" ${boxStyle(s3, '#10b981')}/>
+        <rect x="720" y="22" width="310" height="44" rx="18" fill="#059669"/>
+        <text x="875" y="50" text-anchor="middle" fill="#ffffff" font-size="18" font-weight="900">③ 驗收成果：群組回覆＋權限檢查</text>
 
-  return page.steps
-    .map((s) => {
-      const isCurr = s.step === currentStep;
-      const cls = isCurr
-        ? activeBg[page.color]
-        : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700';
-      return `
-        <button
-          onclick="selectStep(${s.step}, true)"
-          class="rounded-2xl border-2 p-4 text-left transition-all flex items-center gap-3 ${cls}"
-        >
-          <span class="text-3xl shrink-0">${s.icon}</span>
-          <div class="min-w-0">
-            <div class="text-lg sm:text-xl font-black truncate">${s.label}</div>
-            <div class="text-xs sm:text-sm font-bold truncate ${isCurr ? 'opacity-95' : 'text-slate-400'}">${s.shortSub}</div>
-          </div>
-        </button>
-      `;
-    })
-    .join('');
+        <rect x="740" y="84" width="270" height="125" rx="12" fill="#1e293b" stroke="#10b981"/>
+        <text x="756" y="110" fill="#34d399" font-size="15" font-weight="900">✅ 群組直接收到有來源的回答：</text>
+        <text x="756" y="135" fill="#e2e8f0" font-size="13" font-weight="700">• 顯示研習日期、地點、報名期限</text>
+        <text x="756" y="158" fill="#e2e8f0" font-size="13" font-weight="700">• 清楚附上「核定公告」來源</text>
+        <text x="756" y="182" fill="#fbbf24" font-size="13" font-weight="800">• 查無資料時回答「目前無法確認」</text>
+
+        <rect x="740" y="224" width="270" height="102" rx="12" fill="#450a0a" stroke="#f87171" stroke-width="2"/>
+        <text x="756" y="250" fill="#fca5a5" font-size="15" font-weight="900">🔐 權限與可見範圍必查：</text>
+        <text x="756" y="274" fill="#fecaca" font-size="13" font-weight="700">1. 權限看「實際執行身分」（共用服務帳號）</text>
+        <text x="756" y="298" fill="#fecaca" font-size="13" font-weight="700">2. 頻道回覆會被頻道內其他成員看到！</text>
+      </g>
+    </svg>
+  `;
 }
 
 // ----------------------------------------------------------------------------
-// 6. 渲染主畫面（極簡圖說版：頂部一句話 ＋ 中央大型動畫 SVG 圖解 ＋ 底部三格圖說卡）
+// 5. 渲染單一功能頁面（極簡具體圖說版：頂部入口標章 ＋ 大幅 SVG ＋ 單句圖說 ＋ 3 圖卡 ＋ 一鍵複製指令）
 // ----------------------------------------------------------------------------
 function renderMainPage() {
-  const main = document.getElementById('page-main-container');
-  if (!main) return;
+  const container = document.getElementById('page-main-container');
+  if (!container) return;
 
   if (currentPageId === 'overview') {
-    main.innerHTML = renderOverviewVisualPage();
+    container.innerHTML = renderOverviewVisualPage();
     return;
   }
 
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId) || FIVE_PAGES[0];
-  const st = page.steps.find((s) => s.step === currentStep) || page.steps[0];
+  const page = FIVE_PAGES.find(p => p.id === currentPageId) || FIVE_PAGES[0];
+  const st = COLOR_STYLES[page.color];
+  const activeStepObj = page.steps[currentStepIdx] || page.steps[0];
 
-  main.innerHTML = `
-    <div class="page-fade-in space-y-6">
+  const prevIdx = (FIVE_PAGES.findIndex(p => p.id === page.id) - 1 + FIVE_PAGES.length) % FIVE_PAGES.length;
+  const nextIdx = (FIVE_PAGES.findIndex(p => p.id === page.id) + 1) % FIVE_PAGES.length;
+  const prevPage = FIVE_PAGES[prevIdx];
+  const nextPage = FIVE_PAGES[nextIdx];
 
-      <!-- 1. 極簡一句話大標橫幅 -->
-      <section class="rounded-3xl bg-slate-900/95 border-2 border-slate-800 p-5 sm:p-6 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <span class="text-5xl sm:text-6xl">${page.icon}</span>
+  container.innerHTML = `
+    <div class="space-y-5">
+
+      <!-- 1. 頂部標題與「ChatGPT 畫面入口標章」 -->
+      <section class="glass-card rounded-3xl p-5 sm:p-6 border-2 ${st.border} ${st.glow} flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="flex items-start sm:items-center gap-4">
+          <div class="w-16 h-16 rounded-2xl ${st.bgSoft} border-2 ${st.border} flex items-center justify-center text-4xl shrink-0">
+            ${page.icon}
+          </div>
           <div>
-            <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              ${page.num} ${page.name}｜${page.zhTitle}
-            </h2>
-            <p class="text-xl sm:text-2xl font-black text-amber-300 mt-1">
-              🎯 ${page.oneLiner}
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-3 py-0.5 rounded-full text-xs font-black border ${st.badge}">${page.badge}</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-white">${page.name}｜${page.zhName}</h2>
+            </div>
+            <p class="text-base sm:text-xl font-black ${st.text} mt-1">
+              「${page.oneLiner}」
             </p>
+            <div class="mt-2 inline-flex items-center gap-2 px-3.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm font-black text-amber-300">
+              ${page.uiEntryBadge}
+            </div>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button
-            id="btn-play-anim"
-            onclick="toggleAnim()"
-            class="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-base shadow-lg transition-all"
-          >
-            ${isPlayingAnim ? '⏹️ 停止動畫' : '▶️ 播放動畫＋語音圖說'}
+          <button onclick="playStepAnimation()" class="px-5 py-3 rounded-2xl ${st.btn} font-black text-base shadow-lg transition-all flex items-center gap-2">
+            ▶️ 播放 3 步圖說＋語音
           </button>
-          <button
-            onclick="copyPrompt(this)"
-            class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-black text-base border border-slate-700 transition-all"
-          >
-            📋 複製本頁範例指令
+          <button onclick="speakText('${page.voiceIntro.replace(/'/g, "\\'")}', true)" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-600 transition-all">
+            🔊 唸本頁重點
           </button>
-          <button onclick="prevPage()" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-base border border-slate-700">◀</button>
-          <button onclick="nextPage()" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-base border border-slate-700">▶</button>
         </div>
       </section>
 
-      <!-- 2. 中央大型動態 SVG 圖解舞台 ＋ 一句話大字圖說 -->
-      <section class="diagram-stage rounded-3xl border-2 border-slate-800 p-5 sm:p-7 shadow-2xl space-y-5">
-        <!-- SVG 圖解本體 -->
-        <div id="svg-diagram-container" class="bg-slate-950/85 rounded-2xl border border-slate-800 p-3 sm:p-5">
-          ${renderCustomSVG(page.id, currentStep)}
-        </div>
-
-        <!-- 4 個步驟點擊按鈕列 -->
-        <div id="step-pills-bar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          ${renderStepPillsHtml(page)}
-        </div>
-
-        <!-- 大字圖說字幕盒 -->
-        <div class="rounded-2xl bg-slate-950 border-2 border-amber-400/70 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div id="main-caption-box" class="text-xl sm:text-2xl font-black text-white leading-snug">
-            ${st.caption}
+      <!-- 2. 中央大幅「ChatGPT 具體畫面入口 ＋ 辦研習流程」SVG 圖解 ＋ 單句圖說 -->
+      <section class="glass-card rounded-3xl p-5 sm:p-6 border-2 border-slate-800">
+        <!-- 步驟切換按鈕列 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            ${page.steps.map((s, idx) => `
+              <button onclick="selectStep(${idx})"
+                class="px-4 py-2 rounded-xl font-black text-sm sm:text-base transition-all border-2 ${
+                  idx === currentStepIdx
+                    ? `${st.btn} border-white shadow`
+                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
+                }">
+                ${s.label}
+              </button>
+            `).join('')}
           </div>
-          <span class="text-sm sm:text-base font-bold text-amber-300 shrink-0">${page.ruleBanner}</span>
+          <span class="text-xs sm:text-sm font-bold text-slate-400">💡 點擊圖中 ① ② ③ 區塊可直接聽該步語音與圖說</span>
         </div>
-      </section>
 
-      <!-- 3. 底部三格圖說卡（少字、條列清楚、一眼秒懂） -->
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        ${page.visualCards
-          .map(
-            (card) => `
-          <div class="rounded-3xl bg-slate-900/95 border-2 border-slate-800 p-6 flex flex-col justify-between shadow-xl">
-            <div>
-              <span class="inline-block px-3 py-1 rounded-lg bg-slate-800 text-amber-300 font-black text-sm mb-2 border border-slate-700">
-                ${card.badge}
-              </span>
-              <h3 class="text-2xl font-black text-white mb-4">${card.title}</h3>
-              <ul class="space-y-3 text-lg sm:text-xl font-bold text-slate-100">
-                ${card.items.map((it) => `<li class="p-3 rounded-xl bg-slate-950/90 border border-slate-800">${it}</li>`).join('')}
-              </ul>
-            </div>
-          </div>
-        `
-          )
-          .join('')}
-      </section>
+        <!-- 大幅互動 SVG 畫布 -->
+        <div id="svg-stage-box" class="bg-slate-950/95 rounded-2xl p-3 sm:p-4 border border-slate-800">
+          ${renderCustomSVG(page.id, currentStepIdx)}
+        </div>
 
-    </div>
-  `;
-}
-
-function copyPrompt(btnEl) {
-  const page = FIVE_PAGES.find((p) => p.id === currentPageId) || FIVE_PAGES[0];
-  navigator.clipboard.writeText(page.copyPrompt).then(() => {
-    playSound('step');
-    const orig = btnEl.innerHTML;
-    btnEl.innerHTML = '✅ 已複製範例指令！';
-    setTimeout(() => {
-      btnEl.innerHTML = orig;
-    }, 1800);
-  });
-}
-
-// ----------------------------------------------------------------------------
-// 7. 五站總覽圖說頁（圖 1 ＋ 圖 2：同一場研習的五種用法，全圖解呈現）
-// ----------------------------------------------------------------------------
-function renderOverviewVisualPage() {
-  return `
-    <div class="page-fade-in space-y-6">
-      <section class="rounded-3xl bg-slate-900/95 border-2 border-indigo-400/50 p-6 sm:p-7 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-3xl sm:text-4xl font-black text-white">
-            🗺️ 圖 1 ＆ 圖 2｜同一場「AI 行政應用研習」的五種用法總覽
-          </h2>
-          <p class="text-xl text-amber-300 font-black mt-1">
-            💡 五站是教學順序，並非互斥選項，也不是能力高低排名！點擊任一圓圈即可進入該頁圖解：
+        <!-- 單句大字圖說列 -->
+        <div class="mt-4 rounded-2xl p-4 sm:p-5 bg-slate-900/95 border-2 ${st.border} flex items-center gap-3.5">
+          <span class="px-3 py-1.5 rounded-xl ${st.btn} font-black text-sm shrink-0">
+            步驟圖說 ${currentStepIdx + 1}/3
+          </span>
+          <p id="active-caption-text" class="text-lg sm:text-xl font-black text-white leading-snug">
+            ${activeStepObj.caption}
           </p>
         </div>
-        <button
-          onclick="speakCurrentPageIntro()"
-          class="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-base shadow-lg shrink-0"
-        >
-          🔊 聽總覽圖說
+      </section>
+
+      <!-- 3. 底部 3 張具體對照圖卡 -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        ${page.visualCards.map(c => `
+          <div onclick="speakText('${c.title}。${c.caption}', true)"
+            class="cursor-pointer glass-card rounded-2xl p-5 border-2 border-slate-800 hover:${st.border} transition-all flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl ${st.bgSoft} border ${st.border} flex items-center justify-center text-2xl shrink-0">
+              ${c.icon}
+            </div>
+            <div>
+              <span class="text-xs font-black uppercase tracking-wider ${st.text}">${c.tag}</span>
+              <h3 class="text-lg sm:text-xl font-black text-white mt-0.5">${c.title}</h3>
+              <p class="text-sm sm:text-base font-bold text-slate-300 mt-1 leading-relaxed">${c.caption}</p>
+            </div>
+          </div>
+        `).join('')}
+      </section>
+
+      <!-- 4. 課堂實作指令（一鍵複製）＋ 官方文件依據 -->
+      <section class="glass-card rounded-2xl p-5 border border-slate-800 bg-slate-950/80">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-base sm:text-lg font-black text-white">${page.demoPromptTitle}</span>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <a href="${page.officialLink}" target="_blank" rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-sky-300 border border-slate-700 text-xs sm:text-sm font-bold transition-all">
+              🔗 ${page.officialLabel} ↗
+            </a>
+            <button onclick="copyCurrentDemoPrompt()" id="btn-copy-prompt"
+              class="px-4 py-2 rounded-xl ${st.btn} font-black text-xs sm:text-sm shadow transition-all">
+              📋 一鍵複製指令
+            </button>
+          </div>
+        </div>
+        <pre class="bg-slate-900/95 border border-slate-800 rounded-xl p-4 text-sm sm:text-base font-bold text-slate-200 whitespace-pre-wrap leading-relaxed overflow-x-auto">${page.demoPrompt}</pre>
+      </section>
+
+      <!-- 5. 上一頁 / 下一頁快速導航 -->
+      <section class="flex items-center justify-between gap-4 pt-1">
+        <button onclick="switchPage('${prevPage.id}')" class="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-black text-sm sm:text-base flex items-center gap-2">
+          ← 上一頁：${prevPage.stepNum} ${prevPage.name}（${prevPage.zhName}）
+        </button>
+        <button onclick="switchPage('overview')" class="px-5 py-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-black text-sm sm:text-base">
+          🗺️ 看「辦研習」五站總覽對照
+        </button>
+        <button onclick="switchPage('${nextPage.id}')" class="px-5 py-3 rounded-2xl ${st.btn} font-black text-sm sm:text-base flex items-center gap-2 shadow-lg">
+          下一頁：${nextPage.stepNum} ${nextPage.name}（${nextPage.zhName}） →
         </button>
       </section>
 
-      <!-- 圖 1：五圓圈視覺導覽 SVG -->
-      <section class="diagram-stage rounded-3xl border-2 border-slate-800 p-6 shadow-2xl">
-        <svg viewBox="0 0 1050 240" class="w-full h-auto max-h-[260px] select-none">
-          <line x1="175" y1="95" x2="245" y2="95" stroke="#64748b" stroke-width="4" />
-          <line x1="385" y1="95" x2="455" y2="95" stroke="#64748b" stroke-width="4" />
-          <line x1="595" y1="95" x2="665" y2="95" stroke="#64748b" stroke-width="4" />
-          <line x1="805" y1="95" x2="875" y2="95" stroke="#64748b" stroke-width="4" />
+    </div>
+  `;
+}
 
-          <g class="cursor-pointer" onclick="switchPage('prompt', true)" transform="translate(105, 95)">
-            <circle r="68" fill="#0c4a6e" stroke="#38bdf8" stroke-width="4" />
-            <text y="-10" text-anchor="middle" font-size="34">💬</text>
-            <text y="26" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">Prompt</text>
-            <text y="105" text-anchor="middle" fill="#7dd3fc" font-size="18" font-weight="900">交代一次任務</text>
-          </g>
+function copyCurrentDemoPrompt() {
+  const page = FIVE_PAGES.find(p => p.id === currentPageId);
+  if (!page || !page.demoPrompt) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(page.demoPrompt).then(() => {
+      const btn = document.getElementById('btn-copy-prompt');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✅ 已複製到剪貼簿！';
+        setTimeout(() => { btn.textContent = orig; }, 1800);
+      }
+    });
+  }
+}
 
-          <g class="cursor-pointer" onclick="switchPage('skill', true)" transform="translate(315, 95)">
-            <circle r="68" fill="#064e3b" stroke="#10b981" stroke-width="4" />
-            <text y="-10" text-anchor="middle" font-size="34">📘</text>
-            <text y="26" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">Skill</text>
-            <text y="105" text-anchor="middle" fill="#6ee7b7" font-size="18" font-weight="900">保存工作方法</text>
-          </g>
+function selectStep(stepIdx) {
+  if (animTimer) {
+    clearInterval(animTimer);
+    animTimer = null;
+  }
+  currentStepIdx = stepIdx;
+  const page = FIVE_PAGES.find(p => p.id === currentPageId);
+  if (!page) return;
+  renderMainPage();
+  const stepObj = page.steps[stepIdx];
+  if (stepObj) speakText(stepObj.voice, true);
+}
 
-          <g class="cursor-pointer" onclick="switchPage('tool', true)" transform="translate(525, 95)">
-            <circle r="68" fill="#78350f" stroke="#fbbf24" stroke-width="4" />
-            <text y="-10" text-anchor="middle" font-size="34">🧰</text>
-            <text y="26" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">Tool</text>
-            <text y="105" text-anchor="middle" fill="#fde68a" font-size="18" font-weight="900">取得執行能力</text>
-          </g>
+function playStepAnimation() {
+  if (animTimer) {
+    clearInterval(animTimer);
+    animTimer = null;
+  }
+  const page = FIVE_PAGES.find(p => p.id === currentPageId);
+  if (!page) return;
 
-          <g class="cursor-pointer" onclick="switchPage('agent', true)" transform="translate(735, 95)">
-            <circle r="68" fill="#3b0764" stroke="#c084fc" stroke-width="4" />
-            <text y="-10" text-anchor="middle" font-size="34">🧭</text>
-            <text y="26" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">Agent</text>
-            <text y="105" text-anchor="middle" fill="#e9d5ff" font-size="18" font-weight="900">委派目標與調整</text>
-          </g>
+  currentStepIdx = 0;
+  renderMainPage();
+  speakText(page.steps[0].voice, true);
 
-          <g class="cursor-pointer" onclick="switchPage('bot', true)" transform="translate(945, 95)">
-            <circle r="68" fill="#4c0519" stroke="#fb7185" stroke-width="4" />
-            <text y="-10" text-anchor="middle" font-size="34">🤖</text>
-            <text y="26" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">Bot</text>
-            <text y="105" text-anchor="middle" fill="#fda4af" font-size="18" font-weight="900">提供互動服務</text>
-          </g>
-        </svg>
+  animTimer = setInterval(() => {
+    currentStepIdx++;
+    if (currentStepIdx >= page.steps.length) {
+      clearInterval(animTimer);
+      animTimer = null;
+      currentStepIdx = page.steps.length - 1;
+      renderMainPage();
+      return;
+    }
+    renderMainPage();
+    speakText(page.steps[currentStepIdx].voice, true);
+  }, 5500);
+}
+
+// ----------------------------------------------------------------------------
+// 6. 五站總覽頁（對應文件第 1、7、8、9 節：架構圖 ＋ 辦一場校內研習五步串聯 ＋ 自訂 GPT 位置）
+// ----------------------------------------------------------------------------
+function renderOverviewVisualPage() {
+  const scenarioSteps = [
+    { id: 'prompt', num: '1', need: '「幫我把公告寫成通知」', entry: 'Chat 對話輸入框', diff: 'Prompt 把本次成果說清楚', icon: '💬', color: 'sky' },
+    { id: 'skill', num: '2', need: '「每場都照同一套標準寫」', entry: 'Skills 側欄 ＋ @ 對話呼叫', diff: 'Skill 保存可重用的方法', icon: '📦', color: 'emerald' },
+    { id: 'tool', num: '3', need: '「讀取名單並計算人數」', entry: '內建檔案工具 ／ Plugins', diff: 'Tool 實際取得資料與執行動作', icon: '🔌', color: 'amber' },
+    { id: 'agent', num: '4', need: '「發現資料矛盾時繼續找依據」', entry: '切換到 Work ＋ 已授權工具', diff: 'Agent 根據結果調整工作步驟', icon: '🧭', color: 'purple' },
+    { id: 'bot', num: '5', need: '「讓同仁在群組直接詢問」', entry: 'Slack／Teams 的 @ChatGPT', diff: 'Bot 把能力提供為訊息服務', icon: '🤖', color: 'rose' }
+  ];
+
+  return `
+    <div class="space-y-6">
+      <!-- 頂部核心破題 -->
+      <section class="glass-card rounded-3xl p-6 border-2 border-amber-400/70 bg-gradient-to-r from-slate-900 via-slate-900 to-amber-950/30">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40">
+              先看懂：五個概念對應哪些服務？
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">
+              五個概念是理解工作的五個角度，可以組合使用！
+            </h2>
+            <p class="text-base sm:text-lg font-bold text-amber-200 mt-1">
+              ⚠️ 它們不是 ChatGPT 的五種付費等級，也不是五個互斥的按鈕。
+            </p>
+          </div>
+          <button onclick="switchPage('prompt')" class="px-5 py-3 rounded-2xl bg-sky-400 hover:bg-sky-300 text-slate-950 font-black text-base shadow-lg">
+            🚀 從第 1 頁 Prompt 開始看圖解
+          </button>
+        </div>
       </section>
 
-      <!-- 圖 2：同一場研習的五種用法圖說卡 -->
-      <section class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div onclick="switchPage('prompt', true)" class="cursor-pointer rounded-3xl bg-slate-900 hover:bg-slate-800 border-2 border-sky-500/50 p-5 space-y-2">
-          <div class="text-2xl font-black text-sky-300">01 Prompt</div>
-          <div class="text-lg font-bold text-white">請幫我寫研習通知</div>
-          <div class="text-base text-amber-200 font-bold pt-2 border-t border-slate-800">➔ 得到本次通知草稿</div>
+      <!-- 圖解 1：文件第 1 節 Mermaid 概念對照 SVG 圖（五者共同完成一項工作） -->
+      <section class="glass-card rounded-3xl p-6 border-2 border-slate-800">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h3 class="text-xl sm:text-2xl font-black text-white">🗺️ 圖說一：五個概念如何共同完成一項工作？（點任一積木可跳頁）</h3>
+          <span class="text-xs sm:text-sm font-bold text-slate-400">對應《ChatGPT 五大概念服務與頁面對照》第 1 節架構圖</span>
         </div>
-        <div onclick="switchPage('skill', true)" class="cursor-pointer rounded-3xl bg-slate-900 hover:bg-slate-800 border-2 border-emerald-500/50 p-5 space-y-2">
-          <div class="text-2xl font-black text-emerald-300">02 Skill</div>
-          <div class="text-lg font-bold text-white">依單位方法製作每場通知</div>
-          <div class="text-base text-amber-200 font-bold pt-2 border-t border-slate-800">➔ 重用欄位、範本與檢查標準</div>
+
+        <div class="bg-slate-950/95 rounded-2xl p-4 border border-slate-800">
+          <svg viewBox="0 0 1050 290" class="w-full h-auto select-none">
+            <defs>
+              <marker id="arr-ov" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- 左側 5 個概念入口 -->
+            <g onclick="switchPage('prompt')" class="cursor-pointer">
+              <rect x="20" y="15" width="290" height="44" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+              <text x="38" y="43" fill="#38bdf8" font-size="16" font-weight="900">💬 Prompt：這次要做什麼</text>
+            </g>
+            <g onclick="switchPage('skill')" class="cursor-pointer">
+              <rect x="20" y="70" width="290" height="44" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2.5"/>
+              <text x="38" y="98" fill="#34d399" font-size="16" font-weight="900">📦 Skill：可重用的方法</text>
+            </g>
+            <g onclick="switchPage('tool')" class="cursor-pointer">
+              <rect x="20" y="125" width="290" height="44" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="2.5"/>
+              <text x="38" y="153" fill="#fbbf24" font-size="16" font-weight="900">🔌 Tool：讀取、計算、寫入</text>
+            </g>
+            <g onclick="switchPage('agent')" class="cursor-pointer">
+              <rect x="20" y="180" width="290" height="44" rx="10" fill="#0f172a" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="6 4"/>
+              <text x="38" y="208" fill="#c084fc" font-size="16" font-weight="900">🧭 Agent：依結果安排下一步</text>
+            </g>
+            <g onclick="switchPage('bot')" class="cursor-pointer">
+              <rect x="20" y="235" width="290" height="44" rx="10" fill="#0f172a" stroke="#f43f5e" stroke-width="2.5"/>
+              <text x="38" y="263" fill="#fda4af" font-size="16" font-weight="900">🤖 Bot：訊息服務入口 (@ChatGPT)</text>
+            </g>
+
+            <!-- 匯流連線 -->
+            <line x1="312" y1="37" x2="415" y2="120" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arr-ov)"/>
+            <line x1="312" y1="92" x2="415" y2="135" stroke="#10b981" stroke-width="2.5" marker-end="url(#arr-ov)"/>
+            <line x1="312" y1="147" x2="415" y2="147" stroke="#f59e0b" stroke-width="3" marker-end="url(#arr-ov)"/>
+            <line x1="312" y1="202" x2="415" y2="160" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arr-ov)"/>
+            <line x1="312" y1="257" x2="415" y2="175" stroke="#f43f5e" stroke-width="2.5" marker-end="url(#arr-ov)"/>
+
+            <!-- 中央核心工作區 -->
+            <rect x="420" y="85" width="250" height="125" rx="20" fill="#1e293b" stroke="#f8fafc" stroke-width="3"/>
+            <text x="545" y="135" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="900">💻 Chat 對話</text>
+            <text x="545" y="165" text-anchor="middle" fill="#38bdf8" font-size="20" font-weight="900">或 Work 工作</text>
+            <text x="545" y="192" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">（五者協同運作的舞台）</text>
+
+            <!-- 輸出箭頭 -->
+            <line x1="672" y1="147" x2="735" y2="147" stroke="#10b981" stroke-width="4" class="svg-flow-line" marker-end="url(#arr-ov)"/>
+
+            <!-- 右側最終成果 -->
+            <rect x="742" y="75" width="285" height="145" rx="20" fill="#064e3b" stroke="#10b981" stroke-width="3"/>
+            <text x="884" y="122" text-anchor="middle" fill="#6ee7b7" font-size="19" font-weight="900">✅ 可核對的成果</text>
+            <text x="884" y="152" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="800">• 答案與通知草稿</text>
+            <text x="884" y="176" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="800">• 統計檔案與差異查核表</text>
+            <text x="884" y="200" text-anchor="middle" fill="#fde68a" font-size="14" font-weight="800">• 經授權與核對的系統動作</text>
+          </svg>
         </div>
-        <div onclick="switchPage('tool', true)" class="cursor-pointer rounded-3xl bg-slate-900 hover:bg-slate-800 border-2 border-amber-500/50 p-5 space-y-2">
-          <div class="text-2xl font-black text-amber-300">03 Tool</div>
-          <div class="text-lg font-bold text-white">讀取名單並計算報名人數</div>
-          <div class="text-base text-amber-200 font-bold pt-2 border-t border-slate-800">➔ 得到可核對的數據與檔案</div>
+      </section>
+
+      <!-- 圖解 2：用同一個任務「辦一場校內研習」連起五個主題 -->
+      <section class="glass-card rounded-3xl p-6 border-2 border-slate-800">
+        <h3 class="text-xl sm:text-2xl font-black text-white mb-1">${OVERVIEW_DATA.scenarioTitle}</h3>
+        <p class="text-sm sm:text-base font-bold text-slate-400 mb-4">${OVERVIEW_DATA.scenarioSubtitle}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3.5">
+          ${scenarioSteps.map(s => {
+            const st = COLOR_STYLES[s.color];
+            return `
+              <div onclick="switchPage('${s.id}')"
+                class="cursor-pointer rounded-2xl p-4 bg-slate-900/95 border-2 ${st.border} hover:scale-[1.02] transition-all flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="px-2.5 py-0.5 rounded-lg text-xs font-black bg-slate-950 ${st.text}">示範順序 ${s.num}</span>
+                    <span class="text-2xl">${s.icon}</span>
+                  </div>
+                  <div class="text-base sm:text-lg font-black text-white leading-snug">${s.need}</div>
+                  <div class="mt-2 px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-black text-amber-300">
+                    📍 入口：${s.entry}
+                  </div>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-800 text-xs sm:text-sm font-black ${st.text}">
+                  👉 ${s.diff}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
-        <div onclick="switchPage('agent', true)" class="cursor-pointer rounded-3xl bg-slate-900 hover:bg-slate-800 border-2 border-purple-500/50 p-5 space-y-2">
-          <div class="text-2xl font-black text-purple-300">04 Agent</div>
-          <div class="text-lg font-bold text-white">查清不同資料中的日期衝突</div>
-          <div class="text-base text-amber-200 font-bold pt-2 border-t border-slate-800">➔ 依結果調整步驟並交付證據</div>
+      </section>
+
+      <!-- 圖解 3：以前的「自訂 GPT」放在哪裡？ ＋ 授課前可用入口核對表 -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="glass-card rounded-2xl p-5 border-2 border-slate-800">
+          <h4 class="text-lg sm:text-xl font-black text-amber-300">${OVERVIEW_DATA.customGptNote.title}</h4>
+          <p class="text-sm sm:text-base font-bold text-slate-300 mt-2 leading-relaxed">${OVERVIEW_DATA.customGptNote.desc}</p>
+          <div class="mt-3 space-y-2">
+            ${OVERVIEW_DATA.customGptNote.items.map(it => `
+              <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 text-sm sm:text-base font-black text-white">
+                ${it}
+              </div>
+            `).join('')}
+          </div>
         </div>
-        <div onclick="switchPage('bot', true)" class="cursor-pointer rounded-3xl bg-slate-900 hover:bg-slate-800 border-2 border-rose-500/50 p-5 space-y-2">
-          <div class="text-2xl font-black text-rose-300">05 Bot</div>
-          <div class="text-lg font-bold text-white">讓同仁在訊息介面詢問研習</div>
-          <div class="text-base text-amber-200 font-bold pt-2 border-t border-slate-800">➔ 提供可持續使用的問答服務</div>
+
+        <div class="glass-card rounded-2xl p-5 border-2 border-slate-800">
+          <h4 class="text-lg sm:text-xl font-black text-sky-300">📋 授課前檢查：ChatGPT 五大服務實際入口速查</h4>
+          <p class="text-xs sm:text-sm font-bold text-slate-400 mt-1 mb-3">沒看到入口時先確認帳號方案與工作區權限，不要把「找不到按鈕」當成操作錯誤：</p>
+          <div class="space-y-2">
+            ${OVERVIEW_DATA.preClassChecklist.map(row => `
+              <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm">
+                <span class="font-black text-white">${row.item}</span>
+                <span class="font-bold text-amber-300">📍 ${row.entry}</span>
+                <span class="font-bold text-slate-400">${row.note}</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </section>
     </div>
   `;
 }
 
+// ----------------------------------------------------------------------------
+// 7. 初始化
+// ----------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
-  if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+  }
   renderTopTabs();
   renderMainPage();
 });
