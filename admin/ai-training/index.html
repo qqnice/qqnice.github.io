@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="font-mode-normal">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 工作方法與工具選擇｜Prompt・Skill・Agent 同仁教育訓練 3D 語音互動入口網站</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css?v=202610280800" />
+</head>
+<body class="antialiased selection:bg-sky-500 selection:text-slate-950 min-h-screen flex flex-col">
+
+  <!-- =========================================================================
+       頂部常駐大字體導覽與語音控制列 (Sticky Top Command Bar)
+       ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b-2 border-slate-800 shadow-2xl">
+    <div class="max-w-[1460px] mx-auto px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <!-- 左側：品牌與標題 -->
+      <div class="flex items-center gap-3.5">
+        <a href="../" class="px-3 py-2 rounded-xl hover:bg-slate-800 text-slate-200 text-sm font-black border border-slate-700 transition-colors">
+          ← 行政專區
+        </a>
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 via-indigo-500 to-emerald-500 flex items-center justify-center text-2xl shadow-lg shadow-sky-500/25 shrink-0">
+          🧭
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="font-black text-lg sm:text-2xl tracking-tight text-white">
+              AI 工作方法與工具選擇｜同仁教育訓練 3D 語音互動入口網站
+            </h1>
+            <span class="hidden xl:inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+              講義 v2 圖解與實作版・先決定成果再選最簡單做法
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 mt-0.5">
+            一次看懂 <strong class="text-sky-300">Prompt 提示詞</strong>、<strong class="text-emerald-300">Skill 工作方法包</strong>、<strong class="text-amber-300">Tool / Plugin / MCP</strong>、<strong class="text-purple-300">固定流程 vs. Agent</strong> 與 <strong class="text-rose-300">Bot 排程資安邊界</strong> 的功能與挑戰
+          </p>
+        </div>
+      </div>
+
+      <!-- 右側：字體放大鏡 ＋ 語音導覽控制器 -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- 字體放大切換 -->
+        <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700" title="調整全站字體與框架比例">
+          <span class="px-2 text-xs font-bold text-slate-400">字體：</span>
+          <button id="btn-font-normal" onclick="setFontSizeMode('normal')" class="px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 font-black text-sm shadow transition-all">
+            標準大字
+          </button>
+          <button id="btn-font-large" onclick="setFontSizeMode('large')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition-all">
+            特大字
+          </button>
+          <button id="btn-font-xlarge" onclick="setFontSizeMode('xlarge')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition-all">
+            投影超大
+          </button>
+        </div>
+
+        <!-- 語音開關 -->
+        <button id="btn-voice-toggle" onclick="toggleVoiceEnabled()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border-2 border-sky-400/70 text-sm font-black text-sky-300 transition-all">
+          <span id="voice-icon" class="text-lg">🔊</span>
+          <span id="voice-label">語音導覽：開啟</span>
+        </button>
+
+        <!-- 重聽本步 -->
+        <button onclick="speakCurrentStep(true)" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-black text-slate-100 transition-all">
+          🗣️ 唸本階重點
+        </button>
+
+        <!-- 一鍵自動導覽 -->
+        <button id="btn-auto-tour" onclick="toggleAutoTour()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-500/25 transition-all">
+          <span id="tour-icon">▶️</span>
+          <span id="tour-label">一鍵語音導覽 6 大階梯</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 條綱快速跳轉列 (Clear Section Outline Nav) -->
+    <div class="bg-slate-900/90 border-t border-slate-800/90">
+      <div class="max-w-[1460px] mx-auto px-4 sm:px-8 py-2 flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+        <span class="text-slate-400 mr-1">📑 課程大綱直達：</span>
+        <a href="#sec-goals" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-slate-200 transition">① 課後三目標與 90 分鐘地圖</a>
+        <a href="#sec-stage" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-sky-300 border border-sky-500/30 transition">② 3D 演進主舞台 (Prompt ➔ Skill ➔ Agent)</a>
+        <a href="#sec-compare" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/30 transition">③ 四大層次功能與挑戰比較表</a>
+        <a href="#sec-components" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-amber-300 border border-amber-500/30 transition">④ 圖1：八大元件分工圖鑑</a>
+        <a href="#sec-fiveq" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-purple-300 border border-purple-500/30 transition">⑤ 圖2：五個問題任務決策引擎</a>
+        <a href="#sec-security" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-rose-300 border border-rose-500/30 transition">⑥ 圖4：三位置資料流向與六大資安檢查</a>
+        <a href="#sec-quiz" class="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-sky-500 hover:text-slate-950 text-indigo-300 border border-indigo-500/30 transition">⑦ 三題情境演練與我的工作拆解工坊</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1460px] mx-auto w-full px-4 sm:px-8 py-6 space-y-12 flex-1">
+
+    <!-- =======================================================================
+         單元一：課後能做到的三件事 ＆ 九十分鐘建議學習順序 (#sec-goals)
+         ======================================================================= -->
+    <section id="sec-goals" class="space-y-6">
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/40 text-sm font-black mb-2">
+              🎯 單元一｜教育訓練核心宗旨（講義導讀）
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+              把工作需求轉成「可執行、可驗收」的 AI 任務
+            </h2>
+            <p class="text-base sm:text-xl text-slate-300 mt-2 max-w-4xl">
+              先決定成果，再選工作方法、工具與控制方式。<strong class="text-amber-300">Prompt、Skill、Plugin、MCP、Agent 與 Bot 分屬不同面向，不是互斥的高低階等級，可以在同一項任務中搭配使用！</strong>基本原則是：<span class="underline decoration-sky-400 decoration-2 text-white font-black">先採用能達成驗收標準的最簡單做法。</span>
+            </p>
+          </div>
+          <button
+            onclick="speakText('歡迎來到內部 AI 基礎訓練入口網站！本課程協助同仁把日常工作轉成可執行、可驗收的 AI 任務。請記住，Prompt、Skill、工具、Agent 與 Bot 不是誰取代誰的高低等級，而是不同面向的積木。我們的基本原則是：先把成果與驗收標準說清楚，再選擇能達成標準的最簡單做法！')"
+            class="px-5 py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-base shadow-lg shadow-sky-500/25 shrink-0 transition-all"
+          >
+            🔊 聽課程核心導讀
+          </button>
+        </div>
+
+        <!-- 課後能做到的三件事 (三大框架卡片) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+          <div class="rounded-2xl bg-slate-950/90 border-2 border-sky-500/40 p-5 sm:p-6">
+            <div class="flex items-center gap-3 mb-2.5">
+              <span class="w-10 h-10 rounded-xl bg-sky-500 text-slate-950 font-black text-xl flex items-center justify-center">1</span>
+              <h3 class="text-xl font-black text-white">說清楚名詞分工與搭配</h3>
+            </div>
+            <p class="text-base text-slate-300 leading-relaxed">
+              清楚分辨 <strong class="text-sky-300">對話 Prompt、Skill、Tool、Plugin、MCP、Agent、Bot 與排程</strong> 各自解決什麼問題，不再被行銷名詞混淆。
+            </p>
+          </div>
+
+          <div class="rounded-2xl bg-slate-950/90 border-2 border-emerald-500/40 p-5 sm:p-6">
+            <div class="flex items-center gap-3 mb-2.5">
+              <span class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 font-black text-xl flex items-center justify-center">2</span>
+              <h3 class="text-xl font-black text-white">用五個問題選對工作方法</h3>
+            </div>
+            <p class="text-base text-slate-300 leading-relaxed">
+              依序確認「<strong class="text-emerald-300">成果 ➔ 方法重用 ➔ 資料與動作 ➔ 流程控制權 ➔ 啟動與使用</strong>」，為日常業務挑出最簡單且足夠的做法並說明理由。
+            </p>
+          </div>
+
+          <div class="rounded-2xl bg-slate-950/90 border-2 border-amber-500/40 p-5 sm:p-6">
+            <div class="flex items-center gap-3 mb-2.5">
+              <span class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 font-black text-xl flex items-center justify-center">3</span>
+              <h3 class="text-xl font-black text-white">指出資料權限邊界與驗收證據</h3>
+            </div>
+            <p class="text-base text-slate-300 leading-relaxed">
+              拆解「<strong class="text-amber-300">介面、推論、檔案</strong>」三處位置，落實最小讀取權限，並提出可查驗的成果標準與真人安全護欄。
+            </p>
+          </div>
+        </div>
+
+        <!-- 90 分鐘建議學習順序 -->
+        <div class="mt-7 pt-6 border-t border-slate-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-lg sm:text-2xl font-black text-white flex items-center gap-2.5">
+              <span>🗓️ 九十分鐘完整教育訓練地圖（點擊任一階段可聽導覽並跳轉）</span>
+            </h3>
+            <span class="text-sm text-amber-300 font-bold">先理解分工 ➔ 再到自己帳號實測驗證功能</span>
+          </div>
+          <div id="timeline-container" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
+            <!-- JS 渲染 5 階段時間軸 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元二：3D 語音互動主舞台 — 從 Prompt、Skill 到 Agent 的演進與挑戰 (#sec-stage)
+         ======================================================================= -->
+    <section id="sec-stage" class="space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/40 text-sm font-black mb-1.5">
+            🏛️ 單元二｜核心 3D 語音互動劇場（點擊下方 6 大階梯或 3D 節點切換）
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white">
+            從 Prompt、Skill、Tool 到 Agent：每一階能做什麼？有什麼挑戰？
+          </h2>
+        </div>
+      </div>
+
+      <!-- 6 大階梯按鈕列 -->
+      <div class="bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-3 sm:p-4 shadow-xl">
+        <div id="step-pills-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          <!-- JS 渲染 6 大階梯按鈕 -->
+        </div>
+      </div>
+
+      <!-- 當前階梯語音字幕與上下步切換橫幅 -->
+      <div class="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-indigo-950/70 border-2 border-slate-700 p-5 sm:p-6 shadow-2xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+        <div class="flex items-start sm:items-center gap-4">
+          <div class="w-16 h-16 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex flex-col items-center justify-center shrink-0">
+            <span class="text-xs font-black text-sky-300 uppercase">STAGE</span>
+            <span id="banner-step-num" class="text-3xl font-black text-white leading-none">1</span>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2.5 mb-1.5">
+              <span id="banner-step-tag" class="px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-sky-500/20 text-sky-300 border border-sky-400/40">
+                對應第 1 問｜先把成果說清楚
+              </span>
+              <h3 id="banner-step-title" class="text-xl sm:text-3xl font-black text-white tracking-tight">
+                Prompt（對話交辦）：把模糊想法變成「可驗收的單次指令」
+              </h3>
+            </div>
+            <!-- 語音即時字幕 -->
+            <div class="flex items-start gap-2.5 text-base sm:text-lg text-amber-200 font-medium bg-slate-950/70 px-4 py-2.5 rounded-2xl border border-slate-800">
+              <span id="speaking-wave" class="hidden items-end gap-1 h-5 mt-1 shrink-0">
+                <span class="w-1.5 h-3.5 bg-amber-400 rounded-full sound-bar"></span>
+                <span class="w-1.5 h-5 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+                <span class="w-1.5 h-3 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+              </span>
+              <p id="banner-voice-subtitle" class="leading-relaxed">
+                「點擊右上角『一鍵語音導覽』或任一階梯卡片，即可收聽台灣中文語音導覽解說！」
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 self-end lg:self-center shrink-0">
+          <button onclick="prevStep()" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-black text-sm sm:text-base border border-slate-600 transition-all">
+            ◀ 上一階
+          </button>
+          <button onclick="nextStep()" class="px-5 py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-sky-500/25 transition-all">
+            下一階 ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D 舞台與右側大字條綱解析雙欄布局 -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+
+        <!-- 左欄 (6/12)：3D 等距立體「AI 任務組裝與控制權指揮中心」全景舞台 -->
+        <div class="xl:col-span-6 stage-viewport rounded-3xl border-2 border-slate-800 p-5 sm:p-6 flex flex-col justify-between min-h-[580px] overflow-hidden select-none">
+          <div class="flex flex-wrap items-center justify-between gap-2 z-20">
+            <span class="px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700 text-xs sm:text-sm font-black text-slate-200">
+              🧊 3D 任務架構舞台（可直接點擊圖中 6 座立體工作站）
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="goToStep(1, true)" class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 text-xs font-black">① Prompt</button>
+              <button onclick="goToStep(2, true)" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 text-xs font-black">② Skill</button>
+              <button onclick="goToStep(3, true)" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-black">③ Tool/MCP</button>
+              <button onclick="goToStep(4, true)" class="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/40 text-xs font-black">④ 流程 vs Agent</button>
+              <button onclick="goToStep(5, true)" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-400/40 text-xs font-black">⑤ Bot/排程</button>
+              <button onclick="goToStep(6, true)" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/40 text-xs font-black">⑥ 資安三位置</button>
+            </div>
+          </div>
+
+          <!-- 3D 等距 SVG 主圖 -->
+          <div class="my-auto py-3 flex items-center justify-center">
+            <svg viewBox="0 0 900 540" class="w-full h-auto max-h-[490px] drop-shadow-2xl">
+              <defs>
+                <linearGradient id="deckGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1e293b" />
+                  <stop offset="100%" stop-color="#090d16" />
+                </linearGradient>
+                <filter id="glowFilter" x="-25%" y="-25%" width="150%" height="150%">
+                  <feGaussianBlur stdDeviation="8" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- 頂部浮空解說螢幕 -->
+              <g transform="translate(45, 12)">
+                <rect x="0" y="0" width="810" height="68" rx="16" fill="#0f172a" stroke="#38bdf8" stroke-width="2.2" />
+                <text id="svg-banner-title" x="22" y="29" fill="#38bdf8" font-size="16" font-weight="900">
+                  💬 單次對話交辦：先定義檔案、內容與驗收標準
+                </text>
+                <text id="svg-banner-sub" x="22" y="53" fill="#fde68a" font-size="13.5" font-weight="700">
+                  只需文字草稿時先用對話；探索穩定後再考慮保存為範本或 Skill
+                </text>
+              </g>
+
+              <!-- 3D 指揮中心等距底座 -->
+              <g id="iso-deck">
+                <polygon points="35,330 450,115 865,330 450,515" fill="#020617" opacity="0.8" transform="translate(0, 14)" />
+                <polygon points="35,330 450,115 865,330 450,515" fill="url(#deckGrad)" stroke="#475569" stroke-width="2.5" />
+                <line x1="180" y1="255" x2="595" y2="450" stroke="#334155" stroke-width="1.2" stroke-dasharray="6 6" />
+                <line x1="315" y1="185" x2="730" y2="385" stroke="#334155" stroke-width="1.2" stroke-dasharray="6 6" />
+                <line x1="210" y1="410" x2="635" y2="210" stroke="#334155" stroke-width="1.2" stroke-dasharray="6 6" />
+              </g>
+
+              <!-- 連接管線層 -->
+              <g id="stage-wires">
+                <path id="wire-1-2" d="M 190 295 Q 250 235 310 220" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" opacity="0.4" />
+                <path id="wire-2-3" d="M 410 210 Q 470 190 530 220" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" opacity="0.4" />
+                <path id="wire-3-4" d="M 590 260 Q 540 310 470 335" fill="none" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" opacity="0.4" />
+                <path id="wire-4-5" d="M 550 365 Q 630 355 700 325" fill="none" stroke="#c084fc" stroke-width="5" stroke-linecap="round" opacity="0.4" />
+              </g>
+
+              <!-- 節點 1：Prompt 對話交辦工作站 (左前) -->
+              <g class="cursor-pointer float-slow" onclick="goToStep(1, true)" transform="translate(55, 235)">
+                <ellipse id="halo-prompt" cx="95" cy="95" rx="85" ry="34" fill="#38bdf8" opacity="0.65" filter="url(#glowFilter)" />
+                <rect id="box-prompt" x="10" y="15" width="170" height="86" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="3.5" />
+                <text x="24" y="42" fill="#7dd3fc" font-size="15" font-weight="900">① Prompt 對話交辦</text>
+                <text x="24" y="64" fill="#f8fafc" font-size="12.5" font-weight="700">定義成果・欄位・待確認</text>
+                <text x="24" y="84" fill="#fde68a" font-size="11.5" font-weight="700">⚠️ 單次記憶・無外部動作</text>
+              </g>
+
+              <!-- 節點 2：Skill 工作方法與資源包 (中上左) -->
+              <g class="cursor-pointer float-delayed" onclick="goToStep(2, true)" transform="translate(265, 130)">
+                <ellipse id="halo-skill" cx="95" cy="95" rx="85" ry="34" fill="#10b981" opacity="0.15" filter="url(#glowFilter)" />
+                <rect id="box-skill" x="10" y="15" width="175" height="86" rx="14" fill="#0f172a" stroke="#10b981" stroke-width="1.8" />
+                <text x="24" y="42" fill="#6ee7b7" font-size="15" font-weight="900">② Skill 方法資源包</text>
+                <text x="24" y="64" fill="#f8fafc" font-size="12.5" font-weight="700">保存 SOP・範本・檢查表</text>
+                <text x="24" y="84" fill="#fde68a" font-size="11.5" font-weight="700">⚠️ 非重訓模型・不會自啟動</text>
+              </g>
+
+              <!-- 節點 3：Tool / Plugin / MCP 工具橋樑 (中上右) -->
+              <g class="cursor-pointer float-fast" onclick="goToStep(3, true)" transform="translate(495, 135)">
+                <ellipse id="halo-tool" cx="95" cy="95" rx="85" ry="34" fill="#fbbf24" opacity="0.15" filter="url(#glowFilter)" />
+                <rect id="box-tool" x="10" y="15" width="180" height="86" rx="14" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" />
+                <text x="24" y="42" fill="#fde047" font-size="15" font-weight="900">③ Tool / Plugin / MCP</text>
+                <text x="24" y="64" fill="#f8fafc" font-size="12.5" font-weight="700">讀試算表・算人數・建檔</text>
+                <text x="24" y="84" fill="#fca5a5" font-size="11.5" font-weight="700">⚠️ 沿用連線帳號權限範圍</text>
+              </g>
+
+              <!-- 節點 4：圖 3 固定流程 vs. Agent 動態核心 (中央核心) -->
+              <g class="cursor-pointer float-slow" onclick="goToStep(4, true)" transform="translate(310, 275)">
+                <ellipse id="halo-agent" cx="125" cy="95" rx="115" ry="40" fill="#c084fc" opacity="0.15" filter="url(#glowFilter)" />
+                <rect id="box-agent" x="10" y="10" width="230" height="100" rx="16" fill="#1e1b4b" stroke="#c084fc" stroke-width="1.8" />
+                <text x="24" y="36" fill="#e9d5ff" font-size="15" font-weight="900">④ 誰決定下一步？（圖 3）</text>
+                <text x="24" y="58" fill="#6ee7b7" font-size="12.5" font-weight="700">● 規則明確 ➔ 公式 / 固定流程</text>
+                <text x="24" y="78" fill="#fde68a" font-size="12.5" font-weight="700">● 分散衝突 ➔ 受限 Agent 查核</text>
+                <text x="24" y="96" fill="#fda4af" font-size="11.5" font-weight="900">🛡️ 無法判定必列「待確認」交回人</text>
+              </g>
+
+              <!-- 節點 5：Bot 服務與排程啟動 (右側) -->
+              <g class="cursor-pointer float-delayed" onclick="goToStep(5, true)" transform="translate(665, 250)">
+                <ellipse id="halo-bot" cx="95" cy="95" rx="85" ry="34" fill="#fb7185" opacity="0.15" filter="url(#glowFilter)" />
+                <rect id="box-bot" x="10" y="15" width="175" height="86" rx="14" fill="#0f172a" stroke="#fb7185" stroke-width="1.8" />
+                <text x="24" y="42" fill="#fda4af" font-size="15" font-weight="900">⑤ Bot 服務 × 排程</text>
+                <text x="24" y="64" fill="#f8fafc" font-size="12.5" font-weight="700">共享文件 / Bot / 定時觸發</text>
+                <text x="24" y="84" fill="#fde68a" font-size="11.5" font-weight="700">⚠️ 先手動再自動・設維護人</text>
+              </g>
+
+              <!-- 節點 6：圖 4 介面×推論×檔案三位置與真人把關 (底部前側) -->
+              <g class="cursor-pointer" onclick="goToStep(6, true)" transform="translate(225, 415)">
+                <ellipse id="halo-security" cx="225" cy="52" rx="210" ry="32" fill="#38bdf8" opacity="0.15" filter="url(#glowFilter)" />
+                <rect id="box-security" x="15" y="8" width="420" height="76" rx="16" fill="#090d16" stroke="#38bdf8" stroke-width="1.8" />
+                <text x="35" y="34" fill="#7dd3fc" font-size="15" font-weight="900">⑥ 圖 4 資安鐵律：使用介面 ≠ 模型推論位置 ≠ 工具檔案位置</text>
+                <text x="35" y="56" fill="#fde68a" font-size="13" font-weight="700">👩‍💼 檔案在本機 ≠ 離線推論！防提示注入・公式驗算・對外動作真人審核</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- 舞台底部圖例說明 -->
+          <div class="grid grid-cols-3 gap-2.5 pt-3 border-t border-slate-800/90 text-xs sm:text-sm">
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div class="font-black text-sky-300">💬 步驟 1–2：方法層</div>
+              <div class="text-slate-300">先定驗收標準，穩定後存為範本或 Skill</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div class="font-black text-amber-300">🔌 步驟 3–4：動作與控制層</div>
+              <div class="text-slate-300">接上最小權限工具，區分固定流程與 Agent</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div class="font-black text-emerald-300">🛡️ 步驟 5–6：交付與邊界層</div>
+              <div class="text-slate-300">先手動再排程，核對三位置與驗證證據</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右欄 (6/12)：大字體、大框架、條綱分明的深度解析面板 -->
+        <div id="stage-detail-panel" class="xl:col-span-6 bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-5 sm:p-7 flex flex-col justify-between shadow-2xl">
+          <!-- 由 JS 動態渲染綱要 01 ~ 04 -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元三：四大核心層次深度比較表（Prompt vs. Skill vs. 固定流程 vs. Agent）(#sec-compare)
+         ======================================================================= -->
+    <section id="sec-compare" class="space-y-6 pt-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-sm font-black mb-1.5">
+            📊 單元三｜講義第 2–3 節核心比較（條綱對照表）
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white">
+            一張表看懂：Prompt、Skill、固定流程與 Agent 的功能與挑戰
+          </h2>
+          <p class="text-base sm:text-lg text-slate-300 mt-1">
+            不是越後面的名詞越厲害！請依「<strong class="text-amber-300">方法是否常態重用</strong>」與「<strong class="text-sky-300">誰決定下一步執行路徑（圖 3）</strong>」來選擇最合適的做法。
+          </p>
+        </div>
+      </div>
+
+      <!-- 四大層次大字卡片網格 -->
+      <div id="comparison-tiers-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- JS 渲染 4 張大型比較卡 -->
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元四：圖 1「同一項任務可以同時使用這些元件」8 大名詞分工圖鑑 (#sec-components)
+         ======================================================================= -->
+    <section id="sec-components" class="space-y-6 pt-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-sm font-black mb-1.5">
+            🧩 單元四｜講義圖 1 概念分工圖（點擊任一卡片可聽語音解說）
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white">
+            八大常見 AI 名詞分工與「不能據此推定」的迷思破除
+          </h2>
+          <p class="text-base sm:text-lg text-slate-300 mt-1">
+            方格位置不代表能力高低！同一項行政任務可以同時搭配 <strong class="text-white">Skill（第 2 問）＋ 工具/MCP（第 3 問）＋ 固定流程或 Agent（第 4 問）＋ 排程或 Bot（第 5 問）</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div id="eight-components-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- JS 渲染 8 張大字分工卡 -->
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元五：圖 2「用五個問題組合工作方式」互動決策引擎 (#sec-fiveq)
+         ======================================================================= -->
+    <section id="sec-fiveq" class="space-y-6 pt-4">
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/40 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/40 text-sm font-black mb-1.5">
+              🧭 單元五｜講義圖 2 任務判斷流程（互動決策模擬器）
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white">
+              用「五個問題」一步步組合出你的 AI 工作方式
+            </h2>
+            <p class="text-base sm:text-lg text-slate-300 mt-1">
+              每一題都要依序走完！您可以直接點擊下方 4 個<strong class="text-amber-300">「講義標準範例」</strong>一鍵帶入，或親自點選每一題的 A / B / C 選項觀看診斷結果。
+            </p>
+          </div>
+        </div>
+
+        <!-- 預設情境快速帶入列 -->
+        <div>
+          <div class="text-sm font-black text-amber-300 mb-2.5">⚡ 一鍵帶入講義標準案例配置：</div>
+          <div id="fiveq-presets-bar" class="flex flex-wrap gap-2.5">
+            <!-- JS 渲染 4 個講義範例按鈕 -->
+          </div>
+        </div>
+
+        <!-- 五題互動選擇清單 -->
+        <div id="fiveq-questions-list" class="space-y-4">
+          <!-- JS 渲染 Q1 ~ Q5 -->
+        </div>
+
+        <!-- 診斷結果輸出面板 -->
+        <div id="fiveq-result-box" class="rounded-3xl bg-slate-950 border-2 border-emerald-500/60 p-6 shadow-xl">
+          <!-- JS 渲染組合處方箋 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元六：圖 4「介面 × 推論 × 檔案」三位置拆解模擬器 ＆ 第 6 節六大資安檢查 (#sec-security)
+         ======================================================================= -->
+    <section id="sec-security" class="space-y-8 pt-4">
+      <!-- Part A: 圖 4 三位置互動模擬器 -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-rose-950/35 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/40 text-sm font-black mb-1.5">
+            🛡️ 單元六之一｜講義第 4 節＆圖 4 資料流向示意
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-black text-white">
+            分別確認「使用介面 × 模型推論位置 × 工具與檔案位置」
+          </h2>
+          <p class="text-base sm:text-lg text-slate-300 mt-1">
+            從 Web 或桌面軟體進入，只是使用介面的選擇。<strong class="text-amber-300">檔案存在本機電腦，無法單獨證明內容沒有離開電腦！</strong>請點擊下方三種配置比較資料流向：
+          </p>
+        </div>
+
+        <div id="dataflow-cfg-buttons" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- JS 渲染三種配置切換按鈕 -->
+        </div>
+
+        <div id="dataflow-display-panel">
+          <!-- JS 渲染三位置拆解面板 -->
+        </div>
+      </div>
+
+      <!-- Part B: 第 6 節 使用前的六大資料與權限檢查 -->
+      <div class="space-y-5">
+        <div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-sm font-black mb-1.5">
+            🔒 單元六之二｜講義第 6 節 使用前的資料與權限檢查（點擊卡片可聽語音）
+          </span>
+          <h3 class="text-2xl sm:text-3xl font-black text-white">
+            六大安全與品質挑戰：連線身分、提示注入、AI 幻覺與正式動作把關
+          </h3>
+          <p class="text-base sm:text-lg text-slate-300 mt-1">
+            尚未確認校方核准清單與規範前，課堂操作與同仁練習應一律使用<strong class="text-emerald-300">「虛構名單」或「已公開公告」</strong>，且只產出草稿及核對表。
+          </p>
+        </div>
+
+        <div id="security-checks-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- JS 渲染 6 張安全檢查大卡 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         單元七：講義第 7–8 節「三題情境練習、8分制互評表」＆「我的工作套用工坊」(#sec-quiz)
+         ======================================================================= -->
+    <section id="sec-quiz" class="space-y-8 pt-4 pb-12">
+      <!-- Part A: 三題情境練習互動測驗 -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/35 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-sm font-black mb-1.5">
+              🎓 單元七之一｜講義第 7–8 節 三題行政情境實戰演練與參考解答
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-black text-white">
+              換你做決定！三題真實行政情境互動挑戰
+            </h2>
+            <p class="text-base sm:text-lg text-slate-300 mt-1">
+              每題請先選出一項優先採用的做法，立即查看講義標準參考解答、相對其他選項的取捨理由，以及五問完整拆解！
+            </p>
+          </div>
+        </div>
+
+        <!-- 題目切換 Tabs -->
+        <div id="quiz-tabs-bar" class="flex flex-wrap gap-3">
+          <!-- JS 渲染情境 A / B / C 按鈕 -->
+        </div>
+
+        <!-- 題目內容與互動選項 -->
+        <div id="quiz-body-panel">
+          <!-- JS 渲染當前題目 -->
+        </div>
+
+        <!-- 講義第 8 節：互評標準（每題 8 分）大字表格 -->
+        <div class="rounded-2xl bg-slate-950/90 border-2 border-slate-800 p-5 sm:p-6">
+          <h4 class="text-lg sm:text-xl font-black text-amber-300 mb-3">
+            📏 講義第 8 節：課堂互評標準表（每題滿分 8 分，4 大評分面向）
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm sm:text-base">
+              <thead>
+                <tr class="border-b-2 border-slate-700 text-sky-300 bg-slate-900">
+                  <th class="p-3.5 font-black">評分面向</th>
+                  <th class="p-3.5 font-black text-emerald-300">2 分（優良）</th>
+                  <th class="p-3.5 font-black text-amber-300">1 分（尚可）</th>
+                  <th class="p-3.5 font-black text-rose-300">0 分（待補強）</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-200">
+                <tr>
+                  <td class="p-3.5 font-black text-white">1. 成果與驗收</td>
+                  <td class="p-3.5">成果具體且提出可查驗標準</td>
+                  <td class="p-3.5">有成果但驗收標準模糊</td>
+                  <td class="p-3.5">未定義具體成果</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-black text-white">2. 做法與理由</td>
+                  <td class="p-3.5">選擇合適且清楚說明流程控制權</td>
+                  <td class="p-3.5">做法可行但取捨理由不足</td>
+                  <td class="p-3.5">混淆分工或無理由</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-black text-white">3. 元件搭配</td>
+                  <td class="p-3.5">正確處理方法重用、工具與啟動機制</td>
+                  <td class="p-3.5">部分條件或維運環節遺漏</td>
+                  <td class="p-3.5">把元件當成互斥高低等級</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-black text-white">4. 資料與權限</td>
+                  <td class="p-3.5">提出具體最小權限邊界與處理方式</td>
+                  <td class="p-3.5">只空泛寫一句「注意安全」</td>
+                  <td class="p-3.5">未考慮邊界或給過大權限</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part B: 我的工作套用練習（互動表單與 Prompt 產生器） -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/50 border-2 border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 text-sm font-black mb-1.5">
+              🛠️ 單元七之二｜講義第 8 節「我的工作套用練習」互動產生器
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-black text-white">
+              把五個問題套用到你自己的日常行政工作（一鍵生成交辦卡）
+            </h3>
+            <p class="text-base text-slate-300 mt-1">
+              填寫下方五個問題（或點選快速範本），右側會即時產生可貼入個人講義與 AI 對話框的結構化規劃卡！
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2.5 shrink-0">
+            <button onclick="fillPracticePreset('seminar')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-black text-sm border border-slate-700">
+              📋 帶入範例 1：每週研習報名摘要
+            </button>
+            <button onclick="fillPracticePreset('faq')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-black text-sm border border-slate-700">
+              💬 帶入範例 2：處室補助辦法問答
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <!-- 左側輸入欄 -->
+          <div class="lg:col-span-6 space-y-4">
+            <div>
+              <label class="block text-sm sm:text-base font-black text-sky-300 mb-1">■ 工作名稱：</label>
+              <input id="ws-task-name" oninput="updatePracticePreview()" type="text" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2.5 text-base text-white font-bold outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm sm:text-base font-black text-white mb-1">1. 交付什麼成果？如何驗收？</label>
+              <textarea id="ws-q1" oninput="updatePracticePreview()" rows="2" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2 text-sm sm:text-base text-slate-100 outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm sm:text-base font-black text-white mb-1">2. 方法要重複使用嗎？用範本還是 Skill？</label>
+              <textarea id="ws-q2" oninput="updatePracticePreview()" rows="2" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2 text-sm sm:text-base text-slate-100 outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm sm:text-base font-black text-white mb-1">3. 需要哪些資料與動作？帳號及權限範圍？</label>
+              <textarea id="ws-q3" oninput="updatePracticePreview()" rows="2" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2 text-sm sm:text-base text-slate-100 outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm sm:text-base font-black text-white mb-1">4. 誰決定下一步？人、固定流程或 Agent？為什麼？</label>
+              <textarea id="ws-q4" oninput="updatePracticePreview()" rows="2" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2 text-sm sm:text-base text-slate-100 outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm sm:text-base font-black text-white mb-1">5. 如何啟動並讓誰使用？結果送哪裡？誰處理失敗？</label>
+              <textarea id="ws-q5" oninput="updatePracticePreview()" rows="2" class="w-full rounded-xl bg-slate-950 border-2 border-slate-700 focus:border-sky-400 px-4 py-2 text-sm sm:text-base text-slate-100 outline-none"></textarea>
+            </div>
+          </div>
+
+          <!-- 右側即時輸出與一鍵複製 -->
+          <div class="lg:col-span-6 bg-slate-950 rounded-2xl border-2 border-slate-800 p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                <span class="text-sm font-black text-amber-300 font-mono-code">WORKSHEET & PROMPT GENERATOR</span>
+                <button
+                  onclick="copyPracticeOutput(this)"
+                  class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 transition-all"
+                >
+                  📋 一鍵複製規劃卡與 Prompt
+                </button>
+              </div>
+              <pre id="ws-output-preview" class="text-sm sm:text-base text-slate-200 whitespace-pre-wrap leading-relaxed font-mono-code select-all"></pre>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-xs sm:text-sm text-slate-400 flex items-center justify-between">
+              <span>💡 查不到功能時：先核對登入帳號、方案與工作區設定，用虛構資料做小型測試</span>
+              <span class="text-emerald-300 font-bold">講義第 9 節附錄準則</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-sm text-slate-400">
+    <div class="max-w-[1460px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>AI 工作方法與工具選擇｜同仁工作講義 第二版（圖解與實作版）3D 語音互動入口網站</div>
+      <div class="text-slate-500">資訊與產品文件查核基準：2026 年 10 月 28 日｜先決定成果，再選最簡單且可驗收的做法</div>
+    </div>
+  </footer>
+
+  <script src="data.js?v=202610280800"></script>
+  <script src="app.js?v=202610280800"></script>
+</body>
+</html>
