@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root {
+  --bg-dark: #060b16;
+  --card-dark: #0f172a;
+  --root-font-size: 18px;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: var(--root-font-size);
+}
+
+html.font-mode-normal {
+  --root-font-size: 17.5px;
+}
+
+html.font-mode-large {
+  --root-font-size: 19.5px;
+}
+
+html.font-mode-xlarge {
+  --root-font-size: 21.5px;
+}
+
+body {
+  font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: #f8fafc;
+  overflow-x: hidden;
+  line-height: 1.7;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 3D 等距工作桌舞台 (Isometric 3D Stage) */
+.stage-viewport {
+  perspective: 1500px;
+  position: relative;
+  background:
+    radial-gradient(circle at 22% 22%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at 78% 28%, rgba(168, 85, 247, 0.16), transparent 55%),
+    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.15), transparent 55%),
+    linear-gradient(180deg, #0b1326 0%, #050914 100%);
+}
+
+/* 3D 物件陰影與浮空動效 */
+.float-slow {
+  animation: floatSlow 4.2s ease-in-out infinite;
+}
+.float-delayed {
+  animation: floatSlow 4.2s ease-in-out 1.4s infinite;
+}
+.float-fast {
+  animation: floatSlow 3.1s ease-in-out 0.7s infinite;
+}
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+/* 訊號流動動畫 */
+.wire-flow {
+  stroke-dasharray: 12 8;
+  animation: dashFlow 0.75s linear infinite;
+}
+.wire-flow-fast {
+  stroke-dasharray: 10 6;
+  animation: dashFlow 0.45s linear infinite;
+}
+@keyframes dashFlow {
+  to { stroke-dashoffset: -40; }
+}
+
+/* 聲波動畫 */
+.sound-bar {
+  animation: soundWave 0.6s ease-in-out infinite alternate;
+}
+@keyframes soundWave {
+  0% { transform: scaleY(0.25); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* 發光聚焦邊框 */
+.glow-active-sky {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.9), 0 0 38px rgba(56, 189, 248, 0.4);
+}
+.glow-active-emerald {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.9), 0 0 38px rgba(52, 211, 153, 0.4);
+}
+.glow-active-amber {
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.9), 0 0 38px rgba(251, 191, 36, 0.4);
+}
+.glow-active-purple {
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.9), 0 0 38px rgba(192, 132, 252, 0.4);
+}
+.glow-active-rose {
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.9), 0 0 38px rgba(251, 113, 133, 0.4);
+}
+
+/* 3D 卡片懸浮效果 */
+.card-3d {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-3d:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 44px -15px rgba(0, 0, 0, 0.8);
+}
+
+/* 條綱編號大標章 */
+.outline-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.65rem;
+  border-radius: 0.75rem;
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+/* 捲軸美化 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #060b16;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
