@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="WEEK5 既有雙網站擴充 LLM（Host Ollama + Docker Open WebUI + 既有 Nginx）整體網站流程介紹與安裝注意事項互動指南。">
+  <title>WEEK5｜雙網站擴充 LLM：網站整體流程與安裝注意事項</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Ccircle cx='20' cy='24' r='8' fill='%234cc9f0'/%3E%3Ccircle cx='44' cy='24' r='8' fill='%23ff9f43'/%3E%3Cpath d='M14 44c0-6 8-10 18-10s18 4 18 10v4H14v-4Z' fill='%2354e1a6'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0b182b;
+      --panel: rgba(14, 31, 51, .88);
+      --panel-solid: #0e1f33;
+      --line: rgba(151, 190, 221, .22);
+      --line-strong: rgba(151, 190, 221, .42);
+      --text: #edf7ff;
+      --muted: #9db2c4;
+      --blue: #4cc9f0;
+      --orange: #ff9f43;
+      --green: #54e1a6;
+      --pink: #f778ba;
+      --purple: #c997ff;
+      --yellow: #ffd166;
+      --danger: #ff7b72;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(76, 201, 240, .15), transparent 30rem),
+        radial-gradient(circle at 90% 10%, rgba(255, 159, 67, .12), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+    :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 17, 31, .9);
+      backdrop-filter: blur(16px);
+    }
+    .header-inner {
+      width: min(1180px, calc(100% - 2rem));
+      min-height: 64px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-weight: 800;
+      color: var(--text);
+      background: none;
+      border: 0;
+      padding: 0;
+      text-align: left;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #06101d;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      font-weight: 900;
+      font-size: .92rem;
+    }
+    .brand-sub {
+      display: block;
+      font-size: .75rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .nav-btns { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .nav-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: .42rem .75rem;
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 600;
+      transition: .16s ease;
+    }
+    .nav-btn:hover { color: var(--text); background: rgba(255,255,255,.06); border-color: var(--line); }
+
+    main, footer { width: min(1180px, calc(100% - 2rem)); margin-inline: auto; }
+    section { scroll-margin-top: 80px; }
+
+    .section-block {
+      padding: clamp(2.2rem, 4vw, 3.4rem) 0;
+      border-top: 1px solid var(--line);
+    }
+    .section-block:first-child { border-top: 0; padding-top: 1.8rem; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .65rem;
+      color: var(--blue);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 1.4rem;
+      height: 2px;
+      background: currentColor;
+    }
+    h1 {
+      font-size: clamp(1.9rem, 3.8vw, 2.85rem);
+      line-height: 1.12;
+      letter-spacing: -.03em;
+      margin-bottom: .75rem;
+    }
+    h2 {
+      font-size: clamp(1.5rem, 2.8vw, 2.05rem);
+      letter-spacing: -.02em;
+      margin-bottom: .5rem;
+    }
+    .hl-orange { color: var(--orange); }
+    .hl-green { color: var(--green); }
+    .hl-blue { color: var(--blue); }
+
+    /* Hero Summary Strip */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 1.25rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .summary-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .6rem;
+    }
+    .summary-pill {
+      padding: .8rem .9rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .summary-pill small { display: block; color: var(--muted); font-size: .75rem; }
+    .summary-pill strong { display: block; margin-top: .15rem; font-size: .95rem; }
+
+    /* SECTION 1: End-to-End Interactive Flow Stage */
+    .flow-shell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+    }
+    .flow-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: .75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.1rem;
+    }
+    .scenario-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+    }
+    .sc-tab {
+      padding: .5rem .85rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+    .sc-tab:hover { color: var(--text); border-color: var(--sc-accent, var(--blue)); }
+    .sc-tab.active {
+      color: var(--text);
+      border-color: var(--sc-accent, var(--blue));
+      background: color-mix(in srgb, var(--sc-accent, var(--blue)) 16%, #091728);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--sc-accent, var(--blue)) 22%, transparent);
+    }
+    .play-btn {
+      padding: .5rem .95rem;
+      border-radius: 10px;
+      border: 1px solid rgba(84, 225, 166, .45);
+      background: rgba(84, 225, 166, .14);
+      color: var(--green);
+      font-weight: 800;
+      font-size: .86rem;
+      transition: .18s ease;
+    }
+    .play-btn:hover { background: rgba(84, 225, 166, .24); }
+
+    /* Visual Architecture & 6 Clickable Flow Hops */
+    .vm-stage {
+      border: 1px dashed var(--line-strong);
+      border-radius: 15px;
+      padding: 1rem;
+      background: rgba(7, 17, 31, .6);
+    }
+    .vm-stage-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .85rem;
+      font-size: .8rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .hop-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: .65rem;
+    }
+    .hop-card {
+      width: 100%;
+      text-align: left;
+      padding: .8rem .75rem;
+      border-radius: 13px;
+      border: 1.5px solid var(--line);
+      background: #0a1829;
+      color: var(--text);
+      transition: .2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 132px;
+      position: relative;
+    }
+    .hop-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+    .hop-card.selected {
+      outline: 2px solid var(--yellow);
+      outline-offset: 2px;
+    }
+    .hop-card.state-ok {
+      border-color: var(--green);
+      background: rgba(84, 225, 166, .1);
+      box-shadow: 0 0 20px rgba(84, 225, 166, .15);
+    }
+    .hop-card.state-warn {
+      border-color: var(--yellow);
+      background: rgba(255, 209, 102, .11);
+    }
+    .hop-card.state-block {
+      border-color: var(--danger);
+      background: rgba(255, 123, 114, .15);
+      box-shadow: 0 0 22px rgba(255, 123, 114, .25);
+    }
+    .hop-step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: .72rem;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: .3rem;
+    }
+    .hop-zone-tag {
+      padding: .1rem .4rem;
+      border-radius: 5px;
+      background: rgba(255,255,255,.07);
+      font-size: .68rem;
+      color: #cfe4f7;
+    }
+    .hop-card strong {
+      display: block;
+      font-size: .92rem;
+      line-height: 1.3;
+      margin-bottom: .3rem;
+    }
+    .hop-card small {
+      display: block;
+      color: var(--muted);
+      font-size: .77rem;
+      line-height: 1.38;
+    }
+
+    /* Extra Architecture Branches (Dual Sites & Volumes) */
+    .branch-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .65rem;
+      margin-top: .75rem;
+      padding-top: .75rem;
+      border-top: 1px solid var(--line);
+    }
+    .branch-btn {
+      text-align: left;
+      padding: .65rem .85rem;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: rgba(14, 31, 51, .75);
+      color: var(--text);
+      transition: .18s ease;
+    }
+    .branch-btn:hover, .branch-btn.selected {
+      border-color: var(--orange);
+      background: rgba(255, 159, 67, .12);
+    }
+    .branch-btn strong { font-size: .86rem; display: block; }
+    .branch-btn small { font-size: .76rem; color: var(--muted); }
+
+    /* Live Detail Box below Flow Map */
+    .flow-detail-panel {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 1rem;
+      padding: 1.05rem;
+      border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      background: #06101c;
+    }
+    .detail-left h3 {
+      font-size: 1.08rem;
+      color: var(--blue);
+      margin-bottom: .35rem;
+    }
+    .detail-left p {
+      font-size: .91rem;
+      color: #d5e5f2;
+      margin-bottom: .5rem;
+    }
+    .detail-right {
+      padding: .85rem;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 209, 102, .3);
+      background: rgba(255, 209, 102, .06);
+      font-size: .86rem;
+      color: #ffebb3;
+    }
+    .detail-right strong {
+      display: block;
+      color: var(--yellow);
+      margin-bottom: .25rem;
+    }
+
+    /* SECTION 2: Firewall & Container-to-Host Diagnostic Lab */
+    .fw-grid {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 1.2rem;
+    }
+    .fw-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .trap-btns {
+      display: grid;
+      gap: .55rem;
+      margin: .9rem 0;
+    }
+    .trap-btn {
+      width: 100%;
+      text-align: left;
+      padding: .8rem .95rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      transition: .18s ease;
+    }
+    .trap-btn:hover { border-color: var(--danger); }
+    .trap-btn.active {
+      border-color: var(--danger);
+      background: rgba(255, 123, 114, .12);
+    }
+    .trap-btn.active.fix-mode {
+      border-color: var(--green);
+      background: rgba(84, 225, 166, .12);
+    }
+    .trap-btn strong { display: block; font-size: .93rem; margin-bottom: .2rem; }
+    .trap-btn small { color: var(--muted); font-size: .81rem; display: block; }
+
+    .code-box {
+      position: relative;
+      margin-top: .75rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #050d17;
+      overflow: hidden;
+    }
+    .code-box-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5rem .85rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .copy-btn {
+      padding: .22rem .6rem;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: rgba(76, 201, 240, .12);
+      color: var(--blue);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .copy-btn:hover { background: rgba(76, 201, 240, .24); }
+    .code-box pre {
+      margin: 0;
+      padding: .9rem;
+      font-size: .82rem;
+      line-height: 1.6;
+      color: #d1e4f5;
+      overflow-x: auto;
+    }
+
+    /* SECTION 3: 6 Key Installation Precautions */
+    .caution-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+      margin-bottom: 1.1rem;
+    }
+    .filter-btn {
+      padding: .42rem .85rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .filter-btn.active {
+      border-color: var(--blue);
+      background: rgba(76, 201, 240, .14);
+      color: var(--text);
+    }
+    .caution-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .95rem;
+    }
+    .caution-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: .2s ease;
+    }
+    .caution-card:hover {
+      border-color: var(--card-accent, var(--blue));
+      transform: translateY(-2px);
+    }
+    .caution-badge {
+      display: inline-block;
+      padding: .18rem .55rem;
+      border-radius: 6px;
+      font-size: .74rem;
+      font-weight: 800;
+      background: rgba(255,255,255,.07);
+      color: var(--card-accent, var(--blue));
+      margin-bottom: .55rem;
+    }
+    .caution-card h3 {
+      font-size: 1.04rem;
+      margin-bottom: .45rem;
+    }
+    .caution-list {
+      margin: 0;
+      padding-left: 1.15rem;
+      font-size: .87rem;
+      color: #c8d9e8;
+    }
+    .caution-list li { margin-bottom: .35rem; }
+    .caution-dont {
+      margin-top: .8rem;
+      padding: .55rem .7rem;
+      border-radius: 9px;
+      background: rgba(255, 123, 114, .1);
+      border-left: 3px solid var(--danger);
+      font-size: .8rem;
+      color: #ffd4d0;
+    }
+
+    footer {
+      padding: 2rem 0 3rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .88rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    @media (max-width: 980px) {
+      .intro-grid, .flow-detail-panel, .fw-grid { grid-template-columns: 1fr; }
+      .hop-grid { grid-template-columns: repeat(3, 1fr); }
+      .caution-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .summary-pills, .hop-grid, .branch-row, .caution-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <button type="button" class="brand" data-scroll="#top">
+        <span class="brand-mark">W5</span>
+        <span>
+          WEEK5｜雙網站擴充 LLM 流程與安裝注意事項
+          <span class="brand-sub">q1 既有主機 × https://q3.qqnice.org × Host Ollama + Docker WebUI</span>
+        </span>
+      </button>
+      <div class="nav-btns" role="navigation" aria-label="快速跳轉">
+        <button type="button" class="nav-btn" data-scroll="#flowSection">① 網站整體流程圖</button>
+        <button type="button" class="nav-btn" data-scroll="#firewallSection">② 防火牆與連線排錯</button>
+        <button type="button" class="nav-btn" data-scroll="#cautionSection">③ 安裝注意事項提醒</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- SECTION 1: OVERALL WEBSITE FLOW -->
+    <section class="section-block" id="flowSection">
+      <div class="intro-grid">
+        <div>
+          <p class="eyebrow">Overall Request Flow / 01</p>
+          <h1>一張圖看懂：<span class="hl-orange">既有雙網站</span>如何擴充 <span class="hl-green">q3 LLM 服務</span></h1>
+          <p style="color:#c7d7e6;margin-bottom:0;">
+            <code>q1</code> 與 <code>q3</code> 指向<strong>同一台 Ubuntu VM</strong>。外部只走既有 Nginx 的 <code>443</code> 埠，透過專用 Docker 網路進入 Open WebUI 容器，再跨過 <code>host.docker.internal:11434</code> 呼叫 Ubuntu Host 上的 Ollama 推論。
+          </p>
+        </div>
+        <div class="summary-pills">
+          <div class="summary-pill">
+            <small>1. 門口接待（共用）</small>
+            <strong class="hl-orange">既有 Nginx 容器</strong>
+          </div>
+          <div class="summary-pill">
+            <small>2. 聊天室（Docker）</small>
+            <strong class="hl-blue">Open WebUI 容器</strong>
+          </div>
+          <div class="summary-pill">
+            <small>3. 大腦推論（Host）</small>
+            <strong class="hl-green">Ubuntu Ollama</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-shell">
+        <div class="flow-toolbar">
+          <div class="scenario-tabs" role="tablist" aria-label="切換流程情境">
+            <button type="button" class="sc-tab active" data-sc="normal" style="--sc-accent: var(--green)">
+              ① 正常聊天流程（q3 登入 → 推論串流）
+            </button>
+            <button type="button" class="sc-tab" data-sc="coexist" style="--sc-accent: var(--blue)">
+              ② 與原有雙網站分流（q1 原站共存）
+            </button>
+            <button type="button" class="sc-tab" data-sc="blockExt" style="--sc-accent: var(--danger)">
+              ③ 防火牆擋外網（外部偷連 :11434 被擋）
+            </button>
+            <button type="button" class="sc-tab" data-sc="fwTrap" style="--sc-accent: var(--yellow)">
+              ④ 容器連 Host 失敗（防火牆／監聽設錯）
+            </button>
+          </div>
+          <button type="button" class="play-btn" id="playFlowBtn">▶ 逐步播放流程</button>
+        </div>
+
+        <div class="vm-stage">
+          <div class="vm-stage-header">
+            <span>👇 點選下方任一流程節點（STEP 1 ～ STEP 6 或分支元件），查看該站點的動作與安裝提醒：</span>
+            <span id="currentScenarioBadge" style="color:var(--green);">目前情境：q3 正常 HTTPS 聊天與串流</span>
+          </div>
+
+          <!-- 6 Clickable Flow Hops -->
+          <div class="hop-grid" id="hopGrid">
+            <button type="button" class="hop-card state-ok selected" data-hop="0">
+              <div class="hop-step-badge">
+                <span>STEP 1</span>
+                <span class="hop-zone-tag">外部公網</span>
+              </div>
+              <strong>使用者瀏覽器 ＆ DNS</strong>
+              <small id="hopSummary0">連 https://q3.qqnice.org，A 記錄指向既有 VM</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="1">
+              <div class="hop-step-badge">
+                <span>STEP 2</span>
+                <span class="hop-zone-tag">既有容器 :443</span>
+              </div>
+              <strong>既有 Nginx 反向代理</strong>
+              <small id="hopSummary1">檢查憑證、升級 WebSocket 並轉發至內部網路</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="2">
+              <div class="hop-step-badge">
+                <span>STEP 3</span>
+                <span class="hop-zone-tag">~/llmstack 容器</span>
+              </div>
+              <strong>Open WebUI (:8080)</strong>
+              <small id="hopSummary2">驗證登入帳號，不公開 8080/3000 埠</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="3">
+              <div class="hop-step-badge">
+                <span>STEP 4</span>
+                <span class="hop-zone-tag">容器跨界橋樑</span>
+              </div>
+              <strong>host.docker.internal</strong>
+              <small id="hopSummary3">不能寫 localhost！改透過 host-gateway 找 Host</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="4">
+              <div class="hop-step-badge">
+                <span>STEP 5</span>
+                <span class="hop-zone-tag">Host 防火牆</span>
+              </div>
+              <strong>UFW 防火牆 (:11434)</strong>
+              <small id="hopSummary4">放行 Docker 內部網段，攔截外部公網直連</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="5">
+              <div class="hop-step-badge">
+                <span>STEP 6</span>
+                <span class="hop-zone-tag">Ubuntu Host</span>
+              </div>
+              <strong>Ollama 推論引擎</strong>
+              <small id="hopSummary5">systemd 常駐，載入 Host 模型推論並串流回傳</small>
+            </button>
+          </div>
+
+          <!-- 3 Clickable Architecture Branches -->
+          <div class="branch-row">
+            <button type="button" class="branch-btn" data-branch="dualsite">
+              <strong>🔀 分流旁路：既有雙網站容器（Apache / WordPress + DB）</strong>
+              <small>點此查看：為什麼新增 q3 不會搶占原雙網站的 80/443 埠？</small>
+            </button>
+            <button type="button" class="branch-btn" data-branch="volume">
+              <strong>💾 資料保存 A：WebUI 獨立 Volume（帳號與對話紀錄）</strong>
+              <small>點此查看：刪除 WebUI 容器 vs 刪除 Volume 的差別</small>
+            </button>
+            <button type="button" class="branch-btn" data-branch="models">
+              <strong>🧠 資料保存 B：Ubuntu Host 模型目錄（量化模型檔）</strong>
+              <small>點此查看：模型檔案大小 vs 實際 RAM 記憶體注意事項</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Explanation Panel for Clicked Hop / Branch -->
+        <div class="flow-detail-panel" aria-live="polite">
+          <div class="detail-left">
+            <h3 id="hopDetailTitle">STEP 1｜使用者瀏覽器 ＆ DNS（q3.qqnice.org）</h3>
+            <p id="hopDetailFlow">
+              <strong>在這一步發生什麼事：</strong>學生或管理員在瀏覽器輸入 <code>https://q3.qqnice.org</code>，DNS 將 <code>q3</code> 解析到與 <code>q1</code> 相同的 Ubuntu VM 公網 IP，封包送往主機的 <code>443</code> 埠。
+            </p>
+            <p id="hopDetailCmd" style="margin-bottom:0;color:var(--green);font-family:monospace;font-size:.84rem;">
+              驗證方式：dig +short q3.qqnice.org A AAAA
+            </p>
+          </div>
+          <div class="detail-right">
+            <strong>⚠️ 這一站的安裝注意事項：</strong>
+            <span id="hopDetailCaution">
+              確認 q3 的 A 記錄指到正確公網 IP，並檢查是否有錯誤的 IPv6 (AAAA) 記錄導致憑證驗證或連線失敗；管理員須先完成首帳號註冊並關閉任意開放註冊後，再讓學生登入。
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: FIREWALL & CONTAINER-TO-HOST TROUBLESHOOTING -->
+    <section class="section-block" id="firewallSection">
+      <p class="eyebrow">Firewall & Connection Fix / 02</p>
+      <h2>為什麼「設了防火牆／容器連 Host」還是連不上？</h2>
+      <p style="color:var(--muted);max-width:62rem;">
+        Open WebUI（跑在 Docker 容器）要連 Ubuntu Host 上的 Ollama（<code>:11434</code>），必須同時打通<strong>「名稱解析」→「Ollama 監聽範圍」→「UFW 正確來源網段」</strong>三關。點選下方三個最常卡住的原因查看解法：
+      </p>
+
+      <div class="fw-grid">
+        <div class="fw-card">
+          <h3 style="margin-bottom:.3rem;">點選檢查：常見卡關原因與正解</h3>
+          <div class="trap-btns" role="tablist">
+            <button type="button" class="trap-btn active" data-trap="trap1">
+              <strong>❌ 卡關原因 1：UFW 只放行了 172.17.0.0/16，但 Compose 網段根本不是 172.17！</strong>
+              <small>host.docker.internal 雖然解析成 172.17.0.1，但 Compose 容器發出的封包來源 IP 其實是 172.18.x.x ～ 172.31.x.x！</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="trap2">
+              <strong>❌ 卡關原因 2：Ollama 預設只聽 127.0.0.1:11434（拒絕容器連線）</strong>
+              <small>就算 UFW 全開，若沒設 OLLAMA_HOST=0.0.0.0:11434，Ollama 只收 Host 本機迴路，Docker 容器連過來一律被拒。</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="trap3">
+              <strong>❌ 卡關原因 3：WebUI 填了 localhost:11434 或 Compose 漏寫 extra_hosts</strong>
+              <small>容器裡的 localhost 是 WebUI 自己；且 Linux Docker 必須手動加上 host.docker.internal:host-gateway。</small>
+            </button>
+
+            <button type="button" class="trap-btn fix-mode" data-trap="fullfix">
+              <strong>✅ 一次搞定：Ubuntu Host + UFW + Compose 標準成功設定流程</strong>
+              <small>點此查看完整 4 步驟設定與自我檢測指令（可直接複製）</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="fw-card" aria-live="polite">
+          <h3 id="trapTitle" style="color:var(--yellow);margin-bottom:.4rem;">
+            解析原因 1：為什麼放行 172.17.0.0/16 還是被 UFW 擋掉？
+          </h3>
+          <p id="trapExplain" style="font-size:.9rem;color:#d2e2f0;margin-bottom:.6rem;">
+            在 Linux Docker 中，<code>extra_hosts: ["host.docker.internal:host-gateway"]</code> 會把名稱指到預設 <code>docker0</code> 的 IP（通常是 <code>172.17.0.1</code>）。<br><br>
+            <strong>但是！</strong> Docker Compose 會為專案建立獨立的 Bridge 網路（例如 <code>172.18.0.0/16</code> 或 <code>172.19.0.0/16</code>）。當 Open WebUI 容器連線至 <code>172.17.0.1:11434</code> 時，封包的<strong>來源 IP 是 Compose 網路的 <code>172.18.0.x</code></strong>。如果你在 UFW 只放行 <code>172.17.0.0/16</code>，UFW 就會把來自 <code>172.18.0.x</code> 的封包直接丟棄！
+          </p>
+
+          <div class="code-box">
+            <div class="code-box-top">
+              <span id="trapCodeLabel">正確查網段與 UFW 放行指令</span>
+              <button type="button" class="copy-btn" id="copyCodeBtn">複製指令</button>
+            </div>
+            <pre id="trapCodeBlock"># 方法 A（最精準）：查出 WebUI 所在 Docker 網路的真實子網並放行
+docker network inspect llmnet -f '{{range .IPAM.Config}}{{.Subnet}}{{end}}'
+# 假設印出 172.18.0.0/16，則放行該子網：
+sudo ufw allow from 172.18.0.0/16 to any port 11434 proto tcp
+
+# 方法 B（通用 Docker 私網段）：放行本機 Docker 橋接私網段範圍 (172.16.0.0/12)
+sudo ufw allow from 172.16.0.0/12 to any port 11434 proto tcp
+sudo ufw reload && sudo ufw status numbered</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: 6 KEY INSTALLATION PRECAUTIONS -->
+    <section class="section-block" id="cautionSection">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <p class="eyebrow">Installation Precautions / 03</p>
+          <h2>安裝與整合時的「六大注意事項」提醒</h2>
+        </div>
+        <div class="caution-filter" role="group" aria-label="篩選注意事項">
+          <button type="button" class="filter-btn active" data-filter="all">全部顯示 (6)</button>
+          <button type="button" class="filter-btn" data-filter="net">網路與反代 (2)</button>
+          <button type="button" class="filter-btn" data-filter="host">Host 與資源 (2)</button>
+          <button type="button" class="filter-btn" data-filter="data">帳號與資料保存 (2)</button>
+        </div>
+      </div>
+
+      <div class="caution-grid" id="cautionGrid">
+        <article class="caution-card" data-cat="host" style="--card-accent: var(--green)">
+          <div>
+            <span class="caution-badge">注意事項 01 · Host 服務</span>
+            <h3>Ollama 交給 systemd 管理，且須調整監聽</h3>
+            <ul class="caution-list">
+              <li>正式服務由 <code>systemd</code> 常駐管理，可用 <code>systemctl status ollama</code> 與 <code>journalctl -u ollama</code> 追查日誌。</li>
+              <li>必須透過 <code>systemctl edit ollama.service</code> 設定 <code>Environment="OLLAMA_HOST=0.0.0.0:11434"</code>（或容器可達之 Host 位址），否則預設 <code>127.0.0.1</code> 容器連不進來。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>不要在 SSH 終端機裡手動執行 <code>ollama serve</code> 當作正式服務（關掉視窗就斷線）。
+          </div>
+        </article>
+
+        <article class="caution-card" data-cat="net" style="--card-accent: var(--danger)">
+          <div>
+            <span class="caution-badge">注意事項 02 · 防火牆與連接埠</span>
+            <h3>鎖住 11434 與 8080，只開放 q3 的 443</h3>
+            <ul class="caution-list">
+              <li>Open WebUI 不對公網發布 <code>3000</code> 或 <code>8080</code> 埠，只透過專用 Docker 網路給 Nginx 連。</li>
+              <li>當 Ollama 改聽 <code>0.0.0.0:11434</code> 前，<strong>先確認 UFW 與雲端防火牆已阻擋外部公網連入 11434</strong>，僅放行 Docker 容器網段（並核對 IPv4 與 IPv6）。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>不要以為「q3 有設 HTTPS 密碼」就安全——若 11434 暴露在公網，任何人都能繞過網頁直接偷用算力。
+          </div>
+        </article>
+
+        <article class="caution-card" data-cat="net" style="--card-accent: var(--orange)">
+          <div>
+            <span class="caution-badge">注意事項 03 · 既有 Nginx 與串流</span>
+            <h3>沿用既有 Nginx，必開 WebSocket 與關緩衝</h3>
+            <ul class="caution-list">
+              <li>與原有雙網站共用同一個 Nginx 容器，將 Nginx 與 Open WebUI 加入同一個專用外部 Docker 網路。</li>
+              <li>先確認憑證有效再啟用 HTTPS；設定檔須加上 <code>Upgrade</code> / <code>Connection "upgrade"</code>（支援 WebSocket）與 <code>proxy_buffering off</code>（支援逐字串流）。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>不要在 <code>~/llmstack</code> 再開第二個搶占 80/443 埠的 Nginx；且務必先 <code>nginx -t</code> 通過才 <code>reload</code>。
+          </div>
+        </article>
+
+        <article class="caution-card" data-cat="host" style="--card-accent: var(--yellow)">
+          <div>
+            <span class="caution-badge">注意事項 04 · 硬體資源與共存</span>
+            <h3>模型檔案大小 ≠ 記憶體用量，須保護原雙網站</h3>
+            <ul class="caution-list">
+              <li>先從小型量化模型與單人有限上下文開始測試，並用 <code>ollama ps</code> 確認實際跑在 CPU 或 GPU。</li>
+              <li>長對話與多人同時提問會大幅增加記憶體消耗，務必預留 RAM 給原有的雙網站與 MariaDB。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>不要只看裝了 GPU 驅動就以為模型跑在 GPU；也不要一次載入過大模型導致整台 VM OOM 當機。
+          </div>
+        </article>
+
+        <article class="caution-card" data-cat="data" style="--card-accent: var(--blue)">
+          <div>
+            <span class="caution-badge">注意事項 05 · 帳號與版本控管</span>
+            <h3>先建管理員再公開入口，鎖定映像版本</h3>
+            <ul class="caution-list">
+              <li>Open WebUI 啟動後，先在限制來源下建立第一個管理員帳號，並將新註冊改為「管理員審核」或預建一般帳號。</li>
+              <li>固定保存 <code>WEBUI_SECRET_KEY</code>，並固定 WebUI 映像版本與 Digest（不依賴浮動標籤）。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>不要在還沒建立管理員前就把網站公開到公網（第一個註冊的人會直接變成管理員！）。
+          </div>
+        </article>
+
+        <article class="caution-card" data-cat="data" style="--card-accent: var(--purple)">
+          <div>
+            <span class="caution-badge">注意事項 06 · 備份還原與退場機制</span>
+            <h3>獨立 Volume 停機備份，失敗時安全回退</h3>
+            <ul class="caution-list">
+              <li>上週的 WordPress 備份腳本<strong>不會</strong>自動備份本週的 WebUI Volume。備份時先停 WebUI 容器，再打包 Volume。</li>
+              <li>還原驗證請掛載到「獨立測試 Volume」，不要直接覆蓋正式對話資料。</li>
+            </ul>
+          </div>
+          <div class="caution-dont">
+            <strong>切勿：</strong>萬一整合出錯，只需退回新增的 q3 設定並停掉新服務；<strong>絕不要刪除原 Volume 或重設整套防火牆</strong>！
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>WEEK5｜雙網站擴充 LLM：網站整體流程與安裝注意事項</strong><br>
+      <span>聚焦請求流程、容器連 Host 防火牆排錯與六大安裝提醒</span>
+    </div>
+    <div>
+      <span>q1.qqnice.org（既有雙網站）＋ q3.qqnice.org（新增 LLM 入口）共用單一 Ubuntu VM</span>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll helper that works reliably inside iframes and standalone browsers
+    document.querySelectorAll('[data-scroll]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = document.querySelector(btn.dataset.scroll);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Hop & Branch Detail Data (Section 1)
+    const hopDetails = [
+      {
+        title: 'STEP 1｜使用者瀏覽器 ＆ DNS（https://q3.qqnice.org）',
+        flow: '<strong>流程動作：</strong>使用者在瀏覽器輸入 <code>https://q3.qqnice.org</code>。DNS 將 <code>q3</code> 解析到與既有雙網站 <code>q1</code> 同一台 Ubuntu VM 的公網 IP，並向主機的 <code>443</code> 埠發起 HTTPS 連線。',
+        cmd: '檢查指令：dig +short q3.qqnice.org A AAAA',
+        caution: '確認 q3 的 A 記錄指對 IP，且沒有錯誤的 AAAA (IPv6) 記錄；另外必須先由老師/管理員建立第一個帳號並關閉開放註冊後，才讓學生連入。'
+      },
+      {
+        title: 'STEP 2｜既有 Nginx 反向代理容器（Port 80 / 443 唯一入口）',
+        flow: '<strong>流程動作：</strong>既有 Nginx 收到 <code>Host: q3.qqnice.org</code> 的請求後，完成 TLS 解密，並透過「專用共用 Docker 網路」將請求與 WebSocket 連線轉發給內部的 <code>open-webui:8080</code>。',
+        cmd: '檢查指令：docker exec <nginx容器名> nginx -t && docker exec <nginx容器名> nginx -s reload',
+        caution: '不另起第二個搶占 80/443 的反向代理！Nginx 設定必須加上 WebSocket 標頭 (Upgrade / Connection) 與 proxy_buffering off，否則聊天不會逐字跳出。'
+      },
+      {
+        title: 'STEP 3｜Open WebUI 容器（~/llmstack 獨立專案 · 內部 :8080）',
+        flow: '<strong>流程動作：</strong>Open WebUI 負責驗證帳號登入、管理對話介面，並把對話紀錄寫入獨立的持久 Volume。當使用者送出提問時，WebUI 準備向 Host 上的 Ollama 發送推論 API 請求。',
+        cmd: '檢查指令：docker compose -f ~/llmstack/compose.yml ps',
+        caution: '不要對公網 publish 3000 或 8080 埠！務必固定映像版本並記錄 Digest，且固定保存 WEBUI_SECRET_KEY 避免重啟後登入狀態失效。'
+      },
+      {
+        title: 'STEP 4｜容器跨界連 Host（host.docker.internal:11434）',
+        flow: '<strong>流程動作：</strong>因為容器裡的 <code>localhost</code> 是 WebUI 容器自己，所以 Compose 必須設定 <code>extra_hosts: ["host.docker.internal:host-gateway"]</code>，並將 <code>OLLAMA_BASE_URL</code> 設為 <code>http://host.docker.internal:11434</code> 才能跨出容器找到 Host。',
+        cmd: '檢查指令：docker exec open-webui getent hosts host.docker.internal',
+        caution: '光寫 host.docker.internal 只解決「名稱解析」，還必須確定 Host 上的 Ollama 有監聽該介面（非僅 127.0.0.1），且 UFW 有放行該容器子網！'
+      },
+      {
+        title: 'STEP 5｜Ubuntu Host 防火牆（UFW 來源過濾 :11434）',
+        flow: '<strong>流程動作：</strong>封包從 Docker 容器網段進入 Ubuntu Host 的 <code>11434</code> 埠。UFW 檢查封包來源 IP：若是內部允許的 Docker 容器網段則放行；若是來自外部公網的直連請求則直接攔截！',
+        cmd: '檢查指令：sudo ufw status numbered',
+        caution: '最容易失敗的地方！Compose 自訂網路的來源 IP 通常是 172.18.x.x～172.31.x.x（不是預設的 172.17.x.x），UFW 必須放行實際的容器子網或 172.16.0.0/12。'
+      },
+      {
+        title: 'STEP 6｜Ubuntu Host：Ollama 推論服務（systemd 管理）',
+        flow: '<strong>流程動作：</strong>Host 上的 Ollama 接收請求，將 Host 模型目錄中的量化模型載入 CPU / GPU 記憶體執行推論，並將產生的 Token 沿原路即時串流回 WebUI → Nginx → 學生瀏覽器。',
+        cmd: '檢查指令：systemctl status ollama && ss -tlnp | grep 11434 && ollama ps',
+        caution: '必須用 systemd 服務帳號執行（不在 SSH 手動開著跑）；修改 OLLAMA_HOST=0.0.0.0:11434 後記得 daemon-reload 與 restart ollama。'
+      }
+    ];
+
+    const branchDetails = {
+      dualsite: {
+        title: '🔀 分流旁路｜既有雙網站容器（Apache / WordPress + MariaDB）',
+        flow: '<strong>流程動作：</strong>當瀏覽器連的是原有的 <code>q1.qqnice.org</code> 時，同一個 Nginx 會把流量導向原有的雙網站容器，完全不會進入 Open WebUI 或觸發 Ollama。',
+        cmd: '共存檢查：推論進行中同時測試 curl -I https://q1.qqnice.org',
+        caution: 'LLM 推論非常吃記憶體與 CPU！必須選擇適合的小型量化模型並限制並行人數，預留足夠 RAM 給 WordPress 與 MariaDB，確保原雙網站不中斷。'
+      },
+      volume: {
+        title: '💾 資料保存 A｜WebUI 獨立持久 Volume（/app/backend/data）',
+        flow: '<strong>流程動作：</strong>所有管理員與學生帳號、歷史對話紀錄都存在這個獨立 Volume 中，與 Open WebUI 容器的生命週期分離。',
+        cmd: '持久化驗證：docker compose down && docker compose up -d 後確認對話仍在',
+        caution: '刪除 WebUI 容器不會丟失對話；但刪除 Volume 就會失去所有帳號與對話！上週的備份腳本不含此 Volume，更新前務必先停機備份。'
+      },
+      models: {
+        title: '🧠 資料保存 B｜Ubuntu Host 模型目錄（量化模型權重檔）',
+        flow: '<strong>流程動作：</strong>由 Host 上的 Ollama 直接管理與讀取。刪除此目錄會失去已下載的模型檔與自訂模型（需重拉），但不會刪除 WebUI 裡的帳號與歷史對話文字。',
+        cmd: '模型檢查：ollama list && ollama ps',
+        caution: '模型在硬碟上的檔案大小 ≠ 執行時需要的記憶體！還要加上 Context 上下文快取开销，且須區分「首次冷啟動載入」與「常駐回應」的速度差異。'
+      }
+    };
+
+    const flowScenarios = {
+      normal: {
+        badge: '目前情境：① q3 正常 HTTPS 聊天與串流（全線暢通）',
+        badgeColor: 'var(--green)',
+        defaultHop: 0,
+        states: ['state-ok', 'state-ok', 'state-ok', 'state-ok', 'state-ok', 'state-ok'],
+        summaries: [
+          '連 https://q3.qqnice.org，A 記錄指向既有 VM',
+          '檢查憑證、升級 WebSocket 並轉發至內部網路',
+          '驗證登入帳號，不公開 8080/3000 埠',
+          '透過 host-gateway 跨出容器連向 Host :11434',
+          'UFW 確認來自允許的容器子網，放行 11434',
+          'systemd 常駐，載入模型推論並串流回傳'
+        ]
+      },
+      coexist: {
+        badge: '目前情境：② 瀏覽原有雙網站（由 Nginx 分流，與 LLM 隔離共存）',
+        badgeColor: 'var(--blue)',
+        defaultHop: 1,
+        states: ['state-ok', 'state-ok', '', '', '', 'state-warn'],
+        summaries: [
+          '連原有雙網站網域（如 q1.qqnice.org）',
+          'Nginx 依網域直接分流至原有雙網站容器',
+          '不經過 Open WebUI（專案獨立）',
+          '不觸發容器連 Host',
+          '無 11434 請求',
+          '資源配額控制下，背景推論不排擠原雙站'
+        ]
+      },
+      blockExt: {
+        badge: '目前情境：③ 外部偷連 公網IP:11434（被 UFW 防火牆攔截！）',
+        badgeColor: 'var(--danger)',
+        defaultHop: 4,
+        states: ['state-warn', '', '', '', 'state-block', ''],
+        summaries: [
+          '外部試圖直連 http://公網IP:11434',
+          '繞過 Nginx 443 大門',
+          '繞過 WebUI 帳號密碼登入',
+          '非來自內部 Docker 容器網段',
+          '🛑 UFW 防火牆直接阻擋外部來源！',
+          'Ollama 安全受保護，未被外部盜用算力'
+        ]
+      },
+      fwTrap: {
+        badge: '目前情境：④ 容器連 Host 失敗（監聽未開 0.0.0.0 或 UFW 網段設錯）',
+        badgeColor: 'var(--yellow)',
+        defaultHop: 4,
+        states: ['state-ok', 'state-ok', 'state-warn', 'state-warn', 'state-block', ''],
+        summaries: [
+          '使用者正常登入 q3 網頁',
+          'Nginx 正常轉發至 WebUI',
+          'WebUI 出現 Connection Error 找不到模型',
+          '連向 host.docker.internal:11434',
+          '❌ 卡在 Ollama 只聽 127.0.0.1 或 UFW 網段設錯！',
+          '請看下方「第 2 節：防火牆排錯」一鍵修復'
+        ]
+      }
+    };
+
+    const hopCards = [...document.querySelectorAll('.hop-card')];
+    const branchBtns = [...document.querySelectorAll('.branch-btn')];
+
+    function showHopDetail(index) {
+      hopCards.forEach((c, i) => c.classList.toggle('selected', i === index));
+      branchBtns.forEach((b) => b.classList.remove('selected'));
+      const d = hopDetails[index];
+      document.querySelector('#hopDetailTitle').textContent = d.title;
+      document.querySelector('#hopDetailFlow').innerHTML = d.flow;
+      document.querySelector('#hopDetailCmd').textContent = d.cmd;
+      document.querySelector('#hopDetailCaution').textContent = d.caution;
+    }
+
+    function showBranchDetail(key, btnEl) {
+      hopCards.forEach((c) => c.classList.remove('selected'));
+      branchBtns.forEach((b) => b.classList.toggle('selected', b === btnEl));
+      const d = branchDetails[key];
+      document.querySelector('#hopDetailTitle').textContent = d.title;
+      document.querySelector('#hopDetailFlow').innerHTML = d.flow;
+      document.querySelector('#hopDetailCmd').textContent = d.cmd;
+      document.querySelector('#hopDetailCaution').textContent = d.caution;
+    }
+
+    hopCards.forEach((card, idx) => {
+      card.addEventListener('click', () => showHopDetail(idx));
+    });
+
+    branchBtns.forEach((btn) => {
+      btn.addEventListener('click', () => showBranchDetail(btn.dataset.branch, btn));
+    });
+
+    function applyScenario(scKey) {
+      const sc = flowScenarios[scKey];
+      if (!sc) return;
+      document.querySelectorAll('.sc-tab').forEach((t) => t.classList.toggle('active', t.dataset.sc === scKey));
+      const badge = document.querySelector('#currentScenarioBadge');
+      badge.textContent = sc.badge;
+      badge.style.color = sc.badgeColor;
+
+      hopCards.forEach((card, idx) => {
+        card.classList.remove('state-ok', 'state-warn', 'state-block');
+        if (sc.states[idx]) card.classList.add(sc.states[idx]);
+        document.querySelector(`#hopSummary${idx}`).textContent = sc.summaries[idx];
+      });
+      showHopDetail(sc.defaultHop);
+    }
+
+    document.querySelectorAll('.sc-tab').forEach((tab) => {
+      tab.addEventListener('click', () => applyScenario(tab.dataset.sc));
+    });
+
+    // Step-by-step animated playback of the flow
+    let playingFlow = false;
+    document.querySelector('#playFlowBtn').addEventListener('click', async () => {
+      if (playingFlow) return;
+      playingFlow = true;
+      const playBtn = document.querySelector('#playFlowBtn');
+      playBtn.textContent = '⏳ 流程播放中...';
+      applyScenario('normal');
+      for (let i = 0; i < hopCards.length; i += 1) {
+        showHopDetail(i);
+        await new Promise((r) => setTimeout(r, 900));
+      }
+      playBtn.textContent = '▶ 再播放一次流程';
+      playingFlow = false;
+    });
+
+    // Section 2: Firewall & Connection Troubleshooting Data
+    const trapData = {
+      trap1: {
+        title: '解析原因 1：為什麼放行 172.17.0.0/16 還是被 UFW 擋掉？',
+        color: 'var(--yellow)',
+        explain: '在 Linux Docker 中，<code>extra_hosts: ["host.docker.internal:host-gateway"]</code> 會把名稱指到預設 <code>docker0</code> 的 IP（通常是 <code>172.17.0.1</code>）。<br><br><strong>但是！</strong> Docker Compose 會為專案建立獨立的 Bridge 網路（例如 <code>172.18.0.0/16</code> 或 <code>172.19.0.0/16</code>）。當 Open WebUI 容器連線至 <code>172.17.0.1:11434</code> 時，封包的<strong>來源 IP 是 Compose 網路的 <code>172.18.0.x</code></strong>。如果你在 UFW 只放行 <code>172.17.0.0/16</code>，UFW 就會把來自 <code>172.18.0.x</code> 的封包直接擋掉！',
+        label: '解決方法：查出真實容器子網或放行 Docker 私網段 (172.16.0.0/12)',
+        code: `# 方法 A（最精準）：查出 WebUI 所在 Docker 網路的真實子網並放行
+docker network inspect llmnet -f '{{range .IPAM.Config}}{{.Subnet}}{{end}}'
+# 假設印出 172.18.0.0/16，則放行該子網：
+sudo ufw allow from 172.18.0.0/16 to any port 11434 proto tcp
+
+# 方法 B（通用 Docker 私網段）：放行本機 Docker 橋接私網段範圍 (172.16.0.0/12)
+sudo ufw allow from 172.16.0.0/12 to any port 11434 proto tcp
+sudo ufw reload && sudo ufw status numbered`
+      },
+      trap2: {
+        title: '解析原因 2：Ollama 預設只聽 127.0.0.1，容器根本進不去！',
+        color: 'var(--yellow)',
+        explain: 'Ollama 安裝後預設只監聽 <code>127.0.0.1:11434</code>（Host 本機迴路）。這代表就算你把 UFW 防火牆全部關掉，從 Docker 容器連向 <code>172.17.0.1:11434</code> 依然會收到 <code>Connection refused</code>！<br><br><strong>正確做法：</strong>透過 <code>systemd</code> 覆寫設定，讓 Ollama 監聽 <code>0.0.0.0:11434</code>（所有介面），再交由 UFW 防火牆擋住外部公網、只放行內部容器網段。',
+        label: '解決方法：修改 systemd 讓 Ollama 監聽 0.0.0.0:11434',
+        code: `# 1. 建立 systemd override 設定檔
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+cat << 'EOF' | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+EOF
+
+# 2. 重新載入並重啟 Ollama
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+
+# 3. 驗證是否已變成 *:11434 或 0.0.0.0:11434（不能還是 127.0.0.1:11434）
+sudo ss -tlnp | grep 11434`
+      },
+      trap3: {
+        title: '解析原因 3：WebUI 容器內不能填 localhost，且需加 extra_hosts',
+        color: 'var(--yellow)',
+        explain: '在 Open WebUI 容器裡面，<code>localhost</code> 指的是「Open WebUI 容器自己」，裡面並沒有跑 Ollama。<br><br>而且在 Linux 上的 Docker（不像教學桌面版 Docker Desktop），預設不會自動建立 <code>host.docker.internal</code>，必須在 <code>compose.yml</code> 明確寫上 <code>extra_hosts: ["host.docker.internal:host-gateway"]</code>。',
+        label: '解決方法：~/llmstack/compose.yml 正確連線設定',
+        code: `services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - WEBUI_URL=https://q3.qqnice.org
+      - WEBUI_SECRET_KEY=請替換為固定隨機長字串
+    volumes:
+      - open-webui-data:/app/backend/data
+    networks:
+      - llmnet
+
+volumes:
+  open-webui-data:
+
+networks:
+  llmnet:
+    external: true`
+      },
+      fullfix: {
+        title: '✅ 一次搞定：Ubuntu Host + UFW + 容器連線 4 步驟驗證指令',
+        color: 'var(--green)',
+        explain: '照著下方 4 個步驟依序在 Ubuntu Host 執行，就能同時確保：<strong>① Open WebUI 容器連得到 Host Ollama</strong>，且 <strong>② 外部公網連不進 11434 埠</strong>！',
+        label: '完整 4 步驟設定與連線測試腳本',
+        code: `# 【步驟 1】先設好 UFW 防火牆：放行 Docker 內部私網段連 11434（外部公網預設阻擋）
+sudo ufw allow from 172.16.0.0/12 to any port 11434 proto tcp
+sudo ufw reload
+
+# 【步驟 2】設定 Ollama 監聽 0.0.0.0:11434 並重啟服務
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+printf "[Service]\\nEnvironment=\\"OLLAMA_HOST=0.0.0.0:11434\\"\\n" | sudo tee /etc/systemd/system/ollama.service.d/override.conf
+sudo systemctl daemon-reload && sudo systemctl restart ollama
+
+# 【步驟 3】確認 Ollama 真的有監聽 *:11434
+sudo ss -tlnp | grep 11434
+
+# 【步驟 4】從容器網路內部實測能否抓到 Host Ollama 模型清單（印出 {"models":[...]} 即成功！）
+docker run --rm --add-host=host.docker.internal:host-gateway curlimages/curl -s http://host.docker.internal:11434/api/tags`
+      }
+    };
+
+    document.querySelectorAll('.trap-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.trap-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const item = trapData[btn.dataset.trap];
+        if (!item) return;
+        const titleEl = document.querySelector('#trapTitle');
+        titleEl.textContent = item.title;
+        titleEl.style.color = item.color;
+        document.querySelector('#trapExplain').innerHTML = item.explain;
+        document.querySelector('#trapCodeLabel').textContent = item.label;
+        document.querySelector('#trapCodeBlock').textContent = item.code;
+      });
+    });
+
+    // Copy button with fallback for sandboxed iframes
+    document.querySelector('#copyCodeBtn').addEventListener('click', async () => {
+      const text = document.querySelector('#trapCodeBlock').textContent;
+      const copyBtn = document.querySelector('#copyCodeBtn');
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '✓ 已複製！';
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.append(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        copyBtn.textContent = '✓ 已複製！';
+      }
+      setTimeout(() => { copyBtn.textContent = '複製指令'; }, 1800);
+    });
+
+    // Section 3: Filter Caution Cards
+    document.querySelectorAll('.filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const cat = btn.dataset.filter;
+        document.querySelectorAll('.caution-card').forEach((card) => {
+          card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'flex' : 'none';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
