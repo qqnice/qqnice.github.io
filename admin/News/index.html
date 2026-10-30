@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最新資訊 - NTCUST 國立臺中科技大學 資訊管理系</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Zen Kaku Gothic New", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f3f6;
+      color: #2b2b2b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    /* 頂部快速資訊列 */
+    .top-toolbar {
+      width: 100%;
+      max-width: 1080px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .top-toolbar .dept-title {
+      font-size: 14px;
+      color: #667085;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top-toolbar .dept-title span.badge {
+      background: #e4e7ec;
+      color: #344054;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .top-toolbar .source-link {
+      font-size: 13px;
+      color: #7a6e65;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #e0dad3;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .top-toolbar .source-link:hover {
+      background: #faf7f2;
+      color: #b65d1d;
+      border-color: #d1c1b3;
+    }
+
+    /* 主要卡片容器 */
+    .announcement-card {
+      width: 100%;
+      max-width: 1080px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 38px 44px;
+      display: flex;
+      gap: 40px;
+      box-sizing: border-box;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    /* 左側側邊欄 */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .sidebar-header .accent-bar {
+      width: 6.5px;
+      height: 25px;
+      background-color: #f7ca38;
+      border-radius: 3.5px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #55606d;
+      letter-spacing: 0.5px;
+    }
+
+    /* 選單按鈕列表 */
+    .category-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .category-item {
+      width: 100%;
+    }
+
+    .category-btn {
+      width: 100%;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 20px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 12px;
+      background-color: #ffffff;
+      border: 1.5px solid #dfd8cf;
+      color: #444a51;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    .category-btn:hover {
+      background-color: #fff9e6;
+      border-color: #edd27b;
+      color: #212529;
+    }
+
+    /* 當前選中分類按鈕 */
+    .category-item.active .category-btn {
+      background-color: #f7ca38;
+      border: 1.5px solid #ebb924;
+      color: #23272e;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(247, 202, 56, 0.25);
+    }
+
+    /* 右側公告列表區塊 */
+    .content-area {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .articles-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: opacity 0.15s ease-in-out;
+    }
+
+    .articles-container.fade-out {
+      opacity: 0.3;
+    }
+
+    /* 單則公告條目 */
+    .article-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 2px;
+    }
+
+    .article-date {
+      font-size: 13.5px;
+      color: #79828b;
+      font-weight: 500;
+      margin-bottom: 5px;
+      padding-left: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    .article-title-box {
+      border-radius: 5px;
+      padding: 10.5px 14px;
+      transition: background-color 0.15s ease;
+    }
+
+    /* 奇數行具備淺米色背景 (#f4f0eb) */
+    .article-item.odd .article-title-box {
+      background-color: #f4f0eb;
+    }
+
+    /* 偶數行透明底色 */
+    .article-item.even .article-title-box {
+      background-color: transparent;
+    }
+
+    .article-link {
+      color: #262a2e;
+      font-size: 14.8px;
+      line-height: 1.55;
+      text-decoration: none;
+      display: block;
+      transition: color 0.15s ease;
+      word-break: break-word;
+    }
+
+    .article-link:hover {
+      color: #b65d1d;
+      text-decoration: none;
+    }
+
+    .article-title-box:hover {
+      background-color: #ede7df;
+    }
+
+    /* 底部頁腳說明 */
+    .page-footer {
+      width: 100%;
+      max-width: 1080px;
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #8c95a0;
+    }
+
+    .page-footer a {
+      color: #704538;
+      text-decoration: none;
+    }
+
+    .page-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* 響應式佈局 (手機與平板) */
+    @media (max-width: 820px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .announcement-card {
+        flex-direction: column;
+        padding: 24px 20px;
+        border-radius: 18px;
+        gap: 24px;
+      }
+
+      .sidebar {
+        width: 100%;
+      }
+
+      .category-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 8px;
+      }
+
+      .category-btn {
+        height: 40px;
+        font-size: 14px;
+        justify-content: center;
+        padding: 0 10px;
+      }
+
+      .article-title-box {
+        padding: 9px 12px;
+      }
+
+      .article-link {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部資訊列 -->
+  <div class="top-toolbar">
+    <div class="dept-title">
+      <a href="../" style="text-decoration: none; color: #4b5563; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: color 0.15s ease;" onmouseover="this.style.color='#b65d1d'" onmouseout="this.style.color='#4b5563'">
+        <span style="font-size: 16px;">‹</span> 返回行政專區
+      </a>
+      <span style="color: #cbd5e1; margin: 0 4px;">|</span>
+      <span class="badge">NTCUST IM</span>
+      國立臺中科技大學 資訊管理系
+    </div>
+    <a href="https://im.nutc.edu.tw/p/412-1063-8757.php" target="_blank" rel="noopener noreferrer" class="source-link" title="前往系所原始公告頁面">
+      <span>原始頁面</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+    </a>
+  </div>
+
+  <!-- 主體卡片 -->
+  <div class="announcement-card">
+    
+    <!-- 左側分類導覽 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="accent-bar"></div>
+        <h2>最新資訊</h2>
+      </div>
+
+      <ul class="category-list" id="categoryList">
+        <!-- 由 JavaScript 動態生成或預設分類 -->
+      </ul>
+    </aside>
+
+    <!-- 右側公告列表 -->
+    <main class="content-area">
+      <div class="articles-container" id="articlesContainer">
+        <!-- 公告條目載入處 -->
+      </div>
+    </main>
+
+  </div>
+
+  <!-- 頁尾備註 -->
+  <footer class="page-footer">
+    <p>資料來源：<a href="https://im.nutc.edu.tw/p/412-1063-8757.php" target="_blank" rel="noopener noreferrer">國立臺中科技大學資訊管理系 公告系統</a> ｜ 點擊公告條目可直接在新分頁開啟原始詳細內容</p>
+  </footer>
+
+  <script>
+    // 預先載入完整的公告分類與資料庫 (含原始超連結)
+    const announcementData = {
+      "8757": {
+        "name": "所有公告",
+        "url": "https://im.nutc.edu.tw/p/412-1063-8757.php",
+        "items": [
+          {
+            "date": "2026.04.22",
+            "title": "【獎助學金】張文豹文教基金會獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132179,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.22",
+            "title": "【獎助學金】中國上優技能獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132178,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.06.01",
+            "title": "【實習】115(暑期)資管系校外實習登記 (115/6/9止)",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133302,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.12",
+            "title": "【徵才】企業人才招募說明會",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132753,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.29",
+            "title": "【競賽】生成式AI結合電腦輔助設計製造競賽",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137399,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.28",
+            "title": "【競賽】2026全國大學院校生醫電資創新設計競賽",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137287,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】桃園機場115年公開招募 ｜ 64名新夥伴，邀請您一起加入！",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137255,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【活動】臺中「115年度推動校園STEAM教育實施計畫課程研習(11月)資訊」",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137241,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】IBM 2027校園招募線上說明會熱烈報名中",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137232,c8757.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】中國上優科技股份有限公司-後台開發人員",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137234,c8757.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7698": {
+        "name": "重要公告",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7698.php",
+        "items": [
+          {
+            "date": "2026.04.14",
+            "title": "【證照補助】114-2學生取得專業技能證照獎勵(4/24止)",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131846,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.02",
+            "title": "【實習】114學年度第2學期資管系校外實習登記(3/13止)",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130638,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.01.07",
+            "title": "【演講】AI 賦能雲端應用趨勢專題講座",
+            "url": "http://im.nutc.edu.tw/p/405-1063-128867,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.12.18",
+            "title": "【徵才】台中精機股份有限公司人才招募",
+            "url": "http://im.nutc.edu.tw/p/405-1063-128290,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.11.10",
+            "title": "【競賽】第30屆大專校院資訊應用服務創新競賽決賽名單",
+            "url": "http://im.nutc.edu.tw/p/405-1063-127394,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.15",
+            "title": "【獎學金】資訊管理系優秀學生獎助學金申請公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-126581,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.20",
+            "title": "【公告】114學年度第1學期選課注意事項及時程表",
+            "url": "http://im.nutc.edu.tw/p/405-1063-125893,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.05",
+            "title": "【系務】資管系系學會期初大會暨迎新茶會通知",
+            "url": "http://im.nutc.edu.tw/p/405-1063-125430,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.06.28",
+            "title": "【畢業】113學年度資管系畢業專題成果展回顧",
+            "url": "http://im.nutc.edu.tw/p/405-1063-124011,c7698.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.30",
+            "title": "【研討會】2026資訊管理與數位創新趨勢研討會論文徵稿",
+            "url": "http://im.nutc.edu.tw/p/405-1063-123289,c7698.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7683": {
+        "name": "活動公告",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7683.php",
+        "items": [
+          {
+            "date": "2026.10.27",
+            "title": "【活動】臺中「115年度推動校園STEAM教育實施計畫課程研習(11月)資訊」",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137241,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.15",
+            "title": "【講座】生成式AI應用於程式開發工作坊",
+            "url": "http://im.nutc.edu.tw/p/405-1063-136980,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.02",
+            "title": "【工作坊】大數據與機器學習實戰教學講座",
+            "url": "http://im.nutc.edu.tw/p/405-1063-136450,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.18",
+            "title": "【參訪】國立公共資訊圖書館智慧科技應用參訪活動",
+            "url": "http://im.nutc.edu.tw/p/405-1063-135890,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.06.10",
+            "title": "【論壇】資訊安全與隱私防護實務論壇",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133500,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.20",
+            "title": "【研習】跨領域數位科技應用研習課程",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132900,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.08",
+            "title": "【競賽】大專校院雲端運算應用創意黑客松",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132400,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.18",
+            "title": "【系列講座】企業數位轉型成功案例分享會",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131920,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.25",
+            "title": "【迎新】系學會迎新露營活動報名開跑",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131200,c7683.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.10",
+            "title": "【說明會】國際交換學生計畫甄選說明會",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130800,c7683.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7484": {
+        "name": "榮譽表現",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7484.php",
+        "items": [
+          {
+            "date": "2026.10.15",
+            "title": "【榮譽】賀！本系學生榮獲 2026 全國大專資訊創新競賽第一名",
+            "url": "http://im.nutc.edu.tw/p/405-1063-136800,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.28",
+            "title": "【榮譽】賀！本系教師榮獲科技部產學合作優良獎項肯定",
+            "url": "http://im.nutc.edu.tw/p/405-1063-136100,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.08.10",
+            "title": "【榮譽】賀！專題團隊獲選教育部數位人才育苗計畫傑出獎",
+            "url": "http://im.nutc.edu.tw/p/405-1063-134900,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.06.22",
+            "title": "【榮譽】賀！本系多名研究生論文榮獲國際研討會最佳論文獎",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133900,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.18",
+            "title": "【榮譽】恭喜資管系專題組榮獲校內專題競賽資訊組特優",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132800,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.10",
+            "title": "【榮譽】賀！本系同學考取多項甲級及國際頂尖專業證照",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131700,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.15",
+            "title": "【榮譽】賀！資管系籃球隊榮獲全校運動會錦標冠軍",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130950,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.01.20",
+            "title": "【榮譽】賀！教師獲頒全校教學特優教師表揚",
+            "url": "http://im.nutc.edu.tw/p/405-1063-129400,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.12.25",
+            "title": "【榮譽】賀！資管系學生成立之創業團隊獲選U-start創新創業計畫",
+            "url": "http://im.nutc.edu.tw/p/405-1063-128500,c7484.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.11.30",
+            "title": "【榮譽】賀！大專校院資訊服務創新競賽獲得佳績",
+            "url": "http://im.nutc.edu.tw/p/405-1063-127800,c7484.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7486": {
+        "name": "實習公告",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7486.php",
+        "items": [
+          {
+            "date": "2026.06.01",
+            "title": "【實習】115(暑期)資管系校外實習登記 (115/6/9止)",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133302,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.12",
+            "title": "【徵才】企業人才招募說明會",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132753,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】桃園機場115年公開招募 ｜ 64名新夥伴，邀請您一起加入！",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137255,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】IBM 2027校園招募線上說明會熱烈報名中",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137232,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.27",
+            "title": "【徵才】中國上優科技股份有限公司-後台開發人員",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137234,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.15",
+            "title": "【實習】台積電暑期實習技術員暨軟體工程實習計畫招募",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131880,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.30",
+            "title": "【實習】資管系學年校外實習面試及媒合時程公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131350,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.18",
+            "title": "【實習】微軟未來生涯體驗計畫校園招募說明",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131050,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.02.24",
+            "title": "【實習】國泰金控數位資訊實習生CIP計畫熱烈申請中",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130450,c7486.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.01.12",
+            "title": "【實習】玉山商業銀行暑期/學期實習計畫說明",
+            "url": "http://im.nutc.edu.tw/p/405-1063-129100,c7486.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7829": {
+        "name": "獎助學金",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7829.php",
+        "items": [
+          {
+            "date": "2026.04.22",
+            "title": "【獎助學金】張文豹文教基金會獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132179,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.22",
+            "title": "【獎助學金】中國上優技能獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
+            "url": "http://im.nutc.edu.tw/p/405-1063-132178,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.10",
+            "title": "【獎助學金】台中市中等以上學校清寒優秀學生獎學金申請",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131750,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.20",
+            "title": "【獎助學金】行天宮文教發展促進基金會助學金申請公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131100,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.03.05",
+            "title": "【獎助學金】114學年度第2學期各項就學減免及弱勢助學金辦理時程",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130700,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.02.15",
+            "title": "【獎助學金】財團法人高等教育基金會清寒優秀獎學金",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130200,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.11.20",
+            "title": "【獎助學金】資訊管理系校友捐贈清寒勵學助學金審核結果公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-127500,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.10.18",
+            "title": "【獎助學金】教育部學產基金低收入戶學生助學金受理申請",
+            "url": "http://im.nutc.edu.tw/p/405-1063-126700,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.09.25",
+            "title": "【獎助學金】優秀新生入學獎學金受獎學生名單公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-125950,c7829.php?Lang=zh-tw"
+          },
+          {
+            "date": "2025.09.10",
+            "title": "【獎助學金】原住民族委員會獎助大專校院原住民學生實施要點",
+            "url": "http://im.nutc.edu.tw/p/405-1063-125500,c7829.php?Lang=zh-tw"
+          }
+        ]
+      },
+      "7485": {
+        "name": "其他公告",
+        "url": "https://im.nutc.edu.tw/p/412-1063-7485.php",
+        "items": [
+          {
+            "date": "2026.10.29",
+            "title": "【競賽】生成式AI結合電腦輔助設計製造競賽",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137399,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.28",
+            "title": "【競賽】2026全國大學院校生醫電資創新設計競賽",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137287,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.10.20",
+            "title": "【宣導】校園智慧財產權與正版軟體使用規範宣導",
+            "url": "http://im.nutc.edu.tw/p/405-1063-137100,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.30",
+            "title": "【防詐】防制學生遭受校園詐騙及求職陷阱警示宣導",
+            "url": "http://im.nutc.edu.tw/p/405-1063-136200,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.09.12",
+            "title": "【資訊】圖書資訊處校園網路設備定期維護停機公告",
+            "url": "http://im.nutc.edu.tw/p/405-1063-135600,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.06.15",
+            "title": "【失物】系辦公室招領學生遺失物清冊（期末清理）",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133600,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.05.25",
+            "title": "【場地】資管系專業電腦教室課後借用規則及注意事項",
+            "url": "http://im.nutc.edu.tw/p/405-1063-133050,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.04.05",
+            "title": "【節能】配合學校節約能源政策離室請隨手關閉電源",
+            "url": "http://im.nutc.edu.tw/p/405-1063-131600,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.02.20",
+            "title": "【校園】健康中心春季常見傳染病防治注意事項宣導",
+            "url": "http://im.nutc.edu.tw/p/405-1063-130350,c7485.php?Lang=zh-tw"
+          },
+          {
+            "date": "2026.01.05",
+            "title": "【選課】寒假期間各項行政業務受理時間與聯絡窗口",
+            "url": "http://im.nutc.edu.tw/p/405-1063-128750,c7485.php?Lang=zh-tw"
+          }
+        ]
+      }
+    };
+
+    const categoryOrder = ["8757", "7698", "7683", "7484", "7486", "7829", "7485"];
+    let currentCategoryId = "8757";
+
+    const categoryListEl = document.getElementById("categoryList");
+    const articlesContainerEl = document.getElementById("articlesContainer");
+
+    // 初始化左側分類按鈕
+    function initCategories() {
+      categoryListEl.innerHTML = "";
+      categoryOrder.forEach(cid => {
+        const cat = announcementData[cid];
+        if (!cat) return;
+
+        const li = document.createElement("li");
+        li.className = `category-item ${cid === currentCategoryId ? "active" : ""}`;
+        li.dataset.cid = cid;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-btn";
+        btn.textContent = cat.name;
+
+        btn.addEventListener("click", () => {
+          if (currentCategoryId === cid) return;
+          switchCategory(cid);
+        });
+
+        li.appendChild(btn);
+        categoryListEl.appendChild(li);
+      });
+    }
+
+    // 切換分類
+    function switchCategory(cid) {
+      currentCategoryId = cid;
+
+      // 更新按鈕 active 樣式
+      document.querySelectorAll(".category-item").forEach(item => {
+        if (item.dataset.cid === cid) {
+          item.classList.add("active");
+        } else {
+          item.classList.remove("active");
+        }
+      });
+
+      // 淡出再載入新資料
+      articlesContainerEl.classList.add("fade-out");
+      setTimeout(() => {
+        renderArticles(cid);
+        articlesContainerEl.classList.remove("fade-out");
+      }, 100);
+    }
+
+    // 渲染右側公告列表
+    function renderArticles(cid) {
+      articlesContainerEl.innerHTML = "";
+      const cat = announcementData[cid];
+      if (!cat || !cat.items || cat.items.length === 0) {
+        articlesContainerEl.innerHTML = "<p style='color: #888; padding: 20px;'>目前暫無公告</p>";
+        return;
+      }
+
+      cat.items.forEach((item, index) => {
+        const isOdd = (index % 2 === 0); // 視覺上第 1, 3, 5, 7, 9 項 (0-indexed 為偶數)
+        
+        const itemEl = document.createElement("div");
+        itemEl.className = `article-item ${isOdd ? "odd" : "even"}`;
+
+        itemEl.innerHTML = `
+          <div class="article-date">${escapeHtml(item.date)}</div>
+          <div class="article-title-box">
+            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="article-link" title="${escapeHtml(item.title)}">
+              ${escapeHtml(item.title)}
+            </a>
+          </div>
+        `;
+
+        articlesContainerEl.appendChild(itemEl);
+      });
+    }
+
+    // 避免 XSS 的 HTML 轉義
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // 初始化頁面
+    initCategories();
+    renderArticles(currentCategoryId);
+  </script>
+</body>
+</html>
