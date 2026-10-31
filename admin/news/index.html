@@ -664,7 +664,7 @@
           <h4 id="ctaHeading">報名資訊</h4>
           <p id="ctaDesc">請點擊右方按鈕填寫線上報名表單</p>
         </div>
-        <a href="#" class="btn-apply" id="applyLink">
+        <a href="#" class="btn-apply" id="applyLink" target="_blank" rel="noopener noreferrer">
           <span id="ctaBtnText">前往線上報名</span>
           <span>↗</span>
         </a>
@@ -729,7 +729,12 @@
       },
       "bodyHtml": "<p>隨著人工智慧（AI）與生成式 AI（如 ChatGPT、LLM）技術快速突破，業界對於兼具數據科學素養與跨領域開發實作之專業人才需求急迫。財團法人工業技術研究院特別規劃「<strong>AI與大數據應用開發實戰養成班（第12梯次）</strong>」，本課程適用勞動部「產業新尖兵計畫」，協助參訓青年扎實掌握業界主流 AI 開發與大數據分析技能，期末更安排企業媒合會與實體參訪，助力學員成功轉職！</p><h3 class=\"section-title\">產業新尖兵計畫補助與獎勵津貼</h3><ul class=\"theme-list\"><li class=\"theme-item\"><strong>補助對象</strong>：年滿 15 歲至 29 歲之本國籍失業或待業青年（非日間部在學學生）。</li><li class=\"theme-item\"><strong>學費全額補助</strong>：符合資格者，錄取時繳交自行負擔之 10,000 元訓練費，結訓日起 90 日內依法參加就業保險即可申請全額退回！</li><li class=\"theme-item\"><strong>學習獎勵金</strong>：符合失業者職前訓練規定，訓練期間<strong>每月發給學習獎勵金新臺幣 8,000 元整</strong>。</li></ul><h3 class=\"section-title\">350小時實戰課綱規劃（實作比例近 50%）</h3><ul class=\"theme-list\"><li class=\"theme-item\"><strong>Python 程式核心與網路爬蟲</strong>：Anaconda 環境、物件導向、Requests、BeautifulSoup4、Selenium 實務。</li><li class=\"theme-item\"><strong>全端與後端應用開發</strong>：HTML5/CSS3、JavaScript 互動、Flask 網頁架構、Jinja2 模板與 Session 狀態管理。</li><li class=\"theme-item\"><strong>資料庫與容器化架構</strong>：MySQL 關聯式資料庫設計與最佳化、Docker 映像檔構建與 Docker Compose 多容器編排。</li><li class=\"theme-item\"><strong>AI 資料科學與機器學習</strong>：Numpy、Pandas、Matplotlib 統計繪圖、Scikit-learn 迴歸/分類/分群演算法、Kaggle 數據集實戰。</li><li class=\"theme-item\"><strong>深度學習與電腦視覺</strong>：PyTorch 框架、DNN/CNN 影像辨識、OpenCV 特徵工程、RNN/LSTM 自然語言處理。</li><li class=\"theme-item\"><strong>生成式 AI 與 LLM 應用</strong>：LangChain 框架、Agent & Memory、RAG（檢索增強生成）架構實作、開源大語言模型應用。</li><li class=\"theme-item\"><strong>實戰專案與商業落地</strong>：Line Bot 行銷智能客服、TTA（臺灣科技新創基地）企業參訪、期末專題發表與 3~5 家企業現場媒合會。</li></ul><h3 class=\"section-title\">重要開課與報名資訊</h3><p>• <strong>課程時程</strong>：115/12/29 ～ 116/03/24（週一至週五 09:00～17:00，每天 7 小時，共 350 小時）。<br>• <strong>報名期限</strong>：115/07/01 ～ 115/12/25 止（名額 30 名，依報名順序錄取額滿為止）。<br>• <strong>甄試日期</strong>：115/12/28（以 Email 或電話通知錄取結果）。<br>• <strong>上課地點</strong>：台北市大安區和平東路一段155號4樓（中國文化大學推廣教育部大安分部）。<br>• <strong>結訓出路</strong>：AI 工程師、資料分析工程師、大數據工程師、數據分析師。</p><h3 class=\"section-title\">報名程序指引</h3><p>1. 註冊成為「<a href=\"https://exam.taiwanjobs.gov.tw/JobExam/L03/L0301\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#1976d2;text-decoration:underline;\">台灣就業通</a>」會員，並完成「我喜歡做的事」職涯興趣探索測驗。<br>2. 進入「<a href=\"https://elite.taiwanjobs.gov.tw/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#1976d2;text-decoration:underline;\">產業新尖兵計畫網站</a>」，點選「申請參加計畫」搜尋本課程。<br>3. 於專區「線上簽名參訓資格切結書」並「上傳存摺帳戶」，即完成報名程序。</p>",
       "poster": null,
-      "attachments": [],
+      "attachments": [
+        {
+          "title": "📄 招生簡章：AI與大數據應用開發實戰養成班(第12梯次) 簡章完整版.pdf",
+          "url": "assets/itri_ai_bigdata_12_brochure.pdf"
+        }
+      ],
       "contact": "主辦單位：財團法人工業技術研究院（工研院）<br>課程諮詢窗口：02-2370-1111 分機 316 李晨安 小姐（AnnieLee@itri.org.tw）<br>上課地點：台北市大安區和平東路一段155號4樓（文大推廣大安分部）"
 },
       "nutn-ai-competition-2026": {
@@ -1508,6 +1513,8 @@
         ctaDescEl.textContent = post.cta.desc || "請點擊右方按鈕填寫表單";
         ctaBtnTextEl.textContent = post.cta.btnText || "前往報名";
         applyLinkEl.href = post.cta.url;
+        applyLinkEl.target = "_blank";
+        applyLinkEl.rel = "noopener noreferrer";
       } else {
         postCtaEl.style.display = "none";
       }
