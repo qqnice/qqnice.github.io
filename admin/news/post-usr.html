@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【競賽】115學年度 USR 跨域創新場域實踐競賽 - 最新資訊</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Zen Kaku Gothic New", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f3f6;
+      color: #2b2b2b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+    }
+
+    .detail-card {
+      width: 100%;
+      max-width: 1040px;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 12px 38px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 38px 44px;
+      box-sizing: border-box;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    /* 頂部返回導覽 */
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #57636c;
+      text-decoration: none;
+      margin-bottom: 22px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background-color: #f4f0eb;
+      transition: all 0.18s ease;
+    }
+
+    .back-nav:hover {
+      background-color: #fdd835;
+      color: #212121;
+    }
+
+    /* 標題區塊 */
+    .post-header {
+      border-bottom: 2px solid #f4f0eb;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .category-badge {
+      background-color: #b65d1d;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }
+
+    .post-date {
+      color: #79828b;
+      font-size: 14.5px;
+      font-weight: 500;
+    }
+
+    .post-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #212529;
+      line-height: 1.4;
+    }
+
+    /* 重點資訊卡片網格 */
+    .highlight-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .highlight-card {
+      background-color: #fbf9f6;
+      border: 1px solid #efe8df;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .highlight-label {
+      font-size: 12.5px;
+      color: #79828b;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .highlight-value {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #b65d1d;
+    }
+
+    /* 報名按鈕區 */
+    .cta-container {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff1c4 100%);
+      border: 1.5px solid #fed23b;
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+
+    .cta-text h4 {
+      font-size: 17px;
+      color: #5c3b00;
+      margin-bottom: 4px;
+    }
+
+    .cta-text p {
+      font-size: 13.5px;
+      color: #7a5400;
+    }
+
+    .btn-apply {
+      background-color: #b65d1d;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(182, 93, 29, 0.25);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-apply:hover {
+      background-color: #9f4f16;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(182, 93, 29, 0.35);
+    }
+
+    /* 內文左右分欄排版 */
+    .content-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 36px;
+      align-items: start;
+    }
+
+    /* 左側主文 */
+    .article-body {
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: #333d47;
+    }
+
+    .article-body p {
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #212529;
+      margin: 26px 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid #b65d1d;
+      padding-left: 10px;
+    }
+
+    .theme-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .theme-item {
+      background: #fbf9f6;
+      border: 1px solid #f0e9df;
+      padding: 12px 16px;
+      border-radius: 10px;
+    }
+
+    .theme-item strong {
+      color: #b65d1d;
+      font-weight: 700;
+    }
+
+    .theme-item .prize {
+      color: #d97706;
+      font-weight: 600;
+      font-size: 13.5px;
+      margin-left: 6px;
+    }
+
+    .location-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .location-tag {
+      background: #f4f0eb;
+      color: #554433;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    /* 附件下載區塊 */
+    .attachments-box {
+      margin-top: 32px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+
+    .attachments-box h4 {
+      font-size: 16px;
+      color: #334155;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .attachment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      text-decoration: none;
+      color: #1e293b;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .attachment-item:hover {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+      color: #b65d1d;
+    }
+
+    .attachment-item span.download-hint {
+      font-size: 12.5px;
+      color: #64748b;
+    }
+
+    /* 洽詢窗口 */
+    .contact-box {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: #fdfaf6;
+      border-radius: 12px;
+      border: 1px solid #f3ece4;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* 右側海報圖 */
+    .poster-container {
+      position: sticky;
+      top: 20px;
+    }
+
+    .poster-img {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease;
+      cursor: zoom-in;
+    }
+
+    .poster-img:hover {
+      transform: scale(1.015);
+    }
+
+    .poster-hint {
+      text-align: center;
+      font-size: 12.5px;
+      color: #8892a0;
+      margin-top: 8px;
+    }
+
+    /* 響應式 */
+    @media (max-width: 820px) {
+      .detail-card {
+        padding: 24px 18px;
+      }
+      .post-title {
+        font-size: 21px;
+      }
+      .highlight-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .cta-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .btn-apply {
+        width: 100%;
+        justify-content: center;
+      }
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+      .poster-container {
+        position: static;
+        order: -1;
+        margin-bottom: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="detail-card">
+    
+    <!-- 返回導覽 -->
+    <a href="./" class="back-nav" title="回到公告清單">
+      <span>‹</span> 返回最新資訊
+    </a>
+
+    <!-- 標題與中繼資料 -->
+    <header class="post-header">
+      <div class="meta-row">
+        <span class="category-badge">【競賽】</span>
+        <span class="post-date">發布日期：2026.10.12</span>
+      </div>
+      <h1 class="post-title">國立臺中科技大學 115學年度 USR 跨域創新場域實踐競賽</h1>
+    </header>
+
+    <!-- 重點期程網格 -->
+    <section class="highlight-grid">
+      <div class="highlight-card">
+        <div class="highlight-label">報名截止</div>
+        <div class="highlight-value">115.11.09 (一) 17:00</div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-label">繳件期程</div>
+        <div class="highlight-value">11/15 ~ 11/25</div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-label">頒獎典禮</div>
+        <div class="highlight-value">12/03 (四) 12:10</div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-label">總獎金規模</div>
+        <div class="highlight-value">超過 10 萬元！</div>
+      </div>
+    </section>
+
+    <!-- 報名快捷橫幅 -->
+    <section class="cta-container">
+      <div class="cta-text">
+        <h4>本競賽採「先報名、後交件」制</h4>
+        <p>歡迎全校各系同學自由組隊參加，結合創意思維提出地方實踐具體解方！</p>
+      </div>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" target="_blank" rel="noopener noreferrer" class="btn-apply">
+        <span>前往線上報名表單</span>
+        <span>↗</span>
+      </a>
+    </section>
+
+    <!-- 主體內容與海報分欄 -->
+    <div class="content-layout">
+      
+      <!-- 左側詳細內文 -->
+      <article class="article-body">
+        <p>
+          本校智慧產業學院辦理「115學年度USR跨域創新場域實踐競賽」，旨在深化在地連結並落實人才培育。期盼引導師生走入南投實踐場域，結合創意思維提出契合地方需求之具體解方，歡迎全校師生踴躍組隊報名！
+        </p>
+
+        <h3 class="section-title">規劃實踐對象場域</h3>
+        <div class="location-tags">
+          <span class="location-tag">① 小半天休閒農業區</span>
+          <span class="location-tag">② 大雁休閒農業區</span>
+          <span class="location-tag">③ 糯米橋休閒農業區</span>
+        </div>
+
+        <h3 class="section-title">五大競賽主題與獎項</h3>
+        <ul class="theme-list">
+          <li class="theme-item">
+            <strong>A ｜ 農產包裝設計組</strong>：茶葉包裝視覺設計與永續再利用
+            <span class="prize">（金獎 10,000 元）</span>
+          </li>
+          <li class="theme-item">
+            <strong>B ｜ 在地有影山城攝影組</strong>：系列影像敘事創作
+            <span class="prize">（金獎 10,000 元）</span>
+          </li>
+          <li class="theme-item">
+            <strong>C ｜ 食農共好行銷推廣組</strong>：青年食農企劃與推廣
+            <span class="prize">（金獎高達 20,000 元！）</span>
+          </li>
+          <li class="theme-item">
+            <strong>D ｜ 雙語短影音組</strong>：中英／中日雙語行銷短影音
+            <span class="prize">（金獎 10,000 元）</span>
+          </li>
+          <li class="theme-item">
+            <strong>E ｜ 跨域遊程設計組</strong>：休閒農業特色遊程企劃
+            <span class="prize">（金獎 10,000 元）</span>
+          </li>
+        </ul>
+
+        <h3 class="section-title">參賽對象與資格</h3>
+        <p>
+          • 本校各系在學學生（含五專、大學部、研究所及外籍生）皆可報名。<br>
+          • 歡迎跨系自由組隊，<strong>每隊需有一位在校教師擔任指導老師</strong>。
+        </p>
+
+        <h3 class="section-title">報名與繳件方式</h3>
+        <p>
+          1. <strong>報名時間</strong>：115年10月12日（一）起至 115年11月09日（一）17:00 止。<br>
+          2. <strong>報名流程</strong>：至線上表單填寫報名資料，並上傳【團隊清冊】及親簽之【參賽同意書】。<br>
+          3. <strong>線上報名網址</strong>：<a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" target="_blank" rel="noopener noreferrer" style="color: #b65d1d; font-weight: 600;">點擊前往報名表單 ↗</a>
+        </p>
+
+        <!-- 附件下載區塊 -->
+        <section class="attachments-box">
+          <h4>📎 競賽相關附件下載</h4>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" target="_blank" rel="noopener noreferrer" class="attachment-item">
+            <span>📄 附件一：115學年度 USR 跨域創新場域實踐競賽 簡章</span>
+            <span class="download-hint">前往下載 ↗</span>
+          </a>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" target="_blank" rel="noopener noreferrer" class="attachment-item">
+            <span>📝 附件二：參賽團隊清冊範本 (DOCX)</span>
+            <span class="download-hint">表單內下載 ↗</span>
+          </a>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" target="_blank" rel="noopener noreferrer" class="attachment-item">
+            <span>✍️ 附件三：參賽同意書親簽文件 (PDF)</span>
+            <span class="download-hint">表單內下載 ↗</span>
+          </a>
+        </section>
+
+        <!-- 活動洽詢 -->
+        <div class="contact-box">
+          <strong>【活動洽詢】</strong><br>
+          主辦單位：國立臺中科技大學 智慧產業學院 USR 深耕型計畫<br>
+          洽詢電話：04-22195601、04-22195606、04-22195624<br>
+          聯絡信箱：<a href="mailto:usrcompetition@gmail.com" style="color: #b65d1d;">usrcompetition@gmail.com</a>
+        </div>
+      </article>
+
+      <!-- 右側海報圖 -->
+      <aside class="poster-container">
+        <a href="assets/usr_poster.png" target="_blank" title="點擊檢視高畫質海報原圖">
+          <img src="assets/usr_poster.png" alt="115學年度 USR 跨域創新場域實踐競賽海報" class="poster-img">
+        </a>
+        <div class="poster-hint">（點擊海報可開啟高畫質大圖）</div>
+      </aside>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
