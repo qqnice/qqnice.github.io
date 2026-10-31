@@ -30,7 +30,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px 0 24px 0;
+      padding: 10px 0 24px 0;
     }
 
     /* 主響應式容器：電腦置中最大寬度，手機自適應100% */
@@ -51,10 +51,7 @@
       transition: opacity 0.15s ease;
     }
 
-    /* 頂部藥丸分類選單：
-       - 電腦版：橫向排列
-       - 手機版：支援滑順橫向滑動 (Touch Scroll)，不折行擠壓
-    */
+    /* 頂部藥丸分類選單：手機支援觸控滑動 */
     .tabs-header {
       display: flex;
       gap: 10px;
@@ -65,11 +62,11 @@
       white-space: nowrap;
       -webkit-overflow-scrolling: touch;
       padding-bottom: 6px;
-      scrollbar-width: none; /* Firefox 隱藏捲軸 */
+      scrollbar-width: none;
     }
 
     .tabs-header::-webkit-scrollbar {
-      display: none; /* Chrome/Safari 隱藏捲軸 */
+      display: none;
     }
 
     .tab-btn {
@@ -131,7 +128,7 @@
       text-decoration: none;
       color: inherit;
       cursor: pointer;
-      min-height: 48px; /* 符合行動裝置拇指點擊標準 */
+      min-height: 48px;
     }
 
     /* 奇數行淡米色背景 (#f4f0eb) */
@@ -370,9 +367,13 @@
     /* 內文與海報分欄排版 RWD */
     .content-layout {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 32px;
+      grid-template-columns: 1fr;
+      gap: 28px;
       align-items: start;
+    }
+
+    .content-layout.has-poster {
+      grid-template-columns: 1.15fr 0.85fr;
     }
 
     .article-body {
@@ -464,7 +465,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 12px;
+      padding: 11px 14px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 7px;
@@ -519,14 +520,14 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .content-layout {
+      .content-layout.has-poster {
         grid-template-columns: 1fr;
         gap: 24px;
       }
 
       .poster-container {
         position: static;
-        order: -1; /* 手機版海報移至內文上方，吸睛亮眼 */
+        order: -1;
         margin-bottom: 20px;
         max-width: 420px;
         margin-left: auto;
@@ -537,23 +538,22 @@
     /* ================= 4. 手機直向 RWD (螢幕寬度 <= 640px) ================= */
     @media (max-width: 640px) {
       body {
-        padding: 6px 0 16px 0;
+        padding: 4px 0 16px 0;
       }
 
       .board-container {
-        padding: 4px 10px;
+        padding: 4px 8px;
       }
 
-      /* 手機版：公告條目轉為垂直堆疊排版，避免標題被截斷 */
       .announcement-row {
         flex-direction: column;
         align-items: flex-start;
-        padding: 10px 12px;
+        padding: 10px 10px;
         gap: 4px;
       }
 
       .row-divider {
-        display: none; /* 手機版隱藏中間分隔線 */
+        display: none;
       }
 
       .row-date {
@@ -641,7 +641,7 @@
       </div>
     </div>
 
-    <!-- ================= 2. 頁內詳細視圖 (RWD 響應式排版) ================= -->
+    <!-- ================= 2. 頁內詳細視圖 (動態渲染，點選後原地開啟，不另開視窗) ================= -->
     <div id="detailView">
       <button type="button" class="back-btn" id="btnBack">
         <span>‹</span> 返回最新公告清單
@@ -649,132 +649,203 @@
 
       <header class="post-header">
         <div class="meta-row">
-          <span class="category-badge">【競賽】</span>
-          <span class="post-date">發布日期：2026.10.12</span>
+          <span class="category-badge" id="postBadge">【公告】</span>
+          <span class="post-date" id="postDate">發布日期：2026.10.12</span>
         </div>
-        <h1 class="post-title">國立臺中科技大學 115學年度 USR 跨域創新場域實踐競賽</h1>
+        <h1 class="post-title" id="postTitle">公告標題載入中...</h1>
       </header>
 
-      <!-- 重點期程網格 (手機自動2欄，電腦4欄) -->
-      <section class="highlight-grid">
-        <div class="highlight-card">
-          <div class="highlight-label">報名截止</div>
-          <div class="highlight-value">115.11.09 (一) 17:00</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-label">繳件期程</div>
-          <div class="highlight-value">11/15 ~ 11/25</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-label">頒獎典禮</div>
-          <div class="highlight-value">12/03 (四) 12:10</div>
-        </div>
-        <div class="highlight-card">
-          <div class="highlight-label">總獎金規模</div>
-          <div class="highlight-value">超過 10 萬元！</div>
-        </div>
-      </section>
+      <!-- 重點期程網格 -->
+      <section class="highlight-grid" id="postHighlights"></section>
 
-      <!-- 報名橫幅 (手機自動轉垂直全寬) -->
-      <section class="cta-container">
+      <!-- 報名快捷橫幅 (若有報名連結時顯示) -->
+      <section class="cta-container" id="postCta" style="display: none;">
         <div class="cta-text">
-          <h4>本競賽採「先報名、後交件」制</h4>
-          <p>歡迎全校各系同學自由組隊參加，結合創意思維提出地方實踐具體解方！</p>
+          <h4 id="ctaHeading">報名資訊</h4>
+          <p id="ctaDesc">請點擊右方按鈕填寫線上報名表單</p>
         </div>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" class="btn-apply" id="applyLink">
-          <span>前往線上報名表單</span>
+        <a href="#" class="btn-apply" id="applyLink">
+          <span id="ctaBtnText">前往線上報名</span>
           <span>↗</span>
         </a>
       </section>
 
-      <!-- 主體內容與海報分欄 (手機自動單欄，海報居中) -->
-      <div class="content-layout">
-        <article class="article-body">
-          <p>
-            本校智慧產業學院辦理「115學年度USR跨域創新場域實踐競賽」，旨在深化在地連結並落實人才培育。期盼引導師生走入南投實踐場域，結合創意思維提出契合地方需求之具體解方，歡迎全校師生踴躍組隊報名！
-          </p>
+      <!-- 主體內容與海報分欄 -->
+      <div class="content-layout" id="contentLayout">
+        <article class="article-body" id="postBody"></article>
 
-          <h3 class="section-title">規劃實踐對象場域</h3>
-          <div class="location-tags">
-            <span class="location-tag">① 小半天休閒農業區</span>
-            <span class="location-tag">② 大雁休閒農業區</span>
-            <span class="location-tag">③ 糯米橋休閒農業區</span>
-          </div>
-
-          <h3 class="section-title">五大競賽主題與獎項</h3>
-          <ul class="theme-list">
-            <li class="theme-item">
-              <strong>A ｜ 農產包裝設計組</strong>：茶葉包裝視覺設計與永續再利用
-              <span class="prize">（金獎 10,000 元）</span>
-            </li>
-            <li class="theme-item">
-              <strong>B ｜ 在地有影山城攝影組</strong>：系列影像敘事創作
-              <span class="prize">（金獎 10,000 元）</span>
-            </li>
-            <li class="theme-item">
-              <strong>C ｜ 食農共好行銷推廣組</strong>：青年食農企劃與推廣
-              <span class="prize">（金獎高達 20,000 元！）</span>
-            </li>
-            <li class="theme-item">
-              <strong>D ｜ 雙語短影音組</strong>：中英／中日雙語行銷短影音
-              <span class="prize">（金獎 10,000 元）</span>
-            </li>
-            <li class="theme-item">
-              <strong>E ｜ 跨域遊程設計組</strong>：休閒農業特色遊程企劃
-              <span class="prize">（金獎 10,000 元）</span>
-            </li>
-          </ul>
-
-          <h3 class="section-title">參賽對象與資格</h3>
-          <p>
-            • 本校各系在學學生（含五專、大學部、研究所及外籍生）皆可報名。<br>
-            • 歡迎跨系自由組隊，<strong>每隊需有一位在校教師擔任指導老師</strong>。
-          </p>
-
-          <h3 class="section-title">報名與繳件方式</h3>
-          <p>
-            1. <strong>報名時間</strong>：115年10月12日（一）起至 115年11月09日（一）17:00 止。<br>
-            2. <strong>報名流程</strong>：至線上表單填寫報名資料，並上傳【團隊清冊】及親簽之【參賽同意書】。<br>
-            3. <strong>線上報名網址</strong>：<a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" style="color: #b65d1d; font-weight: 600;">點擊前往報名表單 ↗</a>
-          </p>
-
-          <!-- 附件下載區塊 -->
-          <section class="attachments-box">
-            <h4>📎 競賽相關附件下載</h4>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" class="attachment-item">
-              <span>📄 附件一：115學年度 USR 跨域創新場域實踐競賽 簡章</span>
-              <span class="download-hint">前往下載 ↗</span>
-            </a>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" class="attachment-item">
-              <span>📝 附件二：參賽團隊清冊範本 (DOCX)</span>
-              <span class="download-hint">表單內下載 ↗</span>
-            </a>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" class="attachment-item">
-              <span>✍️ 附件三：參賽同意書親簽文件 (PDF)</span>
-              <span class="download-hint">表單內下載 ↗</span>
-            </a>
-          </section>
-
-          <!-- 洽詢窗口 -->
-          <div class="contact-box">
-            <strong>【活動洽詢】</strong><br>
-            主辦單位：國立臺中科技大學 智慧產業學院 USR 深耕型計畫<br>
-            洽詢電話：04-22195601、04-22195606、04-22195624<br>
-            聯絡信箱：<a href="mailto:usrcompetition@gmail.com" style="color: #b65d1d;">usrcompetition@gmail.com</a>
-          </div>
-        </article>
-
-        <!-- 右側海報圖 (手機自動置於頂部或自適應全寬) -->
-        <aside class="poster-container">
-          <img src="assets/usr_poster.png" alt="115學年度 USR 跨域創新場域實踐競賽海報" class="poster-img">
+        <!-- 右側海報圖 (若有海報時顯示) -->
+        <aside class="poster-container" id="posterArea" style="display: none;">
+          <img src="" alt="活動海報" class="poster-img" id="posterImg">
         </aside>
+      </div>
+
+      <!-- 附件下載區塊 -->
+      <section class="attachments-box" id="attachmentsArea" style="display: none;">
+        <h4>📎 相關附件檔案下載</h4>
+        <div id="attachmentsList"></div>
+      </section>
+
+      <!-- 洽詢窗口 -->
+      <div class="contact-box" id="contactArea">
+        <strong>【洽詢窗口】</strong><br>
+        國立臺中科技大學 資訊管理系辦公室<br>
+        洽詢電話：04-22196313、04-22196314 ｜ 辦公室位置：資訊館 4 樓 2406 室
       </div>
     </div>
 
   </div>
 
   <script>
-    // 完整分類與公告條目資料
+    // 前 5 個專屬詳細內文資料庫 (點擊後直接原地展開，完全不跳窗)
+    const detailedPosts = {
+      "usr-competition": {
+        badge: "【競賽】",
+        date: "2026.10.12",
+        title: "國立臺中科技大學 115學年度 USR 跨域創新場域實踐競賽",
+        highlights: [
+          { label: "報名截止", val: "115.11.09 (一) 17:00" },
+          { label: "繳件期程", val: "11/15 ~ 11/25" },
+          { label: "頒獎典禮", val: "12/03 (四) 12:10" },
+          { label: "總獎金規模", val: "超過 10 萬元！" }
+        ],
+        cta: {
+          heading: "本競賽採「先報名、後交件」制",
+          desc: "歡迎全校各系同學自由組隊參加，結合創意思維提出地方實踐具體解方！",
+          btnText: "前往線上報名表單",
+          url: "https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform"
+        },
+        poster: "assets/usr_poster.png",
+        bodyHtml: `
+          <p>本校智慧產業學院辦理「115學年度USR跨域創新場域實踐競賽」，旨在深化在地連結並落實人才培育。期盼引導師生走入南投實踐場域，結合創意思維提出契合地方需求之具體解方，歡迎全校師生踴躍組隊報名！</p>
+          <h3 class="section-title">規劃實踐對象場域</h3>
+          <div class="location-tags">
+            <span class="location-tag">① 小半天休閒農業區</span>
+            <span class="location-tag">② 大雁休閒農業區</span>
+            <span class="location-tag">③ 糯米橋休閒農業區</span>
+          </div>
+          <h3 class="section-title">五大競賽主題與獎項</h3>
+          <ul class="theme-list">
+            <li class="theme-item"><strong>A ｜ 農產包裝設計組</strong>：茶葉包裝視覺設計與永續再利用 <span class="prize">（金獎 10,000 元）</span></li>
+            <li class="theme-item"><strong>B ｜ 在地有影山城攝影組</strong>：系列影像敘事創作 <span class="prize">（金獎 10,000 元）</span></li>
+            <li class="theme-item"><strong>C ｜ 食農共好行銷推廣組</strong>：青年食農企劃與推廣 <span class="prize">（金獎高達 20,000 元！）</span></li>
+            <li class="theme-item"><strong>D ｜ 雙語短影音組</strong>：中英／中日雙語行銷短影音 <span class="prize">（金獎 10,000 元）</span></li>
+            <li class="theme-item"><strong>E ｜ 跨域遊程設計組</strong>：休閒農業特色遊程企劃 <span class="prize">（金獎 10,000 元）</span></li>
+          </ul>
+          <h3 class="section-title">參賽對象與資格</h3>
+          <p>• 本校各系在學學生（含五專、大學部、研究所及外籍生）皆可報名。<br>• 歡迎跨系自由組隊，<strong>每隊需有一位在校教師擔任指導老師</strong>。</p>
+        `,
+        attachments: [
+          { title: "📄 附件一：115學年度 USR 跨域創新場域實踐競賽 簡章", url: "https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" },
+          { title: "📝 附件二：參賽團隊清冊範本 (DOCX)", url: "https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" },
+          { title: "✍️ 附件三：參賽同意書親簽文件 (PDF)", url: "https://docs.google.com/forms/d/e/1FAIpQLScbjXC_3hGxS-DBSEx_RVka6GuoQo7bpL-dyxJ3NzAK8w-SkQ/viewform" }
+        ],
+        contact: "主辦單位：國立臺中科技大學 智慧產業學院 USR 深耕型計畫<br>洽詢電話：04-22195601、04-22195606、04-22195624<br>聯絡信箱：usrcompetition@gmail.com"
+      },
+      "ipas": {
+        badge: "【公告】",
+        date: "2026.09.29",
+        title: "【公告】115-1 iPAS 資安證照輔導班報名資訊",
+        highlights: [
+          { label: "輔導班費用", val: "全額免費！" },
+          { label: "報名截止", val: "115.10.13 (二) 17:00" },
+          { label: "上課時間", val: "115.10.17 (六) 08:00–17:00" },
+          { label: "上課地點", val: "資訊大樓 4 樓 2407 教室" }
+        ],
+        cta: {
+          heading: "iPAS 初級資訊安全工程師證照輔導班",
+          desc: "因開班人數須達 20 人以上方能順利開課，請同學踴躍報名參加！",
+          btnText: "前往 Google 表單報名",
+          url: "https://forms.gle/XCoNBrRrUZiGHuHw7"
+        },
+        bodyHtml: `
+          <p>本學期將開設「iPAS資安證照輔導班」，協助同學準備考取經濟部 iPAS 初級資訊安全工程師證照，強化就業專業競爭力。</p>
+          <h3 class="section-title">課程重點內容</h3>
+          <ul class="theme-list">
+            <li class="theme-item"><strong>單元一 ｜ 資訊安全管理概論</strong>：資安法規、風險評估、ISMS 制度標準與防護基線</li>
+            <li class="theme-item"><strong>單元二 ｜ 資訊安全技術概論</strong>：網路安全架構、惡意程式防護、加解密技術與系統弱點防禦</li>
+          </ul>
+          <h3 class="section-title">報名注意事項</h3>
+          <p>1. 輔導費用：全額免費。<br>2. 報名截止：即日起至 115年10月13日 (二) 17:00 止。<br>3. 提醒事項：請報名同學務必準時出席，名額有限額滿為止。</p>
+        `,
+        attachments: [],
+        contact: "洽詢單位：資訊管理系辦公室（資訊館 4 樓 2406 室）<br>聯絡電話：04-22196313"
+      },
+      "zhang-scholarship": {
+        badge: "【獎學金】",
+        date: "2026.09.17",
+        title: "【恭賀】114學年度第2學期張文豹文教基金會獎學金得獎名單",
+        highlights: [
+          { label: "領獎期間", val: "即日起 ～ 115/10/30 (五)" },
+          { label: "領獎地點", val: "資訊館 2406 系辦公室" },
+          { label: "攜帶文件", val: "身份證、學生證、存摺影本" },
+          { label: "領獎資格", val: "本人親領或派代表" }
+        ],
+        bodyHtml: `
+          <p>恭賀本系獲獎同學！114學年度第2學期「張文豹文教基金會獎學金」得獎名單已經核定，請獲獎同學於期限內前往系辦公室辦理領獎手續。</p>
+          <h3 class="section-title">領獎手續與注意事項</h3>
+          <p>
+            1. <strong>領獎說明</strong>：獎學金得獎名單請詳見下方附件 PDF。<br>
+            2. <strong>應備文件</strong>：領獎簽名時請務必攜帶<strong>「身份證(正反面)、學生證(正反面)、本人銀行存摺」影本</strong>，以利後續會計匯款核銷。<br>
+            3. <strong>出席規定</strong>：請務必由本人親自出席簽名；若因故無法出席，請派代表代為領獎並先行通知系辦公室。
+          </p>
+        `,
+        attachments: [
+          { title: "📄 附件：114下張文豹文教基金會獎學金得獎名單_個資.pdf", url: "https://im.nutc.edu.tw/var/file/63/1063/attach/6/pta_103125_1905803_62951.pdf" }
+        ],
+        contact: "承辦窗口：資訊管理系辦公室 獎學金業務承辦人<br>洽詢電話：04-22196313"
+      },
+      "shangyou-scholarship": {
+        badge: "【獎學金】",
+        date: "2026.09.17",
+        title: "【恭賀】114學年度第2學期中國上優技能獎學金得獎名單",
+        highlights: [
+          { label: "領獎期間", val: "即日起 ～ 115/10/30 (五)" },
+          { label: "領獎地點", val: "資訊館 2406 系辦公室" },
+          { label: "攜帶文件", val: "身份證、學生證、存摺影本" },
+          { label: "領獎資格", val: "本人親領或派代表" }
+        ],
+        bodyHtml: `
+          <p>恭賀本系獲獎同學！114學年度第2學期「中國上優技能獎學金」得獎名單正式公告，感謝企業對資管專業人才技能培育的大力支持。</p>
+          <h3 class="section-title">領獎手續與注意事項</h3>
+          <p>
+            1. <strong>得獎名冊</strong>：詳細得獎名單請參閱下方附件檔案。<br>
+            2. <strong>領獎手續</strong>：請於領獎期間內攜帶<strong>「身份證(正反面)、學生證(正反面)、本人銀行存摺」影本</strong>至系辦簽名領獎。<br>
+            3. <strong>受委託代理</strong>：如本人無法親自前來，請委託同班同學代表領取並主動告知系辦工作人員。
+          </p>
+        `,
+        attachments: [
+          { title: "📄 附件：114下中國上優技能獎學金得獎名單(公告)_個資.pdf", url: "https://im.nutc.edu.tw/var/file/63/1063/attach/5/pta_102236_3173337_42444.pdf" }
+        ],
+        contact: "承辦窗口：資訊管理系辦公室<br>洽詢電話：04-22196314"
+      },
+      "genai-cad-competition": {
+        badge: "【競賽】",
+        date: "2026.10.29",
+        title: "【競賽】生成式AI結合電腦輔助設計製造競賽",
+        highlights: [
+          { label: "競賽核心", val: "生成式 AI × CAD/CAM" },
+          { label: "參賽對象", val: "大專校院在學學生" },
+          { label: "競賽形式", val: "創意設計與工程實作" },
+          { label: "詳細簡章", val: "請參閱下方 PDF 簡章" }
+        ],
+        bodyHtml: `
+          <p>為鼓勵大專校院青年學子運用最新「生成式 AI（Generative AI）」技術結合「電腦輔助設計與製造（CAD/CAM）」，深化數位設計思維並促進智慧製造產學應用接軌，特舉辦本競賽活動。</p>
+          <h3 class="section-title">競賽宗旨與重點說明</h3>
+          <p>
+            • <strong>技術融合</strong>：探索 AI 提示詞工程、拓樸最佳化、智慧輔助生成建模與數位加工之整合流程。<br>
+            • <strong>競賽規則</strong>：評分指標、參賽組別、作品規格及繳件期程，請詳閱下方簡章附件。<br>
+            • 歡迎全校對生成式 AI 與數位設計感興趣的同學踴躍報名組隊！
+          </p>
+        `,
+        attachments: [
+          { title: "📄 附件：生成式AI結合電腦輔助設計製造競賽 簡章.pdf", url: "https://im.nutc.edu.tw/var/file/63/1063/attach/47/pta_103273_661719_37492.pdf" }
+        ],
+        contact: "主辦單位：競賽籌備小組 ｜ 相關諮詢請洽系辦公室（04-22196313）"
+      }
+    };
+
+    // 分類資料庫（前 5 個一律設定為 inpage 頁內展開模式）
     const categoryData = {
       "all": {
         "name": "所有公告",
@@ -789,42 +860,46 @@
           {
             "date": "2026.09.29",
             "title": "【公告】115-1 iPAS資安證照輔導班報名資訊",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136511,c7698.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "ipas"
           },
           {
             "date": "2026.09.17",
             "title": "【恭賀】114學年度第2學期張文豹文教基金會獎學金得獎名單",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136097,c7829.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "zhang-scholarship"
           },
           {
             "date": "2026.09.17",
             "title": "【恭賀】114學年度第2學期中國上優技能獎學金得獎名單",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136096,c7829.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "shangyou-scholarship"
           },
           {
             "date": "2026.10.29",
             "title": "【競賽】生成式AI結合電腦輔助設計製造競賽",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137399,c8757.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "genai-cad-competition"
           },
           {
             "date": "2026.10.28",
             "title": "【競賽】2026全國大學院校生醫電資創新設計競賽",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137287,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137287,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.27",
             "title": "【徵才】桃園機場115年公開招募 | 64名新夥伴，邀請您一起加入！",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137255,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137255,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.27",
             "title": "【活動】臺中「115年度推動校園STEAM教育實施計畫課程研習(11月)資訊」",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137241,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137241,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.27",
             "title": "【徵才】IBM 2027校園招募線上說明會熱烈報名中",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137232,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137232,c8757.php?Lang=zh-tw"
           }
         ]
       },
@@ -835,42 +910,43 @@
           {
             "date": "2026.09.29",
             "title": "【公告】115-1 iPAS資安證照輔導班報名資訊",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136511,c7698.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "ipas"
           },
           {
             "date": "2026.04.14",
             "title": "【證照補助】114-2學生取得專業技能證照獎勵(4/24止)",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131846,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131846,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.02",
             "title": "【實習】114學年度第2學期資管系校外實習登記(3/13止)",
-            "url": "http://im.nutc.edu.tw/p/405-1063-130638,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-130638,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.01.07",
             "title": "【演講】AI 賦能雲端應用趨勢專題講座",
-            "url": "http://im.nutc.edu.tw/p/405-1063-128867,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-128867,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.12.18",
             "title": "【徵才】台中精機股份有限公司人才招募",
-            "url": "http://im.nutc.edu.tw/p/405-1063-128290,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-128290,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.11.10",
             "title": "【競賽】第30屆大專校院資訊應用服務創新競賽決賽名單",
-            "url": "http://im.nutc.edu.tw/p/405-1063-127394,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-127394,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.15",
             "title": "【獎學金】資訊管理系優秀學生獎助學金申請公告",
-            "url": "http://im.nutc.edu.tw/p/405-1063-126581,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-126581,c7698.php?Lang=zh-tw"
           },
           {
             "date": "2026.09.20",
             "title": "【公告】114學年度第1學期選課注意事項及時程表",
-            "url": "http://im.nutc.edu.tw/p/405-1063-125893,c7698.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-125893,c7698.php?Lang=zh-tw"
           }
         ]
       },
@@ -887,37 +963,37 @@
           {
             "date": "2026.10.27",
             "title": "【活動】臺中「115年度推動校園STEAM教育實施計畫課程研習(11月)資訊」",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137241,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137241,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.15",
             "title": "【講座】生成式AI應用於程式開發工作坊",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136980,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-136980,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.02",
             "title": "【工作坊】大數據與機器學習實戰教學講座",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136450,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-136450,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.09.18",
             "title": "【參訪】國立公共資訊圖書館智慧科技應用參訪活動",
-            "url": "http://im.nutc.edu.tw/p/405-1063-135890,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-135890,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.06.10",
             "title": "【論壇】資訊安全與隱私防護實務論壇",
-            "url": "http://im.nutc.edu.tw/p/405-1063-133500,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-133500,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.05.20",
             "title": "【研習】跨領域數位科技應用研習課程",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132900,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132900,c7683.php?Lang=zh-tw"
           },
           {
             "date": "2026.05.08",
             "title": "【競賽】大專校院雲端運算應用創意黑客松",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132400,c7683.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132400,c7683.php?Lang=zh-tw"
           }
         ]
       },
@@ -928,42 +1004,42 @@
           {
             "date": "2026.10.15",
             "title": "【榮譽】賀！本系學生榮獲 2026 全國大專資訊創新競賽第一名",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136800,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-136800,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.09.28",
             "title": "【榮譽】賀！本系教師榮獲科技部產學合作優良獎項肯定",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136100,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-136100,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.08.10",
             "title": "【榮譽】賀！專題團隊獲選教育部數位人才育苗計畫傑出獎",
-            "url": "http://im.nutc.edu.tw/p/405-1063-134900,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-134900,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.06.22",
             "title": "【榮譽】賀！本系多名研究生論文榮獲國際研討會最佳論文獎",
-            "url": "http://im.nutc.edu.tw/p/405-1063-133900,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-133900,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.05.18",
             "title": "【榮譽】恭喜資管系專題組榮獲校內專題競賽資訊組特優",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132800,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132800,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.04.10",
             "title": "【榮譽】賀！本系同學考取多項甲級及國際頂尖專業證照",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131700,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131700,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.15",
             "title": "【榮譽】賀！資管系籃球隊榮獲全校運動會錦標冠軍",
-            "url": "http://im.nutc.edu.tw/p/405-1063-130950,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-130950,c7484.php?Lang=zh-tw"
           },
           {
             "date": "2026.01.20",
             "title": "【榮譽】賀！教師獲頒全校教學特優教師表揚",
-            "url": "http://im.nutc.edu.tw/p/405-1063-129400,c7484.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-129400,c7484.php?Lang=zh-tw"
           }
         ]
       },
@@ -974,42 +1050,42 @@
           {
             "date": "2026.10.27",
             "title": "【徵才】桃園機場115年公開招募 | 64名新夥伴，邀請您一起加入！",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137255,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137255,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.27",
             "title": "【徵才】IBM 2027校園招募線上說明會熱烈報名中",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137232,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137232,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.27",
             "title": "【徵才】中國上優科技股份有限公司-後台開發人員",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137234,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137234,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.06.01",
             "title": "【實習】115(暑期)資管系校外實習登記 (115/6/9止)",
-            "url": "http://im.nutc.edu.tw/p/405-1063-133302,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-133302,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.05.12",
             "title": "【徵才】企業人才招募說明會",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132753,c8757.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132753,c8757.php?Lang=zh-tw"
           },
           {
             "date": "2026.04.15",
             "title": "【實習】台積電暑期實習技術員暨軟體工程實習計畫招募",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131880,c7486.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131880,c7486.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.30",
             "title": "【實習】資管系學年校外實習面試及媒合時程公告",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131350,c7486.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131350,c7486.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.18",
             "title": "【實習】微軟未來生涯體驗計畫校園招募說明",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131050,c7486.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-13050,c7486.php?Lang=zh-tw"
           }
         ]
       },
@@ -1020,42 +1096,44 @@
           {
             "date": "2026.09.17",
             "title": "【恭賀】114學年度第2學期張文豹文教基金會獎學金得獎名單",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136097,c7829.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "zhang-scholarship"
           },
           {
             "date": "2026.09.17",
             "title": "【恭賀】114學年度第2學期中國上優技能獎學金得獎名單",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136096,c7829.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "shangyou-scholarship"
           },
           {
             "date": "2026.04.22",
             "title": "【獎助學金】張文豹文教基金會獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132179,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132179,c7829.php?Lang=zh-tw"
           },
           {
             "date": "2026.04.22",
             "title": "【獎助學金】中國上優技能獎學金開始受理申請至5/27(三)止，歡迎提出申請!",
-            "url": "http://im.nutc.edu.tw/p/405-1063-132178,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-132178,c7829.php?Lang=zh-tw"
           },
           {
             "date": "2026.04.10",
             "title": "【獎助學金】台中市中等以上學校清寒優秀學生獎學金申請",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131750,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131750,c7829.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.20",
             "title": "【獎助學金】行天宮文教發展促進基金會助學金申請公告",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131100,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131100,c7829.php?Lang=zh-tw"
           },
           {
             "date": "2026.03.05",
             "title": "【獎助學金】114學年度第2學期各項就學減免及弱勢助學金辦理時程",
-            "url": "http://im.nutc.edu.tw/p/405-1063-130700,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-130700,c7829.php?Lang=zh-tw"
           },
           {
             "date": "2026.02.15",
             "title": "【獎助學金】財團法人高等教育基金會清寒優秀獎學金",
-            "url": "http://im.nutc.edu.tw/p/405-1063-130200,c7829.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-130200,c7829.php?Lang=zh-tw"
           }
         ]
       },
@@ -1066,42 +1144,43 @@
           {
             "date": "2026.10.29",
             "title": "【競賽】生成式AI結合電腦輔助設計製造競賽",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137399,c7485.php?Lang=zh-tw"
+            "type": "inpage",
+            "postId": "genai-cad-competition"
           },
           {
             "date": "2026.10.28",
             "title": "【競賽】2026全國大學院校生醫電資創新設計競賽",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137287,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137287,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.10.20",
             "title": "【宣導】校園智慧財產權與正版軟體使用規範宣導",
-            "url": "http://im.nutc.edu.tw/p/405-1063-137100,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-137100,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.09.30",
             "title": "【防詐】防制學生遭受校園詐騙及求職陷阱警示宣導",
-            "url": "http://im.nutc.edu.tw/p/405-1063-136200,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-136200,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.09.12",
             "title": "【資訊】圖書資訊處校園網路設備定期維護停機公告",
-            "url": "http://im.nutc.edu.tw/p/405-1063-135600,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-135600,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.06.15",
             "title": "【失物】系辦公室招領學生遺失物清冊（期末清理）",
-            "url": "http://im.nutc.edu.tw/p/405-1063-133600,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-133600,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.05.25",
             "title": "【場地】資管系專業電腦教室課後借用規則及注意事項",
-            "url": "http://im.nutc.edu.tw/p/405-1063-133050,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-133050,c7485.php?Lang=zh-tw"
           },
           {
             "date": "2026.04.05",
             "title": "【節能】配合學校節約能源政策離室請隨手關閉電源",
-            "url": "http://im.nutc.edu.tw/p/405-1063-131600,c7485.php?Lang=zh-tw"
+            "url": "https://im.nutc.edu.tw/p/405-1063-131600,c7485.php?Lang=zh-tw"
           }
         ]
       }
@@ -1117,6 +1196,24 @@
     const listViewEl = document.getElementById("listView");
     const detailViewEl = document.getElementById("detailView");
     const btnBackEl = document.getElementById("btnBack");
+
+    // 詳細頁面元件
+    const postBadgeEl = document.getElementById("postBadge");
+    const postDateEl = document.getElementById("postDate");
+    const postTitleEl = document.getElementById("postTitle");
+    const postHighlightsEl = document.getElementById("postHighlights");
+    const postCtaEl = document.getElementById("postCta");
+    const ctaHeadingEl = document.getElementById("ctaHeading");
+    const ctaDescEl = document.getElementById("ctaDesc");
+    const ctaBtnTextEl = document.getElementById("ctaBtnText");
+    const applyLinkEl = document.getElementById("applyLink");
+    const contentLayoutEl = document.getElementById("contentLayout");
+    const postBodyEl = document.getElementById("postBody");
+    const posterAreaEl = document.getElementById("posterArea");
+    const posterImgEl = document.getElementById("posterImg");
+    const attachmentsAreaEl = document.getElementById("attachmentsArea");
+    const attachmentsListEl = document.getElementById("attachmentsList");
+    const contactAreaEl = document.getElementById("contactArea");
 
     // 初始化頂部按鈕
     function initTabs() {
@@ -1146,7 +1243,6 @@
       document.querySelectorAll(".tab-btn").forEach((btn, idx) => {
         if (tabKeys[idx] === key) {
           btn.classList.add("active");
-          // 手機版自動將被點擊的按鈕捲動至可視區域中
           btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         } else {
           btn.classList.remove("active");
@@ -1182,11 +1278,11 @@
           <div class="row-title">${escapeHtml(item.title)}</div>
         `;
 
-        // 點擊事件：不開新視窗，原本頁面切換
+        // 點擊事件：若為 inpage 則原地展開詳細內文，若外部連結則於同視窗前往
         row.addEventListener("click", (e) => {
           e.preventDefault();
-          if (item.type === "inpage") {
-            showDetail();
+          if (item.type === "inpage" && detailedPosts[item.postId]) {
+            showDetail(item.postId);
           } else if (item.url) {
             window.location.href = item.url;
           }
@@ -1199,12 +1295,85 @@
       moreLinkEl.href = cat.url;
     }
 
-    // 頁內切換到詳細視圖（不另開視窗）
-    function showDetail() {
+    // 頁內動態渲染詳細內容 (原地展開，不另開視窗)
+    function showDetail(postId) {
+      const post = detailedPosts[postId];
+      if (!post) return;
+
+      postBadgeEl.textContent = post.badge;
+      postDateEl.textContent = `發布日期：${post.date}`;
+      postTitleEl.textContent = post.title;
+
+      // 渲染重點卡片
+      postHighlightsEl.innerHTML = "";
+      if (post.highlights && post.highlights.length > 0) {
+        postHighlightsEl.style.display = "grid";
+        post.highlights.forEach(h => {
+          const card = document.createElement("div");
+          card.className = "highlight-card";
+          card.innerHTML = `
+            <div class="highlight-label">${escapeHtml(h.label)}</div>
+            <div class="highlight-value">${escapeHtml(h.val)}</div>
+          `;
+          postHighlightsEl.appendChild(card);
+        });
+      } else {
+        postHighlightsEl.style.display = "none";
+      }
+
+      // 渲染 CTA 報名橫幅
+      if (post.cta && post.cta.url) {
+        postCtaEl.style.display = "flex";
+        ctaHeadingEl.textContent = post.cta.heading || "報名資訊";
+        ctaDescEl.textContent = post.cta.desc || "請點擊右方按鈕填寫表單";
+        ctaBtnTextEl.textContent = post.cta.btnText || "前往報名";
+        applyLinkEl.href = post.cta.url;
+      } else {
+        postCtaEl.style.display = "none";
+      }
+
+      // 渲染內文
+      postBodyEl.innerHTML = post.bodyHtml;
+
+      // 渲染海報
+      if (post.poster) {
+        contentLayoutEl.classList.add("has-poster");
+        posterAreaEl.style.display = "flex";
+        posterImgEl.src = post.poster;
+      } else {
+        contentLayoutEl.classList.remove("has-poster");
+        posterAreaEl.style.display = "none";
+      }
+
+      // 渲染附件
+      if (post.attachments && post.attachments.length > 0) {
+        attachmentsAreaEl.style.display = "block";
+        attachmentsListEl.innerHTML = "";
+        post.attachments.forEach(att => {
+          const a = document.createElement("a");
+          a.className = "attachment-item";
+          a.href = att.url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.innerHTML = `
+            <span>${escapeHtml(att.title)}</span>
+            <span class="download-hint">下載檔案 ↗</span>
+          `;
+          attachmentsListEl.appendChild(a);
+        });
+      } else {
+        attachmentsAreaEl.style.display = "none";
+      }
+
+      // 渲染聯絡資訊
+      if (post.contact) {
+        contactAreaEl.innerHTML = `<strong>【洽詢窗口】</strong><br>${post.contact}`;
+      }
+
       listViewEl.style.display = "none";
       detailViewEl.style.display = "block";
       window.scrollTo({ top: 0, behavior: "smooth" });
-      history.pushState({ view: "detail" }, "", "#usr-competition");
+      history.pushState({ view: "detail", postId: postId }, "", `#${postId}`);
     }
 
     // 返回清單視圖
@@ -1220,8 +1389,9 @@
     btnBackEl.addEventListener("click", showList);
 
     window.addEventListener("popstate", (e) => {
-      if (location.hash === "#usr-competition") {
-        showDetail();
+      const hash = location.hash.replace("#", "");
+      if (hash && detailedPosts[hash]) {
+        showDetail(hash);
       } else {
         showList();
       }
@@ -1241,8 +1411,9 @@
     initTabs();
     renderList(currentKey);
 
-    if (location.hash === "#usr-competition") {
-      showDetail();
+    const initialHash = location.hash.replace("#", "");
+    if (initialHash && detailedPosts[initialHash]) {
+      showDetail(initialHash);
     }
   </script>
 </body>
