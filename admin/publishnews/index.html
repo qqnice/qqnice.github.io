@@ -1,1236 +1,848 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-Hant" class="font-mode-normal">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>從文件到官網：重新設計公佈欄更新流程 - PublishNews 互動導覽</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>從文件到官網：重新設計公佈欄更新流程 ｜ PublishNews 3D 語音互動導覽劇場</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1e3a8a;
-      --primary-light: #3b82f6;
+      --bg-dark: #070d18;
+      --card-dark: #0f1a2e;
+      --primary: #38bdf8;
       --accent: #f59e0b;
-      --accent-hover: #d97706;
       --success: #10b981;
-      --danger: #ef4444;
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --border-dark: #cbd5e1;
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 14px -2px rgba(0,0,0,0.08);
-      --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
+      font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+      overflow-x: hidden;
     }
 
-    a {
-      color: var(--primary-light);
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-    a:hover {
-      color: var(--primary);
-    }
-
-    .container {
-      max-width: 1140px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* 頂部導航列 */
-    header.site-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-      background-color: rgba(255, 255, 255, 0.94);
-    }
-
-    .nav-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 68px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 19px;
-      color: var(--primary);
-      letter-spacing: -0.3px;
-    }
-
-    .brand-badge {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .nav-link {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      transition: all 0.15s;
-    }
-    .nav-link:hover {
-      color: var(--primary);
-      background: #f1f5f9;
-    }
-
-    .btn-nav-primary {
-      background: var(--primary);
-      color: #fff !important;
-      padding: 8px 18px;
-      border-radius: 9999px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(30, 58, 138, 0.25);
-    }
-    .btn-nav-primary:hover {
-      background: var(--primary-light);
-      transform: translateY(-1px);
-    }
-
-    /* Hero 區塊 */
-    .hero-section {
-      padding: 64px 0 48px 0;
-      text-align: center;
-      position: relative;
-    }
-
-    .hero-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 6px 16px;
-      border-radius: 9999px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--primary-light);
-      margin-bottom: 24px;
-    }
-
-    .hero-title {
-      font-size: 42px;
-      font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: -0.8px;
-      color: var(--text);
-      margin-bottom: 20px;
-    }
-
-    .hero-title span.highlight {
-      background: linear-gradient(135deg, #1d4ed8, #0284c7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-desc {
-      font-size: 18px;
-      color: var(--text-muted);
-      max-width: 780px;
-      margin: 0 auto 36px auto;
-      line-height: 1.7;
-    }
-
-    .hero-actions {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 50px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 26px;
-      border-radius: 12px;
-      font-size: 15.5px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3);
-    }
-    .btn-primary:hover {
-      background: var(--primary-light);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(30, 58, 138, 0.4);
-    }
-
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border-dark);
-      box-shadow: var(--shadow-sm);
-    }
-    .btn-secondary:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-      transform: translateY(-2px);
-    }
-
-    /* 關鍵數據指標 */
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 64px;
-    }
-
-    .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 24px 20px;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .metric-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--primary-light);
-    }
-
-    .metric-num {
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--primary);
-      line-height: 1.1;
-      margin-bottom: 8px;
-    }
-    .metric-label {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .metric-sub {
-      font-size: 12.5px;
-      color: var(--text-muted);
-    }
-
-    /* 區塊標題 */
-    .section-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .section-tag {
-      text-transform: uppercase;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--primary-light);
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .section-title {
-      font-size: 30px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
-    }
-    .section-subtitle {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 660px;
-      margin: 0 auto;
-    }
-
-    /* 核心理念：Before & After 對比卡 */
-    .comparison-section {
-      padding: 32px 0 64px 0;
-    }
-
-    .compare-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      box-shadow: var(--shadow-md);
-    }
-
-    @media (max-width: 860px) {
-      .compare-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .compare-card {
-      border-radius: var(--radius-md);
-      padding: 24px;
-      border: 1px solid var(--border);
-    }
-
-    .compare-card.before {
-      background: #fdf2f2;
-      border-color: #fecaca;
-    }
-
-    .compare-card.after {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
-    }
-
-    .card-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      margin-bottom: 16px;
-    }
-    .before .card-badge {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    .after .card-badge {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .compare-title {
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text);
-    }
-
-    .compare-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .compare-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 14.5px;
-      line-height: 1.55;
-    }
-
-    .item-icon {
-      flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      margin-top: 1px;
-    }
-    .before .item-icon {
-      background: #fca5a5;
-      color: #7f1d1d;
-    }
-    .after .item-icon {
-      background: #86efac;
-      color: #14532d;
-    }
-
-    /* 流程架構互動展示 (Tabs / Steps) */
-    .flow-section {
-      padding: 40px 0 64px 0;
-    }
-
-    .flow-nav {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 24px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      scrollbar-width: none;
-    }
-    .flow-nav::-webkit-scrollbar {
-      display: none;
-    }
-
-    .flow-nav-btn {
-      flex: 1;
-      min-width: 170px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 16px 14px;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .flow-nav-btn.active {
-      border-color: var(--primary);
-      background: #eff6ff;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-    }
-    .flow-nav-btn:hover:not(.active) {
-      border-color: var(--border-dark);
-      background: #f8fafc;
-    }
-
-    .step-badge {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--primary-light);
-      margin-bottom: 4px;
-      display: block;
-    }
-    .step-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .flow-detail-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 36px;
-      box-shadow: var(--shadow-md);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      align-items: center;
-    }
-
-    @media (max-width: 860px) {
-      .flow-detail-box {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .flow-info h3 {
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 14px;
-      color: var(--primary);
-    }
-    .flow-info p {
-      font-size: 15.5px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      line-height: 1.7;
-    }
-
-    .feature-tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .feature-tag {
-      background: #f1f5f9;
-      color: #334155;
-      font-size: 12.5px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .flow-preview {
-      background: #0f172a;
-      border-radius: var(--radius-md);
-      padding: 24px;
-      color: #e2e8f0;
+    .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13.5px;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
-      min-height: 240px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      line-height: 1.6;
     }
 
-    .preview-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 8px;
-    }
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .dot-red { background: #ef4444; }
-    .dot-yellow { background: #f59e0b; }
-    .dot-green { background: #10b981; }
-    .preview-title {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-left: 6px;
-    }
+    /* 字體大小模式 */
+    html.font-mode-normal { font-size: 16px; }
+    html.font-mode-large { font-size: 18px; }
+    html.font-mode-xlarge { font-size: 20px; }
 
-    /* 人的判斷核心價值（3大支柱） */
-    .human-pillars-section {
-      padding: 40px 0 64px 0;
-    }
-
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-
-    .pillar-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 28px 24px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.2s;
+    /* 3D Isometric 舞台視角 */
+    .stage-3d-viewport {
+      perspective: 1400px;
+      perspective-origin: 50% 35%;
       position: relative;
-      overflow: hidden;
-    }
-    .pillar-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-light), var(--accent));
-    }
-    .pillar-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
+      background:
+        radial-gradient(circle at 25% 20%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 80% 65%, rgba(16, 185, 129, 0.15), transparent 50%),
+        radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.12), transparent 48%),
+        linear-gradient(180deg, #0b1528 0%, #070d18 100%);
     }
 
-    .pillar-icon {
-      font-size: 32px;
-      margin-bottom: 14px;
-      display: inline-block;
-    }
-    .pillar-title {
-      font-size: 18.5px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-    .pillar-desc {
-      font-size: 14.5px;
-      color: var(--text-muted);
-      line-height: 1.65;
+    .stage-3d-plane {
+      transform-style: preserve-3d;
+      transform: rotateX(20deg) rotateY(-8deg) rotateZ(3deg);
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    /* 互動模擬體驗器 (Simulator) */
-    .simulator-section {
-      padding: 40px 0 64px 0;
+    .stage-3d-plane:hover {
+      transform: rotateX(14deg) rotateY(-3deg) rotateZ(1deg);
     }
 
-    .simulator-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      box-shadow: var(--shadow-lg);
+    /* 3D 浮空卡片與層疊陰影 */
+    .card-3d {
+      transform-style: preserve-3d;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.5),
+        0 20px 40px -10px rgba(56, 189, 248, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .card-3d:hover {
+      transform: translateY(-8px) translateZ(20px);
+      box-shadow: 
+        0 20px 35px -5px rgba(0, 0, 0, 0.6),
+        0 30px 60px -10px rgba(56, 189, 248, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
-    .sim-controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
+    /* 浮空動效 */
+    .float-slow {
+      animation: floatSlow 4s ease-in-out infinite;
     }
-    .sim-btn {
-      padding: 9px 18px;
-      border-radius: 9999px;
-      border: 1px solid var(--border-dark);
-      background: #f8fafc;
-      font-size: 13.5px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s;
+    .float-delayed {
+      animation: floatSlow 4s ease-in-out 1.5s infinite;
     }
-    .sim-btn.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) translateZ(0px); }
+      50% { transform: translateY(-8px) translateZ(12px); }
     }
 
-    .sim-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+    /* 訊號管線流動虛線 */
+    .wire-flow {
+      stroke-dasharray: 8 6;
+      animation: dashFlow 0.8s linear infinite;
     }
-    @media (max-width: 860px) {
-      .sim-layout {
-        grid-template-columns: 1fr;
-      }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -28; }
     }
 
-    .sim-input-card, .sim-output-card {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      background: #fff;
+    /* 語音指示條動畫 */
+    @keyframes waveBar {
+      0%, 100% { height: 5px; }
+      50% { height: 16px; }
+    }
+    .sound-bar {
+      animation: waveBar 0.9s ease-in-out infinite;
     }
 
-    .sim-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-    .sim-header h4 {
-      font-size: 14.5px;
-      font-weight: 700;
-      color: var(--text);
+    ::-webkit-scrollbar-track {
+      background: #0b1528;
     }
-
-    .sim-doc-preview {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      font-size: 13.5px;
-      color: #334155;
-      min-height: 220px;
-      white-space: pre-line;
-      line-height: 1.6;
-    }
-
-    /* 模擬產出的純白底公佈欄預覽 */
-    .sim-post-view {
-      border: 1px dashed #cbd5e1;
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      background: #ffffff;
-      min-height: 220px;
-    }
-
-    .preview-badge {
-      background: #fef08a;
-      color: #854d0e;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
+    ::-webkit-scrollbar-thumb {
+      background: #1e3a8a;
       border-radius: 4px;
-      display: inline-block;
-      margin-bottom: 6px;
     }
-    .preview-post-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #1e293b;
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-
-    .preview-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .preview-mini-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 6px 10px;
-      border-radius: 6px;
-    }
-    .mini-card-label {
-      font-size: 10.5px;
-      color: #64748b;
-    }
-    .mini-card-val {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .preview-cta-btn {
-      display: block;
-      background: #2563eb;
-      color: #ffffff !important;
-      text-align: center;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 12.5px;
-      font-weight: 700;
-      margin-top: 10px;
-    }
-
-    .sim-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 16px;
-      align-items: center;
-    }
-    .sim-status {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--success);
-    }
-
-    /* 頁尾 */
-    footer.site-footer {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 48px 0;
-      margin-top: 80px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6;
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-slate-950">
 
-  <!-- 頂部導航 -->
-  <header class="site-header">
-    <div class="container nav-inner">
-      <div class="brand">
-        <span>PublishNews 智慧公告</span>
-        <span class="brand-badge">流程革新</span>
+  <!-- =========================================================================
+       頂部常駐控制列：導航 ＋ 字體放大 ＋ 語音開關 ＋ 聲音波形
+       ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 shadow-2xl">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- 品牌與副標題 -->
+      <div class="flex items-center gap-3">
+        <a href="../" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 text-xs sm:text-sm font-bold border border-slate-700 transition-colors">
+          ← 行政首頁
+        </a>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-amber-500 flex items-center justify-center text-xl shadow-lg shadow-sky-500/20 shrink-0">
+          🎙️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg text-white tracking-tight">
+              重新設計公佈欄更新流程
+            </h1>
+            <span class="px-2 py-0.5 rounded text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              3D 語音互動導覽
+            </span>
+          </div>
+          <!-- 即時語音狀態文字列 -->
+          <div class="flex items-center gap-2 text-xs text-amber-300 font-medium mt-0.5">
+            <span id="speaking-wave" class="hidden items-end gap-0.5 h-3.5 shrink-0">
+              <span class="w-1 bg-amber-400 rounded-full sound-bar"></span>
+              <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.18s"></span>
+              <span class="w-1 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.36s"></span>
+            </span>
+            <span id="voice-status-text" class="truncate max-w-xs sm:max-w-md lg:max-w-xl">
+              語音已就緒。點擊「開啟語音導覽」或任意站點，即由 AI 為您語音解說！
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="nav-links">
-        <a href="#concept" class="nav-link">設計初衷</a>
-        <a href="#workflow" class="nav-link">五步架構</a>
-        <a href="#human" class="nav-link">人的判斷</a>
-        <a href="#simulator" class="nav-link">實境模擬</a>
-        <a href="../News/" class="btn-nav-primary" target="_blank" rel="noopener noreferrer">開啟實體公佈欄 ↗</a>
+
+      <!-- 右側控制組：語音按鈕、字級切換、外部實體公佈欄按鈕 -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        
+        <!-- 語音朗讀開關 -->
+        <button id="btn-toggle-voice" onclick="toggleVoiceNarration()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 hover:bg-amber-500/30 transition-all shadow-sm">
+          <span id="voice-icon">🔊</span>
+          <span id="voice-btn-label">開啟語音導覽</span>
+        </button>
+
+        <!-- 依序自動導覽輪播按鈕 -->
+        <button id="btn-autoplay-tour" onclick="startAutoplayTour()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-sky-500/20 text-sky-300 border border-sky-400/40 hover:bg-sky-500/30 transition-all">
+          <span>▶️</span>
+          <span>5站連續導覽</span>
+        </button>
+
+        <!-- 字體大小調整 -->
+        <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 text-xs font-bold text-slate-300">
+          <button onclick="setFontMode('normal')" class="px-2 py-1 rounded hover:bg-slate-800" title="標準字級">A</button>
+          <button onclick="setFontMode('large')" class="px-2 py-1 rounded hover:bg-slate-800 text-sm" title="大字體">A+</button>
+          <button onclick="setFontMode('xlarge')" class="px-2 py-1 rounded hover:bg-slate-800 text-base" title="特大字體">A++</button>
+        </div>
+
+        <!-- 前往實體公佈欄 -->
+        <a href="../News/" target="_blank" rel="noopener noreferrer" class="hidden md:inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md transition-all">
+          <span>開啟公佈欄 ↗</span>
+        </a>
       </div>
+
     </div>
   </header>
 
-  <!-- 主體容器 -->
-  <main class="container">
+  <!-- =========================================================================
+       主舞台區：3D 等距懸浮工作桌 ＋ 5 大工作站互動導覽
+       ========================================================================= -->
+  <main class="flex-1">
 
-    <!-- Hero 區塊 -->
-    <section class="hero-section">
-      <div class="hero-pill">
-        <span>✨ 行政流程革新</span> ｜ 從繁複後台操作回到內容把關
-      </div>
-      <h1 class="hero-title">
-        從文件到官網：<br><span class="highlight">重新設計公佈欄更新流程</span>
-      </h1>
-      <p class="hero-desc">
-        這次公佈欄改造的出發點，是讓行政人員把時間放在資訊整理與內容確認上，減少重複操作網站後台的工作。透過 n8n 與 Antigravity 所建立的人機協同架構，文件進入指定資料夾後即自動解析結構，無縫發布並由 Rpage 原地展開呈現。
-      </p>
-      <div class="hero-actions">
-        <a href="#simulator" class="btn btn-primary">🎮 立即體驗模擬流程</a>
-        <a href="../News/" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">🌐 查看線上公佈欄（SPA 模式）</a>
-        <a href="../系所公告區/publishnews_skill_package.zip" class="btn btn-secondary" download>📦 下載完整 Skill 技能包</a>
-      </div>
+    <!-- 3D 舞台區域 -->
+    <section class="stage-3d-viewport border-b border-slate-800/80 py-12 px-4 sm:px-6 relative overflow-hidden">
+      
+      <!-- 背景科技網格與微光光暈 -->
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
 
-      <!-- 核心成果數據 -->
-      <div class="metrics-row">
-        <div class="metric-card">
-          <div class="metric-num">85%</div>
-          <div class="metric-label">減少機械式後台操作時間</div>
-          <div class="metric-sub">告別 Rpage 繁複編輯器與反覆複製貼上</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">100%</div>
-          <div class="metric-label">資訊結構標準化</div>
-          <div class="metric-sub">4 格指標卡片 ＋ 行動 CTA ＋ 另開分頁</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">0 秒</div>
-          <div class="metric-label">SPA 原地展開不跳分頁</div>
-          <div class="metric-sub">純白底無外框，手機電腦極致 RWD</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">Human</div>
-          <div class="metric-label">以人為核心的把關原則</div>
-          <div class="metric-sub">專注把關適法性、對象準確度與資訊品質</div>
-        </div>
-      </div>
-    </section>
+      <div class="max-w-[1360px] mx-auto relative z-10">
 
-    <!-- 核心理念與痛點對比 (Before & After) -->
-    <section class="comparison-section" id="concept">
-      <div class="section-header">
-        <div class="section-tag">PARADIGM SHIFT</div>
-        <h2 class="section-title">為什麼要重新設計更新流程？</h2>
-        <p class="section-subtitle">
-          行政人員的價值在於「理解內容與確認事實」，而非成為後台系統的資料搬運工。
-        </p>
-      </div>
-
-      <div class="compare-container">
-        <!-- 過去模式 -->
-        <div class="compare-card before">
-          <span class="card-badge">⚠️ 過去模式：機械繁瑣易錯</span>
-          <h3 class="compare-title">痛點重重的傳統公告路徑</h3>
-          <ul class="compare-list">
-            <li class="compare-item">
-              <span class="item-icon">✕</span>
-              <span><strong>逐頁手動摘要</strong>：收到 10 多頁的招生簡章或公文，必須手動逐段翻閱並摘錄日期。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✕</span>
-              <span><strong>重複登入後台</strong>：每次發布都得登入 Rpage 系統，在受限的文字編輯器中排版。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✕</span>
-              <span><strong>版型零碎與破版</strong>：手機版表格常跑版；外連表單若嵌入在學校系統會因 <code>X-Frame-Options</code> 遭阻擋。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✕</span>
-              <span><strong>多分類重複發布</strong>：同一則公告若要歸屬活動、重要或獎學金，常需多次手動重複建立。</span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- 現在模式 -->
-        <div class="compare-card after">
-          <span class="card-badge">✨ 現在模式：人機協同發布</span>
-          <h3 class="compare-title">PublishNews 敏捷流暢新體驗</h3>
-          <ul class="compare-list">
-            <li class="compare-item">
-              <span class="item-icon">✓</span>
-              <span><strong>文件集中自動讀取</strong>：文件投放指定資料夾，下達一次指令即自動喚醒多模態解析。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✓</span>
-              <span><strong>標準結構自動提煉</strong>：自動產生規範化標籤、4 格時程卡片、CTA 按鈕與附件清單。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✓</span>
-              <span><strong>原地展開（SPA 模式）</strong>：師生點擊公告時在同頁面展開內文，無需新開視窗或換頁。</span>
-            </li>
-            <li class="compare-item">
-              <span class="item-icon">✓</span>
-              <span><strong>回歸內容把關本質</strong>：行政人員由「打字排版員」轉變為「資訊守門員」，專注核對真偽。</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- 完整 5 步全流程互動架構 (Workflow Steps) -->
-    <section class="flow-section" id="workflow">
-      <div class="section-header">
-        <div class="section-tag">ARCHITECTURE</div>
-        <h2 class="section-title">五步全流程互動架構</h2>
-        <p class="section-subtitle">
-          點選不同步驟，查看 Antigravity 與系統在背後執行的技術細節與資料流動：
-        </p>
-      </div>
-
-      <!-- 導航分頁按鈕 -->
-      <div class="flow-nav">
-        <button class="flow-nav-btn active" onclick="switchStep(0)">
-          <span class="step-badge">STEP 01</span>
-          <span class="step-name">📂 文件投放</span>
-        </button>
-        <button class="flow-nav-btn" onclick="switchStep(1)">
-          <span class="step-badge">STEP 02</span>
-          <span class="step-name">👁️ 多模態理解</span>
-        </button>
-        <button class="flow-nav-btn" onclick="switchStep(2)">
-          <span class="step-badge">STEP 03</span>
-          <span class="step-name">🧩 結構化提煉</span>
-        </button>
-        <button class="flow-nav-btn" onclick="switchStep(3)">
-          <span class="step-badge">STEP 04</span>
-          <span class="step-name">🛡️ 人工把關審核</span>
-        </button>
-        <button class="flow-nav-btn" onclick="switchStep(4)">
-          <span class="step-badge">STEP 05</span>
-          <span class="step-name">🚀 雲端解耦同步</span>
-        </button>
-      </div>
-
-      <!-- 步驟細節展示卡 -->
-      <div class="flow-detail-box">
-        <div class="flow-info">
-          <h3 id="stepTitle">Step 1：文件集中投放（File Ingestion）</h3>
-          <p id="stepDesc">
-            助理日常收到公文、活動公函、PDF 簡章或海報圖片時，無需再開啟繁瑣的網站後台，只需將檔案統一存放於指定專案資料夾中，為後續流程打底。
-          </p>
-          <div class="feature-tag-list" id="stepTags">
-            <span class="feature-tag">支援 PDF 多頁簡章</span>
-            <span class="feature-tag">海報圖片 (PNG/JPG)</span>
-            <span class="feature-tag">純文字公函</span>
-            <span class="feature-tag">本地自動檔案監控</span>
+        <!-- 劇場大抬頭 -->
+        <div class="text-center max-w-3xl mx-auto mb-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold bg-sky-500/10 text-sky-400 border border-sky-400/30 mb-3">
+            <span>✨</span> 行政流程智慧再造 ｜ 人機協同核心
           </div>
-          <div style="font-size: 13.5px; color: #475569;" id="stepRole">
-            <strong>💡 人機分工：</strong>助理只需拖曳存檔，機械操作由系統接管。
-          </div>
-        </div>
-
-        <div class="flow-preview">
-          <div class="preview-header">
-            <span class="dot dot-red"></span>
-            <span class="dot dot-yellow"></span>
-            <span class="dot dot-green"></span>
-            <span class="preview-title" id="previewTitle">input_folder/</span>
-          </div>
-          <pre id="previewCode"><code>📂 /AI行政/公文與簡章待發區/
-  ├── 11.工研院-AI養成班簡章_v6.pdf (822 KB)
-  ├── 2026全國AI專題競賽規程.pdf
-  └── EndNote講習報名通知.docx</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- 人的判斷核心價值（3大支柱） -->
-    <section class="human-pillars-section" id="human">
-      <div class="section-header">
-        <div class="section-tag">HUMAN-IN-THE-LOOP</div>
-        <h2 class="section-title">人的判斷：不可替代的核心關鍵</h2>
-        <p class="section-subtitle">
-          AI 負責「加速閱讀、梳理課綱、產生代碼」，行政人員則負責「把關責任與發布決策」。
-        </p>
-      </div>
-
-      <div class="pillars-grid">
-        <div class="pillar-card">
-          <span class="pillar-icon">🔒</span>
-          <h3 class="pillar-title">1. 公開適法性判定</h3>
-          <p class="pillar-desc">
-            確認文件是否涉及內部非公開公文、學生個資、機敏預算數字或特定受限對象。透過行政人員的法律與校務經驗，第一時間決定是否適合放行至對外官網。
+          <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
+            從文件到官網：<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-amber-300">5站 3D 全流程解密</span>
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+            把行政人員從機械式 Rpage 網站後台解放，重回「資訊審核與品質把關」。點擊下方任意站點或舞台物件，即可展開立體透視與語音解說！
           </p>
         </div>
 
-        <div class="pillar-card">
-          <span class="pillar-icon">🎯</span>
-          <h3 class="pillar-title">2. 受眾對象與資格校準</h3>
-          <p class="pillar-desc">
-            例如「產業新尖兵計畫」限定 15-29 歲失業待業青年、大專競賽不收高中職等細節。行政人員一眼即可確認提煉出的資格是否清楚醒目，避免引起學生誤解。
-          </p>
+        <!-- 5 大站點快速切換標籤列 -->
+        <div class="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mb-10">
+          <button onclick="selectStation(0, true)" id="station-tab-0" class="station-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/30">
+            第 1 站：痛點覺醒
+          </button>
+          <button onclick="selectStation(1, true)" id="station-tab-1" class="station-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-slate-500">
+            第 2 站：集中投放
+          </button>
+          <button onclick="selectStation(2, true)" id="station-tab-2" class="station-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-slate-500">
+            第 3 站：多模態掃描
+          </button>
+          <button onclick="selectStation(3, true)" id="station-tab-3" class="station-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-slate-500">
+            第 4 站：人機把關 (核心)
+          </button>
+          <button onclick="selectStation(4, true)" id="station-tab-4" class="station-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all bg-slate-900/90 text-slate-300 border border-slate-700 hover:border-slate-500">
+            第 5 站：雙軌發布與原地展開
+          </button>
         </div>
 
-        <div class="pillar-card">
-          <span class="pillar-icon">📅</span>
-          <h3 class="pillar-title">3. 關鍵期程與聯絡窗口確認</h3>
-          <p class="pillar-desc">
-            核對線上報名截止時間、決賽實體場地、自付額退回條件與承辦人的電話分機，確保對外發布的每一個字都精準可靠，守護系所官方公信力。
-          </p>
-        </div>
-      </div>
-    </section>
+        <!-- 3D 等距透視展示盤 (Isometric Stage Canvas) -->
+        <div class="stage-3d-plane max-w-[1100px] mx-auto my-6 p-6 sm:p-10 rounded-3xl bg-slate-900/60 border border-slate-700/60 shadow-[0_30px_90px_rgba(0,0,0,0.7)] backdrop-blur-md relative">
+          
+          <!-- 站點流水線 SVG 連線 -->
+          <svg class="absolute inset-0 w-full h-full pointer-events-none hidden md:block" style="z-index: 1;">
+            <path d="M 120 180 Q 300 120 500 180 T 880 180" fill="none" stroke="rgba(56, 189, 248, 0.4)" stroke-width="3" class="wire-flow"></path>
+          </svg>
 
-    <!-- 實境模擬體驗器 (Simulator) -->
-    <section class="simulator-section" id="simulator">
-      <div class="section-header">
-        <div class="section-tag">INTERACTIVE SANDBOX</div>
-        <h2 class="section-title">公佈欄產生器實境模擬</h2>
-        <p class="section-subtitle">
-          點選不同活動案例，體驗系統如何從原始公文內容自動生成高質感的結構化公告：
-        </p>
-      </div>
-
-      <div class="simulator-box">
-        <!-- 案例切換按鈕 -->
-        <div class="sim-controls">
-          <button class="sim-btn active" onclick="loadSimCase(0)">案例一：工研院 AI 養成班簡章</button>
-          <button class="sim-btn" onclick="loadSimCase(1)">案例二：2026 全國 AI 專題創意競賽</button>
-          <button class="sim-btn" onclick="loadSimCase(2)">案例三：圖書館 WOS 研習課程</button>
-        </div>
-
-        <div class="sim-layout">
-          <!-- 左側：原始文件輸入模擬 -->
-          <div class="sim-input-card">
-            <div class="sim-header">
-              <h4>📄 原始輸入文件內容 (Multimodal Raw Input)</h4>
-              <span style="font-size: 11px; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">OCR 解析結果</span>
+          <!-- 3D 浮空 5 大工作站卡片 -->
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6 relative z-10">
+            
+            <!-- Station 1 -->
+            <div onclick="selectStation(0, true)" class="card-3d bg-slate-950/90 border border-rose-500/40 rounded-2xl p-4 cursor-pointer hover:border-rose-400 group float-slow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black text-rose-400">STATION 01</span>
+                <span class="text-lg">😫</span>
+              </div>
+              <h4 class="font-black text-sm text-white mb-1 group-hover:text-rose-300">痛點覺醒</h4>
+              <p class="text-[12px] text-slate-400 leading-snug">Rpage 登入耗時、排版跑版、外連被 iframe 阻擋破版。</p>
             </div>
-            <div class="sim-doc-preview" id="simRawText">載入中...</div>
+
+            <!-- Station 2 -->
+            <div onclick="selectStation(1, true)" class="card-3d bg-slate-950/90 border border-sky-500/40 rounded-2xl p-4 cursor-pointer hover:border-sky-400 group float-delayed">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black text-sky-400">STATION 02</span>
+                <span class="text-lg">📁</span>
+              </div>
+              <h4 class="font-black text-sm text-white mb-1 group-hover:text-sky-300">集中投放</h4>
+              <p class="text-[12px] text-slate-400 leading-snug">多頁 PDF、簡章或圖片拖入指定夾，單一指令啟動流程。</p>
+            </div>
+
+            <!-- Station 3 -->
+            <div onclick="selectStation(2, true)" class="card-3d bg-slate-950/90 border border-indigo-500/40 rounded-2xl p-4 cursor-pointer hover:border-indigo-400 group float-slow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black text-indigo-400">STATION 03</span>
+                <span class="text-lg">🤖</span>
+              </div>
+              <h4 class="font-black text-sm text-white mb-1 group-hover:text-indigo-300">多模態解析</h4>
+              <p class="text-[12px] text-slate-400 leading-snug">高解析視覺 ＋ OCR 雙軌解析，精準提煉 4 格卡片與課綱。</p>
+            </div>
+
+            <!-- Station 4 -->
+            <div onclick="selectStation(3, true)" class="card-3d bg-slate-950/90 border border-amber-500/40 rounded-2xl p-4 cursor-pointer hover:border-amber-400 group float-delayed">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black text-amber-400">STATION 04</span>
+                <span class="text-lg">🛡️</span>
+              </div>
+              <h4 class="font-black text-sm text-white mb-1 group-hover:text-amber-300">人機把關</h4>
+              <p class="text-[12px] text-slate-400 leading-snug">助理核對適法性、對象準確度與附件，掌握發布生殺大權。</p>
+            </div>
+
+            <!-- Station 5 -->
+            <div onclick="selectStation(4, true)" class="card-3d bg-slate-950/90 border border-emerald-500/40 rounded-2xl p-4 cursor-pointer hover:border-emerald-400 group float-slow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black text-emerald-400">STATION 05</span>
+                <span class="text-lg">🚀</span>
+              </div>
+              <h4 class="font-black text-sm text-white mb-1 group-hover:text-emerald-300">原地展開</h4>
+              <p class="text-[12px] text-slate-400 leading-snug">GitHub Pages 託管，Rpage 零摩擦嵌入，SPA 原地閱讀。</p>
+            </div>
+
           </div>
 
-          <!-- 右側：AI 結構化提煉成果 -->
-          <div class="sim-output-card">
-            <div class="sim-header">
-              <h4>✨ 實時產生之公告預覽（SPA 原地展開效果）</h4>
-              <span style="font-size: 11px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">純白底 RWD</span>
+        </div>
+
+        <!-- 當前選定站點之深度解析卡片與語音發音觸發器 -->
+        <div id="station-detail-panel" class="max-w-4xl mx-auto mt-8 bg-slate-900/90 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+              <span id="detail-icon" class="text-3xl">😫</span>
+              <div>
+                <span id="detail-badge" class="text-xs font-black text-rose-400 tracking-wider">STATION 01 / 5</span>
+                <h3 id="detail-title" class="text-xl sm:text-2xl font-black text-white">痛點覺醒：告別網站後台搬運工的泥淖</h3>
+              </div>
             </div>
-            <div class="sim-post-view" id="simRendered">
-              <span class="preview-badge" id="simBadge">【研習】</span>
-              <div class="preview-post-title" id="simTitle">標題載入中...</div>
-              <div class="preview-cards-grid" id="simGrid"></div>
-              <div style="font-size: 12px; color: #475569; margin-bottom: 8px;" id="simDesc">說明文字...</div>
-              <a href="#" class="preview-cta-btn" id="simCtaBtn" target="_blank">前往線上報名 ↗</a>
+            <!-- 單獨朗讀本站按鈕 -->
+            <button onclick="speakCurrentStation()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition-all">
+              <span>▶️ 聽本站語音解說</span>
+            </button>
+          </div>
+
+          <!-- 解析內文與人機職責 -->
+          <p id="detail-content" class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            過去每當各單位轉發一份公文或 10 幾頁的活動簡章，助理就必須耗費大量精力手動翻閱、摘要。接著登入 Rpage 網站後台，在受限的排版器中反覆複製貼上。若要分類到多個類別，還得手動複製多份；更嚴重的是，外部報名表若內嵌在學校系統，往往會因為瀏覽器安全策略遭阻擋無法連線。
+          </p>
+
+          <!-- 關鍵技術亮點標籤 -->
+          <div class="flex flex-wrap items-center gap-2 mb-4" id="detail-tags">
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">Rpage 後台操作負擔</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">外連 X-Frame 破版陷阱</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">時間被瑣事吞噬</span>
+          </div>
+
+          <!-- 人機協同權責分配 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs sm:text-sm text-slate-300 flex items-start gap-2.5">
+            <span class="text-amber-400 font-bold shrink-0">💡 改革核心：</span>
+            <span id="detail-human-role">行政人員的專業價值在於「理解文件意涵、確認公開適法性」，不該被困在機械式的發布操作中。</span>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         人機協同的三大把關核心 (Human-in-the-Loop)
+         ========================================================================= -->
+    <section class="max-w-[1280px] mx-auto py-16 px-4 sm:px-6">
+      
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-black text-amber-400 tracking-wider uppercase">CORE VALUE</span>
+        <h3 class="text-2xl sm:text-3xl font-black text-white mt-1 mb-3">為什麼「人的判斷」依然是系統核心？</h3>
+        <p class="text-slate-400 text-sm sm:text-base">
+          AI 負責以光速完成 14 頁課綱的視覺與 OCR 閱讀，但最終對外發布的責任與信譽，依然由行政人員牢牢把關。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Pillar 1 -->
+        <div class="card-3d bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 relative overflow-hidden group">
+          <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+            🔒
+          </div>
+          <h4 class="font-black text-lg text-white mb-2">1. 公開適法性判定</h4>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            文件是否涉及未核定機敏內容、非公開內部公函、學生電話存摺等個資？行政人員憑藉深厚校務經驗，第一時間把關是否可放行至對外官網。
+          </p>
+          <div class="text-xs text-sky-300/80 font-bold">
+            🛡️ 避免資安與個資外洩的第一道防線
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="card-3d bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 relative overflow-hidden group">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+            🎯
+          </div>
+          <h4 class="font-black text-lg text-white mb-2">2. 受眾對象與補助校準</h4>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            如工研院班次限定「15-29歲失業待業青年」，若一般在校生報名將無法取得補助。助理一眼即可抓出核心對象是否足夠醒目，避免引起學生誤會。
+          </p>
+          <div class="text-xs text-amber-300/80 font-bold">
+            💡 守護學生權益，降低諮詢溝通成本
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="card-3d bg-slate-900/80 border border-slate-700/80 rounded-2xl p-6 relative overflow-hidden group">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+            📅
+          </div>
+          <h4 class="font-black text-lg text-white mb-2">3. 關鍵期程與窗口驗證</h4>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            報名截止日、甄選地點、保證金退回機制與承辦人分機。助理在發布前做最後一次點頭確認，確認各項數字與附件皆正確無誤。
+          </p>
+          <div class="text-xs text-emerald-300/80 font-bold">
+            ✨ 確保官方公告 100% 正確零缺失
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         實境 3D 模擬沙盒 (Interactive Simulator)
+         ========================================================================= -->
+    <section class="max-w-[1280px] mx-auto py-12 px-4 sm:px-6 border-t border-slate-800">
+      
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-xs font-black text-sky-400 tracking-wider uppercase">SIMULATION</span>
+        <h3 class="text-2xl sm:text-3xl font-black text-white mt-1 mb-2">實境模擬：AI 提煉公告展示</h3>
+        <p class="text-slate-400 text-sm">
+          點選以下實際公文案例，查看系統如何即時轉化為 Rpage 專屬之純白底 4 格指標卡片：
+        </p>
+      </div>
+
+      <!-- 案例切換鈕 -->
+      <div class="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mb-8">
+        <button onclick="switchSim(0)" id="sim-btn-0" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-sky-500 text-slate-950 shadow-md">
+          案例一：工研院 AI 養成班 (新尖兵補助)
+        </button>
+        <button onclick="switchSim(1)" id="sim-btn-1" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-slate-900 text-slate-300 border border-slate-700">
+          案例二：2026 全國 AI 專題創意競賽
+        </button>
+        <button onclick="switchSim(2)" id="sim-btn-2" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-slate-900 text-slate-300 border border-slate-700">
+          案例三：圖書館 WOS + EndNote 研習
+        </button>
+      </div>
+
+      <!-- 雙欄比對卡片 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        
+        <!-- 左欄：輸入端公文與 OCR 文字 -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <span class="text-xs font-black text-slate-400">📄 原始公文 / 簡章 OCR 流 (RAW INPUT)</span>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-sky-300">多模態解析</span>
+            </div>
+            <div id="sim-raw-content" class="text-xs sm:text-sm font-mono-code text-slate-300 whitespace-pre-line leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800/80 min-h-[260px]">
+              載入中...
             </div>
           </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span>支援格式：PDF (多頁)、JPG/PNG 海報、DOCX 公函</span>
+            <span class="text-emerald-400 font-bold">✓ 檔案就位</span>
+          </div>
         </div>
 
-        <div class="sim-actions">
-          <span class="sim-status">✓ 已完成多模態結構提煉 ｜ 隨時可一鍵推播至 GitHub Pages</span>
+        <!-- 右欄：實體公告產出預覽（純白底、RWD、SPA 原地展開） -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+              <span class="text-xs font-black text-slate-400">🌐 實時生成之 Rpage 原地展開公告 (PURE WHITE RWD)</span>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">SPA 不跳頁</span>
+            </div>
+
+            <!-- 純白底模擬公告卡片 -->
+            <div class="bg-white text-slate-800 p-5 rounded-xl shadow-lg border border-slate-200">
+              <div class="flex items-center gap-2 mb-2">
+                <span id="sim-badge" class="px-2.5 py-0.5 rounded text-xs font-black bg-amber-400 text-slate-950">
+                  【研習】
+                </span>
+                <span class="text-xs text-slate-500">2026.10.31</span>
+              </div>
+              <h4 id="sim-title" class="text-base sm:text-lg font-black text-slate-900 leading-snug mb-3">
+                公告標題載入中...
+              </h4>
+
+              <!-- 4 格指標卡片 -->
+              <div class="grid grid-cols-2 gap-2 mb-3" id="sim-cards-grid">
+                <!-- 動態注入 -->
+              </div>
+
+              <!-- 說明文字 -->
+              <p id="sim-desc" class="text-xs text-slate-600 line-clamp-2 mb-3">
+                說明文字...
+              </p>
+
+              <!-- 行動 CTA 按鈕 -->
+              <a href="#" id="sim-cta-link" target="_blank" rel="noopener noreferrer" class="block w-full py-2 px-3 text-center rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all">
+                <span id="sim-cta-text">前往線上報名表單</span> ↗
+              </a>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <span>安全外連：強制 <code>target="_blank"</code> 絕不破版</span>
+            <span class="text-sky-400 font-bold">✓ 審核核准即可一鍵推播</span>
+          </div>
         </div>
+
       </div>
+
     </section>
 
   </main>
 
-  <!-- 頁尾 -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-links">
-        <a href="../News/" target="_blank" rel="noopener noreferrer">最新資訊公佈欄（News/）</a>
-        <a href="#concept">流程設計理念</a>
-        <a href="#workflow">五步架構說明</a>
-        <a href="../系所公告區/publishnews_skill_package.zip" download>下載 publishnews 技能包</a>
+  <!-- =========================================================================
+       頁尾區：快速連結與授權聲明
+       ========================================================================= -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-10 px-4 sm:px-6 text-center text-xs text-slate-400">
+    <div class="max-w-[1280px] mx-auto flex flex-col items-center gap-4">
+      <div class="flex flex-wrap items-center justify-center gap-4 font-bold text-slate-300">
+        <a href="../News/" target="_blank" rel="noopener noreferrer" class="hover:text-sky-400">📰 系所最新資訊公佈欄（News/）</a>
+        <a href="../" class="hover:text-sky-400">🧭 AI 行政工具大廳</a>
+        <a href="../系所公告區/publishnews_skill_package.zip" download class="hover:text-amber-400">📦 下載完整 publishnews 技能包</a>
       </div>
-      <p>© 2026 國立臺中科技大學 資訊管理系 ｜ AI 行政智慧轉型計畫</p>
+      <p class="max-w-xl text-slate-500 leading-relaxed">
+        從文件到官網：重新設計公佈欄更新流程 ｜ 國立臺中科技大學 資訊管理系 AI 行政智慧推動專案
+      </p>
     </div>
   </footer>
 
+  <!-- =========================================================================
+       JavaScript 核心：5 站導覽狀態、語音旁白系統 (SpeechSynthesis)、實境模擬器
+       ========================================================================= -->
   <script>
-    // 流程步驟資料庫
-    const stepsData = [
+    // 5 大工作站資料庫與語音旁白腳本
+    const stations = [
       {
-        title: "Step 1：文件集中投放（File Ingestion）",
-        desc: "助理日常收到公文、活動公函、PDF 簡章或海報圖片時，無需再開啟繁瑣的網站後台，只需將檔案統一存放於指定專案資料夾中，由系統排程或指令統一讀取。",
-        tags: ["支援 PDF 多頁簡章", "海報圖片 (PNG/JPG)", "純文字公函", "本地自動檔案監控"],
-        role: "助理只需拖曳存檔，機械性建檔由系統接管。",
-        previewTitle: "input_folder/",
-        code: `📂 /AI行政/待發公文與簡章/
-  ├── 11.工研院-AI與大數據養成班簡章_v6.pdf (822 KB)
-  ├── 2026全國AI專題創意競賽規程.pdf
-  └── EndNote教育訓練公函.docx`
+        badge: "STATION 01 / 5",
+        icon: "😫",
+        title: "痛點覺醒：告別網站後台搬運工的泥淖",
+        tags: ["Rpage 後台操作負擔", "外連 X-Frame 破版陷阱", "時間被瑣事吞噬"],
+        role: "行政人員的專業價值在於「理解文件意涵、確認公開適法性」，不該被困在機械式的發布操作中。",
+        content: "過去每當各單位轉發一份公文或 10 幾頁的活動簡章，助理就必須耗費大量精力手動翻閱、摘要。接著登入 Rpage 網站後台，在受限的排版器中反覆複製貼上。若要分類到多個類別，還得手動複製多份；更嚴重的是，外部報名表若內嵌在學校系統，往往會因為瀏覽器安全策略遭阻擋無法連線。",
+        voice: "第一站，痛點覺醒。過去每收到一份公文或簡章，助理就必須在 Rpage 繁複的後台逐字排版、重複建置。我們重新思考：行政人員的價值在於內容把關，而非機械式的資料搬運工。"
       },
       {
-        title: "Step 2：多模態智能解析（Multimodal OCR & Vision）",
-        desc: "系統同時調用視覺渲染截圖與高精度 OCR 文字串流，逐頁掃描 1~14 頁完整內容，梳理主協辦單位、目標對象、補助金額、期程限制與詳細課綱技術棧。",
-        tags: ["逐頁高解析視覺渲染", "表格與排版精準識別", "資安模型審查規則", "課綱技術棧提取"],
-        role: "AI 承擔最耗費眼力的繁瑣爬梳工作，不漏掉任何細微規定。",
-        previewTitle: "multimodal_ocr_stream.json",
-        code: `🔍 [視覺分析] 識別為「工研院產業新尖兵補助養成班」
-🔍 [資格解析] 年滿 15-29 歲本國籍失業待業青年
-🔍 [費用解析] 自付額 1 萬元結訓退還 ＋ 每月 8,000 元獎勵金
-🔍 [時程解析] 報名截止：115.12.25 ｜ 開課：115.12.29`
+        badge: "STATION 02 / 5",
+        icon: "📁",
+        title: "集中投放：文件放入指定資料夾，一鍵自動觸發",
+        tags: ["支援多頁 PDF 簡章", "海報圖片自動解析", "目錄檔案自動監聽", "告別後台登入"],
+        role: "助理只需將收到的檔案拖入資料夾，機械性的建檔工作交由系統完全接管。",
+        content: "現在，行政人員收到任何公函、簡章 PDF 或海報時，完全不需要登入任何網站後台。只要把文件集中丟入指定的工作資料夾，接著下達一次啟動指令，n8n 與 Antigravity 所建立的自動化管線就會自動喚醒，依序讀取檔案進行智慧處理。",
+        voice: "第二站，集中投放。現在，只需把 PDF、海報或公文放入指定資料夾，下達一次指令，n8n 與 Antigravity 建立的管線就會自動接管所有耗時的建檔程序。"
       },
       {
-        title: "Step 3：標準結構提煉（Structured Synthesis）",
-        desc: "將龐雜文件轉化為 7 大標準組件：規範化標籤（【研習】）、標準抬頭、4 格指標卡片、醒目 CTA 行動橫幅、RWD 純白底排版與附件清單。",
-        tags: ["4 格指標卡片", "標準化 CTA 按鈕", "純白底 #ffffff", "target=_blank 安全外連"],
-        role: "確保每一則公告無論來源為何，在官網上皆呈現整齊統一的高品質視覺。",
-        previewTitle: "structured_payload.json",
-        code: `{
-  "badge": "【研習】",
-  "title": "【研習】工研院「AI與大數據應用開發實戰養成班」",
-  "highlights": [
-    { "label": "報名截止", "val": "115.12.25 (五) 止" },
-    { "label": "專案補助", "val": "全額補助＋月領8千獎勵金" }
-  ],
-  "cta": { "btnText": "前往台灣就業通報名", "url": "https://..." }
-}`
+        badge: "STATION 03 / 5",
+        icon: "🤖",
+        title: "多模態掃描：雙軌透視，精準萃取文件精髓",
+        tags: ["逐頁高解析渲染", "文字層與視覺雙軌", "4 格核心指標萃取", "350小時課綱模組化"],
+        role: "AI 承擔最傷眼力的多頁爬梳工作，不漏掉任何如退費、津貼、資安模型限制等細節規定。",
+        content: "系統會同時調用視覺渲染截圖與 OCR 文字串流，逐頁掃描整份文件。不只精確識別主辦單位、受訓對象資格（如 15-29 歲待業青年）、自付額退還條件、每月 8,000 元學習獎勵金，還能把橫跨十幾頁的完整技術課綱模組化整理，提煉成 4 格關鍵指標卡片。",
+        voice: "第三站，多模態掃描。系統運用高解析視覺渲染與精準 OCR 雙軌解析，自動萃取主辦單位、對象資格、補助金額、報名期程與詳細課綱，化繁為簡。"
       },
       {
-        title: "Step 4：人機協同審核（Human-in-the-Loop）",
-        desc: "此為整個流程的關鍵核心。行政人員快速檢視 AI 整理出的標題、期程、對象與附件，確認公文適合對外公開，並核准發布。",
-        tags: ["適法性把關", "對象正確性確認", "聯絡窗口核對", "集中審核機制"],
-        role: "行政人員掌握最終決定權，讓 AI 的高效與人的專業經驗完美互補。",
-        previewTitle: "terminal_review_prompt",
-        code: `📋 待審核公告：工研院「AI與大數據應用開發實戰養成班」
-▸ 對象：15-29 歲本國籍失業待業青年 (非日間部學生)
-▸ 補助：全額補助 ＋ 每月 8,000 元學習獎勵金
-▸ 附件：已自動掛載 11.工研院招生簡章完整版.pdf
-請助理確認是否准予發布？[Y/n]: Y`
+        badge: "STATION 04 / 5",
+        icon: "🛡️",
+        title: "人機協同把關：行政責任審核，守護資訊品質",
+        tags: ["公開適法性把關", "對象資格重點校準", "關鍵期程電話核對", "發布前集中審核"],
+        role: "人的判斷是整個流程的關鍵核心。文件是否適合公開、對象是否清楚，皆由助理做最後確認。",
+        content: "AI 負責整理，但發布的決策權在人。助理在發布前快速集中審查：這份公文是否能對外公開？有無涉及個資？對象資格與報名截止日是否醒目？確認無誤後點頭放行，將行政人員的專業經驗與 AI 的速度做最完美的結合。",
+        voice: "第四站，人機協同把關。人的判斷依然是整套流程的核心。文件是否適合公開？對象是否精準？關鍵期程是否無誤？由助理在發布前快速集中審核，守護系所公信力。"
       },
       {
-        title: "Step 5：解耦雙軌發布（Decoupled Deploy & SPA Embed）",
-        desc: "審核通過後，自動寫入 published_log.json 並推送到 GitHub Pages。Rpage 官網透過 iframe 零摩擦嵌入，師生點選時以 SPA 原地展開，外連另開分頁保證暢通！",
-        tags: ["GitHub Pages 自動建置", "SPA 原地展開不跳頁", "Rpage 零摩擦嵌入", "published_log 防重紀錄"],
-        role: "Rpage 官網完全不需要動後台，公告即可即時全球上線。",
-        previewTitle: "git_deploy_status",
-        code: `[Success] 已更新本地 index.html
-[Success] 已寫入發布紀錄 published_log.json
-[Success] 成功發布至 GitHub: admin/News/index.html
-🎉 公告發布成功！
-線上檢視連結: https://qqnice.github.io/admin/News/#itri-ai-12`
+        badge: "STATION 05 / 5",
+        icon: "🚀",
+        title: "雙軌發布與原地展開：GitHub 託管，Rpage 零摩擦嵌入",
+        tags: ["SPA 原地展開不跳頁", "純白底無縫嵌入", "target=_blank 絕不破版", "防重複 published_log"],
+        role: "原官網一字不改即可升級現代化體驗，所有外部報名連結在新視窗安全開啟。",
+        content: "審核通過後，系統寫入 published_log.json 並推送到 GitHub Pages。原有的 Rpage 官網只需透過 iframe 嵌入這個公佈欄，師生在熟悉的官網入口瀏覽時，點擊直接於同頁面原地展開（SPA In-page Mode）。所有報名連結強制另開新視窗，絕不會因 iframe 限制而開不了！",
+        voice: "第五站，雙軌發布與原地展開。審核通過後，自動推播至 GitHub Pages。Rpage 官網完全不用改動後台，透過 iframe 零摩擦嵌入，師生點選原地展開，所有外連皆以另開分頁安全開啟，絕不破版！"
       }
     ];
 
-    function switchStep(index) {
-      document.querySelectorAll(".flow-nav-btn").forEach((btn, i) => {
-        btn.classList.toggle("active", i === index);
-      });
-      const data = stepsData[index];
-      document.getElementById("stepTitle").textContent = data.title;
-      document.getElementById("stepDesc").textContent = data.desc;
-      document.getElementById("stepRole").innerHTML = `<strong>💡 人機分工：</strong>${data.role}`;
-      document.getElementById("previewTitle").textContent = data.previewTitle;
-      document.getElementById("previewCode").innerHTML = `<code>${escapeHtml(data.code)}</code>`;
+    let currentStationIndex = 0;
+    let voiceEnabled = false;
+    let isAutoplayRunning = false;
 
-      const tagsContainer = document.getElementById("stepTags");
-      tagsContainer.innerHTML = "";
-      data.tags.forEach(t => {
-        const span = document.createElement("span");
-        span.className = "feature-tag";
+    // 切換選中站點
+    function selectStation(index, shouldSpeak = false) {
+      currentStationIndex = index;
+      document.querySelectorAll('.station-tab').forEach((tab, i) => {
+        if (i === index) {
+          tab.classList.remove('bg-slate-900/90', 'text-slate-300', 'border', 'border-slate-700');
+          tab.classList.add('bg-sky-500', 'text-slate-950', 'shadow-lg', 'shadow-sky-500/30');
+        } else {
+          tab.classList.remove('bg-sky-500', 'text-slate-950', 'shadow-lg', 'shadow-sky-500/30');
+          tab.classList.add('bg-slate-900/90', 'text-slate-300', 'border', 'border-slate-700');
+        }
+      });
+
+      const s = stations[index];
+      document.getElementById('detail-icon').textContent = s.icon;
+      document.getElementById('detail-badge').textContent = s.badge;
+      document.getElementById('detail-title').textContent = s.title;
+      document.getElementById('detail-content').textContent = s.content;
+      document.getElementById('detail-human-role').textContent = s.role;
+
+      const tagsContainer = document.getElementById('detail-tags');
+      tagsContainer.innerHTML = '';
+      s.tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'px-2.5 py-1 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700';
         span.textContent = t;
         tagsContainer.appendChild(span);
       });
+
+      if (shouldSpeak && voiceEnabled) {
+        speakText(s.voice);
+      }
     }
 
-    // 模擬器資料庫
-    const simCases = [
+    // 聽當前站點語音
+    function speakCurrentStation() {
+      if (!voiceEnabled) {
+        enableVoice();
+      }
+      speakText(stations[currentStationIndex].voice);
+    }
+
+    // ==========================================
+    // 語音旁白系統 (Web Speech API)
+    // ==========================================
+    function getBestChineseVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      return (
+        voices.find(v => v.lang === 'zh-TW' && (v.name.includes('Meijia') || v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Han'))) ||
+        voices.find(v => v.lang === 'zh-TW') ||
+        voices.find(v => v.lang.startsWith('zh')) ||
+        null
+      );
+    }
+
+    function setSpeakingIndicator(active) {
+      const wave = document.getElementById('speaking-wave');
+      if (!wave) return;
+      if (active) {
+        wave.classList.remove('hidden');
+        wave.classList.add('inline-flex');
+      } else {
+        wave.classList.add('hidden');
+        wave.classList.remove('inline-flex');
+      }
+    }
+
+    function speakText(text, onEndCallback = null) {
+      if (!('speechSynthesis' in window)) {
+        updateVoiceStatus("您的瀏覽器暫不支援語音合成，已切換至文字模式。");
+        if (onEndCallback) setTimeout(onEndCallback, 3000);
+        return;
+      }
+      window.speechSynthesis.cancel();
+
+      if (!voiceEnabled) {
+        setSpeakingIndicator(false);
+        if (onEndCallback) setTimeout(onEndCallback, 3000);
+        return;
+      }
+
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = getBestChineseVoice();
+      if (voice) utter.voice = voice;
+      utter.lang = 'zh-TW';
+      utter.rate = 1.05;
+      utter.pitch = 1.0;
+
+      utter.onstart = () => {
+        setSpeakingIndicator(true);
+        updateVoiceStatus("🎙️ 正在為您語音解說：" + text.substring(0, 36) + "...");
+      };
+
+      utter.onend = () => {
+        setSpeakingIndicator(false);
+        updateVoiceStatus("本站解說完畢。可點擊其他站點或開啟自動導覽。");
+        if (onEndCallback) onEndCallback();
+      };
+
+      utter.onerror = () => {
+        setSpeakingIndicator(false);
+        if (onEndCallback) onEndCallback();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function updateVoiceStatus(msg) {
+      const el = document.getElementById('voice-status-text');
+      if (el) el.textContent = msg;
+    }
+
+    function enableVoice() {
+      voiceEnabled = true;
+      document.getElementById('voice-icon').textContent = '🔊';
+      document.getElementById('voice-btn-label').textContent = '語音導覽中';
+      document.getElementById('btn-toggle-voice').classList.add('bg-amber-500/40', 'border-amber-400');
+    }
+
+    function disableVoice() {
+      voiceEnabled = false;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      setSpeakingIndicator(false);
+      document.getElementById('voice-icon').textContent = '🔇';
+      document.getElementById('voice-btn-label').textContent = '開啟語音導覽';
+      document.getElementById('btn-toggle-voice').classList.remove('bg-amber-500/40', 'border-amber-400');
+      updateVoiceStatus("語音已靜音。");
+    }
+
+    function toggleVoiceNarration() {
+      if (voiceEnabled) {
+        disableVoice();
+      } else {
+        enableVoice();
+        speakCurrentStation();
+      }
+    }
+
+    // 依序連續自動導覽 5 大站
+    function startAutoplayTour() {
+      enableVoice();
+      isAutoplayRunning = true;
+      updateVoiceStatus("開始 5 站連續自動導覽劇場...");
+      
+      let step = 0;
+      function playNextStep() {
+        if (!isAutoplayRunning || step >= stations.length) {
+          isAutoplayRunning = false;
+          updateVoiceStatus("🎉 全程 5 站導覽結束！歡迎點擊下方公佈欄親自體驗。");
+          return;
+        }
+        selectStation(step, false);
+        speakText(stations[step].voice, () => {
+          step++;
+          setTimeout(playNextStep, 900);
+        });
+      }
+      playNextStep();
+    }
+
+    // 字級切換
+    function setFontMode(mode) {
+      const html = document.documentElement;
+      html.classList.remove('font-mode-normal', 'font-mode-large', 'font-mode-xlarge');
+      html.classList.add(`font-mode-${mode}`);
+    }
+
+    // ==========================================
+    // 實境模擬器 (Simulator)
+    // ==========================================
+    const simData = [
       {
-        rawText: `【開課單位】財團法人工業技術研究院
+        raw: `【開課資訊】財團法人工業技術研究院（工研院）
 【課程名稱】AI與大數據應用開發實戰養成班(第12梯次)
-【補助方案】勞動部產業新尖兵計畫補助
-【補助對象】15-29 歲本國籍失業待業青年，非日間部在學學生
-【重要期程】115/12/25 報名截止，115/12/29 至 116/03/24 上課（共 350 小時）
-【費用說明】符合新尖兵資格者自付額 10,000 元，結訓就業後退回；訓練期間每月發給 8,000 元學習獎勵金。
-【報名入口】台灣就業通產業新尖兵專區 (elite.taiwanjobs.gov.tw)`,
+【補助方案】勞動部「產業新尖兵計畫」專案全額補助
+【補助資格】年滿 15 至 29 歲之本國籍失業或待業青年（非日間部在學學生）
+【課程時程】115/12/29 至 116/03/24（每天 7 小時，共 350 小時）
+【培訓地點】台北市大安區和平東路一段155號4樓（文大推廣大安分部）
+【費用說明】錄取時繳交 10,000 元自付額，結訓就業後退回；每月發給 8,000 元學習獎勵金！
+【諮詢電話】02-2370-1111 #316 李晨安 小姐`,
         badge: "【研習】",
-        title: "【研習】工研院「AI與大數據應用開發實戰養成班(第12梯次)」",
-        highlights: [
-          { label: "報名截止", val: "115.12.25 止" },
-          { label: "專案補助", val: "全額補助＋月領8千" },
-          { label: "訓練時數", val: "350小時實戰" },
-          { label: "媒合活動", val: "TTA參訪+廠商媒合" }
+        title: "【研習】工研院「AI與大數據應用開發實戰養成班(第12梯次)」（產業新尖兵全額補助）",
+        desc: "350小時扎實技術棧：Python爬蟲、Flask後端、MySQL資料庫、Docker容器化、機器學習、深度學習、生成式AI與LangChain/RAG實作，期末安排TTA新創基地參訪與現場廠商媒合！",
+        cards: [
+          { label: "報名截止", val: "115.12.25 (五) 止" },
+          { label: "課程期程", val: "115.12.29 ~ 116.03.24" },
+          { label: "專案補助", val: "全額補助＋月領8千獎勵金" },
+          { label: "培訓時數", val: "350小時實戰" }
         ],
-        desc: "350小時實戰課綱：涵蓋 Python、Flask、MySQL、Docker、OpenCV、機器學習、PyTorch、生成式 AI/LangChain/RAG 等主流技術。",
-        ctaText: "前往台灣就業通-產業新尖兵報名 ↗",
+        ctaText: "前往台灣就業通-產業新尖兵網站報名",
         ctaUrl: "https://elite.taiwanjobs.gov.tw/"
       },
       {
-        rawText: `【活動名稱】2026 全國 AI 專題創意競賽
-【主辦單位】國立臺南大學 理工學院、數位學習科技學系
-【競賽組別】大會專題類（資電組、跨域組、AI培力組）、一般專題類、企業命題類
+        raw: `【活動名稱】2026 全國 AI 專題創意競賽
+【主辦單位】國立臺南大學 理工學院、數位學習科技學系、電機工程學系
+【競賽組別】大會專題類（資電組、跨域組、AI職能培力組）、一般專題類、企業命題類
 【總獎金】高達 450,000 元整
-【競賽時程】115/12/01 報名截止 ｜ 115/12/11 初賽公告 ｜ 115/12/19 臺南大學決賽現場
-【報名資格】大專校院在學生（含碩博），每隊 2-6 人，可跨校組隊`,
+【競賽時程】115/12/01 報名截止 ｜ 115/12/11 初賽名單公告 ｜ 115/12/19 臺南大學中山館決賽現場
+【重要規定】嚴禁使用中資或中國來源之開源模型(如DeepSeek)及API/MCP進行訓練與推論。`,
         badge: "【競賽】",
         title: "【競賽】2026 全國 AI 專題創意競賽（總獎金 45 萬元）",
-        highlights: [
-          { label: "報名截止", val: "115.12.01 23:59" },
-          { label: "初賽公告", val: "115.12.11 線上" },
+        desc: "鼓勵大專院校青年學子結合生成式 AI 與數位技術，針對產業實務痛點提出具落地價值之解決方案，三大賽別提供充沛獎金與企業命題舞台！",
+        cards: [
+          { label: "報名截止", val: "115.12.01 23:59:59" },
+          { label: "初賽公告", val: "115.12.11 線上公佈" },
           { label: "決賽地點", val: "國立臺南大學中山館" },
-          { label: "總獎金", val: "450,000 元" }
+          { label: "總獎金規模", val: "高達 450,000 元！" }
         ],
-        desc: "鼓勵大專青年運用 AI 解決產業數位轉型痛點，三大賽別全開，提供校際交流與企業命題實作舞台。",
-        ctaText: "前往競賽官方網站報名 ↗",
+        ctaText: "前往競賽官方網站報名",
         ctaUrl: "https://phpweb4.nutn.edu.tw/ilt/wordpress/?page_id=4308"
       },
       {
-        rawText: `【活動名稱】WOS Research Assistant＋EndNote 教育訓練
+        raw: `【活動名稱】WOS Research Assistant＋EndNote 教育訓練
 【主辦單位】國立臺中科技大學 圖書館
 【活動時間】115 年 11 月 12 日（四）15:20－17:00
-【參與模式】實體（中商大樓 7501 電腦教室）與線上直播同步進行
-【課程重點】利用自然語言提問 WOS AI 助理、掌握核心文獻圖譜、運用 EndNote 文獻管理`,
+【參與模式】實體課程（中商大樓 7501 電腦教室）與線上直播同步進行
+【課程重點】自然語言提問 WOS AI 助理、視覺圖表掌握研究趨勢、投稿期刊媒合、EndNote文獻管理
+【報名表單】https://forms.gle/q1ymgtdNuRDMMcpj7`,
         badge: "【活動】",
         title: "【活動】圖書館「WOS Research Assistant＋EndNote 教育訓練」",
-        highlights: [
-          { label: "活動時間", val: "115.11.12 15:20" },
-          { label: "參與形式", val: "實體操作＋線上直播" },
+        desc: "本活動採實體課程與線上直播同步進行，全校師生可依需求選擇參與方式，輕鬆提升文獻檢索與研究效率！",
+        cards: [
+          { label: "活動時間", val: "115.11.12 (四) 15:20" },
+          { label: "參與形式", val: "實體操作 ＋ 線上直播" },
           { label: "實體地點", val: "中商大樓 7501 教室" },
-          { label: "線上直播", val: "活動前2日寄發連結" }
+          { label: "線上場次", val: "活動前2日寄發直播連結" }
         ],
-        desc: "由專業講師示範最新 Web of Science AI 檢索工具與 EndNote 文獻庫建置，全校師生皆可依需求選擇參與方式。",
-        ctaText: "前往 Google 表單報名 ↗",
+        ctaText: "前往 Google 表單報名",
         ctaUrl: "https://forms.gle/q1ymgtdNuRDMMcpj7"
       }
     ];
 
-    function loadSimCase(index) {
-      document.querySelectorAll(".sim-btn").forEach((btn, i) => {
-        btn.classList.toggle("active", i === index);
+    function switchSim(index) {
+      document.querySelectorAll('[id^="sim-btn-"]').forEach((btn, i) => {
+        if (i === index) {
+          btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-sky-500 text-slate-950 shadow-md";
+        } else {
+          btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-slate-900 text-slate-300 border border-slate-700";
+        }
       });
-      const c = simCases[index];
-      document.getElementById("simRawText").textContent = c.rawText;
-      document.getElementById("simBadge").textContent = c.badge;
-      document.getElementById("simTitle").textContent = c.title;
-      document.getElementById("simDesc").textContent = c.desc;
-      document.getElementById("simCtaBtn").textContent = c.ctaText;
-      document.getElementById("simCtaBtn").href = c.ctaUrl;
 
-      const grid = document.getElementById("simGrid");
-      grid.innerHTML = "";
-      c.highlights.forEach(h => {
-        const d = document.createElement("div");
-        d.className = "preview-mini-card";
-        d.innerHTML = `
-          <div class="mini-card-label">${escapeHtml(h.label)}</div>
-          <div class="mini-card-val">${escapeHtml(h.val)}</div>
+      const d = simData[index];
+      document.getElementById('sim-raw-content').textContent = d.raw;
+      document.getElementById('sim-badge').textContent = d.badge;
+      document.getElementById('sim-title').textContent = d.title;
+      document.getElementById('sim-desc').textContent = d.desc;
+      document.getElementById('sim-cta-text').textContent = d.ctaText;
+      document.getElementById('sim-cta-link').href = d.ctaUrl;
+
+      const grid = document.getElementById('sim-cards-grid');
+      grid.innerHTML = '';
+      d.cards.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-50 border border-slate-200 p-2 rounded-lg';
+        div.innerHTML = `
+          <div class="text-[10px] text-slate-500 font-bold">${c.label}</div>
+          <div class="text-xs font-black text-slate-900">${c.val}</div>
         `;
-        grid.appendChild(d);
+        grid.appendChild(div);
       });
     }
 
-    function escapeHtml(str) {
-      return str.replace(/[&<>'"]/g, 
-        tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag] || tag)
-      );
-    }
-
-    // 初始化載入
-    document.addEventListener("DOMContentLoaded", () => {
-      switchStep(0);
-      loadSimCase(0);
+    // 頁面初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      selectStation(0, false);
+      switchSim(0);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          getBestChineseVoice();
+        };
+      }
     });
   </script>
 </body>
