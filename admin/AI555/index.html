@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="font-mode-normal">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI555｜AI 行政自動化五大核心 (Prompt・Skill・Tool・Agent・Bot) 3D 互動元宇宙</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js 與 OrbitControls CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- 樣式表 (防快取版本號) -->
+  <link rel="stylesheet" href="styles.css?v=202611021300" />
+</head>
+<body class="antialiased selection:bg-sky-500 selection:text-slate-950 min-h-screen flex flex-col">
+
+  <!-- =========================================================================
+       1. 頂部常駐導覽列：行政專區返回 ＋ 標題 ＋ 字體縮放 ＋ 語音導覽開關
+       ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 shadow-2xl">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- 左側：品牌標題 -->
+      <div class="flex items-center gap-3.5">
+        <a href="../" class="px-3 py-1.5 rounded-xl hover:bg-slate-800 text-slate-200 text-sm font-black border border-slate-700 transition-colors shrink-0">
+          ← 行政專區
+        </a>
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 via-emerald-400 to-purple-500 flex items-center justify-center text-2xl shadow-lg shrink-0">
+          ⚡
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="font-black text-lg sm:text-xl tracking-tight text-white">
+              AI555：AI 行政自動化五大核心
+            </h1>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-400/30">
+              Prompt・Skill・Tool・Agent・Bot
+            </span>
+          </div>
+          <!-- 語音動態波形與即時引導 -->
+          <div class="flex items-center gap-2 text-xs text-amber-200 font-bold mt-0.5">
+            <span id="speaking-wave" class="hidden items-end gap-0.5 h-3 shrink-0">
+              <span class="w-1 h-2 bg-amber-400 rounded-full sound-bar"></span>
+              <span class="w-1 h-3 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.15s"></span>
+              <span class="w-1 h-2 bg-amber-400 rounded-full sound-bar" style="animation-delay:0.3s"></span>
+            </span>
+            <span id="voice-status-text" class="truncate max-w-md sm:max-w-xl">
+              11/2 AI 行政自動化工作坊：用 Codex 打造個人 AI 小幫手｜點擊 3D 反應爐行星互動！
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側：字體放大鏡 ＋ 語音開關 ＋ 快速導覽按鈕 -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- 字體模式 -->
+        <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700">
+          <span class="px-1.5 text-xs font-bold text-slate-400">字體：</span>
+          <button id="btn-font-normal" onclick="setFontSizeMode('normal')" class="px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-black text-xs shadow transition-all">
+            標準大字
+          </button>
+          <button id="btn-font-large" onclick="setFontSizeMode('large')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-all">
+            特大字
+          </button>
+          <button id="btn-font-xlarge" onclick="setFontSizeMode('xlarge')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-all">
+            投影超大
+          </button>
+        </div>
+
+        <!-- 語音開關 -->
+        <button id="btn-voice-toggle" onclick="toggleVoiceEnabled()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-sky-400 text-xs font-black text-sky-300 transition-all">
+          <span id="voice-icon">🔊</span>
+          <span id="voice-label">語音：開啟</span>
+        </button>
+
+        <button onclick="speakCurrentPageIntro()" class="px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow transition-all">
+          🗣️ 唸本頁解說
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 5 大模組頁面切換標籤列 -->
+    <div class="bg-slate-900/90 border-t border-slate-800/80">
+      <div class="max-w-[1440px] mx-auto px-4 sm:px-8 py-2.5">
+        <div id="five-page-tabs" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+          <!-- 由 JS 動態渲染 5 個模組切換按鈕 + 1 個全景總覽按鈕 -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       2. 主舞台內容區 (3D 星環反應爐 ＋ 模組深度介紹 ＋ 決策矩陣 ＋ 自動化流水線)
+       ========================================================================= -->
+  <main class="max-w-[1440px] mx-auto w-full px-4 sm:px-8 py-6 flex-1 space-y-10">
+
+    <!-- 3D 視覺互動區塊：5 核心星環反應爐 (Cyber Reactor) -->
+    <section class="space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <span>🪐</span> 5 核心星環反應爐 (Cyber Reactor) 3D 互動舞台
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">
+            以「完成一項工作」為核心中樞，外環環繞 5 大模組能量節點。拖曳旋轉、點擊行星即可直接導航！
+          </p>
+        </div>
+        <!-- 3D 視角與功能快捷鍵 -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="setCameraView('overview')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700">
+            🌐 重置全景
+          </button>
+          <button onclick="setCameraView('top')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700">
+            ⬆️ 俯瞰網絡
+          </button>
+          <button onclick="setCameraView('iso')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700">
+            📐 等距 3D
+          </button>
+          <button id="btn-autorotate-toggle" onclick="toggleAutoRotate()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-bold border border-sky-500/40">
+            旋轉：運轉中
+          </button>
+          <button id="btn-wireframe-toggle" onclick="toggleWireframe()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700">
+            模式：實體光影
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Canvas 容器與 HUD 浮層 -->
+      <div id="three-canvas-container" class="relative">
+        <div class="hud-overlay absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-sky-400/40 text-xs text-sky-300 backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>WebGL 3D 即時反應爐運轉中</span>
+          </div>
+          <div id="three-hud-status" class="text-xs text-slate-300 bg-slate-950/80 px-3 py-1 rounded-lg border border-slate-800 backdrop-blur-md">
+            可按住滑鼠拖曳旋轉 3D 星環反應爐，或點擊任一行星節點展開
+          </div>
+        </div>
+
+        <div class="hud-overlay absolute bottom-4 right-4 z-10 text-right">
+          <div class="text-[11px] text-slate-400 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 backdrop-blur-md">
+            資管系 QQ林文彥 研發｜Pantone 專屬色彩定義
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 模組深度介紹與沙盒容器（由 JS 動態切換渲染） -->
+    <section id="page-main-container">
+      <!-- JS 動態填入 -->
+    </section>
+
+    <!-- 決策矩陣：該選哪一個？(Slide 31) -->
+    <section class="glass-panel p-6 sm:p-8 rounded-3xl border border-sky-500/30 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="space-y-1">
+          <span class="text-xs font-black px-2.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">
+            Decision Matrix
+          </span>
+          <h3 class="text-2xl font-black text-white">
+            決策矩陣：我的行政業務該選哪一個 AI 元件？
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-300">
+            簡報第 31 頁核心公式：可複選混搭，每個元件都該有明確的使用理由！
+          </p>
+        </div>
+      </div>
+
+      <div id="decision-matrix-container">
+        <!-- 由 JS 動態渲染 5 個問題勾選框與即時建議 -->
+      </div>
+    </section>
+
+    <!-- 從文件到官網的自動化流水線 (Slide 32) -->
+    <section class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5">
+      <div class="space-y-1">
+        <span class="text-xs font-black px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+          End-to-End Pipeline
+        </span>
+        <h3 class="text-2xl font-black text-white">
+          綜合演練：從公文到官網的自動化流水線 (6 步驟)
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-300">
+          整合 Agent 判斷分類 ＋ Skill 格式整理 ＋ Tool 批次發布 ＋ Rpage 官網 iframe 無縫嵌入！
+        </p>
+      </div>
+
+      <div id="pipeline-steps-container">
+        <!-- 由 JS 動態渲染 6 步驟 -->
+      </div>
+
+      <!-- 後續規劃與安全防護盾 -->
+      <div class="p-5 rounded-2xl bg-amber-950/20 border border-amber-500/30 flex items-start gap-4">
+        <span class="text-2xl shrink-0">🛡️</span>
+        <div class="space-y-1">
+          <div class="font-black text-amber-300 text-sm">
+            安全護欄：發布前保留「人工審核節點 (Human-in-the-Loop)」
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            行政人員專注於<strong>『內容確認』與拍板核准</strong>，系統接續自動化整理與發布。草稿做完不等於已發布，等待是正常工作狀態，嚴格防範越權風險。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 避坑守則與關鍵前置設定 (Slide 3 與設計守則) -->
+    <section class="space-y-4">
+      <h3 class="text-lg font-black text-white flex items-center gap-2">
+        <span>⚠️</span> 行政同仁必看：關鍵前置設定與避坑守則
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-panel p-5 rounded-2xl border border-rose-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-black text-rose-300 text-sm">📬 學校信箱自動轉寄</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">關鍵步驟</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            若想讓 AI 幫忙收信，務必進入 <strong>Mail2000 ➔ 個人設定 ➔ 信件處理 ➔ 自動轉寄</strong> 到 Gmail（最好是 <code class="text-sky-300">gm.nutc.edu.tw</code>）。並務必<strong>實測寄信確認 Gmail 收得到</strong>！
+          </p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-sky-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-black text-sky-300 text-sm">💻 地端執行保護隱私</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">資安第一</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            主管課表比對戰情表、考生聯絡電話戰情室，在<strong>本機地端執行</strong>即可，不需串接 Tool 連接外網，確保考生個資與內部課表 100% 不外洩。
+          </p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-emerald-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-black text-emerald-300 text-sm">⚙️ 網頁對話 vs Desktop</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">軟體安裝</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            工作坊建議安裝 <strong>Desktop 專用桌面版軟體</strong>，操作更順暢。技術工作或複雜流水線可搭配 <strong>Codex</strong> 與 <strong>Google Antigravity</strong>。
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       3. 頁尾資訊
+       ========================================================================= -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-400">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>
+        <strong>AI555｜AI 行政自動化五大核心 3D 互動元宇宙</strong>・國立臺中科技大學 資訊管理系 QQ林文彥
+      </div>
+      <div class="text-slate-500">
+        教材來源：11/2 AI 行政自動化工作坊 (Day3-11/01)｜聯絡：<a href="mailto:qqice@gm.nutc.edu.tw" class="text-sky-400 hover:underline">qqice@gm.nutc.edu.tw</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 資料庫與主程式腳本 (含快取版本號) -->
+  <script src="data.js?v=202611021300"></script>
+  <script src="app.js?v=202611021300"></script>
+</body>
+</html>
