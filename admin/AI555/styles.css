@@ -1,0 +1,155 @@
+/* ============================================================================
+   AI555 專屬樣式表 (styles.css)
+   深色賽博太空 / 元宇宙 3D 視效 + 玻璃擬態 HUD + 5 大 Pantone 霓虹主題
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;800&display=swap');
+
+:root {
+  --bg-deep: #050814;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --border-card: rgba(51, 65, 85, 0.6);
+
+  /* Pantone 5 大核心代表色 */
+  --c-prompt: #0284c7; /* Pantone 300 天藍 */
+  --c-skill:  #10b981; /* Pantone 360 翡翠綠 */
+  --c-tool:   #f59e0b; /* Pantone 1505 琥珀橙 */
+  --c-agent:  #a855f7; /* Pantone 2603 霓虹紫 */
+  --c-bot:    #ec4899; /* Pantone 211 亮粉紅 */
+}
+
+/* 基礎設定 */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-deep);
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 字體大小切換模式 */
+html.font-mode-normal body {
+  font-size: 16px;
+}
+
+html.font-mode-large body {
+  font-size: 19px;
+}
+html.font-mode-large h1 { font-size: 2.25rem !important; }
+html.font-mode-large h2 { font-size: 1.85rem !important; }
+html.font-mode-large h3 { font-size: 1.45rem !important; }
+
+html.font-mode-xlarge body {
+  font-size: 22px;
+}
+html.font-mode-xlarge h1 { font-size: 2.6rem !important; }
+html.font-mode-xlarge h2 { font-size: 2.1rem !important; }
+html.font-mode-xlarge h3 { font-size: 1.65rem !important; }
+
+/* 3D 舞台容器 */
+#three-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #0d1933 0%, #050814 85%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 50px rgba(2, 132, 199, 0.15);
+}
+
+@media (min-width: 1024px) {
+  #three-canvas-container {
+    height: 540px;
+  }
+}
+
+/* 3D 舞台 HUD 資訊浮層 */
+.hud-overlay {
+  pointer-events: none;
+}
+.hud-interactive {
+  pointer-events: auto;
+}
+
+/* 玻璃擬態卡片 */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 12px 35px -8px rgba(2, 132, 199, 0.25);
+}
+
+/* 霓虹邊框光暈 */
+.glow-prompt { box-shadow: 0 0 25px rgba(2, 132, 199, 0.3); border-color: rgba(2, 132, 199, 0.6); }
+.glow-skill  { box-shadow: 0 0 25px rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.6); }
+.glow-tool   { box-shadow: 0 0 25px rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.6); }
+.glow-agent  { box-shadow: 0 0 25px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.6); }
+.glow-bot    { box-shadow: 0 0 25px rgba(236, 72, 153, 0.3); border-color: rgba(236, 72, 153, 0.6); }
+
+/* 音波跳動動畫 */
+@keyframes soundwave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.sound-bar {
+  animation: soundwave 0.8s ease-in-out infinite;
+}
+
+/* 循環呼吸動態 */
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* 自訂捲軸 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050814;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* 3D 浮動標籤 (Three.js 2D HTML Overlays) */
+.node-label-3d {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  user-select: none;
+}
