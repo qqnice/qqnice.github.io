@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>從課堂問題到成果發表：AI 協作的教學實踐研究全流程 | 明新科技大學演講工作坊</title>
+  <meta name="description" content="明新科技大學專題演講式工作坊：運用 AI 協助教師進行研究發想、計畫撰寫、教學執行與成果發表。以「AI 開放課堂下的真實學習評量」為貫穿案例。">
+  <!-- Tailwind CSS CDN with Typography & Flowbite -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', '"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .gradient-hero {
+      background: radial-gradient(1200px circle at 50% -20%, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08), transparent 70%);
+    }
+    .dark .gradient-hero {
+      background: radial-gradient(1200px circle at 50% -20%, rgba(37, 99, 235, 0.25), rgba(16, 185, 129, 0.15), transparent 75%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    /* Printable styling */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-break { page-break-after: always; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Navigation Bar -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="p-2 bg-gradient-to-tr from-blue-600 to-emerald-500 text-white rounded-xl shadow-md">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </span>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-blue-700 to-emerald-600 dark:from-blue-400 dark:to-emerald-400 bg-clip-text text-transparent">AI × 教學實踐研究</span>
+          <span class="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">明新科技大學</span>
+        </div>
+      </div>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <a href="#about" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">演講主旨</a>
+        <a href="#journey" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">四段旅程與示範</a>
+        <a href="#pavet" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">PAVET真實評量</a>
+        <a href="#schedule" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">時間配當</a>
+        <a href="#gates" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">品質閘門</a>
+        <a href="#tools" class="px-3 py-2 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">核心工具包</a>
+      </nav>
+
+      <!-- Right controls -->
+      <div class="flex items-center space-x-2">
+        <button id="theme-toggle" aria-label="切換主題" class="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i id="theme-icon-sun" data-lucide="sun" class="w-5 h-5 hidden"></i>
+          <i id="theme-icon-moon" data-lucide="moon" class="w-5 h-5"></i>
+        </button>
+        <a href="#tools" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20 transition active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>下載工具卡</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-12 pb-20 md:pt-20 md:pb-28 gradient-hero overflow-hidden border-b border-slate-200/60 dark:border-slate-800/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      
+      <!-- Badges -->
+      <div class="inline-flex flex-wrap items-center justify-center gap-2 mb-6">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> 明新科技大學 專題演講
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i> 180 分鐘演講式工作坊
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> 教學實踐研究工作流
+        </span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.15] mb-6 max-w-4xl mx-auto">
+        從課堂問題到成果發表：<br class="hidden sm:inline">
+        <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 bg-clip-text text-transparent">AI 協作的教學實踐研究全流程</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed mb-8">
+        運用 AI 協助大專教師進行<strong>研究發想、計畫撰寫、教學執行與成果發表</strong>。<br class="hidden md:inline">
+        貫穿實踐案例：<span class="text-blue-600 dark:text-blue-400 font-semibold underline decoration-blue-300 underline-offset-4">AI 開放課堂下的真實學習評量</span>。
+      </p>
+
+      <!-- Key Quote / Core Statement Banner -->
+      <div class="max-w-3xl mx-auto bg-white/90 dark:bg-slate-900/90 rounded-2xl p-6 shadow-xl border border-blue-100 dark:border-slate-800 text-left relative overflow-hidden mb-10">
+        <div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-600 to-emerald-500"></div>
+        <div class="flex items-start gap-4">
+          <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex-shrink-0">
+            <i data-lucide="quote" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">全場核心主張</h2>
+            <p class="text-base sm:text-lg font-medium text-slate-800 dark:text-slate-200 leading-snug">
+              「AI 不是代筆！AI 可以協助教師導航、搜尋、整理、比較、草擬與檢查；<br class="hidden sm:inline">
+              但<strong>課堂問題、研究價值、倫理、評量效度、研究設計與最終學術主張，必須由教師全權負責。</strong>」
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="#case" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition transform active:scale-95">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+          <span>探索貫穿案例</span>
+        </a>
+        <a href="#journey" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 shadow-sm transition">
+          <i data-lucide="layers" class="w-5 h-5"></i>
+          <span>檢視四段旅程與示範</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Core Case Banner Section -->
+  <section id="case" class="py-16 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Continuous Case Study</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          一個貫穿案例，避免斷裂拼湊
+        </h2>
+        <p class="mt-2 text-slate-600 dark:text-slate-400">
+          全場 180 分鐘緊扣同一門課的真實痛點，展示研究從發想到發表的完整蛻變：
+        </p>
+      </div>
+
+      <!-- Case Card -->
+      <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-4">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i> 課堂初始現象與困境
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold leading-snug mb-4">
+              「在 Linux / 容器化課程中，學生可用 GPT 完成部署，作品完全正確，但老師無法得知學生是否真的學會。」
+            </h3>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+              成果相同，但能力未知：學生能理解診斷邏輯嗎？能查核 AI 給的設定檔與指令安全性嗎？換到未曾見過的故障情境，學生是否能遷移除錯能力？
+            </p>
+            <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-400">
+              <span class="flex items-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> 非空泛討論</span>
+              <span class="flex items-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> 真實工程任務改造</span>
+              <span class="flex items-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> 泛用於各學門</span>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+              <span>案例演化推進路徑</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-blue-300"></i>
+            </h4>
+            <ol class="space-y-2.5 text-xs sm:text-sm font-medium">
+              <li class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+                <span>課堂現象 ➔ 問題與基線證據（非抱怨）</span>
+              </li>
+              <li class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <span>本土成果與國際文獻 ➔ 形成研究缺口</span>
+              </li>
+              <li class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">3</span>
+                <span>PAVET 任務改造 ➔ 多源真實評量證據包</span>
+              </li>
+              <li class="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/10">
+                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">4</span>
+                <span>研究設計與倫理治理 ➔ 成果分析與發表</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4 Journeys & 4 Demos Interactive Section -->
+  <section id="journey" class="py-20 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Core Architecture</span>
+        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          四段研究旅程 × 四大關鍵示範
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">
+          每一次示範結束，我們都固定拷問三個問題：<strong>AI 做了什麼？教師決定了什麼？留下了什麼可查核證據？</strong>
+        </p>
+      </div>
+
+      <!-- Grid of 4 Journeys -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Journey A -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+              旅程 A ｜ 發現階段
+            </span>
+            <span class="text-xs font-semibold text-slate-400">示範一（13 分鐘）</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            我們看到的是問題、表象，還是教師的推測？
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+            區分「抱怨、觀察、證據、可能成因、替代解釋與可介入因素」，避免讓 AI 直接替教師貼學生標籤。
+          </p>
+
+          <!-- Before/After Box -->
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200/70 dark:border-slate-700/60 text-xs space-y-3 mb-6">
+            <div>
+              <span class="font-bold text-red-500 uppercase tracking-wide">原始抱怨：</span>
+              <p class="text-slate-700 dark:text-slate-300 italic mt-0.5">「學生都在抄 GPT，所以沒有學會。」</p>
+            </div>
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">收斂為研究問題：</span>
+              <p class="text-slate-800 dark:text-slate-200 font-medium mt-0.5 leading-relaxed">
+                「在允許使用生成式 AI 的 Linux 實作任務中，現行評量主要依最終產物給分，教師缺少足夠證據判斷學生能否解釋診斷邏輯、驗證 AI 建議，並將方法遷移至未見故障情境。」
+              </p>
+            </div>
+          </div>
+
+          <!-- Triple Check -->
+          <div class="grid grid-cols-3 gap-2 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+            <div><strong class="block text-blue-600 dark:text-blue-400">AI 做了什麼？</strong>整理現象五欄表、分類追問</div>
+            <div><strong class="block text-emerald-600 dark:text-emerald-400">教師決定了什麼？</strong>判定過度歸因、定錨研究價值</div>
+            <div><strong class="block text-purple-600 dark:text-purple-400">留下查核證據？</strong>問題證據矩陣、缺證清單</div>
+          </div>
+        </div>
+
+        <!-- Journey B -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+              旅程 B ｜ 論證階段
+            </span>
+            <span class="text-xs font-semibold text-slate-400">示範二（10 分鐘）</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            本土成果與國際文獻如何支持、挑戰並收斂問題？
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+            AI 不是幫忙堆引用，而是建立文獻辯證。利用本土成果與既有文獻排成「五欄辯證表」，防止假文獻與結論錯配。
+          </p>
+
+          <!-- Highlights -->
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200/70 dark:border-slate-700/60 text-xs mb-6">
+            <span class="font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide block mb-1">五欄辯證架構：</span>
+            <div class="grid grid-cols-5 gap-1.5 text-center font-medium py-1.5 bg-white dark:bg-slate-800 rounded-lg text-[10px] text-slate-700 dark:text-slate-300">
+              <span class="p-1 bg-blue-50 dark:bg-blue-950 rounded">支持</span>
+              <span class="p-1 bg-amber-50 dark:bg-amber-950 rounded">反證</span>
+              <span class="p-1 bg-emerald-50 dark:bg-emerald-950 rounded">成立條件</span>
+              <span class="p-1 bg-rose-50 dark:bg-rose-950 rounded">不可推論</span>
+              <span class="p-1 bg-indigo-50 dark:bg-indigo-950 rounded">本研究回應</span>
+            </div>
+            <p class="mt-2 text-slate-600 dark:text-slate-400">現場核實來源，建立「四句式研究缺口：已知、爭議、未知、本研究回應」。</p>
+          </div>
+
+          <!-- Triple Check -->
+          <div class="grid grid-cols-3 gap-2 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+            <div><strong class="block text-blue-600 dark:text-blue-400">AI 做了什麼？</strong>抽取設計/結果、組織比較</div>
+            <div><strong class="block text-emerald-600 dark:text-emerald-400">教師決定了什麼？</strong>原文查核、證據權重與缺口判定</div>
+            <div><strong class="block text-purple-600 dark:text-purple-400">留下查核證據？</strong>五欄辯證表、引用查核清單</div>
+          </div>
+        </div>
+
+        <!-- Journey C -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              旅程 C ｜ 設計階段
+            </span>
+            <span class="text-xs font-semibold text-slate-400">示範三＋示範四（26 分鐘）</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            RQ、介入、評量、資料與分析是否真的對齊？
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+            抓出「想測問題解決能力，主要工具卻只有滿意度問卷」的致命錯位；並將脆弱作業徹底改造成 <strong>PAVET 真實評量</strong>。
+          </p>
+
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200/70 dark:border-slate-700/60 text-xs mb-6">
+            <span class="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-1">研究鏈閉合檢查：</span>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed font-mono text-[11px]">
+              研究目的 ➔ RQ ➔ 構念 ➔ 操作型定義 ➔ 介入 ➔ 資料 ➔ 分析 ➔ 主張上限
+            </p>
+            <p class="mt-2 text-slate-500 dark:text-slate-400">
+              補入未見情境、操作日誌、AI 查核說明與 micro-viva 口頭答辯。
+            </p>
+          </div>
+
+          <!-- Triple Check -->
+          <div class="grid grid-cols-3 gap-2 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+            <div><strong class="block text-blue-600 dark:text-blue-400">AI 做了什麼？</strong>抓對齊斷點、生成任務草稿</div>
+            <div><strong class="block text-emerald-600 dark:text-emerald-400">教師決定了什麼？</strong>真實能力標準、評分規準 Rubric</div>
+            <div><strong class="block text-purple-600 dark:text-purple-400">留下查核證據？</strong>PAVET 任務單、多源證據包</div>
+          </div>
+        </div>
+
+        <!-- Journey D -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+              旅程 D ｜ 執行與發表
+            </span>
+            <span class="text-xs font-semibold text-slate-400">微示範（14 分鐘）</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            如何保留可信資料，並寫出設計真正支持的結論？
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+            「AI 寫得很有把握」不等於資料支持。嚴格克制過度因果宣稱，建立主張—證據矩陣、零結果揭露與投稿前稽核。
+          </p>
+
+          <!-- Before/After Claims -->
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200/70 dark:border-slate-700/60 text-xs space-y-2.5 mb-6">
+            <div>
+              <span class="font-bold text-rose-500 uppercase">過度主張：</span>
+              <p class="text-slate-600 dark:text-slate-400 line-through mt-0.5">「前後測顯著提高，證明 PAVET 造成學生真實能力提升。」</p>
+            </div>
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 uppercase">單組前後測嚴謹修正：</span>
+              <p class="text-slate-800 dark:text-slate-200 font-medium mt-0.5">
+                「……解讀為介入後的表現變化，而非確定的因果效果，因成熟與其他課程經驗仍是替代解釋。」
+              </p>
+            </div>
+          </div>
+
+          <!-- Triple Check -->
+          <div class="grid grid-cols-3 gap-2 text-[11px] pt-4 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+            <div><strong class="block text-blue-600 dark:text-blue-400">AI 做了什麼？</strong>草擬論述、比對分析結論</div>
+            <div><strong class="block text-emerald-600 dark:text-emerald-400">教師決定了什麼？</strong>守住設計因果上限、真實解讀</div>
+            <div><strong class="block text-purple-600 dark:text-purple-400">留下查核證據？</strong>主張—證據矩陣、資料鎖定紀錄</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PAVET Framework Deep-Dive Section -->
+  <section id="pavet" class="py-20 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Signature Innovation</span>
+        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          PAVET 真實學習評量模型
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">
+          把傳統「交成果與截圖」的脆弱作業，改造成「讓思考與查核歷程可見」的完整證據鏈：
+        </p>
+      </div>
+
+      <!-- Before / After comparison table -->
+      <div class="mb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-6">
+          <div class="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold mb-2">
+            <i data-lucide="x-circle" class="w-5 h-5"></i>
+            <span>改造成前：傳統脆弱作業模式</span>
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-sm mb-3">
+            <strong>指令：</strong>「請部署一個容器化網站服務，繳交成功畫面與設定檔。」
+          </p>
+          <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>學生貼指令給 GPT，一鍵跑完截圖，成果完美</li>
+            <li>教師無法判斷學生到底理不理解背後的除錯或部署原理</li>
+            <li>缺少預測、查核紀錄，且無法應對新故障</li>
+          </ul>
+        </div>
+
+        <div class="bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl p-6">
+          <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold mb-2">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span>改造成後：PAVET 歷程證據模式</span>
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 text-sm mb-3">
+            <strong>核心：</strong>不以防堵 AI 為目標，而是讓<strong>學生的預測、批判、解釋與遷移</strong>全面浮現。
+          </p>
+          <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>先預測再問 AI，主動辨別 AI 建議中的隱藏小錯誤</li>
+            <li>留下系統 log 與測試指令作為客觀機器證據</li>
+            <li>透過口頭答辯（micro-viva）與未見情境（Transfer）確認真實實力</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PAVET 5-Step Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <!-- P -->
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 relative flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-black text-xl flex items-center justify-center mb-3 shadow-md">
+              P
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Predict</h3>
+            <p class="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-2">使用前預測</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              在打開 AI 之前，先寫出架構構想、故障假設及檢查順序。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+            <strong>留下的證據：</strong><br>初始認知模型與推論
+          </div>
+        </div>
+
+        <!-- A -->
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 relative flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-black text-xl flex items-center justify-center mb-3 shadow-md">
+              A
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">AI Collaborate</h3>
+            <p class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mb-2">有目的協作</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              有目標地向 AI 提問，保留提問脈絡並記錄其關鍵建議。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+            <strong>留下的證據：</strong><br>提示詞、回應與使用目的
+          </div>
+        </div>
+
+        <!-- V -->
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 relative flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black text-xl flex items-center justify-center mb-3 shadow-md">
+              V
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Verify</h3>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-2">客觀驗證</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              用官方文件、指令狀態、log 與單元測試主動查核 AI 正確性。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+            <strong>留下的證據：</strong><br>機器記錄、發現並修正錯誤
+          </div>
+        </div>
+
+        <!-- E -->
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 relative flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-amber-600 text-white font-black text-xl flex items-center justify-center mb-3 shadow-md">
+              E
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Explain</h3>
+            <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-2">決策與口答</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              說明採納、拒絕或修改 AI 建議的原因，進行口頭答辯。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+            <strong>留下的證據：</strong><br>技術取捨理由、micro-viva
+          </div>
+        </div>
+
+        <!-- T -->
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 relative flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white font-black text-xl flex items-center justify-center mb-3 shadow-md">
+              T
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Transfer</h3>
+            <p class="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-2">未見情境遷移</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              面對變形故障或延宕任務，不依賴固定套路，展現實力。
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+            <strong>留下的證據：</strong><br>未見情境的獨立表現
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 180 Minutes Schedule Section -->
+  <section id="schedule" class="py-20 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Agenda</span>
+        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          180 分鐘緊湊演講式工作坊排程
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">
+          包含 10 分鐘中場充分休息，精準把控「觀念建立 ➔ 現場示範 ➔ 學員產出」的節奏：
+        </p>
+      </div>
+
+      <!-- Timeline Table -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-100/70 dark:bg-slate-800/80 text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="py-4 px-6">累計時間</th>
+                <th class="py-4 px-4">時長</th>
+                <th class="py-4 px-6">段落主題</th>
+                <th class="py-4 px-6">內容與示範方法</th>
+                <th class="py-4 px-6">參與者現場產出</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">00–10</td>
+                <td class="py-4 px-4 text-xs font-semibold">10 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">開場：AI 完成作業，學生就學會了嗎？</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">即時投票；展示「成果相同、能力未知」Linux 案例；確認全場核心問題</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">找到目前困擾的研究階段</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">10–25</td>
+                <td class="py-4 px-4 text-xs font-semibold">15 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">全流程地圖與人機責任</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">四段旅程、十六階段縮圖；AI 可以做什麼、教師不可外包什麼；倫理與個資紅線</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">全流程心智地圖</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">25–42</td>
+                <td class="py-4 px-4 text-xs font-semibold">17 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">第一段：從課堂表象發現真正問題</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">區分抱怨、觀察、證據、可能成因、替代解釋與可介入因素</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">課堂問題診斷框架</span></td>
+              </tr>
+              <tr class="bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50/60 transition">
+                <td class="py-4 px-6 font-mono font-bold text-amber-600 dark:text-amber-400">42–55</td>
+                <td class="py-4 px-4 text-xs font-semibold text-amber-700 dark:text-amber-300">13 分</td>
+                <td class="py-4 px-6 font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                  <i data-lucide="play-circle" class="w-4 h-4 text-amber-600"></i>
+                  <span>示範一：一句抱怨變成可研究問題</span>
+                </td>
+                <td class="py-4 px-6 text-xs sm:text-sm">AI 整理問題證據矩陣；刻意找出 AI 過度歸因；教師修正並形成問題陳述</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">問題證據矩陣範例</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">55–70</td>
+                <td class="py-4 px-4 text-xs font-semibold">15 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">第二段：本土成果、國際文獻與研究缺口</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">教學實踐成果網站、既有 CSV、摘要庫、近十年文獻；支持、反證、條件與缺口</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">文獻用途地圖</span></td>
+              </tr>
+              <tr class="bg-blue-50/40 dark:bg-blue-950/20 hover:bg-blue-50/60 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">70–80</td>
+                <td class="py-4 px-4 text-xs font-semibold text-blue-700 dark:text-blue-300">10 分</td>
+                <td class="py-4 px-6 font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                  <i data-lucide="play-circle" class="w-4 h-4 text-blue-600"></i>
+                  <span>示範二：從摘要到辯證，而不是堆引用</span>
+                </td>
+                <td class="py-4 px-6 text-xs sm:text-sm">用核實文獻建立辯證表；現場核對一筆來源；四句式缺口成形</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">辯證表與引用查核</span></td>
+              </tr>
+              <tr class="bg-slate-100/80 dark:bg-slate-800/80">
+                <td class="py-3 px-6 font-mono font-bold text-slate-400">80–90</td>
+                <td class="py-3 px-4 text-xs font-semibold text-slate-500">10 分</td>
+                <td class="py-3 px-6 font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                  <i data-lucide="coffee" class="w-4 h-4"></i>
+                  <span>中場休息</span>
+                </td>
+                <td class="py-3 px-6 text-xs text-slate-500 dark:text-slate-400" colspan="2">完整休息，不播放影片，讓學員充分放鬆與交流</td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">90–107</td>
+                <td class="py-4 px-4 text-xs font-semibold">17 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">第三段：研究問題的收斂與研究鏈</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">目的、RQ、假設、構念、操作型定義、主要結果與主張上限</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">研究鏈基本結構</span></td>
+              </tr>
+              <tr class="bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-50/60 transition">
+                <td class="py-4 px-6 font-mono font-bold text-emerald-600 dark:text-emerald-400">107–120</td>
+                <td class="py-4 px-4 text-xs font-semibold text-emerald-700 dark:text-emerald-300">13 分</td>
+                <td class="py-4 px-6 font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                  <i data-lucide="play-circle" class="w-4 h-4 text-emerald-600"></i>
+                  <span>示範三：找出「寫得順、但測不到」的錯位</span>
+                </td>
+                <td class="py-4 px-6 text-xs sm:text-sm">建立對齊矩陣；找出「測能力卻只給滿意度問卷」的致命錯位</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">對齊矩陣範例</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">120–138</td>
+                <td class="py-4 px-4 text-xs font-semibold">18 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">第四段：評量、介入、研究設計與倫理</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">工具藍圖、效度、PAVET 介入、忠實度、研究設計、知情同意與資料治理</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">設計決策檢核表</span></td>
+              </tr>
+              <tr class="bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-50/60 transition">
+                <td class="py-4 px-6 font-mono font-bold text-indigo-600 dark:text-indigo-400">138–151</td>
+                <td class="py-4 px-4 text-xs font-semibold text-indigo-700 dark:text-indigo-300">13 分</td>
+                <td class="py-4 px-6 font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                  <i data-lucide="play-circle" class="w-4 h-4 text-indigo-600"></i>
+                  <span>示範四：把脆弱作業改造成 PAVET 真實評量</span>
+                </td>
+                <td class="py-4 px-6 text-xs sm:text-sm">改由 Predict ➔ Transfer 五階段；加入 log、micro-viva 與未見情境</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">PAVET 證據包</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">151–165</td>
+                <td class="py-4 px-4 text-xs font-semibold">14 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">第五段：從計畫執行到成果發表（含微示範）</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">每週閉環、偏離日誌、三層資料位置；一張投影片把過度因果結論修正為嚴謹主張</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">執行與發表清單</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-blue-600 dark:text-blue-400">165–176</td>
+                <td class="py-4 px-4 text-xs font-semibold">11 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">綜合問答與即時解惑</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">優先回答問題診斷、研究設計、倫理紅線與 AI 使用邊界</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">個別疑問澄清</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                <td class="py-4 px-6 font-mono font-bold text-emerald-600 dark:text-emerald-400">176–180</td>
+                <td class="py-4 px-4 text-xs font-semibold">4 分</td>
+                <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">收束與出口票（Exit Ticket）</td>
+                <td class="py-4 px-6 text-xs sm:text-sm">寫下七日內第一步、最大紅燈風險，以及必須保留給人的關鍵決定</td>
+                <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">七日行動卡</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 8 Quality Gates & Red Flags Section -->
+  <section id="gates" class="py-20 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">Rigorous Standards</span>
+        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          全場必須堅守的八道品質閘門
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">
+          確保計畫從構想、工具發展、執行到投稿，每一步都有可查核的學術證據：
+        </p>
+      </div>
+
+      <!-- 8 Gates Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-bold flex items-center justify-center mb-3">1</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">問題閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">課堂問題有可觀察證據，還是只有教師的主觀印象與抱怨？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-bold flex items-center justify-center mb-3">2</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">文獻閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">AI 提供的來源與主張，是否都已回到原始 DOI/PDF 原文核實？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-bold flex items-center justify-center mb-3">3</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">收斂閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">學習目標、RQ、構念、資料、分析與結論是否形成閉合鏈？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-bold flex items-center justify-center mb-3">4</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">評量閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">工具有無命題藍圖、專家審查、預試、評分規準與公平性證據？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs font-bold flex items-center justify-center mb-3">5</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">介入閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">是否說清楚作用機制、必要成分、介入劑量與執行忠實度？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs font-bold flex items-center justify-center mb-3">6</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">倫理閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">是否在資料蒐集前完成 IRB/研究倫理程序、同意書與去識別保護？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs font-bold flex items-center justify-center mb-3">7</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">分析閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">原始資料（Raw/Clean/Analysis）、排除規則與缺失處理有無版本鎖定？</p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs font-bold flex items-center justify-center mb-3">8</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">發表閘門</h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300">每項學術主張是否有對應證據？是否克制因果宣稱未超過設計？</p>
+        </div>
+
+      </div>
+
+      <!-- Red Flag Alert Box -->
+      <div class="bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-900/60 rounded-3xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <div class="p-3 rounded-2xl bg-rose-500 text-white flex-shrink-0">
+            <i data-lucide="octagon-alert" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-rose-900 dark:text-rose-200">
+              紅燈禁區：遇到以下情況，請立即停止蒐集、分析或發表！
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>未完成必要倫理程序便先行蒐集研究資料。</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>將可識別學生個資直接傳入未核准的第三方 AI 或公用雲端。</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>將 AI 生成測試、示範資料與學生真實研究資料混淆。</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>覆寫原始資料（Raw Data），造成修改不可復原或無法追溯。</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>看過統計結果後，未揭露地事後抽換主要指標或排除樣本。</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-600 font-bold">✕</span>
+                <span>研究設計（如單組前後測）不支持因果，卻斷言「造成、提升、導致」。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Participant Takeaway Tools Section -->
+  <section id="tools" class="py-20 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Toolkit & Worksheets</span>
+        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          參與者可立即帶走的三份核心工具
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-400">
+          現場實作、課後套用；點擊「展開填寫」即可在線模擬或列印成工作紙：
+        </p>
+      </div>
+
+      <!-- 3 Tools Accordion / Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Tool 1 -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="p-2 rounded-xl bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+              </span>
+              <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">工具一</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">課堂問題與證據四格表</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs mb-6">
+              專門對治「只會抱怨學生」或「問題太抽象」，強迫轉化為客觀證據：
+            </p>
+            <div class="space-y-3 text-xs bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60 mb-6">
+              <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span class="font-bold text-slate-800 dark:text-slate-200">1. 我看到什麼可觀察現象？</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px]">（客觀事實而非推論）</p>
+              </div>
+              <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span class="font-bold text-slate-800 dark:text-slate-200">2. 目前有什麼具體證據？</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px]">（作業、問答、失誤率、日誌）</p>
+              </div>
+              <div class="border-b border-slate-200 dark:border-slate-700 pb-2">
+                <span class="font-bold text-slate-800 dark:text-slate-200">3. 可能機制與替代解釋？</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px]">（是真的不會？還是題目不明？）</p>
+              </div>
+              <div>
+                <span class="font-bold text-slate-800 dark:text-slate-200">4. 能介入什麼，還缺什麼？</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px]">（教學可控因素與待補證據）</p>
+              </div>
+            </div>
+          </div>
+          <button onclick="window.print()" class="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> 列印工作紙
+          </button>
+        </div>
+
+        <!-- Tool 2 -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="p-2 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                <i data-lucide="git-merge" class="w-5 h-5"></i>
+              </span>
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase">工具二</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">研究對齊畫布（Alignment Canvas）</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs mb-6">
+              一字排開檢查計畫書是否「寫得漂亮卻測不到」：
+            </p>
+            <div class="text-xs bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60 font-mono space-y-1.5 mb-6 text-slate-700 dark:text-slate-300">
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>課堂問題（Problem）</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>研究缺口（Gap）</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>研究目的與 RQ</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>構念與操作型定義</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>教學介入（PAVET）</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>評量工具與證據包</div>
+              <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>資料分析方法</div>
+              <div class="flex items-center gap-2 font-bold text-emerald-600 dark:text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>可支持的結論上限</div>
+            </div>
+          </div>
+          <button onclick="window.print()" class="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> 列印工作紙
+          </button>
+        </div>
+
+        <!-- Tool 3 -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="p-2 rounded-xl bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+              </span>
+              <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase">工具三</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">執行與發表追蹤表</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs mb-6">
+              學期執行過程的防呆護欄，確保可投稿與學術誠信：
+            </p>
+            <div class="space-y-2 text-xs bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60 mb-6 text-slate-700 dark:text-slate-300">
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span>倫理審查與知情同意狀態</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span>介入版本與每週偏離日誌（Deviations）</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span>三層資料存放（Raw / Clean / Analysis）</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span>主張—證據矩陣查核清單</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span>AI 協作紀錄與人工查核存檔</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="window.print()" class="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> 列印工作紙
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Exit Ticket Box -->
+      <div class="mt-12 bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-3xl p-8 sm:p-10 shadow-xl">
+        <div class="max-w-3xl">
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/30 text-blue-200 border border-blue-400/30">
+            Exit Ticket ｜ 活動出口票
+          </span>
+          <h3 class="text-2xl font-bold mt-3 mb-2">最後四分鐘：帶走您的七日行動卡</h3>
+          <p class="text-slate-300 text-sm mb-6 leading-relaxed">
+            研習結束後不讓筆記束之高閣，請在離開前沉澱並寫下這五個承諾：
+          </p>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex items-baseline gap-2 bg-white/10 p-3 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-300 text-xs">01</span>
+              <span><strong>我在七日內要完成的第一步：</strong>依四格表寫下課堂困擾與第一個客觀證據。</span>
+            </div>
+            <div class="flex items-baseline gap-2 bg-white/10 p-3 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-300 text-xs">02</span>
+              <span><strong>我的計畫目前最大的紅燈風險：</strong>工具未對齊、倫理未同意，還是資料覆寫？</span>
+            </div>
+            <div class="flex items-baseline gap-2 bg-white/10 p-3 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-300 text-xs">03</span>
+              <span><strong>我可以交給 AI 協助的是：</strong>初步文獻抽取、語句潤飾、尋找邏輯盲點。</span>
+            </div>
+            <div class="flex items-baseline gap-2 bg-white/10 p-3 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-300 text-xs">04</span>
+              <span><strong>我必須保留給自己決定的是：</strong>研究價值、學生問題判定、評量效度與學術責任。</span>
+            </div>
+            <div class="flex items-baseline gap-2 bg-white/10 p-3 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-300 text-xs">05</span>
+              <span><strong>進入下一階段前，我要留下的證據：</strong>已核實的文獻對照表與基線數據。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 space-y-3">
+      <p class="font-semibold text-slate-700 dark:text-slate-300 text-sm">
+        明新科技大學 專題演講 ｜ 從課堂問題到成果發表：AI 協作的教學實踐研究全流程
+      </p>
+      <p>
+        AI 可以導航、整理與比對，但研究品質與學生學習責任，永遠在於教師。
+      </p>
+      <div class="pt-4 flex items-center justify-center gap-4 text-slate-400">
+        <span>© 2026 Teaching Practice Research with AI</span>
+        <span>•</span>
+        <a href="https://github.com/qqnice/must-ai-workshop" target="_blank" class="hover:text-blue-500 flex items-center gap-1 transition">
+          <i data-lucide="github" class="w-3.5 h-3.5"></i> GitHub 專案
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Theme Script & Lucide Icons -->
+  <script>
+    // Lucide Icons initialization
+    lucide.createIcons();
+
+    // Dark Mode Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+    }
+
+    // Check system preference or localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      applyTheme(true);
+    } else {
+      applyTheme(false);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isCurrentlyDark);
+      localStorage.setItem('theme', !isCurrentlyDark ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>
