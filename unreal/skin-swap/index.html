@@ -1,0 +1,253 @@
+---
+title: 角色換皮：換骨架、換 Mesh
+description: 把 UE 5.8 第三人稱主角換成舊版 UE4 角色（以 Infinity Blade 的 Forge 示範），套上 AnimStarterPack 動作包。兩個步驟，附截圖。
+---
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色換皮操作手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg: #f5f6f4; --paper: #ffffff; --ink: #1d2226; --muted: #5b646b; --line: #d9ddd9;
+  --accent: #b77800; --accent-soft: #fff3d6; --node: #23292e; --node-ink: #e9eef1;
+  --ok: #2f7d4a; --ok-soft: #e6f4ea; --warn: #b3412e; --warn-soft: #fbe9e5;
+  --font-body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15191c; --paper: #1c2125; --ink: #e6e9e7; --muted: #9aa4aa; --line: #30373c;
+    --accent: #f0b13a; --accent-soft: #3a2f17; --node: #0e1113; --node-ink: #e9eef1;
+    --ok: #6cc28a; --ok-soft: #1c3124; --warn: #f08a76; --warn-soft: #3b211c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15191c; --paper: #1c2125; --ink: #e6e9e7; --muted: #9aa4aa; --line: #30373c;
+  --accent: #f0b13a; --accent-soft: #3a2f17; --node: #0e1113; --node-ink: #e9eef1;
+  --ok: #6cc28a; --ok-soft: #1c3124; --warn: #f08a76; --warn-soft: #3b211c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.75; margin: 0; padding-inline: 16px; padding-block: 0 4rem; }
+.wrap { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; } nav.toc { display: none; } }
+nav.toc { position: sticky; top: 0; align-self: start; padding-top: 2.5rem; font-size: 0.85rem; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 0.2rem 0.5rem; border-left: 2px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; max-width: 52rem; }
+.crumb { font-size: 0.85rem; padding-top: 1.5rem; color: var(--muted); }
+.crumb a { color: var(--muted); }
+header.cover { padding-block: 1.5rem 1.5rem; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-weight: 900; font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.25; margin: 0.4rem 0 0.8rem; text-wrap: balance; }
+h2 { font-weight: 700; font-size: 1.5rem; line-height: 1.35; margin: 0 0 0.6rem; display: flex; gap: 0.7rem; align-items: baseline; text-wrap: balance; }
+h2 .no { font-family: var(--font-mono); font-size: 0.95rem; color: var(--paper); background: var(--accent); border-radius: 4px; padding: 0.05rem 0.45rem; flex: none; }
+h3 { font-size: 1.15rem; margin: 2rem 0 0.4rem; display: flex; gap: 0.6rem; align-items: baseline; }
+h3 .no { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 4px; padding: 0 0.35rem; flex: none; }
+section { padding-block: 2.2rem; border-bottom: 1px solid var(--line); scroll-margin-top: 1rem; }
+p { margin: 0.6rem 0; }
+.lead { color: var(--muted); font-size: 1.05rem; max-width: 42rem; }
+figure { margin: 1rem 0 1.4rem; }
+figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--node); }
+figure.narrow img { max-width: min(100%, 26rem); }
+figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 0.45rem; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; align-items: start; }
+.pair > * { min-width: 0; }
+ol.steps { padding-left: 1.6rem; margin: 0.6rem 0; display: grid; gap: 0.35rem; }
+ol.steps li::marker { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+.mk { display: inline-grid; place-items: center; width: 1.35em; height: 1.35em; border-radius: 50%; background: #e62828; color: #fff; font-family: var(--font-mono); font-size: 0.78em; font-weight: 700; vertical-align: 0.08em; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 0.05rem 0.35rem; border-radius: 4px; overflow-wrap: anywhere; }
+.ui { font-weight: 700; background: var(--node); color: var(--node-ink); padding: 0.05rem 0.45rem; border-radius: 4px; font-size: 0.92em; white-space: nowrap; }
+table { border-collapse: collapse; width: 100%; font-size: 0.94rem; margin: 0.8rem 0; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 0.45rem 0.7rem; text-align: left; vertical-align: top; }
+th { background: var(--paper); }
+.box { border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1.2rem 0; border: 1px solid var(--line); background: var(--paper); }
+.box > :first-child { margin-top: 0; } .box > :last-child { margin-bottom: 0; }
+.box .t { font-weight: 700; display: block; margin-bottom: 0.2rem; }
+.box.note { border-left: 4px solid var(--accent); background: var(--accent-soft); }
+.box.warn { border-left: 4px solid var(--warn); background: var(--warn-soft); }
+.box.ok { border-left: 4px solid var(--ok); background: var(--ok-soft); }
+ul.check { list-style: none; padding-left: 0; display: grid; gap: 0.3rem; }
+ul.check li::before { content: "☐ "; color: var(--accent); font-weight: 700; }
+.flow { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 1rem 0; }
+.flow .chip { background: var(--paper); border: 1.5px solid var(--line); border-radius: 8px; padding: 0.5rem 0.8rem; text-align: center; min-width: 9rem; flex: 1 1 9rem; }
+.flow .chip b { display: block; }
+.flow .chip small { color: var(--muted); overflow-wrap: anywhere; }
+.flow .chip.key { border-color: var(--accent); background: var(--accent-soft); }
+.flow .arr { color: var(--muted); font-weight: 700; }
+footer { color: var(--muted); font-size: 0.85rem; padding-top: 2rem; }
+</style>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="目錄">
+  <ol>
+    <li><a href="#s0">0　開始之前</a></li>
+    <li><a href="#s1">1　換骨架</a></li>
+    <li><a href="#s2">2　換 Mesh</a></li>
+    <li><a href="#s3">3　測試</a></li>
+    <li><a href="#tip">提醒：腳黏在地上</a></li>
+    <li><a href="#faq">常見問題</a></li>
+    <li><a href="#done">驗收清單</a></li>
+  </ol>
+</nav>
+<main>
+<div class="crumb"><a href="../">Unreal 教學專區</a> › 角色換皮</div>
+<header class="cover">
+  <div class="eyebrow">UE 5.8 · 第三人稱範本 · AnimStarterPack</div>
+  <h1>角色換皮：換骨架、換 Mesh</h1>
+  <p class="lead">把第三人稱範本的主角，換成手上的舊版（UE4）角色，並套上 AnimStarterPack 動作包的動作。只要兩個步驟：<strong>先幫角色換骨架，再把主角的 Mesh 換掉</strong>。本手冊以 Infinity Blade Warriors 裡的 <code>SK_CharM_Forge</code> 示範。</p>
+</header>
+
+<section id="s0">
+  <h2><span class="no">0</span>開始之前</h2>
+  <p>你需要一個 <strong>UE 5.8 第三人稱範本</strong>的專案，並且已經加入下面兩個素材包：</p>
+  <table>
+    <tr><th>素材包</th><th>用途</th><th>在 Content 裡的資料夾</th></tr>
+    <tr><td>AnimStarterPack</td><td>提供動作（走、跑、跳、持槍）和動畫藍圖</td><td><code>AnimStarterPack</code></td></tr>
+    <tr><td>Infinity Blade: Warriors</td><td>提供角色外觀（Skin）</td><td><code>InfinityBladeWarriors/Character/CompleteCharacters</code></td></tr>
+  </table>
+  <h3>先懂一個觀念：動作要跟著「骨架」走</h3>
+  <p>一個會動的角色由三樣東西組成。動作是記錄「每根骨頭怎麼轉」，所以<strong>角色和動作必須用同一份骨架</strong>，動作才套得上去。</p>
+  <div class="flow" role="img" aria-label="角色外觀 Mesh、骨架 Skeleton、動作 Animation 三者要共用同一份骨架">
+    <div class="chip"><b>角色外觀</b><small>Skeletal Mesh<br>（例：SK_CharM_Forge）</small></div>
+    <span class="arr">→ 綁在 →</span>
+    <div class="chip key"><b>骨架</b><small>Skeleton<br>newUE4_Mannequin_Skeleton</small></div>
+    <span class="arr">← 綁在 ←</span>
+    <div class="chip"><b>動作</b><small>Animation<br>（AnimStarterPack）</small></div>
+  </div>
+  <p>Forge 原本綁的是另一份骨架（<code>UE4_Mannequin_Skeleton</code>，放在別的素材包裡），所以 AnimStarterPack 的動作套不上去。第 1 步就是把它改綁到 AnimStarterPack 的骨架 <code>newUE4_Mannequin_Skeleton</code>。</p>
+  <div class="box note"><span class="t">為什麼不能直接用 5.8 範本的動作？</span>5.8 範本的主角（Manny / Quinn）用的是 <strong>UE5 骨架</strong>，舊角色用的是 <strong>UE4 骨架</strong>，兩者不同。所以這份手冊改用 AnimStarterPack（UE4 骨架）的動作和動畫藍圖。</div>
+</section>
+
+<section id="s1">
+  <h2><span class="no">1</span>換骨架：Assign Skeleton</h2>
+  <p>把 Forge 改綁到 AnimStarterPack 的骨架。</p>
+
+  <h3><span class="no">1-1</span>在內容瀏覽器找到角色</h3>
+  <ol class="steps">
+    <li>在 Content Browser 打開 <code>Content › InfinityBladeWarriors › Character › CompleteCharacters</code>。<span class="mk">1</span></li>
+    <li>縮圖沒有顯示名字，不好找：在搜尋框輸入 <code>Forge</code> 篩選。<span class="mk">2</span></li>
+    <li>點選<strong>底線是粉紅色</strong>的那一個（粉紅色代表 Skeletal Mesh），就是 <code>SK_CharM_Forge</code>。<span class="mk">3</span>滑鼠停在縮圖上會顯示完整名稱。</li>
+  </ol>
+  <figure><img src="img/01_browser.png" alt="Content Browser 位於 CompleteCharacters 資料夾，搜尋框輸入 Forge，選取底線粉紅色的 SK_CharM_Forge" loading="lazy"><figcaption>篩選後剩 5 個資產，前 4 個是貼圖和材質，最右邊才是角色。</figcaption></figure>
+
+  <h3><span class="no">1-2</span>右鍵 › Skeleton › Assign Skeleton</h3>
+  <ol class="steps">
+    <li>對 Forge 按<strong>右鍵</strong>。<span class="mk">1</span></li>
+    <li>滑鼠移到 <span class="ui">Skeleton</span>，右邊會展開子選單。<span class="mk">2</span></li>
+    <li>點 <span class="ui">Assign Skeleton</span>。<span class="mk">3</span></li>
+  </ol>
+  <figure><img src="img/02_assign.png" alt="右鍵選單中 Skeleton 子選單展開，選取 Assign Skeleton" loading="lazy"><figcaption><span class="ui">Skeleton</span> 在選單上半部「SKELETAL MESH ACTIONS」區。舊版 UE 這一項叫 Skeletal Mesh，5.8 改名為 Skeleton。</figcaption></figure>
+
+  <h3><span class="no">1-3</span>選 AnimStarterPack 的骨架</h3>
+  <p>會跳出 <strong>Choose Skeleton</strong> 視窗。</p>
+  <ol class="steps">
+    <li>在搜尋框輸入 <code>newUE4</code>。<span class="mk">1</span></li>
+    <li>點選唯一的結果 <code>newUE4_Mannequin_Skeleton</code>。<span class="mk">2</span></li>
+    <li>下方會出現<strong>骨頭對照表</strong>：左邊是 Forge 目前的骨頭，右邊是新骨架的骨頭。名字一一對上（root→root、pelvis→pelvis…），代表可以換。<span class="mk">3</span></li>
+    <li>按 <span class="ui">Accept</span>。<span class="mk">4</span></li>
+  </ol>
+  <figure class="narrow"><img src="img/03_dialog.png" alt="Choose Skeleton 視窗：搜尋 newUE4，選取 newUE4_Mannequin_Skeleton，下方骨頭對照表，Accept 按鈕" loading="lazy"><figcaption>清單裡有很多名字相近的骨架（UE4_Mannequin_Skeleton、SK_Mannequin_Skeleton…），用搜尋才不會選錯。</figcaption></figure>
+
+  <h3><span class="no">1-4</span>存檔，並確認換成功</h3>
+  <ol class="steps">
+    <li>按下 Accept 後，Forge 縮圖左下角會出現 <code>*</code>，代表<strong>還沒存檔</strong>。選取 Forge 按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 存檔。<span class="mk">1</span></li>
+    <li>確認：滑鼠停在 Forge 縮圖上，提示框的 <strong>Skeleton</strong> 那一行要顯示 <code>…/AnimStarterPack/UE4_Mannequin/Mesh/newUE4_Mannequin_Skeleton</code>。<span class="mk">2</span></li>
+  </ol>
+  <figure><img src="img/04_verify.png" alt="滑鼠停在 SK_CharM_Forge 上，提示框的 Skeleton 欄位顯示 newUE4_Mannequin_Skeleton" loading="lazy"><figcaption>Skeleton 那一行是 newUE4_Mannequin_Skeleton，第 1 步就完成了。</figcaption></figure>
+</section>
+
+<section id="s2">
+  <h2><span class="no">2</span>換 Mesh：改主角藍圖</h2>
+  <p>打開主角藍圖 <code>Content › ThirdPerson › Blueprints › BP_ThirdPersonCharacter</code>，只改 Mesh 元件的兩個欄位。</p>
+
+  <h3><span class="no">2-1</span>點選 Mesh 元件</h3>
+  <ol class="steps">
+    <li>在左上 <strong>Components</strong> 面板點 <span class="ui">Mesh (CharacterMesh0)</span>。<span class="mk">1</span></li>
+    <li>右邊 Details 會出現要改的兩格：<strong>Skeletal Mesh Asset</strong><span class="mk">2</span>和 <strong>Anim Class</strong><span class="mk">3</span>。目前是 5.8 範本的 Quinn 和 <code>ABP_Unarmed</code>。</li>
+  </ol>
+  <figure><img src="img/05_bp_mesh.png" alt="BP_ThirdPersonCharacter 藍圖編輯器，Components 選取 Mesh，Details 中標出 Skeletal Mesh Asset 與 Anim Class" loading="lazy"><figcaption>修改前：Skeletal Mesh Asset = SKM_Quinn_Simple、Anim Class = ABP_Unarmed。Details 太窄時，可以拖曳它左邊的邊框把面板拉寬。</figcaption></figure>
+
+  <h3><span class="no">2-2</span>Skeletal Mesh Asset → SK_CharM_Forge</h3>
+  <ol class="steps">
+    <li>點 Skeletal Mesh Asset 的下拉選單，在搜尋框輸入 <code>SK_CharM_Forge</code>。<span class="mk">1</span></li>
+    <li>點選搜尋結果。<span class="mk">2</span>材質會自動換成 Forge 的材質。</li>
+  </ol>
+  <figure class="narrow"><img src="img/06_mesh_pick.png" alt="Skeletal Mesh Asset 下拉選單，搜尋 SK_CharM_Forge 並選取" loading="lazy"><figcaption>先換 Mesh，再換 Anim Class。</figcaption></figure>
+
+  <h3><span class="no">2-3</span>Anim Class → UE4ASP_HeroTPP_AnimBlueprint</h3>
+  <ol class="steps">
+    <li>點 Anim Class 的下拉選單，搜尋 <code>UE4ASP</code>。<span class="mk">1</span></li>
+    <li>點選 <code>UE4ASP_HeroTPP_AnimBlueprint</code>（AnimStarterPack 附的動畫藍圖）。<span class="mk">2</span></li>
+  </ol>
+  <figure><img src="img/07_anim_pick.png" alt="Anim Class 下拉選單，搜尋 UE4ASP，選取 UE4ASP_HeroTPP_AnimBlueprint" loading="lazy"></figure>
+  <p>選好之後，左邊預覽視窗裡的 Forge 會立刻擺出<strong>持槍待機</strong>的姿勢<span class="mk">1</span>，Details 兩格都換好了<span class="mk">2</span><span class="mk">3</span>。</p>
+  <figure><img src="img/08_after.png" alt="修改後：預覽中 Forge 持槍待機，Anim Class 為 UE4ASP_HeroTPP_AnimBlueprint，Skeletal Mesh Asset 為 SK_CharM_Forge" loading="lazy"><figcaption>Location (0, 0, -89) 和 Rotation (Yaw 270) 都不用改。</figcaption></figure>
+
+  <h3><span class="no">2-4</span>Compile、Save</h3>
+  <ol class="steps">
+    <li>按左上角 <span class="ui">Compile</span>。<span class="mk">1</span></li>
+    <li>下方 Compiler Results 出現 <strong>successful</strong>。<span class="mk">2</span></li>
+    <li>按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 存檔，然後關掉藍圖視窗。</li>
+  </ol>
+  <figure><img src="img/09_compile.png" alt="按下 Compile 後 Compiler Results 顯示 Compile of BP_ThirdPersonCharacter successful" loading="lazy"></figure>
+</section>
+
+<section id="s3">
+  <h2><span class="no">3</span>測試</h2>
+  <p>回到主編輯器按 ▶ Play，用 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 走動、<kbd>空白鍵</kbd>跳。</p>
+  <figure><img src="img/10_pie_idle.png" alt="遊戲畫面：Forge 持槍姿勢站在地圖中" loading="lazy"><figcaption>主角換成 Forge 了。</figcaption></figure>
+  <figure><img src="img/11_pie_run.png" alt="遊戲畫面連續三張：Forge 持槍姿勢向前跑，雙腳交替抬起" loading="lazy"><figcaption>跑步時雙腳會交替抬起。</figcaption></figure>
+  <div class="box ok"><span class="t">為什麼是持槍的姿勢？</span>AnimStarterPack 是一套<strong>步槍動作包</strong>，所以雙手會舉在胸前像拿著槍。這是刻意的：<strong>下一課會幫角色裝上一把真的槍</strong>，手就剛好握在槍上。</div>
+</section>
+
+<section id="tip">
+  <h2><span class="no">!</span>提醒：腳黏在地上，沒有抬起來</h2>
+  <p>照這份手冊做（AnimStarterPack 的動畫藍圖）<strong>不會</strong>遇到這個問題。只有當你想保留 5.8 範本原本的<strong>空手動作</strong>，改用 <span class="ui">Retarget Animations</span> 把 <code>ABP_Unarmed</code> 轉到舊骨架時才會遇到：角色走路、跑步時腳黏在地板上滑動，不會抬腳。</p>
+  <p><strong>原因：</strong>5.8 範本的動畫藍圖最後面有一個 <span class="ui">Control Rig</span> 節點（腳步 IK），它是照 UE5 骨架寫的。換成舊骨架後，它會把腳壓在地上。</p>
+  <p><strong>處理方法：</strong>打開轉好的動畫藍圖 → 左側 <strong>AnimGraph</strong>：</p>
+  <ol class="steps">
+    <li>刪掉 <span class="ui">Control Rig</span> 節點。<span class="mk">1</span></li>
+    <li>一起刪掉只接給它用的 <span class="ui">NOT</span> 和 <span class="ui">Is Falling</span>。<span class="mk">2</span></li>
+    <li>把 <span class="ui">Slot 'DefaultSlot'</span> 的輸出直接拉到 <span class="ui">Output Pose</span>。</li>
+    <li>Compile → Save。</li>
+  </ol>
+  <div class="pair">
+    <figure><img src="img/tip_before.png" alt="修改前的 AnimGraph：Slot DefaultSlot 接 Control Rig 再接 Output Pose，下方有 NOT 與 Is Falling" loading="lazy"><figcaption>修改前：Slot → <strong>Control Rig</strong> → Output Pose。</figcaption></figure>
+    <figure><img src="img/tip_after.png" alt="修改後的 AnimGraph：Slot DefaultSlot 直接接 Output Pose" loading="lazy"><figcaption>修改後：Slot 直接接 Output Pose。<span class="mk">1</span></figcaption></figure>
+  </div>
+  <div class="box warn"><span class="t">只把 Alpha 改成 0 沒有用</span>Control Rig 節點上的 Alpha 是一個接腳，改屬性面板的值不會生效。直接刪掉節點最乾淨。</div>
+</section>
+
+<section id="faq">
+  <h2><span class="no">?</span>常見問題</h2>
+  <table>
+    <tr><th>狀況</th><th>原因與處理</th></tr>
+    <tr><td>右鍵選單找不到 Skeletal Mesh</td><td>5.8 改名為 <span class="ui">Skeleton</span>，在選單上半部（見 1-2 的圖）。</td></tr>
+    <tr><td>Choose Skeleton 清單裡一堆骨架，不知道選哪個</td><td>搜尋 <code>newUE4</code>，只會剩一個。</td></tr>
+    <tr><td>骨頭對照表左右的名字對不上</td><td>這招只適用 <strong>UE4 人形角色</strong>（骨頭名稱是 root、pelvis、spine_01…）。怪物、蜘蛛、狼這類骨架不同的角色不能用，按 Cancel。</td></tr>
+    <tr><td>重開專案後角色又變回原本的骨架</td><td>Assign Skeleton 之後沒存檔。看縮圖上有沒有 <code>*</code>，有的話按 <kbd>Ctrl</kbd>+<kbd>S</kbd>。</td></tr>
+    <tr><td>Anim Class 搜尋不到 UE4ASP</td><td>確認 AnimStarterPack 有加入專案（Content 裡有 <code>AnimStarterPack</code> 資料夾）。</td></tr>
+    <tr><td>角色浮在半空或陷進地板</td><td>確認 Mesh 的 Location Z 是 <code>-89</code>、Rotation Yaw 是 <code>270</code>（範本預設值，不要動）。</td></tr>
+    <tr><td>想換成別的角色</td><td>同樣兩步：對那個角色做 1-2～1-4，再把 Skeletal Mesh Asset 換成它。Infinity Blade Warriors 的其他角色多半已經是 <code>newUE4_Mannequin_Skeleton</code>，可以直接做第 2 步（滑鼠停在縮圖上看 Skeleton 那一行就知道）。</td></tr>
+  </table>
+</section>
+
+<section id="done">
+  <h2><span class="no">✓</span>驗收清單</h2>
+  <ul class="check">
+    <li>滑鼠停在 <code>SK_CharM_Forge</code> 上，Skeleton 顯示 <code>newUE4_Mannequin_Skeleton</code>，縮圖上沒有 <code>*</code>。</li>
+    <li><code>BP_ThirdPersonCharacter</code> 的 Mesh：Skeletal Mesh Asset = <code>SK_CharM_Forge</code>、Anim Class = <code>UE4ASP_HeroTPP_AnimBlueprint</code>。</li>
+    <li>藍圖 Compile 成功並已存檔。</li>
+    <li>按 ▶ 後，主角是 Forge，待機是持槍姿勢，走跑時雙腳會抬起，按空白鍵會跳。</li>
+  </ul>
+  <footer>Unreal Engine 5.8 · 截圖取自課程專案 · QQ 老師 Unreal 教學專區</footer>
+</section>
+</main>
+</div>
+</body>
+</html>
