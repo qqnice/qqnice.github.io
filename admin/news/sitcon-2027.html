@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【活動】SITCON 2027 學生計算機年會「遠道而來票」與「開源築夢計畫」開放申請 - 國立臺中科技大學 資訊管理系</title>
+  <meta name="description" content="SITCON 2027 學生計算機年會將於 2027 年 3 月 13 日假中央研究院舉行，現正開放遠道而來票及開源築夢計畫申請，提供偏鄉、離島、海外學生保證入場與交通住宿補助！">
+  <meta property="og:title" content="【活動】SITCON 2027 學生計算機年會「遠道而來票」與「開源築夢計畫」開放申請">
+  <meta property="og:description" content="全東亞最大學生資訊研討會・免費索票・名額保證・交通住宿補助">
+  <meta property="og:type" content="article">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --primary-dark: #075985;
+      --accent: #10b981;
+      --accent-light: #d1fae5;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --bg-body: #ffffff;
+      --bg-surface: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .nav-badge {
+      background: #0284c7;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .nav-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+    }
+    .nav-btn:hover {
+      background: var(--bg-surface);
+      border-color: #cbd5e1;
+    }
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .nav-btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 0;
+      font-size: 13px;
+    }
+    .breadcrumb-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .breadcrumb-container a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .breadcrumb-container a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+    .breadcrumb-separator {
+      color: var(--text-light);
+    }
+
+    /* Main Container */
+    .main-wrap {
+      max-width: 1040px;
+      margin: 32px auto 0;
+      padding: 0 20px;
+    }
+
+    /* Header Article Box */
+    .article-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .article-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Highlights 4-Grid Cards */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .hl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .hl-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+    .hl-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+    .hl-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hl-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.4;
+    }
+    .hl-card-date .hl-value {
+      color: #2563eb;
+    }
+    .hl-card-subsidy .hl-value {
+      color: #059669;
+    }
+
+    /* CTA Banner */
+    .cta-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid #334155;
+    }
+    .cta-content h2 {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #38bdf8;
+    }
+    .cta-content p {
+      font-size: 14px;
+      opacity: 0.92;
+      line-height: 1.5;
+    }
+    .cta-actions {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .btn-cta-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-cta-main:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+    }
+    .btn-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 11px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-cta-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Content Layout */
+    .content-body {
+      font-size: 15px;
+      color: #334155;
+    }
+    .content-body p {
+      margin-bottom: 18px;
+      text-align: justify;
+    }
+
+    /* Tags */
+    .location-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 24px;
+    }
+    .location-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    /* Section Headings */
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 32px 0 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      letter-spacing: -0.2px;
+    }
+
+    /* Lists */
+    .theme-list {
+      list-style: none;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .theme-item {
+      position: relative;
+      padding: 8px 0 8px 22px;
+      border-bottom: 1px dashed var(--border-light);
+      line-height: 1.6;
+    }
+    .theme-item:last-child {
+      border-bottom: none;
+    }
+    .theme-item::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 18px;
+      position: absolute;
+      left: 6px;
+      top: 6px;
+    }
+    .theme-item ul {
+      margin: 8px 0 6px 16px;
+      list-style-type: disc;
+    }
+    .theme-item ul li {
+      padding: 3px 0;
+    }
+
+    /* Attachments Area */
+    .attachments-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 36px 0 24px;
+    }
+    .attachments-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .attachments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .attachment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+    .attachment-row:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateX(3px);
+    }
+    .att-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .att-icon {
+      width: 32px;
+      height: 32px;
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .att-download-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    /* Contact Card */
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .contact-card h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      font-size: 14px;
+    }
+    .contact-row {
+      display: flex;
+      gap: 8px;
+    }
+    .contact-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .contact-value a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .contact-value a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .page-footer {
+      max-width: 1040px;
+      margin: 48px auto 0;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 820px) {
+      .highlights-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .cta-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .cta-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+      .page-footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .highlights-grid {
+        grid-template-columns: 1fr;
+      }
+      .article-title {
+        font-size: 21px;
+      }
+      .nav-title {
+        display: none;
+      }
+    }
+
+    @media print {
+      .top-nav, .breadcrumb-bar, .cta-banner, .nav-actions, .attachments-card, .page-footer {
+        display: none !important;
+      }
+      .main-wrap {
+        margin-top: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Bar -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="https://qqnice.github.io/admin/News/" class="nav-brand">
+        <span class="nav-badge">NUTC IM</span>
+        <span class="nav-title">國立臺中科技大學 資訊管理系</span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://qqnice.github.io/admin/News/" class="nav-btn">
+          <span>←</span> 返回最新公告
+        </a>
+        <button class="nav-btn" onclick="window.print()">
+          <span>🖨️</span> 列印
+        </button>
+        <button class="nav-btn nav-btn-primary" onclick="copyShareLink()">
+          <span>🔗</span> 分享本頁
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumbs -->
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-container">
+      <a href="https://im.nutc.edu.tw/">系網首頁</a>
+      <span class="breadcrumb-separator">/</span>
+      <a href="https://qqnice.github.io/admin/News/">最新公告</a>
+      <span class="breadcrumb-separator">/</span>
+      <a href="https://qqnice.github.io/admin/News/#activity">活動公告</a>
+      <span class="breadcrumb-separator">/</span>
+      <span style="color: #0f172a; font-weight: 600;">SITCON 2027 學生計算機年會專案申請</span>
+    </div>
+  </div>
+
+  <!-- Main Content Wrap -->
+  <main class="main-wrap">
+    
+    <!-- Article Header -->
+    <article class="article-header">
+      <div class="category-pill">
+        <span>🎉</span> 活動公告 (activity)
+      </div>
+      <h1 class="article-title">【活動】SITCON 2027 學生計算機年會「遠道而來票」與「開源築夢計畫」開放申請（交通住宿補助・保證入場）</h1>
+      <div class="meta-bar">
+        <div class="meta-item">
+          <span>📅</span> 發布日期：2026.11.06
+        </div>
+        <div class="meta-item">
+          <span>🏛️</span> 主辦單位：財團法人開放文化基金會、學生計算機年會社群 (SITCON)
+        </div>
+        <div class="meta-item">
+          <span>📍</span> 地點：中央研究院 人文社會科學館
+        </div>
+        <div class="meta-item">
+          <span>⏱️</span> 報名機制：採先到先審制（名額有限）
+        </div>
+      </div>
+    </article>
+
+    <!-- 4-Grid Highlights -->
+    <section class="highlights-grid">
+      <div class="hl-card hl-card-date">
+        <div class="hl-label">📅 年會時間</div>
+        <div class="hl-value">2027.03.13 (六) 登場</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">📍 年會地點</div>
+        <div class="hl-value">中研院 人文社會科學館</div>
+      </div>
+      <div class="hl-card hl-card-subsidy">
+        <div class="hl-label">🚄 專案票種與補助</div>
+        <div class="hl-value">名額保證 / 交通住宿補助</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">⏰ 邀請碼報名期限</div>
+        <div class="hl-value">須於 2027/02/05 前報名</div>
+      </div>
+    </section>
+
+    <!-- Interactive CTA Banner -->
+    <section class="cta-banner">
+      <div class="cta-content">
+        <h2>🚀 SITCON 2027 學生計算機年會現正開放專案申請！</h2>
+        <p>東亞最大學生自主籌辦資訊年會！提供偏鄉、離島、海外地區學生保證入場，以及交通住宿補助。</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn-cta-main" href="https://i.sitcon.org/afar-form" target="_blank" rel="noopener noreferrer">
+          <span>🚄</span> 申請遠道而來票
+        </a>
+        <a class="btn-cta-secondary" href="https://i.sitcon.org/dream-form" target="_blank" rel="noopener noreferrer">
+          <span>🌱</span> 申請開源築夢計畫
+        </a>
+      </div>
+    </section>
+
+    <!-- Article Content -->
+    <section class="content-body">
+      <p>財團法人開放文化基金會協助學生計算機年會社群（SITCON）辦理「<strong>SITCON 2027 學生計算機年會</strong>」，期望透過資訊科技交流與知識分享，推廣資訊教育及開放原始碼（Open Source）文化。SITCON 為學生自主籌辦、全東亞最大的學生資訊研討會，全體活動均<strong>免費索票參加</strong>！</p>
+      <p>為降低地域及經濟因素對學生參與資訊交流活動之限制，特別規劃<strong>「遠道而來票」</strong>及<strong>「開源築夢計畫」</strong>，提供符合資格之在學學生申請，歡迎各位師長轉知並推薦同學踴躍提出申請！</p>
+
+      <div class="location-tags">
+        <span class="location-tag">🏛️ 中央研究院 人文社會科學館</span>
+        <span class="location-tag">📅 2027.03.13 (六)</span>
+        <span class="location-tag">🎟️ 免費索票參加</span>
+        <span class="location-tag">🚄 交通與住宿補助方案</span>
+        <span class="location-tag">🌱 先到先審制</span>
+      </div>
+
+      <h3 class="section-title">兩大申請方案詳情</h3>
+      <ul class="theme-list">
+        <li class="theme-item">
+          <strong>🚄 遠道而來票</strong>：
+          <ul>
+            <li><strong>適用對象</strong>：偏遠地區、離島及海外地區之在學學生。</li>
+            <li><strong>保障權益</strong>：經審核通過後可<strong>保證取得年會入場資格（入場票券乙張）</strong>，惟不提供交通及住宿補助。</li>
+            <li><strong>計畫說明</strong>：<a href="https://i.sitcon.org/afar" target="_blank" rel="noopener noreferrer" style="color: #0284c7;">https://i.sitcon.org/afar</a></li>
+            <li><strong>申請表單</strong>：<a href="https://i.sitcon.org/afar-form" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: 600;">https://i.sitcon.org/afar-form</a></li>
+          </ul>
+        </li>
+        <li class="theme-item">
+          <strong>🌱 開源築夢計畫</strong>：
+          <ul>
+            <li><strong>適用對象</strong>：經濟負擔較重、有交通或住宿補助需求之在學學生。</li>
+            <li><strong>補助內容</strong>：經審核通過後可取得年會入場資格，並得依計畫規定申請<strong>往返交通費及活動前一晚之住宿補助（採實報實銷）</strong>。</li>
+            <li><strong>計畫說明</strong>：<a href="https://i.sitcon.org/dream" target="_blank" rel="noopener noreferrer" style="color: #0284c7;">https://i.sitcon.org/dream</a></li>
+            <li><strong>申請表單</strong>：<a href="https://i.sitcon.org/dream-form" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: 600;">https://i.sitcon.org/dream-form</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3 class="section-title">申請須知與關鍵期程</h3>
+      <ul class="theme-list">
+        <li class="theme-item"><strong>審查機制</strong>：採<strong>先到先審制</strong>，額滿即止，敬請符合資格同學儘早提出申請。</li>
+        <li class="theme-item"><strong>必備文件</strong>：申請人應依各方案規定檢附在學與相關證明文件，並完成線上表單填寫。</li>
+        <li class="theme-item"><strong>正式報名期限</strong>：審核通過後將獲發年會報名邀請碼，須於 <strong>民國 116 年 2 月 5 日（2027/02/05）前</strong>持邀請碼完成正式報名，始取得年會入場資格。</li>
+        <li class="theme-item"><strong>年會時間地點</strong>：
+          <ul>
+            <li><strong>時間</strong>：民國 116 年 3 月 13 日（星期六）</li>
+            <li><strong>地點</strong>：中央研究院 人文社會科學館（台北市南港區研究院路二段128號）</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3 class="section-title">相關網站與聯絡資訊</h3>
+      <ul class="theme-list">
+        <li class="theme-item"><strong>SITCON 年會官方網站</strong>：<a href="https://sitcon.org/" target="_blank" rel="noopener noreferrer" style="color: #0284c7;">https://sitcon.org/</a></li>
+        <li class="theme-item"><strong>宣傳海報線上檔案</strong>：<a href="https://i.sitcon.org/afar-poster" target="_blank" rel="noopener noreferrer" style="color: #0284c7;">https://i.sitcon.org/afar-poster</a></li>
+        <li class="theme-item"><strong>轉知用參考文字</strong>：<a href="https://i.sitcon.org/afar-text" target="_blank" rel="noopener noreferrer" style="color: #0284c7;">https://i.sitcon.org/afar-text</a></li>
+        <li class="theme-item"><strong>票務聯絡窗口</strong>：聯絡人 蕭爾西，信箱：<a href="mailto:ticket@sitcon.org" style="color: #0284c7; font-weight: 600;">ticket@sitcon.org</a></li>
+      </ul>
+    </section>
+
+    <!-- Attachments Box -->
+    <section class="attachments-card">
+      <div class="attachments-title">
+        <span>📎</span> 公告附件下載（公文、海報與說明）
+      </div>
+      <div class="attachments-list">
+        <a class="attachment-row" href="assets/sitcon_2027_official_letter.pdf" download>
+          <div class="att-info">
+            <div class="att-icon">PDF</div>
+            <span>2027年SITCON 學生計算機年會＿公文.PDF（開放文化基金會函文）</span>
+          </div>
+          <span class="att-download-badge">點擊下載</span>
+        </a>
+        <a class="attachment-row" href="assets/sitcon_2027_poster.pdf" download>
+          <div class="att-info">
+            <div class="att-icon">PDF</div>
+            <span>2027年SITCON 學生計算機年會＿附件1.pdf（官方宣傳海報）</span>
+          </div>
+          <span class="att-download-badge">點擊下載</span>
+        </a>
+        <a class="attachment-row" href="assets/sitcon_2027_reference_text.pdf" download>
+          <div class="att-info">
+            <div class="att-icon">PDF</div>
+            <span>2027年SITCON 學生計算機年會＿附件2.pdf（轉知用參考文字）</span>
+          </div>
+          <span class="att-download-badge">點擊下載</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Contact Box -->
+    <section class="contact-card">
+      <h3>📞 年會主辦單位聯絡資訊</h3>
+      <div class="contact-grid">
+        <div class="contact-row">
+          <span class="contact-label">主辦單位：</span>
+          <span class="contact-value">財團法人開放文化基金會 / SITCON 社群</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">票務窗口：</span>
+          <span class="contact-value">蕭爾西</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">聯絡信箱：</span>
+          <span class="contact-value"><a href="mailto:ticket@sitcon.org">ticket@sitcon.org</a></span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">年會官網：</span>
+          <span class="contact-value"><a href="https://sitcon.org/" target="_blank" rel="noopener noreferrer">https://sitcon.org/</a></span>
+        </div>
+        <div class="contact-row" style="grid-column: span 2;">
+          <span class="contact-label">年會地點：</span>
+          <span class="contact-value">中央研究院 人文社會科學館（台北市南港區研究院路二段128號）</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <div>國立臺中科技大學 資訊管理系 版權所有 © 2026</div>
+    <div class="footer-links">
+      <a href="https://im.nutc.edu.tw/">系所首頁</a>
+      <a href="https://qqnice.github.io/admin/News/">公告系統</a>
+      <a href="https://qqnice.github.io/admin/News/#activity">活動專區</a>
+    </div>
+  </footer>
+
+  <div id="toast">已複製連結至剪貼簿！</div>
+
+  <script>
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('已複製本頁連結，可直接分享！');
+      }).catch(() => {
+        showToast('請直接複製網址列連結。');
+      });
+    }
+  </script>
+</body>
+</html>
