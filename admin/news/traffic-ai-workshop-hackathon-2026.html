@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【活動】「交通AI工作坊」及「交通安全AI巡守隊-全國黑客松競賽」- 中區場次於本系舉辦 - 國立臺中科技大學 資訊管理系</title>
+  <meta name="description" content="交通AI工作坊中區場次將於 11/26 在臺中科大資管系舉辦，另有交通安全 AI 巡守隊黑客松競賽，歡迎踴躍報名！">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #10b981;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-body: #ffffff;
+      --bg-surface: #f8fafc;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.75;
+      padding-bottom: 60px;
+    }
+    .top-nav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .nav-badge {
+      background: #0284c7;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .nav-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: var(--bg-surface); }
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .nav-btn-primary:hover { background: var(--primary-hover); color: #ffffff; }
+    .breadcrumb-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 0;
+      font-size: 13px;
+    }
+    .breadcrumb-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .breadcrumb-container a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb-container a:hover { color: var(--primary); text-decoration: underline; }
+    .main-wrap { max-width: 1040px; margin: 32px auto 0; padding: 0 20px; }
+    .article-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .article-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .hl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      position: relative;
+    }
+    .hl-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+    .hl-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .hl-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .hl-highlight .hl-value { color: #e11d48; }
+    .hl-accent .hl-value { color: #059669; }
+    .cta-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    .cta-content h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; color: #38bdf8; }
+    .cta-content p { font-size: 14px; opacity: 0.92; }
+    .btn-cta-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-cta-main:hover { background: #0369a1; }
+    .content-body { font-size: 15px; color: #334155; }
+    .content-body p { margin-bottom: 18px; text-align: justify; }
+    .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px; }
+    .location-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 32px 0 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .theme-list {
+      list-style: none;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .theme-item {
+      position: relative;
+      padding: 8px 0 8px 22px;
+      border-bottom: 1px dashed var(--border-light);
+      line-height: 1.6;
+    }
+    .theme-item:last-child { border-bottom: none; }
+    .theme-item::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 18px;
+      position: absolute;
+      left: 6px;
+      top: 6px;
+    }
+    .theme-item ul { margin: 8px 0 6px 16px; list-style-type: disc; }
+    .theme-item ul li { padding: 3px 0; }
+    .prize {
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #a7f3d0;
+    }
+    .attachments-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 36px 0 24px;
+    }
+    .attachments-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .attachment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .attachment-row:hover { border-color: var(--primary); transform: translateX(3px); }
+    .att-info { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+    .att-icon {
+      width: 32px;
+      height: 32px;
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .att-download-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .contact-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
+    .contact-card p { font-size: 14px; line-height: 1.8; color: #334155; }
+    .contact-card a { color: var(--primary); text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+    .page-footer {
+      max-width: 1040px;
+      margin: 48px auto 0;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--primary); }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 820px) {
+      .highlights-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-banner { flex-direction: column; align-items: flex-start; }
+      .page-footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    @media (max-width: 540px) {
+      .highlights-grid { grid-template-columns: 1fr; }
+      .article-title { font-size: 21px; }
+      .nav-title { display: none; }
+    }
+    @media print {
+      .top-nav, .breadcrumb-bar, .cta-banner, .nav-actions, .attachments-card, .page-footer { display: none !important; }
+      .main-wrap { margin-top: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="https://qqnice.github.io/admin/News/" class="nav-brand">
+        <span class="nav-badge">NUTC IM</span>
+        <span class="nav-title">國立臺中科技大學 資訊管理系</span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://qqnice.github.io/admin/News/" class="nav-btn"><span>←</span> 返回最新公告</a>
+        <button class="nav-btn" onclick="window.print()"><span>🖨️</span> 列印</button>
+        <button class="nav-btn nav-btn-primary" onclick="copyShareLink()"><span>🔗</span> 分享本頁</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-container">
+      <a href="https://im.nutc.edu.tw/">系網首頁</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/">最新公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/#activity">活動公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <span style="color: #0f172a; font-weight: 600;">交通AI工作坊及全國黑客松競賽</span>
+    </div>
+  </div>
+
+  <main class="main-wrap">
+    <article class="article-header">
+      <div class="category-pill"><span>🤖</span> 活動公告 (activity)</div>
+      <h1 class="article-title">【活動】「交通AI工作坊」及「交通安全AI巡守隊-全國黑客松競賽」（中區場次於本系舉辦・歡迎踴躍報名）</h1>
+      <div class="meta-bar">
+        <div class="meta-item"><span>📅</span> 發布日期：2026.11.10</div>
+        <div class="meta-item"><span>🏛️</span> 主辦單位：主辦：龍華科技大學 ｜ 協辦：臺中科技大學資管系/人工智慧學程、中山大學電機系</div>
+        <div class="meta-item"><span>📍</span> 地點：中區工作坊：國立臺中科技大學 資訊管理系</div>
+      </div>
+    </article>
+
+    <section class="highlights-grid">
+      <div class="hl-card hl-highlight">
+        <div class="hl-label">🏫 中區工作坊</div>
+        <div class="hl-value">11/26(四)大學・11/27(五)高中</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">📍 中區地點</div>
+        <div class="hl-value">臺中科大資管系 (本系舉辦)</div>
+      </div>
+      <div class="hl-card hl-accent">
+        <div class="hl-label">🏆 全國黑客松</div>
+        <div class="hl-value">116年3月初賽・4/17決賽</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">🌟 計畫支持</div>
+        <div class="hl-value">國科會科普計畫補助支持</div>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <div class="cta-content">
+        <h2>交通 AI 工作坊及全國黑客松競賽線上報名</h2>
+        <p>國科會科普計畫！實作 AI 街景模型生成危險熱點圖，中區場次就在臺中科大資管系，歡迎踴躍報名！</p>
+      </div>
+      <div>
+        <a class="btn-cta-main" href="https://mmdmay.github.io/AITS/" target="_blank" rel="noopener noreferrer">
+          <span>🚀</span> 前往活動官方網站報名
+        </a>
+      </div>
+    </section>
+
+    <section class="content-body">
+      <p>為推廣人工智慧跨域應用及交通安全科普教育，龍華科技大學工業管理系執行 115 年度國科會科普計畫，盛大主辦<strong>「交通AI工作坊」</strong>及<strong>「交通安全AI巡守隊-全國黑客松競賽」</strong>！本活動由<strong>國立臺中科技大學資訊管理系／人工智慧應用工程學士學位學程</strong>及國立中山大學電機系共同協辦，<strong>中區工作坊特別選定於國立臺中科技大學（本系）舉辦</strong>，誠摯邀請全校師生與高中職同學熱烈報名參加！</p>
+
+<div class="location-tags">
+  <span class="location-tag">🏫 中區場次於本系舉辦（中科大資管）</span>
+  <span class="location-tag">📅 中區工作坊：11/26(四)大學場・11/27(五)高中職場</span>
+  <span class="location-tag">🤖 AI 街景危險熱點圖實作</span>
+  <span class="location-tag">🏆 全國黑客松競賽（初賽3月・決賽4/17）</span>
+  <span class="location-tag">🌟 國科會科普計畫支持</span>
+</div>
+
+<h3 class="section-title">活動緣起與實作內容</h3>
+<p>本計畫將街景照片或路口截圖，藉由 AI 模型的協助找出交通工程與道路設計的潛在危險。工作坊將深入培訓交通安全的科學理論與 AI 訓練模型，學員能實際操作 AI 模型生成周遭環境的<strong>「危險熱點圖」</strong>，進而應用所學組隊參加全國黑客松競賽，化身為守護生活周遭道路安全的數位巡守隊長！</p>
+
+<h3 class="section-title">交通 AI 工作坊時程與地點（北中南三區，請擇一參加）</h3>
+<ul class="theme-list">
+  <li class="theme-item">
+    <strong>📍 中區場次（國立臺中科技大學 資訊管理系／人工智慧學程）</strong>：
+    <ul>
+      <li><strong>11/26（四）大學部場次</strong>：大專院校在學學生。</li>
+      <li><strong>11/27（五）高中職場次</strong>：全國高中職在學學生。</li>
+      <li><em>※ 地點位於國立臺中科技大學校區，本系師生可就近在校參與！</em></li>
+    </ul>
+  </li>
+  <li class="theme-item">
+    <strong>📍 南區場次（國立中山大學 電機工程學系）</strong>：
+    <ul>
+      <li>12/03（四）大學部場次｜12/04（五）高中職場次。</li>
+    </ul>
+  </li>
+  <li class="theme-item">
+    <strong>📍 北部場次（龍華科技大學 工業管理系）</strong>：
+    <ul>
+      <li>12/15（二）大學部場次｜12/16（三）高中職場次。</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 class="section-title">交通安全 AI 巡守隊－全國黑客松競賽</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>線上初賽</strong>：民國 116 年 3 月份辦理，為期一個月。</li>
+  <li class="theme-item"><strong>實體決賽</strong>：民國 116 年 4 月 17 日（六）於龍華科技大學進行現場評審與展示。</li>
+  <li class="theme-item"><strong>競賽公假與補助</strong>：主辦單位函請各大專校院及高中職准予參賽師生公假，並依規定提供相關活動補助。</li>
+</ul>
+
+<h3 class="section-title">活動官網與聯絡資訊</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>活動官方網站</strong>：<a href="https://mmdmay.github.io/AITS/" target="_blank" rel="noopener noreferrer">https://mmdmay.github.io/AITS/</a>（包含線上報名表單與最新賽制公布）。</li>
+  <li class="theme-item"><strong>主辦單位</strong>：龍華科技大學 工業管理系</li>
+  <li class="theme-item"><strong>計畫主持人／聯絡窗口</strong>：梅明德 副教授</li>
+  <li class="theme-item"><strong>聯絡電話</strong>：(02) 8209-3211 分機 6119｜傳真：(02) 8209-3211 分機 6110</li>
+  <li class="theme-item"><strong>電子信箱</strong>：<a href="mailto:mdmay@mail.lhu.edu.tw">mdmay@mail.lhu.edu.tw</a></li>
+  <li class="theme-item"><strong>學校地址</strong>：333326 桃園市龜山區萬壽路一段300號</li>
+</ul>
+    </section>
+
+    <section class="attachments-card">
+      <div class="attachments-title"><span>📎</span> 公告附件下載</div>
+      <div class="attachments-list">
+        <a class="attachment-row" href="assets/traffic_ai_workshop_hackathon.pdf" download>
+  <div class="att-info">
+    <div class="att-icon">PDF</div>
+    <span>「交通AI工作坊」及「交通安全AI巡守隊-全國黑客松競賽」.PDF（龍華科大函文）</span>
+  </div>
+  <span class="att-download-badge">點擊下載</span>
+</a>
+      </div>
+    </section>
+
+    <section class="contact-card">
+      <h3>📞 聯絡資訊</h3>
+      <p>主辦單位：龍華科技大學 工業管理系<br>協辦單位：國立臺中科技大學 資訊管理系 / 人工智慧應用工程學士學位學程、國立中山大學 電機工程學系<br>聯絡人：梅明德 副教授｜電話：(02) 8209-3211 分機 6119｜信箱：<a href="mailto:mdmay@mail.lhu.edu.tw">mdmay@mail.lhu.edu.tw</a><br>活動官網：<a href="https://mmdmay.github.io/AITS/" target="_blank" rel="noopener noreferrer">https://mmdmay.github.io/AITS/</a></p>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div>國立臺中科技大學 資訊管理系 版權所有 © 2026</div>
+    <div class="footer-links">
+      <a href="https://im.nutc.edu.tw/">系所首頁</a>
+      <a href="https://qqnice.github.io/admin/News/">公告系統</a>
+    </div>
+  </footer>
+
+  <div id="toast">已複製連結至剪貼簿！</div>
+
+  <script>
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      });
+    }
+  </script>
+</body>
+</html>
