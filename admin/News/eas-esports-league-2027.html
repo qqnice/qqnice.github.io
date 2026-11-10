@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【競賽】《特戰英豪》《傳說對決》「EAS 全民電子競技運動聯賽」報名延長至 12/6 - 國立臺中科技大學 資訊管理系</title>
+  <meta name="description" content="EAS 全民電子競技運動聯賽特戰英豪與傳說對決報名延長至 12/6，冠軍獎金 5 萬元，總決賽進軍南港展覽館一館！">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #10b981;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-body: #ffffff;
+      --bg-surface: #f8fafc;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.75;
+      padding-bottom: 60px;
+    }
+    .top-nav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .nav-badge {
+      background: #0284c7;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .nav-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: var(--bg-surface); }
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .nav-btn-primary:hover { background: var(--primary-hover); color: #ffffff; }
+    .breadcrumb-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 0;
+      font-size: 13px;
+    }
+    .breadcrumb-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .breadcrumb-container a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb-container a:hover { color: var(--primary); text-decoration: underline; }
+    .main-wrap { max-width: 1040px; margin: 32px auto 0; padding: 0 20px; }
+    .article-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .article-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .hl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      position: relative;
+    }
+    .hl-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+    .hl-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .hl-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .hl-highlight .hl-value { color: #e11d48; }
+    .hl-accent .hl-value { color: #059669; }
+    .cta-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    .cta-content h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; color: #38bdf8; }
+    .cta-content p { font-size: 14px; opacity: 0.92; }
+    .btn-cta-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-cta-main:hover { background: #0369a1; }
+    .poster-img-wrap {
+      margin: 20px 0 28px;
+      text-align: center;
+    }
+    .poster-img-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+    }
+    .content-body { font-size: 15px; color: #334155; }
+    .content-body p { margin-bottom: 18px; text-align: justify; }
+    .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px; }
+    .location-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 32px 0 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .theme-list {
+      list-style: none;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .theme-item {
+      position: relative;
+      padding: 8px 0 8px 22px;
+      border-bottom: 1px dashed var(--border-light);
+      line-height: 1.6;
+    }
+    .theme-item:last-child { border-bottom: none; }
+    .theme-item::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 18px;
+      position: absolute;
+      left: 6px;
+      top: 6px;
+    }
+    .theme-item ul { margin: 8px 0 6px 16px; list-style-type: disc; }
+    .theme-item ul li { padding: 3px 0; }
+    .prize {
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #a7f3d0;
+    }
+    .attachments-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 36px 0 24px;
+    }
+    .attachments-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .attachment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .attachment-row:hover { border-color: var(--primary); transform: translateX(3px); }
+    .att-info { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+    .att-icon {
+      width: 32px;
+      height: 32px;
+      background: #eff6ff;
+      color: #2563eb;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .att-download-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .contact-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
+    .contact-card p { font-size: 14px; line-height: 1.8; color: #334155; }
+    .contact-card a { color: var(--primary); text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+    .page-footer {
+      max-width: 1040px;
+      margin: 48px auto 0;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--primary); }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 820px) {
+      .highlights-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-banner { flex-direction: column; align-items: flex-start; }
+      .page-footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    @media (max-width: 540px) {
+      .highlights-grid { grid-template-columns: 1fr; }
+      .article-title { font-size: 21px; }
+      .nav-title { display: none; }
+    }
+    @media print {
+      .top-nav, .breadcrumb-bar, .cta-banner, .nav-actions, .attachments-card, .page-footer { display: none !important; }
+      .main-wrap { margin-top: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="https://qqnice.github.io/admin/News/" class="nav-brand">
+        <span class="nav-badge">NUTC IM</span>
+        <span class="nav-title">國立臺中科技大學 資訊管理系</span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://qqnice.github.io/admin/News/" class="nav-btn"><span>←</span> 返回最新公告</a>
+        <button class="nav-btn" onclick="window.print()"><span>🖨️</span> 列印</button>
+        <button class="nav-btn nav-btn-primary" onclick="copyShareLink()"><span>🔗</span> 分享本頁</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-container">
+      <a href="https://im.nutc.edu.tw/">系網首頁</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/">最新公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/#activity">活動公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <span style="color: #0f172a; font-weight: 600;">EAS 全民電子競技運動聯賽報名延長</span>
+    </div>
+  </div>
+
+  <main class="main-wrap">
+    <article class="article-header">
+      <div class="category-pill"><span>🎮</span> 競賽活動 (activity)</div>
+      <h1 class="article-title">【競賽】《特戰英豪》《傳說對決》「EAS 全民電子競技運動聯賽」報名延長至 12/6（總獎金豐富・全國大專高中職）</h1>
+      <div class="meta-bar">
+        <div class="meta-item"><span>📅</span> 發布日期：2026.11.10</div>
+        <div class="meta-item"><span>🏛️</span> 主辦單位：主辦：運動部全民運動署 ｜ 承辦：中華民國電子競技運動協會 (CTESA)</div>
+        <div class="meta-item"><span>📍</span> 地點：線上預賽 ｜ 線下決賽：台北南港展覽館一館</div>
+      </div>
+    </article>
+
+    <section class="highlights-grid">
+      <div class="hl-card hl-highlight">
+        <div class="hl-label">⏰ 報名截止</div>
+        <div class="hl-value">延長至 12/06 (日) 23:59</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">🎮 比賽項目</div>
+        <div class="hl-value">特戰英豪 / 傳說對決</div>
+      </div>
+      <div class="hl-card hl-accent">
+        <div class="hl-label">🏆 賽事獎金</div>
+        <div class="hl-value">各組冠軍 5 萬元、總獎金優渥</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">🏟️ 線下決賽</div>
+        <div class="hl-value">116/1/21~1/24 南港展覽館</div>
+      </div>
+    </section>
+
+    <div class="poster-img-wrap"><img src="assets/eas_esports_poster.jpg" alt="EAS 全民電子競技運動聯賽海報"></div>
+
+    <section class="cta-banner">
+      <div class="cta-content">
+        <h2>EAS 全民電子競技運動聯賽熱烈報名中</h2>
+        <p>報名期限特別延長至 12/6（日）！不設隊伍數上限，各組冠軍獎金 5 萬元，總決賽進軍南港展覽館！</p>
+      </div>
+      <div>
+        <a class="btn-cta-main" href="https://forms.gle/apkkE8he7VEhezDJ6" target="_blank" rel="noopener noreferrer">
+          <span>🚀</span> 前往 Google 表單立即報名
+        </a>
+      </div>
+    </section>
+
+    <section class="content-body">
+      <p>為貫徹全民參與、普及電子競技運動之理念，運動部全民運動署主辦、中華民國電子競技運動協會（CTESA）承辦之首屆「<strong>EAS 全民電子競技運動聯賽</strong>」，特別宣布<strong>【報名期限延長至 2026 年 12 月 6 日（日）23:59 止】</strong>！歡迎大專院校及高中職喜愛電競運動的同學跨校組隊、熱烈報名，在頂尖舞台展現團隊實力！</p>
+
+<div class="location-tags">
+  <span class="location-tag">🎮 特戰英豪 (VALORANT)</span>
+  <span class="location-tag">⚔️ 傳說對決 (AoV)</span>
+  <span class="location-tag">⏰ 報名延長至 12/06 止</span>
+  <span class="location-tag">🏆 各組冠軍獎金 5 萬元</span>
+  <span class="location-tag">🏟️ 線下決賽：南港展覽館一館</span>
+</div>
+
+<h3 class="section-title">競賽項目與參賽組別</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>比賽項目</strong>：
+    <ul>
+      <li><strong>《特戰英豪》（VALORANT）</strong>：PC 平台 5v5 自訂標準模式。</li>
+      <li><strong>《傳說對決》（Arena of Valor）</strong>：手機平台 5v5 競賽模式（全局 BP）。</li>
+    </ul>
+  </li>
+  <li class="theme-item"><strong>參賽組別資格（公開報名，不設隊伍數上限，每人限報 1 項目）</strong>：
+    <ul>
+      <li><strong>U23 組別（大專院校主要組別）</strong>：年齡介於 18 歲（含）至 23 歲（含），出生日期為 2002 年 11 月 16 日至 2008 年 11 月 15 日並具中華民國國籍者。</li>
+      <li><strong>U18 組別（高中職組別）</strong>：年齡介於 15 歲（含）至 18 歲（含），出生日期為 2007 年 11 月 16 日至 2011 年 11 月 15 日並具中華民國國籍者。</li>
+      <li><em>※ 隊伍名單登錄為 6 人（5 人先發、1 人替補），名單經提交後不得任意更換。</em></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 class="section-title">賽事時程規劃</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>報名截止時間</strong>：<span class="prize">2026 年 12 月 6 日（日） 23:59 止</span>（特別延長，請把握最後機會！）</li>
+  <li class="theme-item"><strong>賽程抽籤與公告</strong>：2026 年 12 月 9 日（電腦抽籤後公告於官網、粉專及 Discord 群組）</li>
+  <li class="theme-item"><strong>線上預賽（BO3 單淘汰制）</strong>：2026 年 12 月 12 日 ～ 2027 年 1 月 20 日（八強賽起進行官方線上轉播）</li>
+  <li class="theme-item"><strong>線下實體總決賽</strong>：<strong>2027 年 1 月 21 日 ～ 1 月 24 日</strong>
+    <ul>
+      <li>地點：<strong>台北南港展覽館一館</strong>（配合台北國際電玩展檔期現場開打！）</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 class="section-title">賽事獎勵（各競賽種類各組別獨立頒發）</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>冠軍</strong>：<span class="prize">新臺幣 50,000 元整</span> 及獎狀。</li>
+  <li class="theme-item"><strong>亞軍</strong>：<span class="prize">新臺幣 30,000 元整</span> 及獎狀。</li>
+  <li class="theme-item"><strong>季軍</strong>：<span class="prize">新臺幣 20,000 元整</span> 及獎狀。</li>
+  <li class="theme-item"><strong>殿軍</strong>：<span class="prize">新臺幣 10,000 元整</span> 及獎狀。</li>
+</ul>
+
+<h3 class="section-title">報名連結與相關管道</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>線上報名表單</strong>：<a href="https://forms.gle/apkkE8he7VEhezDJ6" target="_blank" rel="noopener noreferrer">https://forms.gle/apkkE8he7VEhezDJ6</a></li>
+  <li class="theme-item"><strong>賽事官方網站</strong>：<a href="https://www.eas.com.tw" target="_blank" rel="noopener noreferrer">https://www.eas.com.tw</a></li>
+  <li class="theme-item"><strong>承辦單位聯絡窗口</strong>：中華民國電子競技運動協會（CTESA）
+    <ul>
+      <li>承辦人：鄭欣維</li>
+      <li>聯絡電話：(02) 8786-9081</li>
+      <li>電子信箱：<a href="mailto:ctesa@esports.com.tw">ctesa@esports.com.tw</a></li>
+      <li>會址：114 台北市內湖區行愛路141巷39號6樓</li>
+    </ul>
+  </li>
+</ul>
+    </section>
+
+    <section class="attachments-card">
+      <div class="attachments-title"><span>📎</span> 公告附件下載</div>
+      <div class="attachments-list">
+        <a class="attachment-row" href="assets/eas_esports_official_letter.pdf" download>
+  <div class="att-info"><div class="att-icon">PDF</div><span>EAS全民電子競技運動聯賽_來函.PDF（中華民國電競協會公文）</span></div>
+  <span class="att-download-badge">點擊下載</span>
+</a>
+<a class="attachment-row" href="assets/eas_esports_rules.pdf" download>
+  <div class="att-info"><div class="att-icon">PDF</div><span>EAS全民電子競技運動聯賽_競賽規程.pdf（完整競賽規程）</span></div>
+  <span class="att-download-badge">點擊下載</span>
+</a>
+<a class="attachment-row" href="assets/eas_esports_poster.jpg" download>
+  <div class="att-info"><div class="att-icon" style="background:#fef3c7;color:#d97706;">JPG</div><span>EAS全民電子競技運動聯賽.jpg（官方宣傳海報）</span></div>
+  <span class="att-download-badge">點擊下載</span>
+</a>
+      </div>
+    </section>
+
+    <section class="contact-card">
+      <h3>📞 聯絡資訊</h3>
+      <p>主辦單位：運動部全民運動署 ｜ 承辦單位：中華民國電子競技運動協會 (CTESA)<br>聯絡人：鄭欣維｜電話：(02) 8786-9081｜信箱：<a href="mailto:ctesa@esports.com.tw">ctesa@esports.com.tw</a><br>賽事官網：<a href="https://www.eas.com.tw" target="_blank" rel="noopener noreferrer">https://www.eas.com.tw</a><br>報名表單：<a href="https://forms.gle/apkkE8he7VEhezDJ6" target="_blank" rel="noopener noreferrer">https://forms.gle/apkkE8he7VEhezDJ6</a></p>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div>國立臺中科技大學 資訊管理系 版權所有 © 2026</div>
+    <div class="footer-links">
+      <a href="https://im.nutc.edu.tw/">系所首頁</a>
+      <a href="https://qqnice.github.io/admin/News/">公告系統</a>
+    </div>
+  </footer>
+
+  <div id="toast">已複製連結至剪貼簿！</div>
+
+  <script>
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      });
+    }
+  </script>
+</body>
+</html>
