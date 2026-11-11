@@ -752,8 +752,8 @@
         <div class="pagination-wrap" id="paginationBar"></div>
         <div class="more-btn-container">
           <a href="https://im.nutc.edu.tw/p/412-1063-8757.php" class="btn-more" id="moreLink" target="_blank" rel="noopener noreferrer">
-            <span id="moreText">更多所有公告</span>
-            <span>&longrightarrow;</span>
+            <span id="moreText">舊版系統公告</span>
+            <span>↗</span>
           </a>
         </div>
       </div>
@@ -6133,8 +6133,6 @@
       });
 
       renderPagination(safePage, totalPages, totalItems);
-      moreTextEl.textContent = `更多${cat.name}`;
-      moreLinkEl.href = cat.url;
     }
 
     function renderPagination(page, totalPages, totalItems) {
