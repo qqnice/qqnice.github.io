@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【競賽】聯華神通集團【第24屆育秀盃創意獎】『玩轉 AI・智創未來』競賽開跑 - 國立臺中科技大學 資訊管理系</title>
+  <meta name="description" content="第24屆育秀盃創意獎以玩轉 AI・智創未來為主題，數位應用類金獎 20 萬元，獲獎享聯華神通集團實習機會，歡迎全國大專校院與高中職同學組隊報名！">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #10b981;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-body: #ffffff;
+      --bg-surface: #f8fafc;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.75;
+      padding-bottom: 60px;
+    }
+    .top-nav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .nav-badge {
+      background: #0284c7;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .nav-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: var(--bg-surface); }
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .nav-btn-primary:hover { background: var(--primary-hover); color: #ffffff; }
+    .breadcrumb-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 0;
+      font-size: 13px;
+    }
+    .breadcrumb-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .breadcrumb-container a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb-container a:hover { color: var(--primary); text-decoration: underline; }
+    .main-wrap { max-width: 1040px; margin: 32px auto 0; padding: 0 20px; }
+    .article-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .article-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .hl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      position: relative;
+    }
+    .hl-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+    .hl-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .hl-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .hl-highlight .hl-value { color: #e11d48; }
+    .hl-accent .hl-value { color: #059669; }
+    .cta-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    .cta-content h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; color: #38bdf8; }
+    .cta-content p { font-size: 14px; opacity: 0.92; }
+    .btn-cta-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-cta-main:hover { background: #0369a1; }
+    .content-body { font-size: 15px; color: #334155; }
+    .content-body p { margin-bottom: 18px; text-align: justify; }
+    .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px; }
+    .location-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 32px 0 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    .theme-list {
+      list-style: none;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .theme-item {
+      position: relative;
+      padding: 8px 0 8px 22px;
+      border-bottom: 1px dashed var(--border-light);
+      line-height: 1.6;
+    }
+    .theme-item:last-child { border-bottom: none; }
+    .theme-item::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 18px;
+      position: absolute;
+      left: 6px;
+      top: 6px;
+    }
+    .theme-item ul { margin: 8px 0 6px 16px; list-style-type: disc; }
+    .theme-item ul li { padding: 3px 0; }
+    .prize {
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #a7f3d0;
+    }
+    .attachments-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 36px 0 24px;
+    }
+    .attachments-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .attachment-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .attachment-row:hover { border-color: var(--primary); transform: translateX(3px); }
+    .att-info { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+    .att-icon {
+      width: 32px;
+      height: 32px;
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .att-download-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .contact-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
+    .contact-card p { font-size: 14px; line-height: 1.8; color: #334155; }
+    .contact-card a { color: var(--primary); text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+    .page-footer {
+      max-width: 1040px;
+      margin: 48px auto 0;
+      padding: 24px 20px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--primary); }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 820px) {
+      .highlights-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-banner { flex-direction: column; align-items: flex-start; }
+      .page-footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    @media (max-width: 540px) {
+      .highlights-grid { grid-template-columns: 1fr; }
+      .article-title { font-size: 21px; }
+      .nav-title { display: none; }
+    }
+    @media print {
+      .top-nav, .breadcrumb-bar, .cta-banner, .nav-actions, .attachments-card, .page-footer { display: none !important; }
+      .main-wrap { margin-top: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="https://qqnice.github.io/admin/News/" class="nav-brand">
+        <span class="nav-badge">NUTC IM</span>
+        <span class="nav-title">國立臺中科技大學 資訊管理系</span>
+      </a>
+      <div class="nav-actions">
+        <a href="https://qqnice.github.io/admin/News/" class="nav-btn"><span>←</span> 返回最新公告</a>
+        <button class="nav-btn" onclick="window.print()"><span>🖨️</span> 列印</button>
+        <button class="nav-btn nav-btn-primary" onclick="copyShareLink()"><span>🔗</span> 分享本頁</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="breadcrumb-container">
+      <a href="https://im.nutc.edu.tw/">系網首頁</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/">最新公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <a href="https://qqnice.github.io/admin/News/#activity">活動公告</a>
+      <span style="color: var(--text-muted);">/</span>
+      <span style="color: #0f172a; font-weight: 600;">第24屆育秀盃創意獎</span>
+    </div>
+  </div>
+
+  <main class="main-wrap">
+    <article class="article-header">
+      <div class="category-pill"><span>🏆</span> 競賽活動 (activity)</div>
+      <h1 class="article-title">【競賽】聯華神通集團【第24屆育秀盃創意獎】『玩轉 AI・智創未來』競賽開跑（總獎金破百萬・金獎20萬・企業實習機會）</h1>
+      <div class="meta-bar">
+        <div class="meta-item"><span>📅</span> 發布日期：2026.11.11</div>
+        <div class="meta-item"><span>🏛️</span> 主辦單位：教育部指導、育秀教育基金會、聯華神通集團</div>
+        <div class="meta-item"><span>⏱️</span> 數位應用初賽截止：2026/12/31 23:59 止</div>
+      </div>
+    </article>
+
+    <section class="highlights-grid">
+      <div class="hl-card hl-highlight">
+        <div class="hl-label">⏰ 數位應用初賽</div>
+        <div class="hl-value">2026.12.31 截止</div>
+      </div>
+      <div class="hl-card hl-accent">
+        <div class="hl-label">💰 競賽總獎金</div>
+        <div class="hl-value">金獎20萬 / 銀獎10萬</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">🎓 參賽對象</div>
+        <div class="hl-value">全國大專(含碩博)與高中職</div>
+      </div>
+      <div class="hl-card">
+        <div class="hl-label">🏢 專屬福利</div>
+        <div class="hl-value">獲獎享神通集團實習機會</div>
+      </div>
+    </section>
+
+    <section class="cta-banner">
+      <div class="cta-content">
+        <h2>第 24 屆育秀盃創意獎『玩轉 AI・智創未來』熱烈徵件中</h2>
+        <p>全國指標性企業競賽！數位應用類金獎 20 萬元整，更提供聯華神通集團實習機會，歡迎踴躍組隊報名！</p>
+      </div>
+      <div>
+        <a class="btn-cta-main" href="http://award.ysed.org.tw/" target="_blank" rel="noopener noreferrer">
+          <span>🚀</span> 前往育秀盃官網報名
+        </a>
+      </div>
+    </section>
+
+    <section class="content-body">
+      <p>為孵化未來跨領域人才並深化數位競爭力，教育部指導、<strong>聯華神通集團與財團法人育秀教育基金會</strong>自 2002 年起主辦之指標性年度盛事──<strong>【第 24 屆育秀盃創意獎】</strong>正式開跑！本屆競賽以<strong>「玩轉 AI・智創未來」</strong>為主題，秉持「以人為本 AI（Human-Centered AI）」核心精神，廣邀全國大專院校（含碩博士生）與高中職學子發揮無限創意，將創新思維轉化為具體行動！</p>
+
+<div class="location-tags">
+  <span class="location-tag">🏆 數位應用類金獎 20 萬元</span>
+  <span class="location-tag">🤖 Human-Centered AI 以人為本</span>
+  <span class="location-tag">🏢 獲獎可享神通集團實習機會</span>
+  <span class="location-tag">📅 數位應用初賽截止：12/31</span>
+  <span class="location-tag">🎓 全國大專校院與高中職皆可參賽</span>
+</div>
+
+<h3 class="section-title">三大競賽類別與徵件重點</h3>
+<ul class="theme-list">
+  <li class="theme-item">
+    <strong>💡 數位應用類（含大專組與高中職組）</strong>：
+    <ul>
+      <li><strong>核心焦點</strong>：聚焦<strong>人工智慧(AI)、商業智慧(BI)、AIoT、智慧交通與車載通訊、永續與淨零碳排、能源與自然資源、低碳氫、公共安全與公用事業、智慧製造、倉儲及物流、區塊鏈</strong>等前沿技術應用領域。</li>
+      <li><strong>神達企業特別命題</strong>：綠色微旅，永續共遊──打造趣味與連結城市鄰近的探索體驗。</li>
+      <li><strong>高中職組命題</strong>：「AI 代理人・未來學堂」應用開發──打造解決校園真實痛點的次世代 AI 助手。</li>
+      <li><strong>徵件條件</strong>：研發實作，<strong>成品需可實機展示及實地操作測試</strong>（非概念式作品）。</li>
+    </ul>
+  </li>
+  <li class="theme-item">
+    <strong>🎨 工業設計類</strong>：請以 3-5 年內可實現的科技與服務模式，進行創新設計及開發（可為概念式作品）。
+  </li>
+  <li class="theme-item">
+    <strong>🎬 品牌形象類</strong>：
+    <ul>
+      <li>包含動態影像（5分鐘以內原創短片/AIGC短片）、創新提案策展企劃、IP 及文創設計。</li>
+      <li>多樣化企業命題：聯華製粉《主食升級計畫》、神達數位《用鏡頭記錄你的行車焦慮》、神基科技《Edge AI, Absolute Trust》、育秀兒少科普短片、Mio 青年視角道路安全守護、育秀公益夢想家 ESG 教育實作、小麥宇宙 IP 及駱駝 IP 文創設計。</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 class="section-title">優渥競賽獎金與專屬福利</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>數位應用類（大專組）</strong>：
+    <ul>
+      <li><strong>金獎（1名）</strong>：<span class="prize">獎學金 NT$200,000 元</span>、獎盃乙座、每位隊員獎狀一隻。</li>
+      <li><strong>銀獎（1名）</strong>：<span class="prize">獎學金 NT$100,000 元</span>、獎盃乙座、每位隊員獎狀一隻。</li>
+      <li><strong>銅獎（1名）</strong>：<span class="prize">獎學金 NT$80,000 元</span>、獎盃乙座、每位隊員獎狀一隻。</li>
+      <li><strong>優選（2名）</strong>：獎學金 NT$50,000 元、每位隊員獎狀一隻。</li>
+      <li><strong>佳作（數名）</strong>：獎學金 NT$30,000 元、每位隊員獎狀一隻。</li>
+      <li>神達企業特別獎（1名）：獎學金 NT$20,000 元 ｜ 女力科技獎（1名）：獎學金 NT$10,000 元。</li>
+      <li><strong>指導老師獎</strong>：前三名團隊每隊指導老師獎金 NT$10,000 元。</li>
+      <li><strong>企業實習機會</strong>：<strong>金、銀、銅獲獎團隊可參與聯華神通集團企業提供之實習機會，最長 2 個月！</strong></li>
+    </ul>
+  </li>
+  <li class="theme-item"><strong>數位應用類（高中職組）</strong>：金獎 10 萬元、銀獎 8 萬元、銅獎 6 萬元、佳作 2 萬元。</li>
+  <li class="theme-item"><strong>品牌形象類</strong>：年度品牌行銷金獎 20 萬元、最佳影片/企劃/IP 各 10 萬元、銅獎 8 萬元等。</li>
+</ul>
+
+<h3 class="section-title">關鍵競賽時程</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>數位應用類 / 工業設計類</strong>：
+    <ul>
+      <li>線上報名起跑：2026 年 10 月 1 日（四）起</li>
+      <li><strong>初賽收件截止</strong>：<span class="prize">2026 年 12 月 31 日（四） 23:59 止</span>（官網作品繳件區上傳）</li>
+      <li>複賽入圍公布：2027 年 1 月中旬</li>
+      <li>複賽繳件截止：2027 年 2 月 16 日（二） 23:59 止</li>
+      <li>決賽評選及頒獎典禮：2027 年 4 月辦理</li>
+    </ul>
+  </li>
+  <li class="theme-item"><strong>品牌形象類</strong>：<strong>初賽截止日為 2027 年 2 月 16 日（二） 23:59 止</strong>，決賽於 2027 年 4 月辦理。</li>
+</ul>
+
+<h3 class="section-title">報名方式與主辦單位聯絡資訊</h3>
+<ul class="theme-list">
+  <li class="theme-item"><strong>競賽線上報名平台</strong>：<a href="http://award.ysed.org.tw/" target="_blank" rel="noopener noreferrer">http://award.ysed.org.tw/</a>（請至「登入/會員中心」進行線上報名填表）。</li>
+  <li class="theme-item"><strong>育秀教育基金會官方網站</strong>：<a href="https://ysed.org.tw" target="_blank" rel="noopener noreferrer">https://ysed.org.tw</a></li>
+  <li class="theme-item"><strong>官方 Facebook 粉絲專頁</strong>：<a href="https://www.facebook.com/YSEDAWARD/" target="_blank" rel="noopener noreferrer">https://www.facebook.com/YSEDAWARD/</a></li>
+  <li class="theme-item"><strong>承辦窗口聯絡資訊</strong>：
+    <ul>
+      <li>聯絡電話：+886-2-26516200 分機 7503</li>
+      <li>電子信箱：<a href="mailto:ysedaward@gmail.com">ysedaward@gmail.com</a></li>
+      <li>會址：114 台北市南港區市民大道八段 205 號 15 樓</li>
+    </ul>
+  </li>
+</ul>
+    </section>
+
+    <section class="attachments-card">
+      <div class="attachments-title"><span>📎</span> 公告附件下載</div>
+      <div class="attachments-list">
+        <a class="attachment-row" href="assets/ysed_24th_award_guide.pdf" download>
+          <div class="att-info"><div class="att-icon">PDF</div><span>聯華神通集團【第24屆育秀盃創意獎】『玩轉AI·智創未來』競賽須知.pdf</span></div>
+          <span class="att-download-badge">點擊下載</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="contact-card">
+      <h3>📞 聯絡資訊</h3>
+      <p>指導單位：教育部 ｜ 主辦單位：財團法人育秀教育基金會、聯華神通集團<br>聯絡電話：+886-2-26516200 分機 7503<br>電子信箱：<a href="mailto:ysedaward@gmail.com">ysedaward@gmail.com</a><br>競賽官網：<a href="http://award.ysed.org.tw/" target="_blank" rel="noopener noreferrer">http://award.ysed.org.tw/</a><br>基金會官網：<a href="https://ysed.org.tw" target="_blank" rel="noopener noreferrer">https://ysed.org.tw</a></p>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div>國立臺中科技大學 資訊管理系 版權所有 © 2026</div>
+    <div class="footer-links">
+      <a href="https://im.nutc.edu.tw/">系所首頁</a>
+      <a href="https://qqnice.github.io/admin/News/">公告系統</a>
+    </div>
+  </footer>
+
+  <div id="toast">已複製連結至剪貼簿！</div>
+
+  <script>
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      });
+    }
+  </script>
+</body>
+</html>
