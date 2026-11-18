@@ -67,8 +67,8 @@ def topic_for(zone,path):
  s=path.lower()
  if zone=='linux':
   if 'graylog' in s:return 'logs'
-  if 'week3' in s:return 'lab'
-  if any(x in s for x in ['docker','多網站','week2']):return 'docker'
+  if any(x in s for x in ['week3','week4']):return 'lab'
+  if any(x in s for x in ['docker','多網站','week2','week5','k3s']):return 'docker'
   return 'tools'
  if zone=='unreal':
   if any(x in s for x in ['elevator','unrealev']):return 'elevator'
@@ -92,6 +92,23 @@ OVERRIDES={
 'linux/week2-webstack/操作指令.html':('WEEK2｜實際操作指令與範例','雙網站部署紀錄，附 Compose、Nginx 設定與網站範例。'),
 'linux/week3/index.html':('WEEK3｜Docker Lab 實作工作台','備份、還原與主機安全的互動式學習工作台。'),
 'linux/files/week3/檢查.html':('WEEK3｜完成檢查表','逐項核對課堂實作，檢查備份、還原與安全設定。'),
+'linux/WEEK4-VM資安事件-流水線故事互動網站.html':('WEEK4｜VM 被入侵資安事件與數位鑑識流水線','從 HTTP 200 (0 bytes) 追查容器入侵真相，剖析八大維運漏洞與防護檢核表。'),
+'linux/week4/index.html':('WEEK4｜VM 被入侵資安事件與數位鑑識流水線','從 HTTP 200 (0 bytes) 追查容器入侵真相，剖析八大維運漏洞與防護檢核表。'),
+'linux/WEEK5-LLM-架構與部署互動網站.html':('WEEK5｜雙網站擴充地端 LLM 架構與部署實戰','在既有雙網站主機混合部署 Host Ollama 與 Docker Open WebUI，含 6 站請求流程與 UFW 防火牆排錯。'),
+'linux/week5/index.html':('WEEK5｜雙網站擴充地端 LLM 架構與部署實戰','在既有雙網站主機混合部署 Host Ollama 與 Docker Open WebUI，含 6 站請求流程與 UFW 防火牆排錯。'),
+'linux/k3s-llm-guide/index.html':('WEEK6｜K3s 與地端 LLM 服務高互動多索引實戰講義','3D 叢集拓撲動畫與六大互動實驗室：餐廳工作站 vs K3s 經理、Pod 自癒迴圈、127.0.0.1 網路診斷與 HPA 動態擴展。'),
+'linux/01本地 AI 部署.html':('WSL + Ollama + Open WebUI 本地 AI 部署指南','在 Windows WSL 環境架設本地 LLM 推論與 WebUI 聊天介面。'),
+'linux/02QQdocker廚房.html':('QQ Docker 魔法廚房（互動式容器入門）','透過魔法廚房互動體驗理解映像檔、容器與環境隔離。'),
+'linux/Docker概念與簡介.html':('Docker 廚房｜容器世界入門圖解','以美食街與廚房工作站比喻介紹 Docker 容器核心概念。'),
+'linux/03多網站部署.html':('114-2 雲端技術期末實作｜單主機多服務與地端 AI 戰情室','單主機多網站反向代理與地端 AI 服務整合專案戰情室。'),
+'linux/04-1Graylog 準備與安裝.html':('Graylog 6.0 部署指南（Ubuntu 24.04 SOP）','Ubuntu 24.04 環境準備、MongoDB、Data Node 與 Graylog 6.0 標準安裝步驟。'),
+'linux/04Graylog伺服器.html':('Graylog 資安戰情中心（SOC 互動體驗模擬）','模擬 SOC 資安監控中心日誌收集、儀表板與告警查詢。'),
+'linux/05Windows nxlog_to_graylog.html':('Windows NXLog ➔ Graylog 整合指南','將 Windows 事件檢視器日誌透過 NXLog 傳送至 Graylog 集中分析。'),
+'linux/Windows11使netlogtoGraylogServer.html':('Windows 11 透過 NXLog 傳送日誌至 Graylog 實戰','Windows 11 端點安裝設定 NXLog 並驗證 Graylog 接收狀態的逐步教學。'),
+'linux/RsyslogtoGraylog日誌收集.html':('Linux Rsyslog to Graylog 部署與進階除錯指南','Linux 伺服器透過 Rsyslog 拋送系統日誌至 Graylog 的設定與除錯工具。'),
+'linux/06Graylog 進階.html':('Graylog 進階操作與整合實戰（互動模擬）','Extractor 欄位萃取、Pipeline 規則與告警通知進階實作。'),
+'linux/07 Ubuntu 24.04 固定 IP 教學器.html':('Ubuntu 24.04 固定 IP（Netplan YAML）互動產生器','輸入網卡、IP、Gateway 與 DNS，一鍵產生正確縮排的 Netplan 設定檔。'),
+'linux/Aws_shield.html':('AWS Shield 防禦 DDoS 原理與架構圖解','互動圖解 AWS Shield Standard / Advanced 的 L3/L4/L7 DDoS 防護架構。'),
 'unreal/unrealev/index.html':('ElevatorKit 學生操作手冊','由四個實作關卡，逐步建立電梯的完整行為。'),
 'unreal/elevator-state-lab/index.html':('電梯狀態實驗室','透過樓層呼叫、擋門與單步觀察理解狀態切換。'),
 'unreal/elevator-fsm-lab/index.html':('電梯狀態機｜聲光與藍圖實驗室','結合聲光、關卡切換、白線追蹤與接線 Bug 診所。'),
