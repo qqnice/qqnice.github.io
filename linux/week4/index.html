@@ -1,0 +1,1722 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="WEEK4 old VM WordPress 被入侵資安事件：流水線故事介紹、數位鑑識分析、延伸維護漏洞診斷與後續防護互動網站。">
+  <title>WEEK4｜old VM 被入侵資安事件：流水線故事與延伸維護漏洞互動指南</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307111f'/%3E%3Cpath d='M32 10l18 8v12c0 12.6-7.7 23.8-18 28-10.3-4.2-18-15.4-18-28V18l18-8z' fill='none' stroke='%23ff7b72' stroke-width='4'/%3E%3Ccircle cx='32' cy='28' r='5' fill='%23ffd166'/%3E%3Cpath d='M32 36v8' stroke='%23ffd166' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0b182b;
+      --panel: rgba(14, 31, 51, .88);
+      --panel-solid: #0e1f33;
+      --line: rgba(151, 190, 221, .22);
+      --line-strong: rgba(151, 190, 221, .42);
+      --text: #edf7ff;
+      --muted: #9db2c4;
+      --blue: #4cc9f0;
+      --orange: #ff9f43;
+      --green: #54e1a6;
+      --pink: #f778ba;
+      --purple: #c997ff;
+      --yellow: #ffd166;
+      --danger: #ff7b72;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .38);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 123, 114, .14), transparent 32rem),
+        radial-gradient(circle at 88% 8%, rgba(76, 201, 240, .14), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+    :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 17, 31, .92);
+      backdrop-filter: blur(16px);
+    }
+    .header-inner {
+      width: min(1200px, calc(100% - 2rem));
+      min-height: 66px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-weight: 800;
+      color: var(--text);
+      background: none;
+      border: 0;
+      padding: 0;
+      text-align: left;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #07111f;
+      background: linear-gradient(135deg, var(--danger), var(--orange));
+      font-weight: 900;
+      font-size: .92rem;
+      box-shadow: 0 0 18px rgba(255, 123, 114, .35);
+    }
+    .brand-sub {
+      display: block;
+      font-size: .75rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .nav-btns { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .nav-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: .42rem .75rem;
+      border-radius: 8px;
+      font-size: .86rem;
+      font-weight: 600;
+      transition: .16s ease;
+    }
+    .nav-btn:hover { color: var(--text); background: rgba(255,255,255,.06); border-color: var(--line); }
+
+    main, footer { width: min(1200px, calc(100% - 2rem)); margin-inline: auto; }
+    section { scroll-margin-top: 82px; }
+
+    .section-block {
+      padding: clamp(2.1rem, 4vw, 3.2rem) 0;
+      border-top: 1px solid var(--line);
+    }
+    .section-block:first-child { border-top: 0; padding-top: 1.8rem; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .6rem;
+      color: var(--blue);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 1.4rem;
+      height: 2px;
+      background: currentColor;
+    }
+    h1 {
+      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      margin-bottom: .75rem;
+    }
+    h2 {
+      font-size: clamp(1.45rem, 2.6vw, 2rem);
+      letter-spacing: -.02em;
+      margin-bottom: .5rem;
+    }
+    .hl-danger { color: var(--danger); }
+    .hl-orange { color: var(--orange); }
+    .hl-green { color: var(--green); }
+    .hl-blue { color: var(--blue); }
+    .hl-yellow { color: var(--yellow); }
+
+    /* Hero Summary Strip */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 1.25rem;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+    .summary-pills {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: .65rem;
+    }
+    .summary-pill {
+      padding: .8rem .95rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .summary-pill small { display: block; color: var(--muted); font-size: .75rem; }
+    .summary-pill strong { display: block; margin-top: .15rem; font-size: .95rem; }
+
+    /* SECTION 1: Pipeline Story Stage */
+    .flow-shell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+    }
+    .flow-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: .75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.1rem;
+    }
+    .scenario-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+    }
+    .sc-tab {
+      padding: .48rem .85rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: .85rem;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+    .sc-tab:hover { color: var(--text); border-color: var(--sc-accent, var(--blue)); }
+    .sc-tab.active {
+      color: var(--text);
+      border-color: var(--sc-accent, var(--blue));
+      background: color-mix(in srgb, var(--sc-accent, var(--blue)) 16%, #091728);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--sc-accent, var(--blue)) 22%, transparent);
+    }
+    .play-btn {
+      padding: .5rem .95rem;
+      border-radius: 10px;
+      border: 1px solid rgba(84, 225, 166, .45);
+      background: rgba(84, 225, 166, .14);
+      color: var(--green);
+      font-weight: 800;
+      font-size: .86rem;
+      transition: .18s ease;
+    }
+    .play-btn:hover { background: rgba(84, 225, 166, .24); }
+
+    .vm-stage {
+      border: 1px dashed var(--line-strong);
+      border-radius: 15px;
+      padding: 1rem;
+      background: rgba(7, 17, 31, .6);
+    }
+    .vm-stage-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .85rem;
+      font-size: .82rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .hop-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: .65rem;
+    }
+    .hop-card {
+      width: 100%;
+      text-align: left;
+      padding: .8rem .75rem;
+      border-radius: 13px;
+      border: 1.5px solid var(--line);
+      background: #0a1829;
+      color: var(--text);
+      transition: .2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 144px;
+      position: relative;
+    }
+    .hop-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+    .hop-card.selected {
+      outline: 2.5px solid var(--yellow);
+      outline-offset: 2px;
+    }
+    .hop-card.state-ok {
+      border-color: var(--green);
+      background: rgba(84, 225, 166, .1);
+      box-shadow: 0 0 18px rgba(84, 225, 166, .14);
+    }
+    .hop-card.state-warn {
+      border-color: var(--yellow);
+      background: rgba(255, 209, 102, .11);
+    }
+    .hop-card.state-block {
+      border-color: var(--danger);
+      background: rgba(255, 123, 114, .15);
+      box-shadow: 0 0 22px rgba(255, 123, 114, .22);
+    }
+    .hop-card.state-info {
+      border-color: var(--blue);
+      background: rgba(76, 201, 240, .12);
+    }
+    .hop-step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: .72rem;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: .35rem;
+    }
+    .hop-zone-tag {
+      padding: .1rem .42rem;
+      border-radius: 5px;
+      background: rgba(255,255,255,.08);
+      font-size: .68rem;
+      color: #cfe4f7;
+    }
+    .hop-card strong {
+      display: block;
+      font-size: .92rem;
+      line-height: 1.32;
+      margin-bottom: .35rem;
+    }
+    .hop-card small {
+      display: block;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.38;
+    }
+
+    /* Extra Branches */
+    .branch-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .65rem;
+      margin-top: .75rem;
+      padding-top: .75rem;
+      border-top: 1px solid var(--line);
+    }
+    .branch-btn {
+      text-align: left;
+      padding: .68rem .85rem;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: rgba(14, 31, 51, .75);
+      color: var(--text);
+      transition: .18s ease;
+    }
+    .branch-btn:hover, .branch-btn.selected {
+      border-color: var(--orange);
+      background: rgba(255, 159, 67, .14);
+    }
+    .branch-btn strong { font-size: .86rem; display: block; margin-bottom: .15rem; }
+    .branch-btn small { font-size: .75rem; color: var(--muted); display: block; }
+
+    /* Live Detail Box below Flow Map */
+    .flow-detail-panel {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1.18fr .82fr;
+      gap: 1rem;
+      padding: 1.1rem;
+      border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      background: #06101c;
+    }
+    .detail-left h3 {
+      font-size: 1.08rem;
+      color: var(--blue);
+      margin-bottom: .4rem;
+    }
+    .detail-left p {
+      font-size: .91rem;
+      color: #d5e5f2;
+      margin-bottom: .55rem;
+    }
+    .detail-evidence {
+      display: inline-block;
+      padding: .3rem .65rem;
+      border-radius: 8px;
+      background: rgba(84, 225, 166, .1);
+      border: 1px solid rgba(84, 225, 166, .3);
+      color: var(--green);
+      font-family: monospace;
+      font-size: .81rem;
+    }
+    .detail-right {
+      padding: .9rem;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 209, 102, .32);
+      background: rgba(255, 209, 102, .06);
+      font-size: .86rem;
+      color: #ffebb3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: .6rem;
+    }
+    .detail-right strong {
+      display: block;
+      color: var(--yellow);
+      margin-bottom: .25rem;
+    }
+
+    /* Interactive Fine-Grained Timeline Filter */
+    .timeline-box {
+      margin-top: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 1.25rem;
+    }
+    .tl-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    .tl-filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+    .tl-btn {
+      padding: .38rem .78rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+    .tl-btn.active {
+      border-color: var(--blue);
+      background: rgba(76, 201, 240, .15);
+      color: var(--text);
+    }
+    .tl-list {
+      display: grid;
+      gap: .55rem;
+      max-height: 430px;
+      overflow-y: auto;
+      padding-right: .35rem;
+    }
+    .tl-item {
+      display: grid;
+      grid-template-columns: 155px 110px 1fr 170px;
+      gap: .75rem;
+      align-items: center;
+      padding: .65rem .85rem;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: rgba(7, 17, 31, .65);
+      font-size: .86rem;
+    }
+    .tl-time {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--blue);
+      font-size: .82rem;
+    }
+    .tl-tag {
+      display: inline-block;
+      text-align: center;
+      padding: .15rem .5rem;
+      border-radius: 6px;
+      font-size: .74rem;
+      font-weight: 800;
+    }
+    .tag-prep { background: rgba(84, 225, 166, .14); color: var(--green); }
+    .tag-probe { background: rgba(255, 209, 102, .15); color: var(--yellow); }
+    .tag-breach { background: rgba(255, 123, 114, .18); color: var(--danger); }
+    .tag-defense { background: rgba(76, 201, 240, .16); color: var(--blue); }
+    .tl-source {
+      font-size: .76rem;
+      color: var(--muted);
+      text-align: right;
+      font-family: monospace;
+    }
+
+    /* SECTION 2: Digital Forensics & Evidence Lab */
+    .fw-grid {
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      gap: 1.2rem;
+    }
+    .fw-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .trap-btns {
+      display: grid;
+      gap: .55rem;
+      margin: .85rem 0 0;
+    }
+    .trap-btn {
+      width: 100%;
+      text-align: left;
+      padding: .78rem .95rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      transition: .18s ease;
+    }
+    .trap-btn:hover { border-color: var(--blue); }
+    .trap-btn.active {
+      border-color: var(--blue);
+      background: rgba(76, 201, 240, .13);
+    }
+    .trap-btn strong { display: block; font-size: .92rem; margin-bottom: .18rem; }
+    .trap-btn small { color: var(--muted); font-size: .8rem; display: block; }
+
+    .code-box {
+      position: relative;
+      margin-top: .75rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #050d17;
+      overflow: hidden;
+    }
+    .code-box-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5rem .85rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .copy-btn {
+      padding: .22rem .6rem;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: rgba(76, 201, 240, .12);
+      color: var(--blue);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .copy-btn:hover { background: rgba(76, 201, 240, .24); }
+    .code-box pre {
+      margin: 0;
+      padding: .9rem;
+      font-size: .81rem;
+      line-height: 1.58;
+      color: #d1e4f5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* SECTION 3: Extended Maintenance Vulnerabilities */
+    .caution-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+    }
+    .filter-btn {
+      padding: .42rem .85rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .filter-btn.active {
+      border-color: var(--orange);
+      background: rgba(255, 159, 67, .15);
+      color: var(--text);
+    }
+    .caution-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .caution-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: .2s ease;
+    }
+    .caution-card:hover {
+      border-color: var(--card-accent, var(--orange));
+      transform: translateY(-2px);
+    }
+    .caution-badge {
+      display: inline-block;
+      padding: .18rem .58rem;
+      border-radius: 6px;
+      font-size: .74rem;
+      font-weight: 800;
+      background: rgba(255,255,255,.07);
+      color: var(--card-accent, var(--orange));
+      margin-bottom: .5rem;
+    }
+    .caution-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: .45rem;
+    }
+    .caution-list {
+      margin: 0;
+      padding-left: 1.15rem;
+      font-size: .87rem;
+      color: #c8d9e8;
+    }
+    .caution-list li { margin-bottom: .35rem; }
+    .caution-fix {
+      margin-top: .8rem;
+      padding: .6rem .75rem;
+      border-radius: 9px;
+      background: rgba(84, 225, 166, .09);
+      border-left: 3px solid var(--green);
+      font-size: .81rem;
+      color: #d2f9e6;
+    }
+
+    /* SECTION 4: Interactive Hardening & Rebuild Checklist + Open Mysteries */
+    .rebuild-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 1.2rem;
+    }
+    .checklist-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 1.25rem;
+    }
+    .progress-bar-wrap {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+      margin: .6rem 0 1rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width .25s ease;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      padding: .65rem .75rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(7, 17, 31, .55);
+      margin-bottom: .5rem;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+    .check-item:hover { border-color: var(--blue); }
+    .check-item.done {
+      border-color: rgba(84, 225, 166, .45);
+      background: rgba(84, 225, 166, .09);
+    }
+    .check-item input {
+      margin-top: .25rem;
+      accent-color: var(--green);
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+    }
+    .check-item strong { display: block; font-size: .9rem; }
+    .check-item small { display: block; color: var(--muted); font-size: .79rem; }
+
+    .mystery-list {
+      display: grid;
+      gap: .55rem;
+    }
+    .mystery-item {
+      padding: .72rem .85rem;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+      background: rgba(7, 17, 31, .6);
+      font-size: .85rem;
+    }
+    .mystery-item strong {
+      color: var(--yellow);
+      display: block;
+      margin-bottom: .18rem;
+    }
+
+    footer {
+      padding: 2rem 0 3rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .88rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    @media (max-width: 980px) {
+      .intro-grid, .flow-detail-panel, .fw-grid, .rebuild-grid { grid-template-columns: 1fr; }
+      .hop-grid { grid-template-columns: repeat(3, 1fr); }
+      .caution-grid { grid-template-columns: 1fr; }
+      .tl-item { grid-template-columns: 1fr; gap: .3rem; }
+      .tl-source { text-align: left; }
+    }
+    @media (max-width: 640px) {
+      .summary-pills, .hop-grid, .branch-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <button type="button" class="brand" data-scroll="#top">
+        <span class="brand-mark">W4</span>
+        <span>
+          WEEK4｜old VM WordPress 被入侵事件：流水線故事與維護漏洞指南
+          <span class="brand-sub">事件時間軸（UTC+8）× 數位鑑識排查 × 延伸維護漏洞 × 安全重建檢核</span>
+        </span>
+      </button>
+      <div class="nav-btns" role="navigation" aria-label="快速跳轉">
+        <button type="button" class="nav-btn" data-scroll="#pipelineSection">① 事件流水線故事</button>
+        <button type="button" class="nav-btn" data-scroll="#forensicsSection">② 數位鑑識實驗室</button>
+        <button type="button" class="nav-btn" data-scroll="#vulnSection">③ 延伸維護漏洞(8)</button>
+        <button type="button" class="nav-btn" data-scroll="#rebuildSection">④ 後續處理與防護</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- SECTION 1: INCIDENT PIPELINE STORY -->
+    <section class="section-block" id="pipelineSection">
+      <div class="intro-grid">
+        <div>
+          <p class="eyebrow">Incident Story Pipeline / 01</p>
+          <h1>一場從 <span class="hl-danger">HTTP 200 (0 bytes)</span> 揭開的<span class="hl-orange">容器入侵與數位鑑識</span>流水線</h1>
+          <p style="color:#c7d7e6;margin-bottom:0;">
+            2026/10/24 中午，<code>old-vm</code> 上的 WordPress 首頁突然變成空白（狀態碼 <code>200</code> 但內容 <code>0 bytes</code>），網站目錄與資料庫出現陌生管理員與偽造日期的後門檔。所幸在 <strong>10/23 16:54 已完成乾淨備份並還原至 <code>new-vm</code></strong>，且發現當下立即<strong>停機保留現場、不誤刪 Volume</strong>，得以完整還原整條攻擊鏈！
+          </p>
+        </div>
+        <div class="summary-pills">
+          <div class="summary-pill">
+            <small>1. 關鍵防線（入侵前 12 小時）</small>
+            <strong class="hl-green">10/23 16:54 乾淨備份</strong>
+          </div>
+          <div class="summary-pill">
+            <small>2. 攻擊突破口（10/24 05:20 起）</small>
+            <strong class="hl-danger">5 組 IP 帳密「一擊 302」</strong>
+          </div>
+          <div class="summary-pill">
+            <small>3. 權限失控（10/24 09:31～10:59）</small>
+            <strong class="hl-orange">外掛建檔 + 全站改 777</strong>
+          </div>
+          <div class="summary-pill">
+            <small>4. 正確止血（10/24 13:18）</small>
+            <strong class="hl-blue">停容器保現場 + 鎖 NSG</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-shell">
+        <div class="flow-toolbar">
+          <div class="scenario-tabs" role="tablist" aria-label="切換流水線視角">
+            <button type="button" class="sc-tab active" data-sc="fullStory" style="--sc-accent: var(--blue)">
+              ① 完整事件流水線（6 階段全覽）
+            </button>
+            <button type="button" class="sc-tab" data-sc="attackChain" style="--sc-accent: var(--danger)">
+              ② 駭客攻擊視角（探測 → 奪權 → 植後門 → 毀站）
+            </button>
+            <button type="button" class="sc-tab" data-sc="defenderSop" style="--sc-accent: var(--green)">
+              ③ 防守止血與鑑識視角（備份 → 封鎖 → 排查 → 重建）
+            </button>
+          </div>
+          <button type="button" class="play-btn" id="playFlowBtn">▶ 自動播放事件流水線</button>
+        </div>
+
+        <div class="vm-stage">
+          <div class="vm-stage-header">
+            <span>👇 點選下方任一流水線階段（STAGE 1 ～ STAGE 6）或延伸對照分支，查看當時發生的細節与證據：</span>
+            <span id="currentScenarioBadge" style="color:var(--blue);">目前視角：① 完整事件流水線（台灣時間 UTC+8）</span>
+          </div>
+
+          <!-- 6 Clickable Story Stages -->
+          <div class="hop-grid" id="hopGrid">
+            <button type="button" class="hop-card state-ok selected" data-hop="0">
+              <div class="hop-step-badge">
+                <span>STAGE 1</span>
+                <span class="hop-zone-tag">10/22～10/23</span>
+              </div>
+              <strong>建站、備份與遷至 new-vm</strong>
+              <small id="hopSummary0">10/23 16:54 建立乾淨備份並核對 SHA256，new-vm 還原完成</small>
+            </button>
+
+            <button type="button" class="hop-card state-warn" data-hop="1">
+              <div class="hop-step-badge">
+                <span>STAGE 2</span>
+                <span class="hop-zone-tag">10/23 晚間</span>
+              </div>
+              <strong>前哨掃描與 138 次暴破失敗</strong>
+              <small id="hopSummary1">xmlrpc 探測 18 次；單一 IP 5 分鐘狂送 138 次登入皆回 200 失敗</small>
+            </button>
+
+            <button type="button" class="hop-card state-block" data-hop="2">
+              <div class="hop-step-badge">
+                <span>STAGE 3</span>
+                <span class="hop-zone-tag">10/24 05:20～07:55</span>
+              </div>
+              <strong>帳密外洩？一擊 302 與後門植入</strong>
+              <small id="hopSummary2">3 組 IP 各 POST 1 次即回 302 進後台，上傳外掛後門並偽造檔案時間</small>
+            </button>
+
+            <button type="button" class="hop-card state-block" data-hop="3">
+              <div class="hop-step-badge">
+                <span>STAGE 4</span>
+                <span class="hop-zone-tag">10/24 09:31～10:59</span>
+              </div>
+              <strong>私建管理員、裝外掛與全站 777</strong>
+              <small id="hopSummary3">新增 tajmohol 與 root_34gm486，用 wp-file-manager 建 14 檔並改 777</small>
+            </button>
+
+            <button type="button" class="hop-card state-info" data-hop="4">
+              <div class="hop-step-badge">
+                <span>STAGE 5</span>
+                <span class="hop-zone-tag">10/24 13:10～15:25</span>
+              </div>
+              <strong>發現 0 bytes、停機保現場與鎖 NSG</strong>
+              <small id="hopSummary4">首頁變 0 bytes！13:18 停容器不用 down -v、鎖 Azure NSG、換密碼並報備老師</small>
+            </button>
+
+            <button type="button" class="hop-card state-ok" data-hop="5">
+              <div class="hop-step-badge">
+                <span>STAGE 6</span>
+                <span class="hop-zone-tag">10/25～10/28</span>
+              </div>
+              <strong>排除 PHP 漏洞、鑑識備份與離機保存</strong>
+              <small id="hopSummary5">驗證 PHP 8.3.36 已修補、確認 10/23 備份與 new-vm 乾淨、下載離機副本</small>
+            </button>
+          </div>
+
+          <!-- 3 Clickable Architecture / Comparison Branches -->
+          <div class="branch-row">
+            <button type="button" class="branch-btn" data-branch="volumes">
+              <strong>📦 容器與 Volume 雙軌對照：匿名 Volume `5d00e04c…` vs `wordpress_site_wordpress_data`</strong>
+              <small>點此查看：為什麼受駭的是匿名 Volume，而原本的命名 Volume 與備份卻毫髮無傷？</small>
+            </button>
+            <button type="button" class="branch-btn" data-branch="newvm">
+              <strong>🛡️ 對照組 `new-vm` 狀態檢查：`webstack-wordpress-1` 為何沒被入侵？</strong>
+              <small>點此查看：new-vm 的檔案清單、wp_users 檢查結果與預防性停機保護策略</small>
+            </button>
+            <button type="button" class="branch-btn" data-branch="port8081">
+              <strong>🔌 網路入口鑑識：攻擊者是走 Nginx (80/443) 還是直連公開的 `:8081`？</strong>
+              <small>點此查看：5 個成功登入 IP 的 Nginx log 紀錄 vs `212.73.148.8` 對 8081 的掃描證據</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Explanation Panel for Clicked Stage / Branch -->
+        <div class="flow-detail-panel" aria-live="polite">
+          <div class="detail-left">
+            <h3 id="hopDetailTitle">STAGE 1｜建站、完成乾淨備份與遷至 new-vm（10/22 20:02 ～ 10/23 19:57）</h3>
+            <p id="hopDetailFlow">
+              <strong>發生經過：</strong>10/22 20:02 完成 WordPress 安裝並建立管理員帳號（代稱 <code>123</code>），20:15 修改最後一篇文章。10/23 01:24 建立 <code>qqnice-wordpress</code> 容器（掛載匿名 Volume <code>5d00e04c…</code>）。最關鍵的是在 <strong>10/23 16:54:59 建立了完整備份 <code>20261023-085459-real</code></strong>（含 <code>db.sql</code> 與 <code>wp-data.tar.gz</code>），核對 SHA256 無誤後複製到 <code>new-vm</code> 完成還原驗證。
+            </p>
+            <div class="detail-evidence" id="hopDetailCmd">
+              鑑識依據：wp_users / docker inspect / stat (10/23 16:54:59) / SHA256SUMS 核對 OK
+            </div>
+          </div>
+          <div class="detail-right">
+            <div>
+              <strong>💡 這一站的關鍵伏筆與維護洞察：</strong>
+              <span id="hopDetailCaution">
+                10/23 12:21 在主機誤執行 apt install certbot python3-certbot-apache -y，意外把 apache2 與 apache-htcacheclean 裝進 Host（因 80 埠被佔用啟動失敗），日後排查 www-data 程序時差點誤判為駭客後門！此外 19:14 將備份還原回 old-vm 時使用 tar 解壓，埋下「tar 只覆蓋同名檔、不刪多餘檔」的鑑識細節。
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fine-grained Interactive Timeline Filter -->
+      <div class="timeline-box">
+        <div class="tl-controls">
+          <div>
+            <h3 style="margin-bottom:.2rem;font-size:1.08rem;">⏱️ 完整時間軸明細（已統一換算為台灣時間 UTC+8）</h3>
+            <small style="color:var(--muted);">系統與容器原始 log 為 UTC，下方皆已 +8 小時對齊，點選分類標籤可快速過濾關鍵事件：</small>
+          </div>
+          <div class="tl-filter-group" role="group" aria-label="過濾時間軸">
+            <button type="button" class="tl-btn active" data-tl="all">全部事件 (22)</button>
+            <button type="button" class="tl-btn" data-tl="prep">🟢 入侵前作業與備份 (6)</button>
+            <button type="button" class="tl-btn" data-tl="probe">🟡 外部探測與暴破失敗 (3)</button>
+            <button type="button" class="tl-btn" data-tl="breach">🔴 入侵奪權與植後門 (7)</button>
+            <button type="button" class="tl-btn" data-tl="defense">🔵 發現異常、止血與鑑識 (6)</button>
+          </div>
+        </div>
+
+        <div class="tl-list" id="tlList">
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/22 20:02:59</span>
+            <span class="tl-tag tag-prep">建站與文章</span>
+            <span>WordPress 安裝完成，建立管理員帳號 <code>123</code>；20:15:57 完成最後一篇文章修改。</span>
+            <span class="tl-source">依據: wp_users / wp_posts</span>
+          </div>
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/23 01:24:00</span>
+            <span class="tl-tag tag-prep">建立容器</span>
+            <span><code>qqnice-wordpress</code> 容器建立，掛載匿名 Volume <code>5d00e04c…</code>（01:48 曾有外部 IP <code>212.73.148.8</code> 直連 8081 送 TLS 亂碼回 400）。</span>
+            <span class="tl-source">依據: docker inspect / log</span>
+          </div>
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/23 12:21:05</span>
+            <span class="tl-tag tag-prep">套件小插曲</span>
+            <span>執行 <code>apt install certbot python3-certbot-apache -y</code>，連帶安裝主機 <code>apache2</code> 並啟動 <code>apache-htcacheclean</code>；主機 apache2 因 80 埠被佔用啟動失敗。</span>
+            <span class="tl-source">依據: apt / dpkg / journalctl</span>
+          </div>
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/23 16:54:59</span>
+            <span class="tl-tag tag-prep">關鍵乾淨備份</span>
+            <span>建立備份 <code>20261023-085459-real</code>（含 <code>db.sql</code>、<code>wp-data.tar.gz</code>），18:55 複製至 <code>new-vm</code> 並核對 SHA256 一致、完成還原。</span>
+            <span class="tl-source">依據: stat / new bash_history</span>
+          </div>
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/23 19:05～19:20</span>
+            <span class="tl-tag tag-prep">還原與測試</span>
+            <span>學生 IP 對 <code>install.php</code> 請求及對 <code>wp-login.php</code> 16 次 POST 回 200（失敗）；約 19:14 將備份還原至 <code>old-vm</code> 並重啟容器。</span>
+            <span class="tl-source">依據: 容器 log / docker inspect</span>
+          </div>
+          <div class="tl-item" data-cat="prep">
+            <span class="tl-time">10/23 19:32～19:57</span>
+            <span class="tl-tag tag-prep">設定檔調整</span>
+            <span>編輯 Nginx 設定並多次執行 <code>sudo systemctl reload nginx</code>（因主機 nginx 為 inactive 而失敗，容器內 nginx 未確認重載）。</span>
+            <span class="tl-source">依據: auth.log / journalctl</span>
+          </div>
+          <div class="tl-item" data-cat="probe">
+            <span class="tl-time">10/23 19:54、20:16</span>
+            <span class="tl-tag tag-probe">API 探測</span>
+            <span>外部 IP <code>45.148.10.120</code> 對 <code>/wp-json/batch/v1</code> 各發送一次 POST（回 207），屬自動化漏洞探測。</span>
+            <span class="tl-source">依據: 容器 log</span>
+          </div>
+          <div class="tl-item" data-cat="probe">
+            <span class="tl-time">10/23 20:06～05:35</span>
+            <span class="tl-tag tag-probe">XML-RPC 攻擊</span>
+            <span>5 個外部 IP（含 <code>87.121.84.174</code> 連發 9 次）對 <code>xmlrpc.php</code> 發送 18 次 POST，皆回 200（回應大小 446/625/976 bytes）。</span>
+            <span class="tl-source">依據: 容器 log</span>
+          </div>
+          <div class="tl-item" data-cat="probe">
+            <span class="tl-time">10/23 20:20～20:25</span>
+            <span class="tl-tag tag-probe">暴力破解失敗</span>
+            <span>IP <code>129.212.229.61</code> 在 5 分鐘內對 <code>wp-login.php</code> 密集送出 <strong>138 次 POST</strong>，全部回 HTTP 200（登入失敗）。</span>
+            <span class="tl-source">依據: 容器 log</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 05:20:54</span>
+            <span class="tl-tag tag-breach">首次後台失守</span>
+            <span>IP <code>34.63.104.237</code> 對 <code>wp-login.php</code> 發送 <strong>1 次 POST 即回 HTTP 302</strong> 進入 <code>wp-admin</code>（最早的成功後台登入）。</span>
+            <span class="tl-source">依據: 容器 log</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 07:00～07:05</span>
+            <span class="tl-tag tag-breach">植入主題後門</span>
+            <span>07:00:15 IP <code>34.68.195.31</code> 一擊 302 登入；14 秒後建立佈景主題後門夾 <code>themes/l1m9cf4jd9q0z7dqw4cz</code>；07:05:53 建立 <code>e7u3xaw9zs0avFM.php</code>（偽造 mtime 為 10/16）。</span>
+            <span class="tl-source">依據: 容器 log / stat</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 07:19～07:20</span>
+            <span class="tl-tag tag-breach">上傳外掛後門</span>
+            <span>07:19:53 IP <code>114.79.6.51</code> 一擊 302 登入；07:20:15 呼叫 <code>update.php?action=upload-plugin</code>，同秒建立外掛後門夾 <code>plugins/l1m9cf4jd9q0z7dqw4cz</code>。</span>
+            <span class="tl-source">依據: 容器 log / stat</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 07:45～07:55</span>
+            <span class="tl-tag tag-breach">觸發後門建檔</span>
+            <span>同網段 IP <code>114.79.4.19</code> 呼叫主題與外掛後門 PHP；07:55:29 建立 <code>ncizbvva0mgpibzhsbCfm.php</code>（偽造 mtime 為 10/7），<code>wp-admin</code> 目錄亦被修改。</span>
+            <span class="tl-source">依據: 容器 log / stat</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 09:31:30</span>
+            <span class="tl-tag tag-breach">私建管理員</span>
+            <span>IP <code>209.50.170.195</code> 登入後台（302），09:31:35 建立陌生管理員 <code>tajmohol</code>，並安裝、啟用 <code>wp-file-manager (8.0.6)</code> 外掛。</span>
+            <span class="tl-source">依據: 容器 log / wp_users</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 10:58:49</span>
+            <span class="tl-tag tag-breach">大舉建檔與 777</span>
+            <span>IP <code>179.255.155.96</code> 登入（302），與相鄰 IP <code>179.255.151.96</code> 透過 <code>wp-file-manager (cmd=mkfile)</code> 送出 15 次建檔請求（含 <code>performance-tweaks.php</code>、<code>index.php</code> 等）；<strong>10:58:54 整個 Volume 權限被改為 777</strong>！</span>
+            <span class="tl-source">依據: 容器 log / stat</span>
+          </div>
+          <div class="tl-item" data-cat="breach">
+            <span class="tl-time">10/24 10:59:13</span>
+            <span class="tl-tag tag-breach">二號幽靈管理員</span>
+            <span>建立第二個陌生管理員 <code>root_34gm486</code>；<code>wp-login.php</code> 與 <code>index.php</code> 再次被覆寫，導致首頁回應變成 0 bytes。</span>
+            <span class="tl-source">依據: wp_users / stat</span>
+          </div>
+          <div class="tl-item" data-cat="defense">
+            <span class="tl-time">10/24 13:10～13:18</span>
+            <span class="tl-tag tag-defense">發現異常與停機</span>
+            <span>12:47 登入 old，13:09 改時區為 <code>Asia/Taipei</code>；13:10 載入首頁發現 <code>HTTP 200 (0 bytes)</code>；<strong>13:18:22 立即停止 <code>qqnice-wordpress</code> 容器（保留現場）</strong>。</span>
+            <span class="tl-source">依據: nginx log / docker inspect</span>
+          </div>
+          <div class="tl-item" data-cat="defense">
+            <span class="tl-time">10/24 13:19～13:53</span>
+            <span class="tl-tag tag-defense">鎖 NSG 與換密碼</span>
+            <span>13:22 預防性停止 <code>new-vm</code> 容器；修改 Azure NSG 將 22/80/443/8081 限縮為本人 IP；13:30 與 13:32 更換 new 與 old 的 Linux 密碼。</span>
+            <span class="tl-source">依據: auth.log / docker inspect</span>
+          </div>
+          <div class="tl-item" data-cat="defense">
+            <span class="tl-time">10/24 15:25～10/25</span>
+            <span class="tl-tag tag-defense">通報老師與協作</span>
+            <span>寄信向老師報告並整理 Notion 紀錄；10/25 老師回信提示排查 10/21 新公布的 PHP 漏洞（CVE-2026-109618 / 109619）並提供三個檢查指令。</span>
+            <span class="tl-source">依據: 電子郵件</span>
+          </div>
+          <div class="tl-item" data-cat="defense">
+            <span class="tl-time">10/26 13:38</span>
+            <span class="tl-tag tag-defense">完成漏洞排查</span>
+            <span>回覆老師排查結果：確認容器為已修補的 <code>PHP 8.3.36</code>、無 OOM/Fatal、主機 <code>www-data</code> 僅為 certbot 帶入的 <code>htcacheclean</code>；老師肯定排查並確認在 new 上測試重建。</span>
+            <span class="tl-source">依據: 電子郵件 / docker logs</span>
+          </div>
+          <div class="tl-item" data-cat="defense">
+            <span class="tl-time">10/27～10/28</span>
+            <span class="tl-tag tag-defense">備份鑑識與離機保存</span>
+            <span>唯讀檢查 10/23 備份 <code>db.sql</code> 的 <code>wp_options</code>（無外掛、排程正常），並於 10/28 21:44 將備份下載至個人電腦核對 SHA256 一致，完成離機保存！</span>
+            <span class="tl-source">依據: 終端機 / SHA256SUMS</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: DIGITAL FORENSICS & EVIDENCE LAB -->
+    <section class="section-block" id="forensicsSection">
+      <p class="eyebrow">Digital Forensics Lab / 02</p>
+      <h2>數位鑑識實驗室：如何從 Log 與檔案時間戳記揪出真相？</h2>
+      <p style="color:var(--muted);max-width:65rem;">
+        面對被入侵的主機，不能只看表面檔案列表或急著重灌。點選下方 <strong>5 個核心鑑識課題</strong>，查看我們如何透過狀態碼統計、<code>stat</code> 時間比對、PHP 版本排查與資料庫唯讀檢測還原真相：
+      </p>
+
+      <div class="fw-grid">
+        <div class="fw-card">
+          <h3 style="margin-bottom:.3rem;">點選切換：5 大數位鑑識證據鏈</h3>
+          <div class="trap-btns" role="tablist">
+            <button type="button" class="trap-btn active" data-trap="f1">
+              <strong>🔍 鑑識 1：wp-login.php 的 164 次 POST（200 失敗 vs 302 一擊成功）</strong>
+              <small>為什麼 138 次連發是失敗，而 5 個不同國家的 IP 卻能「各按 1 次就進後台」？還有雙胞胎 IP 謎團！</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="f2">
+              <strong>🕒 鑑識 2：識破駭客的「時間穿越偽造術」（mtime vs ctime / Birth）</strong>
+              <small>惡意 PHP 檔顯示修改日期是 10/16 與 10/7（比建站還早！），如何用 stat 一眼看穿？</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="f3">
+              <strong>🧪 鑑識 3：排查 PHP 重大漏洞（CVE-2026-109618 / 109619）與 www-data 疑雲</strong>
+              <small>依老師建議檢查容器 PHP 版本、OOM 紀錄，並追查主機上為什麼會有 www-data 程序？</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="f4">
+              <strong>💎 鑑識 4：驗證 10/23 備份是否乾淨（4,358 檔案 + wp_options + cron）</strong>
+              <small>重建前必須確認備份沒被污染！如何用唯讀指令檢查外掛、使用者與 12 項排程？</small>
+            </button>
+
+            <button type="button" class="trap-btn" data-trap="f5">
+              <strong>🧭 鑑識 5：感染範圍邊界判定（SSH / Nginx 容器 / Volume / new-vm）</strong>
+              <small>主機有沒有被拿到 root？Nginx 容器有沒有被改？new-vm 安全嗎？</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="fw-card" aria-live="polite">
+          <h3 id="trapTitle" style="color:var(--blue);margin-bottom:.4rem;">
+            鑑識 1：從 HTTP 狀態碼看穿「暴力破解失敗」與「憑證外洩一擊登入」
+          </h3>
+          <p id="trapExplain" style="font-size:.9rem;color:#d2e2f0;margin-bottom:.6rem;">
+            在 WordPress 中，對 <code>wp-login.php</code> 發送 POST 時：若回傳 <strong><code>HTTP 200</code> 代表停留在登入頁（登入失敗）</strong>；若回傳 <strong><code>HTTP 302</code> 代表驗證成功並跳轉至 <code>/wp-admin/</code></strong>。<br><br>
+            統計全部 164 次 POST 發現：<code>129.212.229.61</code> 在 10/23 晚間狂試 138 次全回 200（失敗）；但 10/24 05:20 起，卻有 <strong>5 個不同 IP 各只送出 1 次 POST 就拿到了 302 成功登入</strong>！這證明攻擊者進場時手上已握有管理員 <code>123</code> 的有效帳密。<br><br>
+            <strong>雙胞胎 IP 謎團：</strong>10:58:49 由 <code>179.255.155.96</code> 登入成功（302），但 13 秒後從未登入過的 <code>179.255.151.96</code>（僅差一碼）卻直接呼叫 <code>admin-ajax.php</code> 建立 3 個檔案，推測為同一攻擊者跨節點共用登入 Cookie！
+          </p>
+
+          <div class="code-box">
+            <div class="code-box-top">
+              <span id="trapCodeLabel">容器 Log 登入狀態碼統計與 5 組成功 IP 清單（台灣時間 UTC+8）</span>
+              <button type="button" class="copy-btn" id="copyCodeBtn">複製內容</button>
+            </div>
+            <pre id="trapCodeBlock"># wp-login.php 全部 164 次 POST 狀態碼分布：
+- 129.212.229.61 : 138 次 POST -> 全部 HTTP 200 (10/23 20:20:17～20:25:15 暴力破解失敗)
+- 學生本人 IP     :  16 次 POST -> 全部 HTTP 200 (10/23 19:09:48～19:20:02 測試失敗)
+- 其他 4 個外部 IP :   5 次 POST -> 全部 HTTP 200 (10/24 10:03～10:50 零星嘗試失敗)
+
+# 🚨 5 個「一擊成功 (HTTP 302)」進入後台的攻擊者 IP：
+1. 34.63.104.237  -> 10/24 05:20:54 (1 次 POST 回 302，最早的後台失守紀錄)
+2. 34.68.195.31   -> 10/24 07:00:15 (1 次 POST 回 302，14 秒後建立 themes 後門夾)
+3. 114.79.6.51    -> 10/24 07:19:53 (1 次 POST 回 302，22 秒後 upload-plugin 植後門)
+4. 209.50.170.195 -> 10/24 09:31:30 (1 次 POST 回 302，建立管理員 tajmohol + 裝 wp-file-manager)
+5. 179.255.155.96 -> 10/24 10:58:49 (1 次 POST 回 302，聯手 179.255.151.96 建 14 檔 + 全站改 777 + 建 root_34gm486)</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: EXTENDED MAINTENANCE VULNERABILITIES -->
+    <section class="section-block" id="vulnSection">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1.1rem;">
+        <div>
+          <p class="eyebrow">Extended Maintenance Vulnerabilities / 03</p>
+          <h2>延伸維護時的「八大漏洞與維運盲點」深度剖析</h2>
+          <p style="color:var(--muted);margin-bottom:0;">
+            除了帳密外洩本身，這次事件更暴露了日常維護、容器配置、備份策略與緊急應變時的 <strong>8 個延伸漏洞</strong>。點選分類篩選查看原因與根治方案：
+          </p>
+        </div>
+        <div class="caution-filter" role="group" aria-label="篩選維護漏洞">
+          <button type="button" class="filter-btn active" data-filter="all">全部漏洞 (8)</button>
+          <button type="button" class="filter-btn" data-filter="arch">容器與網路暴露 (3)</button>
+          <button type="button" class="filter-btn" data-filter="ops">主機與備份盲點 (3)</button>
+          <button type="button" class="filter-btn" data-filter="auth">帳號與後台防線 (2)</button>
+        </div>
+      </div>
+
+      <div class="caution-grid" id="cautionGrid">
+        <!-- Vuln 1 -->
+        <article class="caution-card" data-cat="arch" style="--card-accent: var(--danger)">
+          <div>
+            <span class="caution-badge">維護漏洞 01 · 容器端口暴露</span>
+            <h3>後端容器 `:8081` 直接對外開放（繞過 Nginx 風險）</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>WordPress 容器的 <code>8081</code> 埠原本直接對外開放。雖然 5 個登入成功的 IP 在 Nginx log 都有紀錄（代表走 80/443），但容器 log 在 <code>10/23 01:48</code> 抓到一筆來自 <code>212.73.148.8</code> 的 TLS 握手亂碼請求（回 400），而 Nginx log 完全沒有這個 IP！</li>
+              <li><strong>延伸風險：</strong>證明外部掃描器已經直接掃到 <code>8081</code>！一旦未來在 Nginx 設定了 IP 白名單或 WAF，攻擊者只要改連 <code>:8081</code> 就能輕鬆繞過所有防護。</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>後端容器絕不對公網 publish 埠號（移除 <code>0.0.0.0:8081->80</code>，或僅綁定 <code>127.0.0.1:8081:80</code> 供本機測試），統一只由 Nginx 反向代理透過內部 Docker 網路連線，並在雲端 NSG 關閉 8081。
+          </div>
+        </article>
+
+        <!-- Vuln 2 -->
+        <article class="caution-card" data-cat="arch" style="--card-accent: var(--orange)">
+          <div>
+            <span class="caution-badge">維護漏洞 02 · Volume 命名與殘留陷阱</span>
+            <h3>使用匿名 Volume (`5d00e04c…`) 且誤以為 `tar` 解壓能還原乾淨</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong><code>qqnice-wordpress</code> 掛載的是 64 字元匿名 Volume <code>5d00e04c…</code>，而主機上另有 <code>wordpress_site_wordpress_data</code> 與 <code>webstack_wp-data</code>，多份 Volume 散落極易搞混。</li>
+              <li><strong>延伸風險：</strong>維護還原時若直接對舊 Volume 執行 <code>tar -xzf wp-data.tar.gz</code>，<strong><code>tar</code> 只會覆蓋同名檔案，絕對不會刪除攻擊者新增的後門檔案</strong>！且本次受駭 Volume 已被整批 <code>chmod 777</code> 與改寫核心檔。</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>在 <code>compose.yml</code> 明確宣告具名 Volume；被入侵後的 Volume 視為完全不可信任（僅保留供鑑識，絕不搬移任何檔案回去），還原時必須建立<strong>全新空白 Volume</strong> 再解壓乾淨備份。
+          </div>
+        </article>
+
+        <!-- Vuln 3 -->
+        <article class="caution-card" data-cat="ops" style="--card-accent: var(--yellow)">
+          <div>
+            <span class="caution-badge">維護漏洞 03 · 主機與容器環境混淆</span>
+            <h3>在容器化 Host 誤裝 `python3-certbot-apache` 並對錯的 Nginx 下指令</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>10/23 12:21 執行 <code>apt install certbot python3-certbot-apache -y</code>，導致 Ubuntu 主機被裝入整套 <code>apache2</code> 並自動啟動 <code>apache-htcacheclean</code>（以 <code>www-data</code> 執行），主機 apache2 則因 80 埠被佔用啟動失敗；同日 19:32 修改設定後多次執行 <code>sudo systemctl reload nginx</code>，但主機的 nginx 其實是 <code>inactive</code>（真正在跑的是容器內的 nginx）。</li>
+              <li><strong>延伸風險：</strong>Host 與容器職責混淆，不僅讓設定重載失效，更在資安鑑識 <code>ps aux | grep www-data</code> 時出現幽靈程序干擾判斷！</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>反向代理既已容器化，重載應使用 <code>docker exec &lt;nginx容器&gt; nginx -t && docker exec &lt;nginx容器&gt; nginx -s reload</code>；申請憑證應使用純 <code>certbot</code> (webroot/standalone) 而非安裝會夾帶主機 Web Server 的 <code>python3-certbot-apache</code>。
+          </div>
+        </article>
+
+        <!-- Vuln 4 -->
+        <article class="caution-card" data-cat="ops" style="--card-accent: var(--purple)">
+          <div>
+            <span class="caution-badge">維護漏洞 04 · 備份範圍落差與單點風險</span>
+            <h3>手動備份漏掉 `config.tar.gz`（Nginx/憑證），且初期缺乏離機副本</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>標準講義的 <code>backup.sh</code> 會產出 5 個檔案（含文章清單 <code>posts.tsv</code>、檔案雜湊 <code>wp-files.sha256</code>、設定檔 <code>config.tar.gz</code>）。本次手動備份只打包了 <code>db.sql</code> 與 <code>wp-data.tar.gz</code>，使 <code>SHA256SUMS</code> 只有兩行，漏掉了 Nginx 反向代理設定與 SSL 憑證。</li>
+              <li><strong>延伸風險：</strong>若整台 VM 毀損，雖有網站資料卻得重新設定 Nginx 與憑證；且若備份只放在雲端 VM 上，一旦攻擊者取得 Host 權限連備份一起加密或刪除就會全軍覆沒。</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>遵循 3-2-1 備份原則，<strong>第一時間將乾淨備份下載回個人電腦離機保存並核對 SHA256</strong>（已於 10/28 完成！），並將 Nginx 設定檔、<code>compose.yml</code> 與憑證納入自動化備份腳本。
+          </div>
+        </article>
+
+        <!-- Vuln 5 -->
+        <article class="caution-card" data-cat="auth" style="--card-accent: var(--danger)">
+          <div>
+            <span class="caution-badge">維護漏洞 05 · 身分驗證與登入端點暴露</span>
+            <h3>使用好猜的帳號代稱 (`123`)、疑似密碼外洩／共用，且 `wp-login.php` 全網公開</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>管理員帳號命名過於簡單（<code>123</code>），且 5 組外部 IP 不需暴力猜測就能「1 次 POST 回 302」直接登入，高度懷疑密碼強度不足或與其他曾外洩的服務共用密碼。</li>
+              <li><strong>延伸風險：</strong><code>wp-login.php</code> 與 <code>xmlrpc.php</code> 對全網開放，不僅引來 5 分鐘 138 次 POST 暴力破解與 18 次 XML-RPC 呼叫，一旦憑證外洩更是門戶大開。</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>重建後停用舊管理員帳號名稱，改用<strong>獨特帳號 + 16 字元以上獨立隨機強密碼 + 開啟雙因素驗證 (2FA)</strong>；並在 Nginx 設定 <code>location = /wp-login.php</code> 與 <code>xmlrpc.php</code> 僅允許管理員 IP 存取（其他人直接回 403）。
+          </div>
+        </article>
+
+        <!-- Vuln 6 -->
+        <article class="caution-card" data-cat="auth" style="--card-accent: var(--blue)">
+          <div>
+            <span class="caution-badge">維護漏洞 06 · 後台權限擴張與檔案修改權限</span>
+            <h3>後台允許直接上傳／安裝外掛（`wp-file-manager` 淪為毀站工具）</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>攻擊者進後台後，先用 <code>update.php?action=upload-plugin</code> 上傳後門壓縮檔，接著 <code>209.50.170.195</code> 直接在後台安裝 <code>wp-file-manager (8.0.6)</code>，讓後續的 <code>179.255.155.96</code> 能在 10 秒內發送 15 次 <code>cmd=mkfile</code> 建立惡意 PHP 並將整個 Volume 改為 <code>777</code>。</li>
+              <li><strong>延伸風險：</strong>只要一個管理員帳號或 Cookie 被偷，就等於取得容器內 <code>www-data</code> 的任意寫檔與執行程式碼 (RCE) 權限！</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>網站穩定上線後，可在 <code>wp-config.php</code> 設定 <code>define('DISALLOW_FILE_EDIT', true);</code> 甚至 <code>define('DISALLOW_FILE_MODS', true);</code> 禁止從後台直接安裝外掛或改寫 PHP，外掛更新統一由維護期間短暫開啟。
+          </div>
+        </article>
+
+        <!-- Vuln 7 -->
+        <article class="caution-card" data-cat="arch" style="--card-accent: var(--green)">
+          <div>
+            <span class="caution-badge">維護漏洞 07 · 雲端防火牆緊急操作失誤</span>
+            <h3>Azure NSG 規則誤把本人 IP 填在「目的地 (Destination)」導致斷線</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>10/24 13:19 發現入侵並準備鎖定 Azure NSG（限制 22/80/443/8081 只讓自己連）時，一時緊張誤把自己的公網 IP 填進「目的地 (Destination)」而非「來源 (Source)」。</li>
+              <li><strong>延伸風險：</strong>因為封包的目的地是 VM 的內網/公網 IP，不可能等於學生家裡的 IP，結果規則一生效就把包括自己在內的所有 SSH 連線全部擋死！</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>修改雲端防火牆 (NSG / Security Group) 入站規則時，務必口訣核對：<strong>「誰連進來 ＝ 來源 (Source) 填我的 IP；連向哪台主機 ＝ 目的地 (Destination) 維持 Any / 主機 IP」</strong>，修改後於 13:53 順利恢復登入。
+          </div>
+        </article>
+
+        <!-- Vuln 8 -->
+        <article class="caution-card" data-cat="ops" style="--card-accent: var(--pink)">
+          <div>
+            <span class="caution-badge">維護漏洞 08 · 鑑識時區與指令展開盲點</span>
+            <h3>UTC 與台灣時間 (+8) 混用差一天，以及萬用字元未展開的「假 0 筆」</h3>
+            <ul class="caution-list">
+              <li><strong>問題現象：</strong>容器內與舊系統預設為 UTC，最初寄信給老師時看到後門檔日期為 <code>10/15</code>、<code>10/6</code>，換算為台灣時間 (+8) 其實是 <code>10/16</code>、<code>10/7</code>；此外在執行搜尋指令時，若萬用字元 (Glob) 因權限或引號未正確展開，終端機印出「0 個結果」其實是「根本沒讀到檔案」。</li>
+              <li><strong>延伸風險：</strong>8 小時的時差跨過午夜就會差一天，可能完全推翻「先備份還是先被入侵」的因果推論！</li>
+            </ul>
+          </div>
+          <div class="caution-fix">
+            <strong>✅ 根治方案：</strong>所有資安報告與時間軸統一標註時區（如全頁統一換算為 <code>UTC+8</code> 並註明原始 log 為 UTC）；執行 <code>grep</code> 或 <code>find</code> 檢查無異常時，務必先用已知存在的關鍵字（如 Apache 啟動訊息 <code>AH00163</code>）確認指令真的有讀到資料！
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SECTION 4: REBUILD PLAN, HARDENING CHECKLIST & UNSOLVED MYSTERIES -->
+    <section class="section-block" id="rebuildSection">
+      <p class="eyebrow">Action Plan & Future Hardening / 04</p>
+      <h2>後續處理進度檢核表 ＆ 誠實保留的未解謎團</h2>
+      <p style="color:var(--muted);max-width:65rem;">
+        資安事件處理的最高原則是：<strong>「有一分證據說一分話，不確定的絕不硬猜；被污染的環境絕不原地清理，一律從乾淨備份重建並全面換鑰匙。」</strong>點選下方檢核表追蹤復原進度：
+      </p>
+
+      <div class="rebuild-grid">
+        <!-- Interactive Checklist -->
+        <div class="checklist-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin-bottom:0;">🛡️ 止血、鑑識與安全重建 8 步檢核表</h3>
+            <span id="checkProgressText" style="font-weight:800;color:var(--green);font-size:.9rem;">已完成 5 / 8 (63%)</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="checkProgressBar"></div>
+          </div>
+
+          <label class="check-item done">
+            <input type="checkbox" checked data-check>
+            <div>
+              <strong>1. 立即停止受駭與對照組容器，完整保留犯罪現場（10/24 完成）</strong>
+              <small>執行 <code>docker stop qqnice-wordpress</code> 與停止 <code>new-vm</code> 容器，絕不使用 <code>down -v</code> 刪除現場。</small>
+            </div>
+          </label>
+
+          <label class="check-item done">
+            <input type="checkbox" checked data-check>
+            <div>
+              <strong>2. 限縮雲端防火牆 (Azure NSG) 與更換雙機 Linux 密碼（10/24 完成）</strong>
+              <small>將 22 / 80 / 443 / 8081 來源限制為本人 IP，並立即更換 old 與 new 的系統密碼。</small>
+            </div>
+          </label>
+
+          <label class="check-item done">
+            <input type="checkbox" checked data-check>
+            <div>
+              <strong>3. 完成 PHP CVE 漏洞排查與感染邊界鑑定（10/26 完成）</strong>
+              <small>確認 PHP 8.3.36 已修補、Nginx 容器未遭竄改、<code>new-vm</code> 無異常檔案與陌生帳號。</small>
+            </div>
+          </label>
+
+          <label class="check-item done">
+            <input type="checkbox" checked data-check>
+            <div>
+              <strong>4. 唯讀檢驗 10/23 備份資料庫之 wp_options 與排程（10/27 完成）</strong>
+              <small>確認 <code>active_plugins</code> 為空 (<code>a:0:{}</code>)、12 項 cron 皆為核心預設、無陌生管理員。</small>
+            </div>
+          </label>
+
+          <label class="check-item done">
+            <input type="checkbox" checked data-check>
+            <div>
+              <strong>5. 將入侵前乾淨備份下載至個人電腦離機保存並驗 SHA256（10/28 完成）</strong>
+              <small>已下載至本機 <code>C:\Users\User\20261023-085459-real</code>，核對 <code>db.sql</code> 與 <code>wp-data.tar.gz</code> 雜湊完全一致。</small>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" data-check>
+            <div>
+              <strong>6. 全面更換密碼、資料庫帳密與 WordPress Salts（重建時執行）</strong>
+              <small>棄用舊管理員代稱 <code>123</code>，改設 16+ 字元獨立強密碼；更新 DB 密碼與 <code>wp-config.php</code> Salts；同步檢查其他外部服務是否有共用密碼。</small>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" data-check>
+            <div>
+              <strong>7. 開啟後台雙因素驗證 (2FA) 並封鎖公開登入面（重建後第一件事）</strong>
+              <small>關閉或限縮 <code>8081</code> 埠；於 Nginx 限制 <code>wp-login.php</code> 僅允許本人 IP 連線；啟用管理員 2FA。</small>
+            </div>
+          </label>
+
+          <label class="check-item">
+            <input type="checkbox" data-check>
+            <div>
+              <strong>8. 在 new-vm 完成還原驗證與更新測試（保留 old-vm 至報告結束）</strong>
+              <small>絕不搬移舊受駭 Volume 任何檔案；在 <code>new-vm</code> 驗證雙網域正常並截圖存證。</small>
+            </div>
+          </label>
+        </div>
+
+        <!-- Unsolved Mysteries / Epistemic Honesty Card -->
+        <div class="checklist-card">
+          <h3 style="margin-bottom:.35rem;color:var(--yellow);">🕵️ 鑑識極限：誠實記錄「尚未確認的 6 個問題」</h3>
+          <p style="font-size:.84rem;color:var(--muted);margin-bottom:.8rem;">
+            在資安調查中，區分<strong>「有 log 證據的事實」</strong>與<strong>「因 log 未記錄請求內容而無法確認的推論」</strong>至關重要：
+          </p>
+
+          <div class="mystery-list">
+            <div class="mystery-item">
+              <strong>❓ 謎團 1：管理員 `123` 的密碼究竟如何外洩？</strong>
+              <span>05:20 起 5 個 IP 各 POST 1 次就拿到 302，代表進場前已有帳密。但容器 log 不記錄 POST Body，無法確認是密碼過弱在其他地方撞庫外洩，還是更早之前透過其他途徑流出。</span>
+            </div>
+
+            <div class="mystery-item">
+              <strong>❓ 謎團 2：07:00 最早的佈景主題後門夾如何寫入？</strong>
+              <span>07:20 的外掛後門有明確的 <code>update.php?action=upload-plugin</code> 紀錄；但 07:00:29 的 <code>themes/l1m9cf4jd9q0z7dqw4cz</code> 與 07:05 的 <code>e7u3xaw9zs0avFM.php</code> 在存取 log 中看不出具體上傳端點。</span>
+            </div>
+
+            <div class="mystery-item">
+              <strong>❓ 謎團 3：`179.255.151.96` 為何不用登入就能建檔？</strong>
+              <span>登入成功 (302) 的只有 <code>179.255.155.96</code>（10:58:49），但 13 秒後只差一碼的 <code>179.255.151.96</code> 卻直接呼叫 <code>admin-ajax.php</code> 建立 3 個檔案。因 log 無 Cookie 紀錄，只能推測為同一人共用 Session。</span>
+            </div>
+
+            <div class="mystery-item">
+              <strong>❓ 謎團 4：已消失的 `performance-tweaks.php` 內容為何？</strong>
+              <span>10:58:58 與 10:59:16 被建立後各在 1～2 秒內收到一次 POST（回應 802 與 382 bytes），隨後檔案被刪除（可能是執行完全站改 777 或建立帳號後自毀的跳板腳本），無法還原原始碼。</span>
+            </div>
+
+            <div class="mystery-item">
+              <strong>❓ 謎團 5：10/23 19:05 來自本人 IP 的 `install.php` 請求</strong>
+              <span>早於 19:14 備份還原前，容器 log 有來自學生本人 IP 對 <code>install.php (step=1, 2)</code> 的請求，不確定是否為還原前開啟瀏覽器測試所觸發，維持未確認。</span>
+            </div>
+
+            <div class="mystery-item">
+              <strong>❓ 謎團 6：10/23 12:21 主機 80 埠被誰佔用？</strong>
+              <span>主機誤裝 apache2 時因 80 埠被佔用而啟動失敗（主機 nginx 已於 10/22 停止，而目前的容器 nginx 於 12:28:55 才啟動），12:21 當下是哪個舊容器佔用 80 埠已無法考證。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>WEEK4｜old VM 被入侵資安事件：流水線故事與延伸維護漏洞互動指南</strong><br>
+      <span>依據 Notion 事件調查報告（2026/10/24 記錄，10/28 更新）整理製作 · 全站時間皆為台灣時間（UTC+8）</span>
+    </div>
+    <div>
+      <span>核心精神：保留現場 · 證據說話 · 驗證備份 · 乾淨重建</span>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll navigation
+    document.querySelectorAll('[data-scroll]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = document.querySelector(btn.dataset.scroll);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Stage & Branch Detail Data (Section 1)
+    const hopDetails = [
+      {
+        title: 'STAGE 1｜建站、完成乾淨備份與遷至 new-vm（10/22 20:02 ～ 10/23 19:57）',
+        flow: '<strong>發生經過：</strong>10/22 20:02 完成 WordPress 安裝並建立管理員帳號（代稱 <code>123</code>），20:15 修改最後一篇文章。10/23 01:24 建立 <code>qqnice-wordpress</code> 容器（掛載匿名 Volume <code>5d00e04c…</code>）。最關鍵的是在 <strong>10/23 16:54:59 建立了完整備份 <code>20261023-085459-real</code></strong>（含 <code>db.sql</code> 與 <code>wp-data.tar.gz</code>），核對 SHA256 無誤後複製到 <code>new-vm</code> 完成還原驗證。',
+        cmd: '鑑識依據：wp_users / docker inspect / stat (10/23 16:54:59) / SHA256SUMS 核對 OK',
+        caution: '10/23 12:21 在主機誤執行 apt install certbot python3-certbot-apache -y，意外把 apache2 與 apache-htcacheclean 裝進 Host（因 80 埠被佔用啟動失敗），日後排查 www-data 程序時差點誤判為駭客後門！此外 19:14 將備份還原回 old-vm 時使用 tar 解壓，埋下「tar 只覆蓋同名檔、不刪多餘檔」的鑑識細節。'
+      },
+      {
+        title: 'STAGE 2｜前哨掃描與 138 次暴力破解失敗（10/23 19:54 ～ 10/24 05:35）',
+        flow: '<strong>發生經過：</strong>10/23 晚間起，自動化攻擊機器人開始盯上這台 VM：19:54 <code>45.148.10.120</code> 探測 <code>/wp-json/batch/v1</code>（回 207）；20:06 起 5 個 IP 對 <code>xmlrpc.php</code> 發送 18 次 POST（回 200）；20:20:17～20:25:15 <code>129.212.229.61</code> 在短短 5 分鐘內對 <code>wp-login.php</code> 狂送 <strong>138 次 POST，但全部回傳 HTTP 200（代表停留在登入畫面、密碼猜測全部失敗）</strong>。',
+        cmd: '鑑識依據：docker logs qqnice-wordpress（統計 POST /wp-login.php 與 /xmlrpc.php 狀態碼）',
+        caution: '很多人在看 log 時看到「wp-login.php 回傳 200 OK」會誤以為駭客暴破成功！其實在 WordPress 中，登入失敗重新渲染表單就是回 200，真正登入成功跳轉後台會回傳 HTTP 302！'
+      },
+      {
+        title: 'STAGE 3｜帳密外洩？一擊 302 奪權與後門植入（10/24 05:20 ～ 07:55）',
+        flow: '<strong>發生經過：</strong>清晨 05:20:54 局勢突變！IP <code>34.63.104.237</code> 只送了 <strong>1 次 POST 就拿到 HTTP 302</strong> 進入 <code>wp-admin</code>。接著 07:00:15 <code>34.68.195.31</code> 一擊登入，14 秒後建立佈景主題後門夾 <code>themes/l1m9cf4jd9q0z7dqw4cz</code>，07:05 建立 <code>e7u3xaw9zs0avFM.php</code>；07:19:53 <code>114.79.6.51</code> 一擊登入並透過 <code>update.php?action=upload-plugin</code> 上傳外掛後門；07:45～07:55 同網段 <code>114.79.4.19</code> 呼叫後門並建立 <code>ncizbvva0mgpibzhsbCfm.php</code>。',
+        cmd: '鑑識依據：容器 log (POST /wp-login.php 302) + stat 比對 Birth (10/24) 與偽造的 Modify (10/16、10/7)',
+        caution: '攻擊者為了掩人耳目，把兩個後門 PHP 檔的「修改時間 (mtime)」偽造成 10/16 與 10/7（比 10/22 建站還早！）。如果只用 ls -l 看修改時間就會被騙，必須用 stat 查看檔案系統的 Birth（建立時間）與 Change（狀態變更時間）！'
+      },
+      {
+        title: 'STAGE 4｜私建雙管理員、安裝 wp-file-manager 與全站改 777（10/24 09:31 ～ 10:59）',
+        flow: '<strong>發生經過：</strong>09:31:30 第 4 個 IP <code>209.50.170.195</code> 登入後台，5 秒內建立陌生管理員 <code>tajmohol</code>，並安裝啟用檔案管理外掛 <code>wp-file-manager (8.0.6)</code>。10:58:49 第 5 個 IP <code>179.255.155.96</code> 登入，與未登入卻有權限的 <code>179.255.151.96</code> 透過該外掛 (<code>cmd=mkfile</code>) 連發 15 次建檔請求（含 <code>performance-tweaks.php</code>、<code>index.php</code> 等 14 種檔案），並在 <strong>10:58:54 將整個 Volume 所有檔案權限遞迴改為 777</strong>，10:59:13 再建管理員 <code>root_34gm486</code>，首頁自此變成 0 bytes！',
+        cmd: '鑑識依據：wp_users 資料表 + 容器 log (action=mk_file_folder_manager&cmd=mkfile) + stat (ctime 10:58:54)',
+        caution: '注意因果順序：wp-file-manager 是攻擊者在 09:31 登入後台才自己安裝的「作案工具」，而不是最初被攻破的漏洞入口！這說明一旦後台管理員失守，攻擊者就能利用合法外掛功能將整個容器檔案系統拆毀。'
+      },
+      {
+        title: 'STAGE 5｜發現首頁 0 bytes、緊急停機保現場與鎖定 NSG（10/24 12:47 ～ 15:25）',
+        flow: '<strong>發生經過：</strong>12:47 登入 <code>old-vm</code>，13:09 將時區設為 <code>Asia/Taipei</code>。13:10～13:11 瀏覽首頁發現回應 <code>HTTP 200</code> 但大小為 <code>0 bytes</code>（此時 13:14 攻擊者還在改 <code>robots.txt</code>！）。<strong>13:18:22 果斷停止 <code>qqnice-wordpress</code> 容器</strong>，13:22 預防性停止 <code>new-vm</code> 容器，接著修改 Azure NSG 僅允許本人 IP、更換雙機 Linux 密碼，並於 15:25 寄信向老師請教。',
+        cmd: '處置紀錄：docker inspect (FinishedAt 13:18:22) / auth.log (passwd 13:30、13:32) / Azure NSG',
+        caution: '這次能順利完成高品質鑑識報告的最大功臣，就是發現異常當下「只執行 docker stop，絕對不執行 docker compose down -v 或刪除檔案」！完整保留了容器 log 與受駭 Volume 現場。'
+      },
+      {
+        title: 'STAGE 6｜排查 PHP 漏洞、驗證乾淨備份與離機保存（10/25 ～ 10/28）',
+        flow: '<strong>發生經過：</strong>10/25 老師回信提示排查 10/21 新公布的 PHP 漏洞（CVE-2026-109618 / 109619）。經檢查容器映像為 10/21 釋出的修補版 <code>PHP 8.3.36</code>、無 OOM/Segmentation 錯誤，排除 PHP 漏洞。10/27 唯讀檢查 <code>10/23</code> 備份的 <code>wp_options</code> 確認無惡意外掛與排程；<strong>10/28 將乾淨備份下載至個人電腦並核對 SHA256 一致</strong>，準備於 <code>new-vm</code> 安全重建！',
+        cmd: '驗證紀錄：PHP 8.3.36 (built Oct 21) / grep wp_options / Windows 本機 certutil & SHA256SUMS 比對 OK',
+        caution: '被入侵過的 Volume（10:58:54 全站檔案 ctime 都被變更過）完全不可信任！重建時絕不搬移舊 Volume 的任何檔案，一律使用驗證過 SHA256 的 10/23 乾淨備份，並全面更換所有密碼與 Salts。'
+      }
+    ];
+
+    const branchDetails = {
+      volumes: {
+        title: '📦 容器與 Volume 雙軌對照：為什麼受駭的是匿名 Volume `5d00e04c…`？',
+        flow: '<strong>架構真相：</strong><code>old-vm</code> 上其實存在兩個與 WordPress 相關的 Volume：<br>① <code>wordpress_site_wordpress_data</code>（Compose 專案建立於 10/22 19:58，10/23 16:54 的乾淨備份即源自這裡，檢查無任何不明檔案）。<br>② 匿名 Volume <code>5d00e04c…</code>（<code>qqnice-wordpress</code> 容器於 10/23 01:24 建立時掛載，10/23 19:14 曾把備份解壓進來，並在 10/24 遭到入侵與全站改 777）。',
+        cmd: '檢查指令：docker inspect qqnice-wordpress --format "{{json .Mounts}}"',
+        caution: '維護時若混用手動 docker run（未指定具名 volume）與 docker compose，就會產生這種 64 碼匿名 Volume，不僅難以管理，還容易搞錯備份與還原的目標對象！'
+      },
+      newvm: {
+        title: '🛡️ 對照組 `new-vm` 狀態檢查：為什麼 `new-vm` 逃過一劫？',
+        flow: '<strong>檢查結果：</strong><code>new-vm</code> 在 10/23 18:55 收到從 <code>old-vm</code> 複製過去的乾淨備份 <code>20261023-085459-real</code>（早於 10/24 05:20 的首次入侵），並還原至 <code>webstack-wordpress-1</code>。經檢查 <code>new-vm</code> 根目錄無不明 PHP 檔、外掛僅有預設的 <code>akismet</code> 與 <code>hello.php</code>，資料庫 <code>wp_users</code> 也只有原本的帳號 <code>123</code>（無 <code>tajmohol</code> 與 <code>root_34gm486</code>）。',
+        cmd: '檢查指令：在 new-vm 檢查 volume 檔案清單與 SELECT user_login, user_registered FROM wp_users;',
+        caution: '雖然 new-vm 檔案與帳號看似乾淨，但因為它是從同一個備份還原出來的，代表它的管理員帳號 123 用的也是「同一組已經外洩的密碼」！幸好在 10/24 13:22 就預防性停止了 new-vm 容器，重建啟用前必須先換掉密碼！'
+      },
+      port8081: {
+        title: '🔌 網路入口鑑識：攻擊者是走 Nginx (80/443) 還是直連 `:8081`？',
+        flow: '<strong>交叉比對結果：</strong>雖然 <code>8081</code> 埠原本對外開放，但比對 Nginx access.log 後發現，<strong>5 個成功登入後台的 IP 在 Nginx log 中全部都有大量紀錄</strong>（<code>34.63.104.237</code> 111 筆、<code>34.68.195.31</code> 117 筆、<code>114.79.6.51</code> 102 筆、<code>209.50.170.195</code> 21 筆、<code>179.255.155.96</code> 62 筆），證明這批攻擊者都是從 Nginx (80/443) 大門進來的。不過容器 log 開頭有一筆 <code>212.73.148.8</code> 的 TLS 亂碼請求（回 400）不在 Nginx log 中，代表 <code>8081</code> 確實曾被外部掃描器直接探測過。',
+        cmd: '鑑識方法：比對 Nginx access.log 與 WordPress 容器 log 的來源 IP 與請求筆數',
+        caution: '即便這次駭客沒靠 8081 入侵，把後端容器的 8081 直接暴露在公網仍是嚴重架構漏洞（未來若在 Nginx 設 IP 限制，駭客直連 8081 就能繞過），重建時必須封閉 8081！'
+      }
+    };
+
+    const flowScenarios = {
+      fullStory: {
+        badge: '目前視角：① 完整事件流水線（台灣時間 UTC+8）',
+        badgeColor: 'var(--blue)',
+        defaultHop: 0,
+        states: ['state-ok', 'state-warn', 'state-block', 'state-block', 'state-info', 'state-ok'],
+        summaries: [
+          '10/23 16:54 建立乾淨備份並核對 SHA256，new-vm 還原完成',
+          'xmlrpc 探測 18 次；單一 IP 5 分鐘狂送 138 次登入皆回 200 失敗',
+          '3 組 IP 各 POST 1 次即回 302 進後台，上傳外掛後門並偽造檔案時間',
+          '新增 tajmohol 與 root_34gm486，用 wp-file-manager 建 14 檔並改 777',
+          '首頁變 0 bytes！13:18 停容器不用 down -v、鎖 Azure NSG、換密碼並報備老師',
+          '驗證 PHP 8.3.36 已修補、確認 10/23 備份與 new-vm 乾淨、下載離機副本'
+        ]
+      },
+      attackChain: {
+        badge: '目前視角：② 駭客攻擊鏈視角（聚焦 STAGE 2 ～ STAGE 4 如何一步步拆毀網站）',
+        badgeColor: 'var(--danger)',
+        defaultHop: 2,
+        states: ['', 'state-warn', 'state-block', 'state-block', '', ''],
+        summaries: [
+          '（入侵前：管理員 123 帳密疑似於未知管道外洩）',
+          '🔥 步驟 1：自動化機器人掃描 xmlrpc 與 138 次暴破測試（皆回 200 失敗）',
+          '🔥 步驟 2：持有效帳密「一擊 302」進後台，上傳主題/外掛後門並偽造 mtime',
+          '🔥 步驟 3：私建雙管理員，裝 wp-file-manager 連建 14 檔、全站改 777、掏空首頁',
+          '（13:18 容器被管理員強制停止，切斷後門連線）',
+          '（犯罪現場時間戳記與 log 被完整封存供鑑識）'
+        ]
+      },
+      defenderSop: {
+        badge: '目前視角：③ 防守止血與鑑識 SOP（為什麼這次能全身而退並寫出完整報告？）',
+        badgeColor: 'var(--green)',
+        defaultHop: 4,
+        states: ['state-ok', '', '', '', 'state-ok', 'state-ok'],
+        summaries: [
+          '🛡️ 防線 1：入侵前 12 小時完成 10/23 乾淨備份並驗證 SHA256',
+          '（留存完整容器 log，未因暴破而當機）',
+          '（透過 stat 識破駭客偽造的 10/16、10/7 修改時間）',
+          '（識破 wp-file-manager 是登入後安裝，非初始漏洞入口）',
+          '🛡️ 防線 2：發現 0 bytes 後 8 分鐘內停機、不用 down -v、鎖 NSG、換密碼',
+          '🛡️ 防線 3：排除 PHP CVE、唯讀驗證備份 wp_options、完成本機離機備份'
+        ]
+      }
+    };
+
+    const hopCards = [...document.querySelectorAll('.hop-card')];
+    const branchBtns = [...document.querySelectorAll('.branch-btn')];
+
+    function showHopDetail(index) {
+      hopCards.forEach((c, i) => c.classList.toggle('selected', i === index));
+      branchBtns.forEach((b) => b.classList.remove('selected'));
+      const d = hopDetails[index];
+      document.querySelector('#hopDetailTitle').textContent = d.title;
+      document.querySelector('#hopDetailFlow').innerHTML = d.flow;
+      document.querySelector('#hopDetailCmd').textContent = d.cmd;
+      document.querySelector('#hopDetailCaution').textContent = d.caution;
+    }
+
+    function showBranchDetail(key, btnEl) {
+      hopCards.forEach((c) => c.classList.remove('selected'));
+      branchBtns.forEach((b) => b.classList.toggle('selected', b === btnEl));
+      const d = branchDetails[key];
+      document.querySelector('#hopDetailTitle').textContent = d.title;
+      document.querySelector('#hopDetailFlow').innerHTML = d.flow;
+      document.querySelector('#hopDetailCmd').textContent = d.cmd;
+      document.querySelector('#hopDetailCaution').textContent = d.caution;
+    }
+
+    hopCards.forEach((card, idx) => {
+      card.addEventListener('click', () => showHopDetail(idx));
+    });
+
+    branchBtns.forEach((btn) => {
+      btn.addEventListener('click', () => showBranchDetail(btn.dataset.branch, btn));
+    });
+
+    function applyScenario(scKey) {
+      const sc = flowScenarios[scKey];
+      if (!sc) return;
+      document.querySelectorAll('.sc-tab').forEach((t) => t.classList.toggle('active', t.dataset.sc === scKey));
+      const badge = document.querySelector('#currentScenarioBadge');
+      badge.textContent = sc.badge;
+      badge.style.color = sc.badgeColor;
+
+      hopCards.forEach((card, idx) => {
+        card.classList.remove('state-ok', 'state-warn', 'state-block', 'state-info');
+        if (sc.states[idx]) card.classList.add(sc.states[idx]);
+        document.querySelector(`#hopSummary${idx}`).textContent = sc.summaries[idx];
+      });
+      showHopDetail(sc.defaultHop);
+    }
+
+    document.querySelectorAll('.sc-tab').forEach((tab) => {
+      tab.addEventListener('click', () => applyScenario(tab.dataset.sc));
+    });
+
+    // Animated playback
+    let playingFlow = false;
+    document.querySelector('#playFlowBtn').addEventListener('click', async () => {
+      if (playingFlow) return;
+      playingFlow = true;
+      const playBtn = document.querySelector('#playFlowBtn');
+      playBtn.textContent = '⏳ 故事流水線播放中...';
+      applyScenario('fullStory');
+      for (let i = 0; i < hopCards.length; i += 1) {
+        showHopDetail(i);
+        await new Promise((r) => setTimeout(r, 1050));
+      }
+      playBtn.textContent = '▶ 再播放一次流水線';
+      playingFlow = false;
+    });
+
+    // Timeline filter buttons
+    document.querySelectorAll('.tl-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tl-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const cat = btn.dataset.tl;
+        document.querySelectorAll('.tl-item').forEach((item) => {
+          item.style.display = (cat === 'all' || item.dataset.cat === cat) ? 'grid' : 'none';
+        });
+      });
+    });
+
+    // Section 2: Digital Forensics Lab Data
+    const trapData = {
+      f1: {
+        title: '鑑識 1：從 HTTP 狀態碼看穿「暴力破解失敗」與「憑證外洩一擊登入」',
+        color: 'var(--blue)',
+        explain: '在 WordPress 中，對 <code>wp-login.php</code> 發送 POST 時：若回傳 <strong><code>HTTP 200</code> 代表停留在登入頁（登入失敗）</strong>；若回傳 <strong><code>HTTP 302</code> 代表驗證成功並跳轉至 <code>/wp-admin/</code></strong>。<br><br>統計全部 164 次 POST 發現：<code>129.212.229.61</code> 在 10/23 晚間狂試 138 次全回 200（失敗）；但 10/24 05:20 起，卻有 <strong>5 個不同 IP 各只送出 1 次 POST 就拿到了 302 成功登入</strong>！這證明攻擊者進場時手上已握有管理員 <code>123</code> 的有效帳密。<br><br><strong>雙胞胎 IP 謎團：</strong>10:58:49 由 <code>179.255.155.96</code> 登入成功（302），但 13 秒後從未登入過的 <code>179.255.151.96</code>（僅差一碼）卻直接呼叫 <code>admin-ajax.php</code> 建立 3 個檔案，推測為同一攻擊者跨節點共用登入 Cookie！',
+        label: '容器 Log 登入狀態碼統計與 5 組成功 IP 清單（台灣時間 UTC+8）',
+        code: `# wp-login.php 全部 164 次 POST 狀態碼分布：
+- 129.212.229.61 : 138 次 POST -> 全部 HTTP 200 (10/23 20:20:17～20:25:15 暴力破解失敗)
+- 學生本人 IP     :  16 次 POST -> 全部 HTTP 200 (10/23 19:09:48～19:20:02 測試失敗)
+- 其他 4 個外部 IP :   5 次 POST -> 全部 HTTP 200 (10/24 10:03～10:50 零星嘗試失敗)
+
+# 🚨 5 個「一擊成功 (HTTP 302)」進入後台的攻擊者 IP：
+1. 34.63.104.237  -> 10/24 05:20:54 (1 次 POST 回 302，最早的後台失守紀錄)
+2. 34.68.195.31   -> 10/24 07:00:15 (1 次 POST 回 302，14 秒後建立 themes 後門夾)
+3. 114.79.6.51    -> 10/24 07:19:53 (1 次 POST 回 302，22 秒後 upload-plugin 植後門)
+4. 209.50.170.195 -> 10/24 09:31:30 (1 次 POST 回 302，建立管理員 tajmohol + 裝 wp-file-manager)
+5. 179.255.155.96 -> 10/24 10:58:49 (1 次 POST 回 302，聯手 179.255.151.96 建 14 檔 + 全站改 777 + 建 root_34gm486)`
+      },
+      f2: {
+        title: '鑑識 2：識破駭客的「時間穿越偽造術」（mtime vs ctime / Birth）',
+        color: 'var(--yellow)',
+        explain: '攻擊者寫入 <code>e7u3xaw9zs0avFM.php</code> 與 <code>ncizbvva0mgpibzhsbCfm.php</code> 後，故意執行類似 <code>touch -m</code> 的操作，將檔案的<strong>修改時間 (Modify / mtime) 偽造成 <code>10/16</code> 與 <code>10/7</code></strong>（比 10/22 建站還早！），企圖讓管理員用 <code>ls -l</code> 檢查時誤以為是原本的舊系統檔案。<br><br><strong>如何識破？</strong>在 Linux 檔案系統中，攻擊者雖然能輕易偽造 <code>Modify (mtime)</code>，但無法在不具備底層磁碟權限下偽造檔案系統記錄的 <strong><code>Birth（實際建立時間）</code></strong> 與 <strong><code>Change (ctime，屬性/狀態變更時間)</code></strong>！用 <code>stat</code> 一查，清楚顯示它們其實是在 <strong>10/24 07:05:53 與 07:55:29</strong> 才建立的，且在 <strong>10:58:54</strong> 隨全站一起被改為 <code>0777</code> 權限！',
+        label: 'stat 時間戳記鑑識對照（已換算為台灣時間 UTC+8）',
+        code: `# 1. 檢查根目錄與外掛目錄的 e7u3xaw9zs0avFM.php：
+  File: e7u3xaw9zs0avFM.php
+Access: 2026-10-16 ...          <-- 偽造的存取時間
+Modify: 2026-10-16 ...          <-- ❌ 攻擊者偽造的修改時間 (mtime)，企圖偽裝成舊檔案！
+Change: 2026-10-24 10:58:54     <-- 🚨 10:58:54 全站被整批改為 777 時的狀態變更時間 (ctime)
+ Birth: 2026-10-24 07:05:53     <-- 🎯 鐵證！真實建立時間是 10/24 07:05:53
+
+# 2. 檢查 ncizbvva0mgpibzhsbCfm.php：
+Modify: 2026-10-07 ...          <-- ❌ 攻擊者偽造的修改時間 (mtime)
+Change: 2026-10-24 10:58:54     <-- 🚨 隨全站一起變更權限為 0777 (rwxrwxrwx)
+ Birth: 2026-10-24 07:55:29     <-- 🎯 鐵證！與 07:55:27 後門 PHP 被呼叫的時間完全吻合！`
+      },
+      f3: {
+        title: '鑑識 3：排查 PHP 漏洞（CVE-2026-109618 / 109619）與主機 www-data 疑雲',
+        color: 'var(--green)',
+        explain: '10/25 老師來信提示：10/21 剛公布兩個嚴重的 PHP 漏洞（<code>CVE-2026-109618</code>、<code>CVE-2026-109619</code>，可能未經登入即執行程式），建議檢查三件事：<br><br>① <strong>PHP 版本：</strong>檢查容器發現映像內為 <strong><code>PHP 8.3.36 (built Oct 21 2026)</code></strong>，正好是官方公告已修補的版本！且容器建立於 10/23 01:24，晚於修補釋出。<br>② <strong>OOM / Segmentation / Fatal 紀錄：</strong>搜尋 <code>docker logs</code> 筆數為 <code>0</code>（同時確認有印出 Apache 啟動紀錄 <code>AH00163</code>，證明 log 有正常運作而非空集合）。<br>③ <strong>主機上的 <code>ps aux | grep www-data</code>：</strong>發現主機上有一個 <code>htcacheclean (PID 37728)</code>！追查 <code>apt/history.log</code> 與 <code>dpkg.log</code> 證實：這是 10/23 12:21 學生執行 <code>apt install certbot python3-certbot-apache -y</code> 時連帶裝入的主機套件，與容器入侵完全無關！',
+        label: '老師提供的三個排查方向與實際鑑識結果',
+        code: `# [排查 1] 確認容器內 PHP 版本是否已修補 CVE-2026-109618 / 109619
+$ docker run --rm <wordpress映像> php -v
+PHP 8.3.36 (cli) (built: Oct 21 2026 ...)  # ✅ 已是修補後版本！
+
+# [排查 2] 檢查容器 log 有無記憶體崩潰或致命錯誤（先確認讀得到 AH00163 證明指令有效）
+$ docker logs qqnice-wordpress 2>&1 | grep -E -i "oom|segmentation|fatal" | wc -l
+0  # ✅ 0 筆異常，且整份 log 僅有 2 筆 5xx
+
+# [排查 3] 追查主機上為何有 www-data 執行的 htcacheclean (PID 37728)
+$ ps aux | grep www-data
+www-data   37728  ... /usr/bin/htcacheclean -d 120 -p /var/cache/apache2/mod_cache_disk ...
+# 對照 /var/log/apt/history.log：
+Start-Date: 2026-10-23  12:21:05 (台灣時間)
+Commandline: apt install certbot python3-certbot-apache -y
+# ✅ 證實為主機誤裝 certbot-apache 帶入的 systemd 服務，主機 apache2 因 80 埠被佔用未啟動 (log 皆 0 bytes)`
+      },
+      f4: {
+        title: '鑑識 4：驗證 10/23 備份是否乾淨（4,358 檔案 + wp_options + 12 項排程）',
+        color: 'var(--orange)',
+        explain: '在決定用 <code>20261023-085459-real</code>（建立於 10/23 16:54:59）重建網站前，必須嚴格證明「這份備份沒有包含任何潛伏後門」：<br><br>① <strong>時間先後：</strong>備份建立於 10/23 16:54，早於最早的後台失守（10/24 05:20）超過 12 小時；且乾淨資料庫最後一篇文章修改時間為 <code>10/22 20:15:57</code>，之後並無新增內容。<br>② <strong>檔案清單檢查：</strong><code>wp-data.tar.gz</code> 內共 <strong>4,358 個項目</strong>，搜尋所有可疑後門檔名與 <code>performance-tweaks.php</code> 皆為 <strong><code>0 筆</code></strong>。<br>③ <strong>資料庫唯讀檢查 (<code>db.sql</code>)：</strong><code>wp_users</code> 只有 1 筆（帳號 <code>123</code>），搜尋 <code>tajmohol</code> 與 <code>root_34gm486</code> 為 <code>0 筆</code>；檢查 <code>wp_options</code> 確認 <code>users_can_register=0</code>、<code>active_plugins</code> 為 <code>a:0:{}</code>（<strong>未啟用任何外掛</strong>），且 12 個 <code>cron</code> 排程全數為 WordPress 核心預設排程！',
+        label: '備份檔案與 db.sql 唯讀安全檢驗結果',
+        code: `# 1. 檢查備份壓縮檔 (wp-data.tar.gz) 是否含有任何可疑檔名：
+- 總項目數：4,358 個項目
+- 搜尋 e7u3xaw9zs0avFM / ncizbvva0mgpibzhsbCfm / l1m9cf4jd9q0z7dqw4cz / wp-file-manager / performance-tweaks.php -> 皆為 0 筆！
+
+# 2. 唯讀 grep 檢查備份資料庫 (db.sql) 的 wp_users 與 wp_options：
+- wp_users 總筆數：1 筆 (ID=1, user_login='123')，tajmohol 與 root_34gm486 出現次數 = 0
+- siteurl / home ：本人網域（正常）
+- users_can_register ：0（未開放任意註冊）｜ default_role ：subscriber
+- active_plugins ：a:0:{}（完全沒有啟用任何外掛！）
+- cron 排程事件（共 12 項，皆為 WP 核心標準排程）：
+  delete_expired_transients, recovery_mode_clean_expired_keys, wp_delete_temp_updater_backups,
+  wp_privacy_delete_old_export_files, wp_privacy_personal_data_cleanup_requests,
+  wp_scheduled_auto_draft_delete, wp_scheduled_delete, wp_site_health_scheduled_check,
+  wp_update_plugins, wp_update_themes, wp_update_user_counts, wp_version_check`
+      },
+      f5: {
+        title: '鑑識 5：感染範圍邊界判定（Host SSH / Nginx 容器 / Volume / new-vm）',
+        color: 'var(--purple)',
+        explain: '發生資安事件時，必須釐清「到底哪些地方被攻破、哪些地方還是安全的」：<br><br>• <strong>Ubuntu Host (SSH)：</strong>檢查 <code>auth.log</code>（10/23 起）所有外部 SSH 猜密碼皆失敗，成功登入只有本人 IP（<code>last</code> 另有 10/22 10:44 來自 <code>49.217.202.63</code> 的本人帳號登入，早於建站時間）。<br>• <strong>Nginx 反向代理容器：</strong>執行 <code>docker diff</code> 檢查，只有 <code>/var/cache/nginx</code> 暫存目錄變動，設定與程式未被竄改。<br>• <strong>WordPress 容器內部：</strong>在容器內 <code>/run/lock</code> 與 <code>/run/lock/.well-known</code> 發現後門駐留檔；受駭匿名 Volume <code>5d00e04c…</code> 全站被改為 777。<br>• <strong>對照組 <code>new-vm</code>：</strong>檢查其 Volume 與 <code>wp_users</code> 皆無可疑檔案或陌生管理員，判定未受感染。',
+        label: '各層級感染邊界判定總表',
+        code: `┌──────────────────────────────┬──────────────┬────────────────────────────────────────────────────────┐
+│ 檢查目標                     │ 鑑識狀態     │ 證據與處置方式                                         │
+├──────────────────────────────┼──────────────┼────────────────────────────────────────────────────────┤
+│ 1. Ubuntu Host (SSH)         │ ✅ 未被突破  │ auth.log 外部暴破皆失敗；仍預防性更換 Linux 密碼與鎖 NSG│
+│ 2. Nginx 容器                │ ✅ 未被修改  │ docker diff 僅有 /var/cache/nginx 變動                 │
+│ 3. qqnice-wordpress 容器     │ 🚨 嚴重受駭  │ /run/lock/.well-known 有後門；已於 10/24 13:18 停止容器│
+│ 4. 匿名 Volume (5d00e04c…)   │ 🚨 全站污染  │ 含多個後門夾、外掛與 10:58:54 全站改 777；保留現場不復用│
+│ 5. wordpress_site_data Vol   │ ✅ 檔案乾淨  │ 10/23 備份來源，檢查無不明檔案                         │
+│ 6. 10/23 16:54 備份包        │ ✅ 驗證乾淨  │ 4358 檔無異常、wp_options 無外掛；已下載至個人電腦保存  │
+│ 7. 對照組 new-vm             │ ✅ 未見入侵  │ 無惡意檔與陌生帳號；已預防性停機，待換密碼後作為重建基地│
+└──────────────────────────────┴──────────────┴────────────────────────────────────────────────────────┘`
+      }
+    };
+
+    document.querySelectorAll('.trap-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.trap-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const item = trapData[btn.dataset.trap];
+        if (!item) return;
+        const titleEl = document.querySelector('#trapTitle');
+        titleEl.textContent = item.title;
+        titleEl.style.color = item.color;
+        document.querySelector('#trapExplain').innerHTML = item.explain;
+        document.querySelector('#trapCodeLabel').textContent = item.label;
+        document.querySelector('#trapCodeBlock').textContent = item.code;
+      });
+    });
+
+    // Copy button with fallback
+    document.querySelector('#copyCodeBtn').addEventListener('click', async () => {
+      const text = document.querySelector('#trapCodeBlock').textContent;
+      const copyBtn = document.querySelector('#copyCodeBtn');
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '✓ 已複製！';
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.append(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        copyBtn.textContent = '✓ 已複製！';
+      }
+      setTimeout(() => { copyBtn.textContent = '複製內容'; }, 1800);
+    });
+
+    // Section 3: Filter Vulnerability Cards
+    document.querySelectorAll('.filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+        const cat = btn.dataset.filter;
+        document.querySelectorAll('.caution-card').forEach((card) => {
+          card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'flex' : 'none';
+        });
+      });
+    });
+
+    // Section 4: Interactive Checklist Progress
+    const checkInputs = [...document.querySelectorAll('[data-check]')];
+    function updateChecklistProgress() {
+      const total = checkInputs.length;
+      const done = checkInputs.filter((i) => i.checked).length;
+      const pct = Math.round((done / total) * 100);
+      document.querySelector('#checkProgressText').textContent = `已完成 ${done} / ${total} (${pct}%)`;
+      document.querySelector('#checkProgressBar').style.width = `${pct}%`;
+      checkInputs.forEach((inp) => {
+        inp.closest('.check-item').classList.toggle('done', inp.checked);
+      });
+    }
+    checkInputs.forEach((inp) => inp.addEventListener('change', updateChecklistProgress));
+    updateChecklistProgress();
+  </script>
+</body>
+</html>
