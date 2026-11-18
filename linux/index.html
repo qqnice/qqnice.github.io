@@ -1,37 +1,253 @@
 ---
-title: Linux 教學專區
-description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 24.04 LTS 實作教材
+title: Linux 與雲端容器教學專區
+description: Ubuntu 24.04 LTS、Docker Compose、K3s 容器編排、地端 LLM (Ollama + Open WebUI)、資安事件鑑識與 Graylog 日誌收集實戰教材
 ---
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Linux 教學專區</title>
+  <title>Linux 與雲端容器教學專區｜QQ 老師教學分享區</title>
   {% include zone-style.html %}
   <style>
-    .cards-gap h3 { margin-top: 28px; }
-    .file-list-box .desc { display: block; font-size: .88em; color: var(--muted); margin-top: 2px; }
-    details.folder { margin: 8px 0; }
-    details.folder > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
-    details.folder .cnt { font-weight: 400; color: var(--muted); font-size: .85em; margin-left: 6px; }
-    details.folder .open { font-weight: 400; font-size: .85em; margin-left: 10px; }
-    details.folder ul { margin: 6px 0 10px; font-size: .95em; }
-    details.folder li { margin-bottom: 4px; word-break: break-all; }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 18px 0 24px;
+    }
+    .stat-pill {
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .stat-pill strong {
+      display: block;
+      font-size: 1.25em;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+    .stat-pill span {
+      font-size: 0.84em;
+      color: var(--muted);
+    }
+    .quick-nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0 26px;
+      padding: 12px 14px;
+      background: var(--code-bg);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+    .quick-nav-bar a {
+      font-size: 0.88em;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .quick-nav-bar a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .cards-gap h3 {
+      margin-top: 32px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sec-badge {
+      font-size: 0.72em;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .file-list-box .desc {
+      display: block;
+      font-size: .88em;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    details.folder {
+      margin: 8px 0;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    details.folder > summary {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 4px 0;
+    }
+    details.folder .cnt {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: .85em;
+      margin-left: 6px;
+    }
+    details.folder .open {
+      font-weight: 600;
+      font-size: .85em;
+      margin-left: 10px;
+    }
+    details.folder ul {
+      margin: 8px 0 6px;
+      font-size: .94em;
+    }
+    details.folder li {
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body class="zone-linux">
   <div class="container">
-    <nav class="crumb"><a href="../">QQ 教學分享區首頁</a> › Linux 教學專區</nav>
+    <nav class="crumb"><a href="../">QQ 教學分享區首頁（五島海圖）</a> › Linux 與雲端容器教學專區</nav>
 
-    <h1>🐧 Linux 教學專區</h1>
-    <p class="lead">這裡是 Linux 與伺服器管理的課堂教材，以 Ubuntu 24.04 LTS 為主要實作平台。教材由 Generative AI（Google Gemini）協助生成，並以 Canva 做成互動式網頁，透過 GitHub Pages 公開分享。</p>
+    <h1>🐧 Linux 與雲端容器教學專區</h1>
+    <p class="lead">
+      這裡整理 Linux 系統管理、Docker 容器化、<strong>K3s 容器編排</strong>、<strong>地端私有 LLM 服務（Ollama ＋ Open WebUI）</strong>、<strong>資安事件數位鑑識</strong>與 <strong>Graylog 日誌收集</strong>的完整互動式實作教材（以 Ubuntu 24.04 LTS 為主要實作平台）。
+    </p>
 
-    <p><a href="#all-files">📂 直接看全部檔案與資料夾 ↓</a>（新增的檔案與資料夾會自動出現在那裡）</p>
+    <!-- 專區教材統計總覽 -->
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <strong>WEEK 1–6</strong>
+        <span>容器、資安、LLM 到 K3s 完整週次</span>
+      </div>
+      <div class="stat-pill">
+        <strong>22+ 份互動教材</strong>
+        <span>3D 拓撲、模擬實驗室與排錯工作台</span>
+      </div>
+      <div class="stat-pill">
+        <strong>7 大實戰專案夾</strong>
+        <span>附 Compose、Nginx、備份腳本與講義</span>
+      </div>
+      <div class="stat-pill">
+        <strong>Ubuntu 24.04 LTS</strong>
+        <span>貼近業界標準的現代伺服器環境</span>
+      </div>
+    </div>
 
-    <h2>🧭 依主題進入</h2>
+    <!-- 快速錨點導覽列 -->
+    <div class="quick-nav-bar" aria-label="本頁主題快速跳轉">
+      <span style="font-size:0.85em; color:var(--muted); align-self:center; margin-right:4px;">⚡ 快速跳轉：</span>
+      <a href="#sec-weekly">🐳 WEEK1–6 容器・資安・地端 LLM 與 K3s</a>
+      <a href="#sec-github-ai">🐙 GitHub 2FA ＆ Antigravity 串接三部曲</a>
+      <a href="#sec-graylog">📜 Graylog 6.0 日誌收集與 SOC 戰情中心</a>
+      <a href="#sec-tools">🧰 本地 AI・Netplan 固定 IP・AWS 防護</a>
+      <a href="#all-files">📂 全部教材與實作檔案清單 ↓</a>
+    </div>
+
+    <!-- 最新重點主打教材橫幅 (Featured Hero CTAs) -->
+    <a class="cta-big" href="k3s-llm-guide/" style="background: linear-gradient(135deg, #070b14 0%, #0f172a 45%, #1e1b4b 100%); border: 3px solid #38bdf8; box-shadow: 0 10px 25px -6px rgba(56,189,248,.45); margin-bottom: 16px;">
+      <span class="cta-tag" style="background: #38bdf8; color: #070b14;">🆕 WEEK6 最新主打・3D 叢集動畫 × 6 大互動模擬器 × 多維度索引 (⌘K)</span>
+      <span class="cta-title" style="color: #ffffff;">☸️ K3s 與地端 LLM 服務講義：為什麼用、怎麼搭、用在哪裡（高互動多索引實戰網站）</span>
+      <span class="cta-desc" style="color: #e0f2fe; opacity: 0.95;">從「為什麼 Docker 還不夠」出發！透過即時 3D 叢集拓撲動畫、餐廳工作站 vs. K3s 自動經理、Pod 自癒控制迴圈、127.0.0.1 跨網路空間連線診斷器、HPA 動態擴展 vs. Ollama 512 佇列瓶頸模擬，以及三大驗收指標（&lt;unknown&gt; 與 300 秒穩定視窗）排錯急救站，一次搞懂容器編排與地端 AI 架構！</span>
+      <span class="cta-go" style="background: #38bdf8; color: #070b14;">點我進入「K3s 與地端 LLM 服務」高互動教學網站 ▶</span>
+    </a>
+
+    <a class="cta-big" href="WEEK4-VM%E8%B3%87%E5%AE%89%E4%BA%8B%E4%BB%B6-%E6%B5%81%E6%B0%B4%E7%B7%9A%E6%95%85%E4%BA%8B%E4%BA%92%E5%8B%95%E7%B6%B2%E7%AB%99.html" style="background: linear-gradient(135deg, #450a0a 0%, #1e293b 55%, #0f172a 100%); border: 3px solid #f87171; box-shadow: 0 8px 22px -6px rgba(239,68,68,.45); margin-bottom: 16px;">
+      <span class="cta-tag" style="background: #fca5a5; color: #450a0a;">🕵️ WEEK4 真實案例改編・數位鑑識實驗室 × 8 大維運漏洞剖析</span>
+      <span class="cta-title" style="color: #ffffff;">🚨 一場從 HTTP 200 (0 bytes) 揭開的容器入侵與數位鑑識流水線</span>
+      <span class="cta-desc" style="color: #fee2e2; opacity: 0.95;">為什麼網站看似正常回應 200 OK，畫面卻一片空白？跟著時間軸與 Log 證據抽絲剝繭，找出後端 :8081 裸露、匿名 Volume 還原誤區、wp-file-manager 外掛濫用與 Azure NSG 填錯方向等八大真實維運盲點！</span>
+      <span class="cta-go" style="background: #fca5a5; color: #450a0a;">點我進入「WEEK4 資安事件與數位鑑識」互動指南 ▶</span>
+    </a>
+
+    <a class="cta-big" href="WEEK5-LLM-%E6%9E%B6%E6%A7%8B%E8%88%87%E9%83%A8%E7%BD%B2%E4%BA%92%E5%8B%95%E7%B6%B2%E7%AB%99.html" style="background: linear-gradient(135deg, #2e1065 0%, #0f172a 55%, #064e3b 100%); border: 3px solid #c084fc; box-shadow: 0 8px 22px -6px rgba(168,85,247,.45); margin-bottom: 24px;">
+      <span class="cta-tag" style="background: #d8b4fe; color: #2e1065;">🦙 WEEK5 混合架構實戰・6 站請求流程 × UFW 防火牆與容器連 Host 排錯</span>
+      <span class="cta-title" style="color: #ffffff;">🧠 雙網站擴充地端 LLM：Host Ollama ＋ Docker Open WebUI 整體流程與安裝注意事項</span>
+      <span class="cta-desc" style="color: #f3e8ff; opacity: 0.95;">在既有雙網站主機（q1 / q3）無痛擴充私有 AI 聊天服務！完整圖解 6 站請求流向、host.docker.internal 跨網橋通訊、UFW 防火牆放行 docker0 與六大安裝踩坑對策。</span>
+      <span class="cta-go" style="background: #d8b4fe; color: #2e1065;">點我進入「WEEK5 雙網站擴充 LLM」互動網站 ▶</span>
+    </a>
+
+    <h2>🧭 依主題與學習路線進入</h2>
     <div class="cards-gap">
-    <h3>🐙 GitHub 帳號、2FA 與 AI 串接發佈實戰（學習三部曲）</h3>
+
+    <!-- 主題一：WEEK 1~6 容器、資安、地端 LLM 與 K3s -->
+    <h3 id="sec-weekly">
+      <span>🐳 Docker、Compose、資安鑑識、地端 LLM 與 K3s（WEEK1–6 核心主線）</span>
+      <span class="sec-badge">建議依序學習：概念 ➔ 部署 ➔ 備份 ➔ 鑑識 ➔ LLM ➔ K3s</span>
+    </h3>
+    <div class="cards">
+      <a class="card" href="k3s-llm-guide/">
+        <span class="tag">WEEK6｜K3s × 地端 LLM</span>
+        <strong>K3s 與地端 LLM 服務講義：為什麼用、怎麼搭、用在哪裡</strong>
+        <span class="d">高互動多索引實戰網站：3D 叢集拓撲動畫、餐廳工作站 vs K3s 經理、Pod 自癒迴圈、127.0.0.1 網路空間診斷、HPA 動態擴展 vs Ollama 512 佇列模擬與驗收排錯指南。</span>
+      </a>
+      <a class="card" href="WEEK5-LLM-%E6%9E%B6%E6%A7%8B%E8%88%87%E9%83%A8%E7%BD%B2%E4%BA%92%E5%8B%95%E7%B6%B2%E7%AB%99.html">
+        <span class="tag">WEEK5｜混合部署 LLM</span>
+        <strong>雙網站擴充 LLM：網站整體流程與安裝注意事項</strong>
+        <span class="d">在既有雙網站主機（q1 / q3）混合部署 Host Ollama 與 Docker Open WebUI：6 站請求流程互動圖、UFW 防火牆與容器連 Host 排錯、六大安裝注意事項。</span>
+      </a>
+      <a class="card" href="WEEK4-VM%E8%B3%87%E5%AE%89%E4%BA%8B%E4%BB%B6-%E6%B5%81%E6%B0%B4%E7%B7%9A%E6%95%85%E4%BA%8B%E4%BA%92%E5%8B%95%E7%B6%B2%E7%AB%99.html">
+        <span class="tag">WEEK4｜資安與數位鑑識</span>
+        <strong>old VM 被入侵資安事件：流水線故事與延伸維護漏洞互動指南</strong>
+        <span class="d">從 HTTP 200 (0 bytes) 異常展開容器入侵調查！包含 Log 與時間戳記數位鑑識實驗室、八大維運漏洞深度剖析與後續防護檢核表。</span>
+      </a>
+      <a class="card" href="week3/">
+        <span class="tag">WEEK3｜備份與主機安全</span>
+        <strong>Docker Lab：WEEK3 實作工作台</strong>
+        <span class="d">「讓系統回得來，也守得住」——Docker 系統的完整備份、災難還原演練與主機防火牆安全實作工作台。</span>
+      </a>
+      <a class="card" href="files/week3/%E6%AA%A2%E6%9F%A5.html">
+        <span class="tag">WEEK3｜驗收檢查表</span>
+        <strong>WEEK3 完成檢查表（附備份／還原腳本）</strong>
+        <span class="d">教師與助教核對學生作業用；同資料夾附課堂實作下載用的 backup.sh、restore.sh 與 compose.yml。</span>
+      </a>
+      <a class="card" href="Docker%20Compose%20%E9%9B%99%E7%B6%B2%E7%AB%99%E9%83%A8%E7%BD%B2%E5%AF%A6%E6%88%B0.html">
+        <span class="tag">WEEK2｜雙網站實戰</span>
+        <strong>Docker Compose 雙網站部署流程</strong>
+        <span class="d">以 Nginx 反向代理整合多個容器網站（WordPress 與靜態站）的逐步互動教材。</span>
+      </a>
+      <a class="card" href="week2-webstack/%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4.html">
+        <span class="tag">WEEK2｜實作指令紀錄</span>
+        <strong>WEEK2 實際完成的操作指令與設定檔</strong>
+        <span class="d">Nginx、WordPress 與兩個靜態網站的 Docker Compose 部署紀錄；同資料夾附完整 compose.yml、Nginx conf.d 與範例網站。</span>
+      </a>
+      <a class="card" href="%E5%AE%B9%E5%99%A8Docker-Compose%20%E5%88%9D%E9%AB%94%E9%A9%97.html">
+        <span class="tag">WEEK1｜容器入門</span>
+        <strong>容器 Docker-Compose 初體驗</strong>
+        <span class="d">從第一個容器與 Compose 定義檔開始，建立 Docker 容器化部署的基本操作能力。</span>
+      </a>
+      <a class="card" href="Docker%E6%A6%82%E5%BF%B5%E8%88%87%E7%B0%A1%E4%BB%8B.html">
+        <span class="tag">先備概念｜圖解</span>
+        <strong>Docker 廚房｜容器世界入門</strong>
+        <span class="d">把 Docker 想成一座美食街！以廚房工作站比喻直覺理解映像檔（Image）、容器（Container）與虛擬機的差異。</span>
+      </a>
+      <a class="card" href="02QQdocker%E5%BB%9A%E6%88%BF.html">
+        <span class="tag">互動遊戲｜入門</span>
+        <strong>QQ Docker 魔法廚房</strong>
+        <span class="d">結合視覺化互動操作的 Docker 魔法廚房學習頁，適合初學者建立容器直覺。</span>
+      </a>
+      <a class="card" href="03%E5%A4%9A%E7%B6%B2%E7%AB%99%E9%83%A8%E7%BD%B2.html">
+        <span class="tag">綜合專題｜期末實作</span>
+        <strong>114-2 雲端技術期末實作：單主機多服務與地端 AI 戰情室</strong>
+        <span class="d">整合單主機多網站反向代理、容器管理與地端 AI 服務部署的期末綜合專案戰情室。</span>
+      </a>
+    </div>
+
+    <!-- 主題二：GitHub 帳號、2FA 與 AI 串接發佈實戰 -->
+    <h3 id="sec-github-ai">
+      <span>🐙 GitHub 帳號、2FA 與 Antigravity AI 串接發佈實戰（學習三部曲）</span>
+      <span class="sec-badge">免背 Git 指令・下 Prompt 自動發布網站</span>
+    </h3>
     <div class="cards">
       <a class="card" href="github-account-guide/">
         <span class="tag">第 1 站：帳號與 2FA</span>
@@ -50,122 +266,77 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
       </a>
     </div>
 
-    <h3>🐳 Docker、Compose、K3s 與私有 LLM</h3>
+    <!-- 主題三：Graylog 日誌收集與資安監控 -->
+    <h3 id="sec-graylog">
+      <span>📜 Graylog 6.0 集中式日誌收集與 SOC 資安戰情中心</span>
+      <span class="sec-badge">Linux Rsyslog × Windows NXLog 跨平台日誌整合</span>
+    </h3>
     <div class="cards">
-      <a class="card" href="容器Docker-Compose%20初體驗.html">
-        <span class="tag">WEEK1</span>
-        <strong>容器 Docker-Compose 初體驗</strong>
-        <span class="d">WEEK1 Docker 入門。</span>
+      <a class="card" href="04-1Graylog%20%E6%BA%96%E5%82%99%E8%88%87%E5%AE%89%E8%A3%9D.html">
+        <span class="tag">STEP 1｜伺服器安裝</span>
+        <strong>Graylog 6.0 部署指南（Ubuntu 24.04 SOP）</strong>
+        <span class="d">Ubuntu 24.04 環境準備、MongoDB、OpenSearch / Data Node 與 Graylog 6.0 Server 標準安裝步驟。</span>
       </a>
-      <a class="card" href="Docker%20Compose%20雙網站部署實戰.html">
-        <span class="tag">WEEK2</span>
-        <strong>Docker Compose 雙網站部署流程</strong>
-        <span class="d">WEEK2 雙網站部署的互動教材。</span>
+      <a class="card" href="04Graylog%E4%BC%BA%E6%9C%8D%E5%99%A8.html">
+        <span class="tag">STEP 2｜互動模擬</span>
+        <strong>Graylog 資安戰情中心（SOC 互動體驗模擬）</strong>
+        <span class="d">透過互動模擬體驗 SOC 資安監控中心如何接收日誌、設定 Input、檢視儀表板與追查異常事件。</span>
       </a>
-      <a class="card" href="week2-webstack/操作指令.html">
-        <span class="tag">WEEK2 紀錄</span>
-        <strong>WEEK2 實際完成的操作指令</strong>
-        <span class="d">Nginx、WordPress 與兩個靜態網站的 Docker Compose 部署紀錄；同資料夾附 compose.yml、Nginx 設定與範例網站。</span>
-      </a>
-      <a class="card" href="week3/">
-        <span class="tag">WEEK3</span>
-        <strong>Docker Lab：WEEK3 實作工作台</strong>
-        <span class="d">Docker 系統的備份、還原與主機安全。</span>
-      </a>
-      <a class="card" href="files/week3/檢查.html">
-        <span class="tag">WEEK3 檢查表</span>
-        <strong>WEEK3 完成檢查表</strong>
-        <span class="d">教師與助教核對學生作業用；同資料夾的 backup.sh、restore.sh、compose.yml 是手冊中下載的檔案。</span>
-      </a>
-      <a class="card" href="WEEK5-LLM-架構與部署互動網站.html">
-        <span class="tag">WEEK5</span>
-        <strong>雙網站擴充 LLM：網站整體流程與安裝注意事項</strong>
-        <span class="d">在既有雙網站主機（q1 / q3）混合部署 Host Ollama 與 Docker Open WebUI：6 站請求流程互動圖、UFW 防火牆與容器連 Host 排錯、六大安裝注意事項。</span>
-      </a>
-      <a class="card" href="k3s-llm-guide/">
-        <span class="tag">K3s × 地端 LLM</span>
-        <strong>K3s 與地端 LLM 服務講義：為什麼用、怎麼搭、用在哪裡</strong>
-        <span class="d">高互動多索引實戰網站：3D 叢集拓撲動畫、餐廳工作站 vs K3s 經理、Pod 自癒迴圈、127.0.0.1 網路空間診斷、HPA 動態擴展 vs Ollama 512 佇列模擬與驗收排錯指南。</span>
-      </a>
-      <a class="card" href="Docker概念與簡介.html">
-        <span class="tag">入門</span>
-        <strong>Docker 廚房｜容器世界入門</strong>
-        <span class="d">以廚房比喻介紹容器的基本概念。</span>
-      </a>
-      <a class="card" href="02QQdocker廚房.html">
-        <span class="tag">互動</span>
-        <strong>QQ Docker 魔法廚房</strong>
-        <span class="d">Docker 的互動式學習頁。</span>
-      </a>
-      <a class="card" href="03多網站部署.html">
-        <span class="tag">期末實作</span>
-        <strong>114-2 雲端技術期末實作</strong>
-        <span class="d">多網站部署的專案戰情室。</span>
-      </a>
-    </div>
-
-    <h3>📜 Graylog 日誌收集</h3>
-    <div class="cards">
-      <a class="card" href="04-1Graylog%20準備與安裝.html">
-        <span class="tag">安裝</span>
-        <strong>Graylog 6.0 部署指南（Ubuntu 24.04）</strong>
-        <span class="d">Graylog 的環境準備與安裝步驟。</span>
-      </a>
-      <a class="card" href="04Graylog伺服器.html">
-        <span class="tag">互動模擬</span>
-        <strong>Graylog 資安戰情中心</strong>
-        <span class="d">互動體驗模擬。</span>
+      <a class="card" href="RsyslogtoGraylog%E6%97%A5%E8%AA%8C%E6%94%B6%E9%9B%86.html">
+        <span class="tag">STEP 3｜Linux 端點整合</span>
+        <strong>Rsyslog to Graylog 部署與進階除錯互動指南</strong>
+        <span class="d">將 Ubuntu / Linux 系統日誌透過 Rsyslog 拋送至 Graylog，含連線測試與常見收不到 Log 的除錯流程。</span>
       </a>
       <a class="card" href="05Windows%20nxlog_to_graylog.html">
-        <span class="tag">整合</span>
-        <strong>NXLog to Graylog 整合指南</strong>
-        <span class="d">Windows 日誌以 NXLog 送進 Graylog。</span>
+        <span class="tag">STEP 4｜Windows 端點概念</span>
+        <strong>Windows NXLog to Graylog 整合指南</strong>
+        <span class="d">將 Windows 事件檢視器（Event Log）透過 NXLog 轉換為 GELF / Syslog 格式送進 Graylog 的架構與設定。</span>
       </a>
-      <a class="card" href="Windows11使netlogtoGraylogServer.html">
-        <span class="tag">實戰</span>
-        <strong>Windows 11 透過 NXLog 傳送日誌至 Graylog</strong>
-        <span class="d">實戰教學。</span>
+      <a class="card" href="Windows11%E4%BD%BFnetlogtoGraylogServer.html">
+        <span class="tag">STEP 5｜Windows 11 實戰</span>
+        <strong>Windows 11 透過 NXLog 傳送日誌至 Graylog 實戰教學</strong>
+        <span class="d">在 Windows 11 端點實際安裝 NXLog、編輯 nxlog.conf 並於 Graylog Search 驗證日誌進線。</span>
       </a>
-      <a class="card" href="RsyslogtoGraylog日誌收集.html">
-        <span class="tag">整合</span>
-        <strong>Rsyslog to Graylog 部署與進階除錯</strong>
-        <span class="d">Linux 日誌以 Rsyslog 送進 Graylog 的互動指南。</span>
-      </a>
-      <a class="card" href="06Graylog%20進階.html">
-        <span class="tag">進階</span>
-        <strong>Graylog 進階操作與整合實戰</strong>
-        <span class="d">互動模擬。</span>
+      <a class="card" href="06Graylog%20%E9%80%B2%E9%9A%8E.html">
+        <span class="tag">STEP 6｜進階解析與告警</span>
+        <strong>Graylog 進階操作與整合實戰（互動模擬）</strong>
+        <span class="d">進階欄位萃取（Extractors）、Pipeline 規則處理、Stream 分流與資安事件告警通知實作。</span>
       </a>
     </div>
 
-    <h3>🧰 其他工具與主題</h3>
+    <!-- 主題四：其他工具與主題 -->
+    <h3 id="sec-tools">
+      <span>🧰 本地 AI 環境、Ubuntu 網路設定工具與雲端安全</span>
+      <span class="sec-badge">實用產生器與架構圖解</span>
+    </h3>
     <div class="cards">
-      <a class="card" href="01本地%20AI%20部署.html">
-        <span class="tag">本地 AI</span>
+      <a class="card" href="01%E6%9C%AC%E5%9C%B0%20AI%20%E9%83%A8%E7%BD%B2.html">
+        <span class="tag">本地 AI｜Windows WSL</span>
         <strong>WSL + Ollama + Open WebUI 本地 AI 部署指南</strong>
-        <span class="d">在 Windows 的 WSL 上架設本地 AI。</span>
+        <span class="d">在自己筆電或桌機的 Windows WSL2 環境中，快速架設 Ollama 本地推論引擎與 Open WebUI 聊天介面。</span>
       </a>
-      <a class="card" href="07%20Ubuntu%2024.04%20固定%20IP%20教學器.html">
-        <span class="tag">工具</span>
-        <strong>Ubuntu 24.04 固定 IP（Netplan）產生器</strong>
-        <span class="d">產生 Netplan 設定的互動工具。</span>
+      <a class="card" href="07%20Ubuntu%2024.04%20%E5%9B%BA%E5%AE%9A%20IP%20%E6%95%99%E5%AD%B8%E5%99%A8.html">
+        <span class="tag">互動工具｜Netplan</span>
+        <strong>Ubuntu 24.04 固定 IP（Netplan YAML）互動產生器</strong>
+        <span class="d">輸入網卡名稱、固定 IP/遮罩、Gateway 與 DNS，即時預覽並複製零縮排錯誤的 Netplan 設定檔與套用指令。</span>
       </a>
       <a class="card" href="Aws_shield.html">
-        <span class="tag">雲端安全</span>
+        <span class="tag">雲端安全｜DDoS 防護</span>
         <strong>AWS Shield 防禦 DDoS 原理與架構圖解</strong>
-        <span class="d">圖解 AWS Shield 的防禦原理與架構。</span>
+        <span class="d">互動圖解 AWS Shield Standard 與 Advanced 如何結合 CloudFront、Route 53 與 WAF 防禦各層級 DDoS 攻擊。</span>
       </a>
     </div>
 
     </div>
 
-    <h2 id="all-files">📂 全部檔案</h2>
-    <p>上方是各單元的入口；這裡列出本專區所有檔案，資料夾可展開查看內容。</p>
+    <!-- 全部檔案與資料夾清單（由 Jekyll 自動展開） -->
+    <h2 id="all-files">📂 本專區全部教材、講義與實作設定檔總覽</h2>
+    <p>上方是依學習主題分類的互動卡片入口；下方則完整列出 <code>linux/</code> 專區內的所有第一層網頁與子資料夾（點擊資料夾名稱即可展開檢視內含的 HTML、Markdown 原始講義、Shell 腳本或 Compose 設定檔）。</p>
+
     {% assign lp = 'linux/' %}
     {% assign lsp = '/linux/' %}
     {% assign l_pages = site.pages | sort: 'path' %}
     {% assign l_static = site.static_files | sort: 'path' %}
-    {% comment %} 有些 .md 檔會同時產生「網頁版」和「原始檔」兩份，這裡只保留網頁版 {% endcomment %}
     {% assign page_paths = '|' %}
     {% for page in l_pages %}{% assign page_paths = page_paths | append: page.path | append: '|' %}{% endfor %}
     {% assign sp = '' %}
@@ -176,7 +347,7 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
     {% assign l_files = sp | split: '|' %}
 
     <div class="file-list-box">
-      <h3>📚 第一層頁面與檔案</h3>
+      <h3>📚 第一層互動網頁與說明文件</h3>
       <ul>
         {% for page in l_pages %}
           {% assign pre = page.path | slice: 0, 6 %}
@@ -184,7 +355,7 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
             {% assign rel = page.path | remove_first: lp %}
             {% assign parts = rel | split: '/' %}
             {% if parts.size == 1 %}
-              <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.title | default: page.name }}</a></li>
+              <li>📄 <a href="{{ site.baseurl }}{{ page.url }}">{{ page.title | default: page.name }}</a>{% if page.description %}<span class="desc">{{ page.description }}</span>{% endif %}</li>
             {% endif %}
           {% endif %}
         {% endfor %}
@@ -201,7 +372,7 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
         {% endfor %}
       </ul>
 
-      <h3>📁 資料夾（點開看內容）</h3>
+      <h3>📁 專題資料夾與隨附實作檔（點開看內容）</h3>
       {% assign seen = '|' %}
       {% assign folders = '' %}
       {% for page in l_pages %}
@@ -254,7 +425,7 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
           {% if pre == fsprefix %}{% assign fcount = fcount | plus: 1 %}{% if file == sidx_path %}{% assign has_index = true %}{% endif %}{% endif %}
         {% endfor %}
         <details class="folder">
-          <summary>📁 {{ fname }}/ <span class="cnt">{{ fcount }} 個檔案</span>{% if has_index %} <a class="open" href="{{ site.baseurl }}/{{ fprefix }}">開啟 ↗</a>{% endif %}</summary>
+          <summary>📁 {{ fname }}/ <span class="cnt">（共 {{ fcount }} 個檔案）</span>{% if has_index %} <a class="open" href="{{ site.baseurl }}/{{ fprefix }}">開啟互動網頁 ↗</a>{% endif %}</summary>
           <ul>
             {% for page in l_pages %}
               {% assign pre = page.path | slice: 0, fplen %}
@@ -275,7 +446,7 @@ description: Linux 與伺服器管理：Docker、Graylog 日誌收集、Ubuntu 2
 
     <div class="author-box">
       <h3>👨‍🏫 關於作者</h3>
-      <p><strong>QQ 老師 (Wen-Yen Lin)</strong> 現任教於國立臺中科技大學資訊管理學系。</p>
+      <p><strong>QQ 老師 (Wen-Yen Lin)</strong> 現任教於國立臺中科技大學資訊管理學系。本專區教材結合生成式 AI 與互動視覺化技術持續滾動更新，歡迎師生與開發者自由探索交流！</p>
     </div>
   </div>
 </body>
