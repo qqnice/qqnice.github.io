@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K3s 與地端 LLM 服務講義：高互動多索引實戰指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Three.js for 3D Cluster & LLM Packet Animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="reading-progress"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-header">
+    <a href="#top" class="brand">
+      <span class="brand-badge">K3s × LLM LAB</span>
+      <span>K3s 與地端 LLM 服務互動講義</span>
+    </a>
+
+    <div class="header-actions">
+      <!-- Multi-Index Switcher -->
+      <div class="index-mode-bar" role="tablist" aria-label="多維度索引切換">
+        <button class="mode-btn active" onclick="toggleIndexDrawer('chapters')">📖 章節導覽</button>
+        <button class="mode-btn" onclick="toggleIndexDrawer('objects')">🧩 K8s 物件索引</button>
+        <button class="mode-btn" onclick="toggleIndexDrawer('troubleshoot')">🩺 驗收排錯索引</button>
+        <button class="mode-btn" onclick="toggleIndexDrawer('labs')">⚡ 互動實驗室</button>
+      </div>
+
+      <button class="cmd-k-trigger" onclick="openCmdModal()">
+        <span>🔍 全域搜尋 / 跳轉...</span>
+        <span class="kbd">⌘K</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout" id="top">
+    <!-- Left Multi-Index Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section-title">快速索引標籤 (Quick Tags)</div>
+      <div class="quick-jump-chips">
+        <a href="#sec-2" class="jump-chip">Pod / Deployment</a>
+        <a href="#sec-2" class="jump-chip">HPA 自動擴展</a>
+        <a href="#sec-3" class="jump-chip">Traefik Ingress</a>
+        <a href="#sec-4" class="jump-chip">127.0.0.1 卡關</a>
+        <a href="#sec-5" class="jump-chip">OLLAMA_NUM_PARALLEL</a>
+        <a href="#sec-5" class="jump-chip">無狀態 vs 共享</a>
+        <a href="#sec-7" class="jump-chip">&lt;unknown&gt; 排錯</a>
+        <a href="#sec-8" class="jump-chip">名詞字典</a>
+      </div>
+
+      <div class="sidebar-section-title">講義九大章節</div>
+      <ul class="nav-list" id="chapter-nav">
+        <li><a href="#sec-1" class="nav-link active"><span class="nav-num">01</span>為什麼 Docker 還不夠</a></li>
+        <li><a href="#sec-2" class="nav-link"><span class="nav-num">02</span>K8s 核心：宣告期望狀態</a></li>
+        <li><a href="#sec-3" class="nav-link"><span class="nav-num">03</span>K3s：單一執行檔輕量叢集</a></li>
+        <li><a href="#sec-4" class="nav-link"><span class="nav-num">04</span>本課架構：K3s + 主機 Ollama</a></li>
+        <li><a href="#sec-5" class="nav-link"><span class="nav-num">05</span>架構限制與誠實說明</a></li>
+        <li><a href="#sec-6" class="nav-link"><span class="nav-num">06</span>業界應用情境與決策樹</a></li>
+        <li><a href="#sec-7" class="nav-link"><span class="nav-num">07</span>本週任務與驗收排錯對照</a></li>
+        <li><a href="#sec-8" class="nav-link"><span class="nav-num">08</span>課堂討論題與名詞表</a></li>
+        <li><a href="#sec-9" class="nav-link"><span class="nav-num">09</span>官方參考資料索引</a></li>
+      </ul>
+
+      <div class="sidebar-section-title">6 大互動模擬器</div>
+      <ul class="nav-list">
+        <li><a href="#lab-kitchen" class="nav-link">🍳 1. 餐廳工作站 vs K3s 經理</a></li>
+        <li><a href="#lab-reconcile" class="nav-link">🔄 2. 自癒與期望狀態控制迴圈</a></li>
+        <li><a href="#lab-network" class="nav-link">🔌 3. Pod 連 Ollama 網路診斷器</a></li>
+        <li><a href="#lab-hpa-ollama" class="nav-link">📈 4. HPA 擴展 vs Ollama 佇列</a></li>
+        <li><a href="#lab-stateful" class="nav-link">🗄️ 5. 教學簡化 vs 正式多副本架構</a></li>
+        <li><a href="#lab-decision" class="nav-link">🧭 6. 我該用 K3s 嗎？決策幫手</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Multi-Index Explorer Drawer (Toggled by Header Tabs) -->
+      <section class="index-explorer-drawer" id="index-drawer">
+        <div id="index-drawer-content"></div>
+      </section>
+
+      <!-- Hero Section with 3D Interactive Canvas -->
+      <section class="hero-section">
+        <div class="hero-text">
+          <div class="hero-badge-row">
+            <span class="pill-tag pill-blue">Nov 18, 2026 · @Lin Wen Yen</span>
+            <span class="pill-tag pill-purple">K3s Container Orchestration</span>
+            <span class="pill-tag pill-green">On-Prem LLM (Ollama + Open WebUI)</span>
+          </div>
+          <h1 class="hero-title">K3s 與地端 LLM 服務講義：為什麼用、怎麼搭、用在哪裡</h1>
+          <p class="hero-subtitle">
+            剛接觸容器的同學常問：「我已經會 <code>docker run</code> 了，為什麼還需要學 Kubernetes 跟 K3s？」
+            透過右側<strong>即時 3D 叢集拓撲動畫</strong>與下方的<strong>六大互動實驗室</strong>，帶你親手體驗「自動擴展」、「容器自癒」以及「前端進 K3s、重模型留主機」的實務架構！
+          </p>
+          <div class="hero-cta-group">
+            <a href="#lab-kitchen" class="btn btn-primary">🚀 開始互動實驗</a>
+            <button class="btn btn-secondary" onclick="openCmdModal()">🧭 開啟多維度知識索引 (⌘K)</button>
+            <a href="#sec-7" class="btn btn-secondary">🩺 驗收卡關急救站</a>
+          </div>
+        </div>
+
+        <!-- 3D WebGL / Canvas Cluster Topology -->
+        <div class="hero-3d-box">
+          <canvas id="cluster-3d-canvas" title="拖曳旋轉視角 · 點擊下方按鈕模擬流量與故障"></canvas>
+          <div class="canvas-overlay-ui">
+            <div class="canvas-legend">
+              <span><i class="legend-dot" style="background:#f59e0b"></i>Traefik (80/443)</span>
+              <span><i class="legend-dot" style="background:#38bdf8"></i>Service</span>
+              <span><i class="legend-dot" style="background:#10b981"></i>Open WebUI Pods (<span id="3d-pod-count">3</span>)</span>
+              <span><i class="legend-dot" style="background:#a855f7"></i>Host Ollama</span>
+            </div>
+            <div class="canvas-controls">
+              <button class="mini-btn" onclick="sim3DChangePods(1)">+ 擴展 Pod</button>
+              <button class="mini-btn" onclick="sim3DChangePods(-1)">- 縮減 Pod</button>
+              <button class="mini-btn" onclick="sim3DBurstTraffic()">⚡ 發送 LLM 請求潮</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 1: 為什麼 Docker 還不夠
+           ========================================== -->
+      <section class="lecture-section" id="sec-1">
+        <div class="section-header">
+          <span class="section-num-badge">01</span>
+          <h2 class="section-title">一、為什麼 Docker 還不夠？</h2>
+        </div>
+        <p class="section-lead">
+          Docker 解決了<strong>「怎麼把一個服務打包好、到哪都能跑」</strong>，但沒有解決<strong>「服務上線後誰來照顧它」</strong>。
+        </p>
+
+        <div class="card-grid">
+          <div class="glass-card">
+            <div class="card-title">🍳 廚房工作站的比喻</div>
+            <p style="color:var(--text-muted); font-size:0.93rem;">
+              一個容器（Container）就像一座<strong>備齊廚具與食材的工作站</strong>，開起來就能出菜。但當餐廳客人突然暴增時，真正的問題才開始：
+            </p>
+            <ul style="margin-top:10px; padding-left:20px; color:var(--text-main); font-size:0.9rem;">
+              <li>誰決定什麼時候要<strong>再開幾座工作站</strong>？</li>
+              <li>某座工作站突然停擺（Crash），<strong>誰發現並補上新的一座</strong>？</li>
+              <li>客人進門後，<strong>誰負責把客人平均分配</strong>到不同的工作站？</li>
+            </ul>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title">🛠️ 只用 Docker vs 容器編排</div>
+            <p style="color:var(--text-muted); font-size:0.93rem;">
+              只用 Docker 時，這些事都要<strong>人手動處理</strong>：自己多下幾次 <code>docker run</code>、自己改 Nginx 後端清單、半夜盯著容器有沒有掛掉。
+            </p>
+            <p style="color:var(--text-muted); font-size:0.93rem; margin-top:8px;">
+              <strong>Docker Compose</strong> 雖然能把多個容器寫進同一份檔案，但主要場景是<strong>單一主機</strong>，也不會依負載自動增減副本。這類自動化管理工作稱為<strong>容器編排（Orchestration）</strong>，相當於<strong>全天候值班的餐廳經理</strong>。Kubernetes (K8s) 是被廣泛採用的編排系統，而 <strong>K3s</strong> 則是它的輕量版本。
+            </p>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE LAB 1: Kitchen Simulator -->
+        <div class="lab-box" id="lab-kitchen">
+          <div class="lab-header">
+            <div class="lab-title">
+              <span>🍳 互動實驗室 1：手動 Docker 大廚 vs K3s 自動餐廳經理</span>
+            </div>
+            <div class="lab-controls">
+              <div class="arch-mode-switch" style="margin-bottom:0;">
+                <button class="arch-mode-btn active" id="btn-mode-docker" onclick="setKitchenMode('docker')">😰 純 Docker 手動模式</button>
+                <button class="arch-mode-btn" id="btn-mode-k3s" onclick="setKitchenMode('k3s')">🤖 K3s 容器編排經理模式</button>
+              </div>
+              <button class="btn btn-primary" onclick="kitchenAddCustomers(15)">👥 湧入 15 位客人</button>
+              <button class="btn btn-danger" onclick="kitchenCrashRandom()">💥 讓一座工作站當機</button>
+              <button class="btn btn-secondary" id="btn-manual-docker-run" onclick="kitchenManualAddStation()">➕ 手動 docker run 新站</button>
+            </div>
+          </div>
+
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;" id="kitchen-hint">
+            💡 <strong>目前為「純 Docker 手動模式」</strong>：試著點擊「湧入 15 位客人」或「讓工作站當機」。你會發現沒有人幫你開新工作站，壞掉的工作站也不會自己補新副本并更新 Nginx 清單，必須你自己狂按「手動 docker run」！切換到「K3s 容器編排經理模式」看看差別。
+          </p>
+
+          <div class="kitchen-stage">
+            <div class="kitchen-queue-panel">
+              <div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">門口排隊客人 / 待處理請求</div>
+                <div style="font-size:2.2rem; font-weight:800; font-family:var(--font-mono); color:var(--accent-amber);" id="kitchen-queue-count">4</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">工作站平均負載 (CPU)</div>
+                <div style="font-size:1.4rem; font-weight:700; font-family:var(--font-mono); color:var(--primary);" id="kitchen-avg-load">35%</div>
+              </div>
+              <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border-color); font-size:0.8rem;">
+                <div>餐廳經理狀態：<strong id="kitchen-manager-status" style="color:var(--accent-red);">無（需人工盯場）</strong></div>
+                <div style="margin-top:4px;">負載均衡櫃台：<strong id="kitchen-lb-status" style="color:var(--text-muted);">需手動改 Nginx</strong></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="kitchen-stations-grid" id="kitchen-stations-container">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 2: Kubernetes 的核心觀念
+           ========================================== -->
+      <section class="lecture-section" id="sec-2">
+        <div class="section-header">
+          <span class="section-num-badge">02</span>
+          <h2 class="section-title">二、Kubernetes 的核心觀念：宣告期望狀態，系統負責達成</h2>
+        </div>
+        <p class="section-lead">
+          Kubernetes（簡稱 K8s）的做法是：<strong>你只描述「我要什麼樣子」（Desired State），系統持續讓現實（Actual State）貼近這份描述。</strong>本週任務會用到下列六個核心角色：
+        </p>
+
+        <!-- Interactive 6 K8s Role Cards + Official Table -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>物件 (Object)</th>
+                <th>白話角色比喻</th>
+                <th>本週任務中的具體用途</th>
+                <th>互動檢視</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Pod</code> <span class="pill-tag pill-green" style="font-size:0.7rem;">最小排程單位</span></td>
+                <td>一座<strong>工作站</strong>，是 K8s 排程的最小單位，裡面跑一個或幾個緊密配合的容器</td>
+                <td>每個 Pod 跑一份 <strong>Open WebUI</strong> 容器</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('Pod')">查看 YAML 與細節</button></td>
+              </tr>
+              <tr>
+                <td><code>Deployment</code></td>
+                <td><strong>「我要 N 座相同工作站」的訂單</strong>，底下由 ReplicaSet 維持副本數，也負責更新版本</td>
+                <td>宣告 Open WebUI 的映像檔、環境變數與資源需求 (<code>requests</code>)</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('Deployment')">查看 YAML 與細節</button></td>
+              </tr>
+              <tr>
+                <td><code>Service</code></td>
+                <td>工作站的<strong>固定櫃台</strong>。Pod 會換（IP 會變），Service 的位址不變，並把流量分給就緒 (Ready) 的 Pod</td>
+                <td>給 Ingress 一個穩定的後端入口</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('Service')">查看 YAML 與細節</button></td>
+              </tr>
+              <tr>
+                <td><code>Ingress</code></td>
+                <td><strong>餐廳大門的接待</strong>，依網域與路徑把外部 HTTP 請求導向對應的 Service，需 Ingress Controller 執行（K3s 內建 Traefik）</td>
+                <td>讓 <code>qN.qqnice.org</code> 進得來並導向 Open WebUI Service</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('Ingress')">查看 YAML 與細節</button></td>
+              </tr>
+              <tr>
+                <td><code>HPA</code></td>
+                <td>依忙碌程度<strong>自動調整訂單數量 (N) 的調度員</strong> (Horizontal Pod Autoscaler)</td>
+                <td>依 CPU 使用率在 <strong>1 到 4 個 Pod</strong> 之間自動調整</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('HPA')">查看 YAML 與細節</button></td>
+              </tr>
+              <tr>
+                <td><code>metrics-server</code></td>
+                <td>提供各 Pod 用量的<strong>儀表板感測器</strong></td>
+                <td>HPA 計算 CPU 使用率百分比的資料來源（<code>kubectl top</code> 也靠它）</td>
+                <td><button class="mini-btn" onclick="inspectK8sObject('metrics-server')">查看說明</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Object Inspector Drawer -->
+        <div class="glass-card" id="k8s-object-inspector" style="margin-bottom:24px; border-color:var(--primary);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="color:var(--primary); font-size:1.05rem;" id="inspector-title">🔍 點擊上方表格「查看 YAML 與細節」來預覽具體設定範例</strong>
+            <span class="pill-tag pill-blue">具體實例說明</span>
+          </div>
+          <div id="inspector-body" style="font-size:0.9rem; color:var(--text-muted);">
+            初學者常覺得 K8s 名詞很抽象。點選上方任一物件（例如 <code>Deployment</code> 或 <code>HPA</code>），這裡會顯示它在 Open WebUI 任務中實際長什麼樣子、以及它跟其他物件如何串聯！
+          </div>
+        </div>
+
+        <!-- INTERACTIVE LAB 2: Reconciliation Loop (Self-healing & HPA) -->
+        <div class="lab-box" id="lab-reconcile">
+          <div class="lab-header">
+            <div class="lab-title">🔄 互動實驗室 2：比對迴圈（Reconciliation Loop）與「自癒」原理模擬器</div>
+            <div class="lab-controls">
+              <button class="btn btn-danger" onclick="reconKillPod()">🗑️ 手動刪除 1 個 Pod (kubectl delete pod)</button>
+              <button class="btn btn-primary" onclick="reconChangeDesired(1)">📈 HPA 調高期望副本 (N+1)</button>
+              <button class="btn btn-secondary" onclick="reconChangeDesired(-1)">📉 HPA 調低期望副本 (N-1)</button>
+            </div>
+          </div>
+
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">
+            理解這些物件的關鍵是一個<strong>持續執行的比對迴圈</strong>，也就是任務書中的<strong>「自癒」原理</strong>：<br>
+            1️⃣ 你宣告期望：Open WebUI 要有 <code>N</code> 個副本。 ➔ 2️⃣ 控制器持續比對「實際的副本數」和「期望的副本數」。 ➔ 3️⃣ 兩者不同就動手：<strong>少了就補，多了就收</strong>。<br>
+            試著點擊<strong>「手動刪除 1 個 Pod」</strong>：這等於讓實際少了一個，觀察控制器如何在幾秒內發現差異並自動補上一個新的 Pod！
+          </p>
+
+          <div class="recon-grid">
+            <div class="recon-control-panel">
+              <div class="state-counter-row">
+                <span>🎯 期望狀態 (Desired <code>N</code>)</span>
+                <span class="state-num" style="color:var(--primary);" id="recon-desired-val">3</span>
+              </div>
+              <div class="state-counter-row">
+                <span>📦 實際就緒 (Actual Ready)</span>
+                <span class="state-num" style="color:var(--accent-green);" id="recon-actual-val">3</span>
+              </div>
+              <div class="state-counter-row">
+                <span>⚖️ 控制器比對結果</span>
+                <span id="recon-diff-badge" class="pill-tag pill-green">一致 (In Sync)</span>
+              </div>
+              <div style="font-size:0.78rem; color:var(--text-muted); margin-top:10px;">
+                <strong>readinessProbe 保護機制：</strong>新補上的 Pod 會先經過啟動與就緒檢查（黃燈），確認 Ready（綠燈）後 Service 才會把流量導過去，確保服務不中斷！
+              </div>
+            </div>
+
+            <div>
+              <div class="kitchen-stations-grid" id="recon-pods-container">
+                <!-- Populated by JS -->
+              </div>
+              <div class="terminal-log" id="recon-terminal">
+                <div class="log-line log-ok">[Controller] Loop active: Desired=3, Actual=3. Everything in sync.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 3: K3s 是什麼
+           ========================================== -->
+      <section class="lecture-section" id="sec-3">
+        <div class="section-header">
+          <span class="section-num-badge">03</span>
+          <h2 class="section-title">三、K3s 是什麼：把 Kubernetes 精簡打包成單一執行檔</h2>
+        </div>
+        <p class="section-lead">
+          K3s 是符合 Kubernetes 標準、可用於正式環境的輕量發行版，把非容器化的叢集元件整合成一個<strong>小於 100 MB 的單一執行檔</strong>。官方將它定位為<strong>「distribution（發行版）」而非 fork</strong>，目標是盡量貼近上游 Kubernetes（<a href="https://github.com/k3s-io/k3s" target="_blank" style="color:var(--primary);">K3s 官方 README</a>）。預設資料庫使用 <code>sqlite3</code>，也支援 etcd3、MariaDB、MySQL 與 Postgres。
+        </p>
+
+        <div class="card-grid">
+          <div class="glass-card">
+            <div class="card-title">🪶 為什麼這麼輕？硬體需求多低？</div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">
+              K3s 原本就是為<strong>資源有限、維運人力有限</strong>的場景設計。官方列出的適用情境包括 Edge、IoT、CI、開發環境、ARM 架構，以及無法投入大量 K8s 專業維運資源的情境。
+            </p>
+            <div style="background:rgba(7,11,20,0.8); padding:12px; border-radius:10px; border:1px solid var(--border-color); font-size:0.85rem;">
+              <div style="margin-bottom:6px;">🖥️ <strong>K3s Server 節點最低需求：</strong> <code>2 核心 CPU</code> · <code>2 GB RAM</code></div>
+              <div>⚙️ <strong>K3s Agent 節點最低需求：</strong> <code>1 核心 CPU</code> · <code>512 MB RAM</code></div>
+              <div style="color:var(--text-dim); font-size:0.76rem; margin-top:6px;">*註：以上為官方最低硬體需求，不包含工作負載本身（例如 Ollama 模型或 Open WebUI）。</div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title">🎁 開箱即用：單一執行檔內建完整電池</div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">
+              上游標準 Kubernetes 安裝完只是空骨架，需要自己挑選並安裝網路外掛 (CNI)、Ingress Controller、metrics-server 等。<strong>K3s 把常用的全部備好</strong>，這也是本週任務能在一臺 VM 上快速完成的原因！
+            </p>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              <span class="pill-tag pill-blue">containerd &amp; runc</span>
+              <span class="pill-tag pill-purple">Flannel (CNI)</span>
+              <span class="pill-tag pill-green">CoreDNS</span>
+              <span class="pill-tag pill-amber">Traefik Ingress</span>
+              <span class="pill-tag pill-blue">Klipper-lb (ServiceLB)</span>
+              <span class="pill-tag pill-green">Metrics Server</span>
+              <span class="pill-tag pill-purple">Local-path-provisioner</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin:24px 0 12px; font-size:1.2rem;">📦 K3s 安裝完就已經附帶的 7 大內建元件（點擊列可凸顯重點）</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>內建元件</th>
+                <th>核心功能</th>
+                <th>與本週任務的關係（實戰必讀！）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>containerd</code> 與 <code>runc</code></td>
+                <td>容器執行環境，<strong>K3s 不依賴 Docker</strong></td>
+                <td>拉映像、跑 Pod。<span style="color:var(--accent-amber);">⚠️ 注意：K3s 的映像庫與 Docker 分開，本機 Docker 映像不會自動出現在 K3s！</span></td>
+              </tr>
+              <tr>
+                <td><code>Flannel</code></td>
+                <td>Pod 之間的網路（CNI）</td>
+                <td>建立 Pod 虛擬網路，也是 <strong>Pod 連到主機 Ollama 的網路路徑</strong>基礎</td>
+              </tr>
+              <tr>
+                <td><code>CoreDNS</code></td>
+                <td>叢集內的名稱解析 (DNS)</td>
+                <td>讓叢集內的 Service 名稱能夠自動對應到 IP</td>
+              </tr>
+              <tr>
+                <td><code>Traefik</code></td>
+                <td>Ingress Controller</td>
+                <td>對外 HTTP/HTTPS 入口，依網域規則讓流量導向 Open WebUI</td>
+              </tr>
+              <tr>
+                <td><code>Klipper-lb</code>（ServiceLB）</td>
+                <td>讓 LoadBalancer 類型的 Service 在沒有雲端 Load Balancer 的環境也能運作</td>
+                <td>讓 Traefik 能對外接收流量，<strong>預設會綁定並使用主機的 80 / 443 埠</strong></td>
+              </tr>
+              <tr>
+                <td><code>Metrics Server</code></td>
+                <td>提供 Pod 與節點的 CPU、記憶體即時用量</td>
+                <td><strong>HPA 自動擴展的資料來源</strong>，執行 <code>kubectl top</code> 指令也靠它</td>
+              </tr>
+              <tr>
+                <td><code>Local-path-provisioner</code></td>
+                <td>用主機本機目錄提供 PersistentVolume 儲存</td>
+                <td>本週不使用（因為本課容器採無狀態 Stateless 設計）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-dim);">*以上元件列表來自 K3s 官方 README，在進階應用中這些元件都可以透過啟動參數停用或替換（例如把 Traefik 換成 nginx Ingress）。</p>
+
+        <h3 style="margin:28px 0 12px; font-size:1.2rem;">⚖️ Docker Compose vs K3s vs 完整 Kubernetes（自行組裝）全方位比較</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>比較項目</th>
+                <th>Docker Compose</th>
+                <th>K3s（本課採用）</th>
+                <th>完整 Kubernetes（自行組裝）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>設計重點</strong></td>
+                <td>以單一主機描述多個容器</td>
+                <td><strong style="color:var(--primary);">輕量、單一執行檔、內建常用元件</strong></td>
+                <td>彈性高，所有元件自行挑選組裝</td>
+              </tr>
+              <tr>
+                <td><strong>容器掛掉時</strong></td>
+                <td>依 <code>restart policy</code> 在原地重啟該容器</td>
+                <td><strong>Deployment 控制器自動補回新副本</strong></td>
+                <td>同 K3s（Deployment 控制器補回副本）</td>
+              </tr>
+              <tr>
+                <td><strong>依負載自動增減</strong></td>
+                <td><span class="pill-tag pill-red">無</span></td>
+                <td><span class="pill-tag pill-green">有（內建 HPA + Metrics Server）</span></td>
+                <td><span class="pill-tag pill-amber">有（需自行安裝 metrics-server）</span></td>
+              </tr>
+              <tr>
+                <td><strong>多主機叢集</strong></td>
+                <td>以單機為主</td>
+                <td>支援（Server 與 Agent 節點擴充）</td>
+                <td>支援</td>
+              </tr>
+              <tr>
+                <td><strong>起步成本</strong>*</td>
+                <td>低</td>
+                <td><strong>中，需要理解 K8s 物件</strong></td>
+                <td>高（光是裝好網路跟 Ingress 就很耗時）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-dim);">*註：最後一列「起步成本」為概略比較，不是官方數據。</p>
+      </section>
+
+      <!-- ==========================================
+           SECTION 4: 本課場景：前端交給 K3s，模型留在主機
+           ========================================== -->
+      <section class="lecture-section" id="sec-4">
+        <div class="section-header">
+          <span class="section-num-badge">04</span>
+          <h2 class="section-title">四、本課場景：前端交給 K3s，模型留在主機</h2>
+        </div>
+        <p class="section-lead">
+          為什麼不把 Ollama 模型也塞進 K3s 跟著一起複製 4 份？因為這個架構的核心哲學是：<strong>把「很重、不適合複製」的 LLM 模型留在主機，把「很輕、可以複製」的網頁前端（Open WebUI）交給 K3s 管理。</strong>
+        </p>
+
+        <!-- Dynamic SVG Architecture Flowchart -->
+        <div class="arch-svg-container">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+            <span style="font-weight:700; color:var(--primary); font-size:0.95rem;">🗺️ 動態架構流程圖：使用者 ➔ Traefik ➔ Service ➔ Open WebUI Pods (1~4) ➔ 主機 Ollama</span>
+            <div style="display:flex; gap:8px;">
+              <button class="mini-btn" onclick="triggerSvgPacketFlow()">▶️ 模擬發送一筆請求封包</button>
+              <button class="mini-btn" onclick="toggleSvgConnectionState()" id="btn-svg-conn-toggle">🔧 切換最右邊連線狀態（目前：已打通）</button>
+            </div>
+          </div>
+
+          <svg class="arch-svg" viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="k3sBoxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(56, 189, 248, 0.12)" />
+                <stop offset="100%" stop-color="rgba(15, 23, 42, 0.7)" />
+              </linearGradient>
+              <linearGradient id="hostBoxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(168, 85, 247, 0.15)" />
+                <stop offset="100%" stop-color="rgba(15, 23, 42, 0.8)" />
+              </linearGradient>
+            </defs>
+
+            <!-- Outer VM Box -->
+            <rect x="135" y="12" width="830" height="335" rx="16" fill="rgba(15,23,42,0.4)" stroke="rgba(148,163,184,0.3)" stroke-dasharray="6 4" />
+            <text x="155" y="36" fill="#94a3b8" font-size="13" font-weight="bold">🖥️ 單一 Linux VM 主機 (同時運行 K3s 叢集 + systemd Ollama)</text>
+
+            <!-- K3s Cluster Sub-box -->
+            <rect x="155" y="52" width="545" height="275" rx="14" fill="url(#k3sBoxGrad)" stroke="#38bdf8" stroke-width="1.5" />
+            <text x="175" y="78" fill="#38bdf8" font-size="13" font-weight="bold">☸️ K3s 叢集空間 (Pod 獨立網路空間)</text>
+
+            <!-- Host Ollama Sub-box -->
+            <rect x="730" y="52" width="215" height="275" rx="14" fill="url(#hostBoxGrad)" stroke="#a855f7" stroke-width="1.5" />
+            <text x="748" y="78" fill="#c084fc" font-size="13" font-weight="bold">🧠 主機端 (systemd 管控)</text>
+
+            <!-- User Browser Node -->
+            <rect x="12" y="140" width="105" height="80" rx="12" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" />
+            <text x="64" y="172" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">🌐 使用者</text>
+            <text x="64" y="192" fill="#7dd3fc" font-size="11" font-family="monospace" text-anchor="middle">qN.qqnice.org</text>
+
+            <!-- Traefik Node -->
+            <rect x="175" y="130" width="115" height="100" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="2" />
+            <text x="232" y="162" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">🚪 Traefik</text>
+            <text x="232" y="182" fill="#cbd5e1" font-size="11" text-anchor="middle">Ingress Controller</text>
+            <text x="232" y="202" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">Port 80 / 443</text>
+
+            <!-- Service Node -->
+            <rect x="330" y="130" width="110" height="100" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+            <text x="385" y="162" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">🎯 Service</text>
+            <text x="385" y="182" fill="#cbd5e1" font-size="11" text-anchor="middle">固定櫃台位址</text>
+            <text x="385" y="202" fill="#94a3b8" font-size="10" text-anchor="middle">分流至 Ready Pod</text>
+
+            <!-- 3 Open WebUI Pods -->
+            <g id="svg-pod-1">
+              <rect x="490" y="75" width="185" height="58" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2" />
+              <text x="582" y="102" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">📦 Open WebUI Pod #1</text>
+              <text x="582" y="120" fill="#94a3b8" font-size="10" text-anchor="middle">輕量前端副本 (Ready)</text>
+            </g>
+            <g id="svg-pod-2">
+              <rect x="490" y="152" width="185" height="58" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2" />
+              <text x="582" y="179" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">📦 Open WebUI Pod #2</text>
+              <text x="582" y="197" fill="#94a3b8" font-size="10" text-anchor="middle">輕量前端副本 (Ready)</text>
+            </g>
+            <g id="svg-pod-3">
+              <rect x="490" y="229" width="185" height="58" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2" />
+              <text x="582" y="256" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">📦 Open WebUI Pod #3</text>
+              <text x="582" y="274" fill="#94a3b8" font-size="10" text-anchor="middle">HPA 在 1~4 之間動態調整</text>
+            </g>
+
+            <!-- Ollama Node -->
+            <rect x="752" y="115" width="172" height="145" rx="12" fill="#1e1b4b" stroke="#c084fc" stroke-width="2.5" />
+            <text x="838" y="148" fill="#e9d5ff" font-size="15" font-weight="bold" text-anchor="middle">🦙 Ollama (單一實例)</text>
+            <text x="838" y="170" fill="#cbd5e1" font-size="11" text-anchor="middle">載入重型 LLM 模型</text>
+            <text x="838" y="190" fill="#fcd34d" font-size="11" font-family="monospace" text-anchor="middle">Port: 11434</text>
+            <text x="838" y="212" fill="#94a3b8" font-size="10" text-anchor="middle">佔用大量 RAM / VRAM</text>
+            <text x="838" y="230" fill="#94a3b8" font-size="10" text-anchor="middle">內建請求排隊佇列</text>
+
+            <!-- Flow Lines -->
+            <path d="M 117 180 L 175 180" class="flow-path-active" />
+            <path d="M 290 180 L 330 180" class="flow-path-active" />
+            <path d="M 440 180 L 490 104" class="flow-path-active" />
+            <path d="M 440 180 L 490 180" class="flow-path-active" />
+            <path d="M 440 180 L 490 258" class="flow-path-active" />
+
+            <!-- Rightmost Critical Connection (Pods -> Ollama) -->
+            <path id="svg-conn-1" d="M 675 104 L 752 165" class="flow-path-success" />
+            <path id="svg-conn-2" d="M 675 180 L 752 185" class="flow-path-success" />
+            <path id="svg-conn-3" d="M 675 258 L 752 205" class="flow-path-success" />
+
+            <!-- Warning Callout on Rightmost Arrow -->
+            <rect x="658" y="292" width="175" height="28" rx="6" fill="rgba(239,68,68,0.2)" stroke="#ef4444" />
+            <text x="745" y="310" fill="#fca5a5" font-size="11" font-weight="bold" text-anchor="middle" id="svg-conn-label">⚡ 最右邊這條箭頭最容易卡關！</text>
+
+            <!-- Animated Packet Circle -->
+            <circle id="svg-packet" cx="64" cy="180" r="7" fill="#38bdf8" visibility="hidden">
+              <animate attributeName="r" values="6;9;6" dur="0.8s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+        </div>
+
+        <div class="table-wrapper" style="margin-top:24px;">
+          <table>
+            <thead>
+              <tr>
+                <th>元件</th>
+                <th>放在哪裡</th>
+                <th>為什麼這樣設計？</th>
+                <th>誰負責維持運作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ollama</strong></td>
+                <td>主機，由 <code>systemd</code> 管控</td>
+                <td>模型載入後占用大量記憶體：CPU 推論用系統記憶體，GPU 推論用 VRAM；Ollama 也自帶請求排隊機制（<a href="https://docs.ollama.com/faq.md" target="_blank" style="color:var(--primary);">Ollama FAQ</a>）。<strong>合理推論：多開一份只會多載入一份模型，把記憶體塞爆。</strong></td>
+                <td><code>systemd</code></td>
+              </tr>
+              <tr>
+                <td><strong>Open WebUI</strong></td>
+                <td>K3s 內的 <code>Pod</code></td>
+                <td><strong>合理推論：</strong>網頁前端本身運算量小，容易複製；各副本設定一致，就能互相替換分流。</td>
+                <td><code>Deployment</code> 維持副本數，<code>HPA</code> 調整數量 (1~4)</td>
+              </tr>
+              <tr>
+                <td><strong>Traefik</strong></td>
+                <td>K3s 內建的 <code>Ingress Controller</code></td>
+                <td>對外只開 80 / 443 埠，依網域（如 <code>qN.qqnice.org</code>）導向 Open WebUI。</td>
+                <td><code>K3s</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>💡 為什麼這個場景選 K3s？</strong>
+          <ul style="margin-top:6px; padding-left:20px;">
+            <li>一臺 VM 要同時跑 Ollama 與叢集，資源吃緊。K3s 官方最低需求是 Server 2 核心、2 GB RAM（不含工作負載），比自行組裝的完整 Kubernetes 輕量許多。</li>
+            <li>K3s 已內建 <strong>Traefik</strong> 與 <strong>Metrics Server</strong>，不必另外安裝就能直接做到 Ingress 與 HPA。</li>
+            <li>單一節點就能完整體驗 Deployment、Service、Ingress、HPA 這組核心概念，之後換成多節點或雲端託管叢集（如 Azure AKS），觀念可以直接沿用！</li>
+          </ul>
+        </div>
+
+        <!-- INTERACTIVE LAB 3: The Most Common Stumbling Block (127.0.0.1 vs Host Network) -->
+        <div class="lab-box" id="lab-network">
+          <div class="lab-header">
+            <div class="lab-title">🔌 互動實驗室 3：「最容易卡關的一條連線」網路空間模擬與診斷器</div>
+            <span class="pill-tag pill-amber">本週探索重點 · 必考觀念</span>
+          </div>
+
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:14px;">
+            架構圖中最右邊那條箭頭（<strong>Open WebUI Pod ➔ 主機 Ollama</strong>）是本週最容易卡關的地方！<br>
+            為什麼？因為 <strong>Ollama 預設只綁定 <code>127.0.0.1:11434</code></strong>，只接受「主機本機」的連線；而 <strong>Pod 有自己獨立的網路空間（Network Namespace）</strong>，從 Pod 裡面看出去的 <code>127.0.0.1</code> 是<strong>Pod 自己</strong>，並不是主機！同時要記得：<strong style="color:var(--accent-red);">Ollama 的 11434 埠絕不應該對公網開放！</strong>
+          </p>
+
+          <div class="net-debug-grid">
+            <div class="config-box">
+              <div style="font-weight:700; color:var(--secondary); margin-bottom:6px;">1️⃣ 主機端：Ollama 監聽設定 (<code>OLLAMA_HOST</code>)</div>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">決定主機上的 Ollama 願意接受從哪個介面來的連線：</div>
+
+              <div class="radio-option selected" id="opt-host-loopback" onclick="setNetSimHost('127.0.0.1')">
+                <span>🔴</span>
+                <div>
+                  <div><strong>預設值：<code>127.0.0.1:11434</code></strong></div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">只收主機自己的 Loopback，拒絕來自虛擬網卡/Pod 的連線</div>
+                </div>
+              </div>
+
+              <div class="radio-option" id="opt-host-internal" onclick="setNetSimHost('host-internal')">
+                <span>🟢</span>
+                <div>
+                  <div><strong>綁定主機內網 / 虛擬介面 (或搭配防火牆限制之 <code>0.0.0.0</code>)</strong></div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">允許來自 K3s Pod 網段連線，且防火牆阻擋公網直連 11434</div>
+                </div>
+              </div>
+
+              <div class="radio-option" id="opt-host-public-exposed" onclick="setNetSimHost('public-exposed')">
+                <span>⚠️</span>
+                <div>
+                  <div><strong>綁定 <code>0.0.0.0:11434</code> 且未擋公網防火牆</strong></div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Pod 連得上，但全世界都能免費偷用你的 Ollama 模型！</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-box">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:6px;">2️⃣ K3s Pod 端：Open WebUI 的 <code>OLLAMA_BASE_URL</code></div>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">決定 Pod 裡面的 Open WebUI 要往哪個位址找 Ollama：</div>
+
+              <div class="radio-option selected" id="opt-pod-localhost" onclick="setNetSimPod('localhost')">
+                <span>🔴</span>
+                <div>
+                  <div><strong>錯誤寫法：<code>http://127.0.0.1:11434</code> 或 <code>localhost</code></strong></div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Pod 會在「自己的容器空間裡」找 11434，當然找不到 Ollama！</div>
+                </div>
+              </div>
+
+              <div class="radio-option" id="opt-pod-hostip" onclick="setNetSimPod('host-ip')">
+                <span>🟢</span>
+                <div>
+                  <div><strong>正確方向：指向主機在內網/cni0 的 IP (或 K8s Endpoints)</strong></div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">封包離開 Pod 獨立網路空間，透過 Flannel 路由到達主機介面</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnostic Output Console -->
+          <div class="terminal-log" id="net-sim-console" style="height:auto; min-height:110px; margin-top:16px; padding:16px;">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 5: 這個架構的限制：誠實說明
+           ========================================== -->
+      <section class="lecture-section" id="sec-5">
+        <div class="section-header">
+          <span class="section-num-badge">05</span>
+          <h2 class="section-title">五、這個架構的限制：誠實說明</h2>
+        </div>
+        <p class="section-lead">
+          本任務驗證的是 <strong>Kubernetes 的擴展與自癒機制</strong>，並不代表聊天服務的實際容量因此提高。有兩個關鍵限制一定要先說清楚：
+        </p>
+
+        <!-- Limitation 1 + Interactive HPA vs Ollama Bottleneck Simulator -->
+        <h3 style="margin:20px 0 10px; font-size:1.25rem; color:var(--accent-amber);">
+          ⚠️ 限制一：增加 Open WebUI Pod，不會讓模型回答變快
+        </h3>
+        <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:14px;">
+          Ollama 每個已載入的模型，預設一次只處理 <strong>1 個請求</strong>（<code>OLLAMA_NUM_PARALLEL</code> 預設為 <code>1</code>），其餘請求排隊；佇列預設上限為 <strong>512</strong>，超過就回傳 <code>503</code> 過載錯誤。調高並行數需要更多記憶體，所需 RAM 與 <code>OLLAMA_NUM_PARALLEL × 上下文長度 (Context Length)</code> 成正比（<a href="https://docs.ollama.com/faq.md" target="_blank" style="color:var(--primary);">Ollama FAQ</a>）。
+        </p>
+        <div class="callout warn">
+          <strong>🎯 核心觀念：瓶頸在模型推論端，不在網頁前端！</strong><br>
+          前端 Pod 再多，聊天請求還是要排隊等<strong>同一個 Ollama</strong>。真正要提高推論容量，需要在模型服務端擴充（例如更多 GPU 或主機，這不屬於本課範圍）。<br>
+          👉 <strong>這也是任務書要求「壓測別打聊天 API」的原因：</strong>打聊天 API 會把壓力全卡在 Ollama 排隊，前端 CPU 根本不會升高，反而無法觸發 HPA！
+        </div>
+
+        <!-- INTERACTIVE LAB 4: HPA & Ollama Queue Simulator -->
+        <div class="lab-box" id="lab-hpa-ollama">
+          <div class="lab-header">
+            <div class="lab-title">📈 互動實驗室 4：為什麼壓測不能打聊天 API？（HPA 擴展 vs Ollama 排隊模擬器）</div>
+            <div class="lab-controls">
+              <button class="btn btn-primary" onclick="startLoadTest('frontend')">🚀 壓測「前端網頁 API」 (觸發 HPA)</button>
+              <button class="btn btn-danger" onclick="startLoadTest('chat')">🐢 壓測「LLM 聊天推論 API」 (卡在 Ollama)</button>
+              <button class="btn btn-secondary" onclick="stopLoadTest()">⏹️ 停止壓測 (觀察 300s 縮減穩定視窗)</button>
+            </div>
+          </div>
+
+          <div class="sim-metrics-bar">
+            <div class="metric-tile">
+              <div class="metric-label">目前壓測模式</div>
+              <div class="metric-val" id="sim-mode-text" style="font-size:1rem; color:var(--text-main);">待機中 (Idle)</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">Open WebUI CPU (TARGETS)</div>
+              <div class="metric-val" id="sim-cpu-text">12% / 50%</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">K3s Pod 副本數 (REPLICAS)</div>
+              <div class="metric-val" id="sim-replicas-text" style="color:var(--accent-green);">1 / 4</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">Ollama 推論佇列 (上限 512)</div>
+              <div class="metric-val" id="sim-ollama-q-text" style="color:var(--secondary);">0 筆排隊</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">縮減穩定視窗倒數</div>
+              <div class="metric-val" id="sim-cooldown-text" style="color:var(--accent-amber);">--</div>
+            </div>
+          </div>
+
+          <div class="terminal-log" id="hpa-sim-log" style="height:130px;">
+            <div class="log-line">[kubectl get hpa -w] NAME: open-webui-hpa | TARGETS: 12%/50% | MINPODS: 1 | MAXPODS: 4 | REPLICAS: 1</div>
+          </div>
+        </div>
+
+        <!-- Limitation 2: Open WebUI Multi-replica Stateful vs Stateless -->
+        <h3 style="margin:36px 0 10px; font-size:1.25rem; color:var(--accent-amber);">
+          ⚠️ 限制二：Open WebUI 預設不支援直接多副本
+        </h3>
+        <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:14px;">
+          Open WebUI 官方說明，標準映像檔是<strong>單一實例</strong>，內含嵌入式 SQLite、嵌入式 ChromaDB 與本機檔案儲存，這種設定不能直接多實例運行。水平擴展需要<strong>共享的持久化與協調服務</strong>（<a href="https://docs.openwebui.com/getting-started/advanced-topics/scaling.md" target="_blank" style="color:var(--primary);">Scaling Open WebUI</a>）。
+        </p>
+
+        <!-- INTERACTIVE LAB 5: Course Stateless vs Official Production Multi-Replica -->
+        <div class="lab-box" id="lab-stateful">
+          <div class="lab-header">
+            <div class="lab-title">🗄️ 互動實驗室 5：「本課教學簡化做法」vs「官方正式多副本架構」切換器</div>
+            <div class="arch-mode-switch" style="margin-bottom:0;">
+              <button class="arch-mode-btn active" id="btn-arch-course" onclick="switchScalingArch('course')">🎓 本課簡化做法 (無狀態、不持久化)</button>
+              <button class="arch-mode-btn" id="btn-arch-prod" onclick="switchScalingArch('prod')">🏢 官方正式環境多副本 (共享服務)</button>
+            </div>
+          </div>
+
+          <div id="scaling-arch-visual" style="margin-bottom:18px;">
+            <!-- Populated dynamically by JS -->
+          </div>
+
+          <div class="table-wrapper" style="margin-bottom:0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>項目</th>
+                  <th>🏢 官方多副本需求 (Production)</th>
+                  <th>🎓 本課的簡化做法 (Lab)</th>
+                  <th>若直接多開副本的後果與取捨</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>資料庫</strong></td>
+                  <td>外部共享 <code>PostgreSQL</code>（設定 <code>DATABASE_URL</code>）</td>
+                  <td>每個 Pod 內建獨立 <code>SQLite</code>，不共享</td>
+                  <td>各 Pod 資料彼此獨立，<strong>對話紀錄與帳號不會跨 Pod 保留</strong>（故本課採單一使用者模式）</td>
+                </tr>
+                <tr>
+                  <td><strong>即時協調</strong></td>
+                  <td>外部共享 <code>Redis</code></td>
+                  <td>不使用</td>
+                  <td>缺乏跨實例即時狀態同步與 WebSocket 協調</td>
+                </tr>
+                <tr>
+                  <td><code>WEBUI_SECRET_KEY</code></td>
+                  <td>所有副本必須相同，否則發生登入循環與 <code>401</code> 錯誤</td>
+                  <td><strong>用 K8s <code>Secret</code> 注入，所有副本相同</strong></td>
+                  <td>這是本課唯一保持一致的憑證金鑰，避免 Session 驗證失敗</td>
+                </tr>
+                <tr>
+                  <td><strong>向量資料庫 (RAG)</strong></td>
+                  <td>必須使用外部向量資料庫 (如 PGVector, Qdrant, Milvus)</td>
+                  <td>內建嵌入式 <code>ChromaDB</code>，<strong>不使用文件上傳與 RAG</strong></td>
+                  <td><span style="color:var(--accent-red);">嵌入式 ChromaDB 只允許單一程序寫入，多副本同時上傳文件可能導致程序崩潰！實作時請勿上傳文件。</span></td>
+                </tr>
+                <tr>
+                  <td><strong>檔案儲存</strong></td>
+                  <td>共享檔案系統 (NFS/ Ceph) 或物件儲存 (S3 / GCS)</td>
+                  <td>不使用</td>
+                  <td>上傳的檔案只會留在單一 Pod 內，換個 Pod 就讀不到</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 6: 業界應用情境：K3s 適合用在哪裡
+           ========================================== -->
+      <section class="lecture-section" id="sec-6">
+        <div class="section-header">
+          <span class="section-num-badge">06</span>
+          <h2 class="section-title">六、業界應用情境：K3s 適合用在哪裡？</h2>
+        </div>
+        <p class="section-lead">
+          K3s 適合<strong>資源有限、維運人力有限，卻仍想使用 Kubernetes 機制</strong>的場景。下表清楚標明哪些是官方列出的適用情境，哪些是根據課程脈絡的合理推論：
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>業界情境</th>
+                <th>為什麼適合 K3s？</th>
+                <th>和本課架構的對應</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>🏭 邊緣與現場</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">（分店、工廠、IoT 閘道）</span></td>
+                <td><span class="pill-tag pill-blue">官方適用情境</span> 小型主機就能運行，現場沒有專職 IT 維運人員，靠 K8s <strong>自癒機制</strong>自動維持服務不中斷。</td>
+                <td><strong>合理推論：</strong>單節點 K3s 搭配本地 LLM 模型，提供工廠或分店現場使用的私有 AI 助理。</td>
+              </tr>
+              <tr>
+                <td><strong>🔒 企業內部的私有 LLM 入口</strong></td>
+                <td><span class="pill-tag pill-purple">合理推論</span> 模型與對話都在自己的主機，不需把機密內容送到外部雲端服務，較容易配合內部資安與資料管理規定。</td>
+                <td>前端用 Open WebUI 多副本分流，模型留在主機。<strong>正式上線需要補齊第五節表格中的共享服務（PostgreSQL + Redis + 外部向量庫）</strong>。</td>
+              </tr>
+              <tr>
+                <td><strong>🧪 開發與測試、CI 流水線</strong></td>
+                <td><span class="pill-tag pill-blue">官方適用情境</span> 一臺 VM 或筆電就能建出與正式環境相近的 K8s 叢集，快速建立、快速重置。</td>
+                <td>在把服務送上雲端託管 Kubernetes（如 AKS / GKE）之前，先在本地用 K3s 驗證 YAML 是否正確。</td>
+              </tr>
+              <tr>
+                <td><strong>🎓 教學與實驗室、小型團隊自架</strong></td>
+                <td><span class="pill-tag pill-purple">合理推論</span> 一臺主機就能完整實作 Deployment、Service、Ingress、HPA 等物件，硬體門檻極低。</td>
+                <td><strong>本週任務就是這個場景！</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-grid" style="margin-top:24px;">
+          <div class="glass-card">
+            <div class="card-title">☁️ 和雲端託管 Kubernetes (AKS / EKS / GKE) 的關係</div>
+            <p style="font-size:0.9rem; color:var(--text-muted);">
+              K3s 符合 Kubernetes 標準，所以<strong>你在這堂課學到的觀念可以直接移轉到雲端！</strong><br>
+              Open WebUI 官方的 Helm 部署文件說明，它可部署在任何 K8s 發行版上，包括 <strong>EKS、AKS、GKE、OpenShift、Rancher</strong> 與自架叢集。其中 <strong>AKS (Azure Kubernetes Service)</strong> 就是同學平常實作所在的雲端。
+            </p>
+            <p style="font-size:0.86rem; color:var(--primary); margin-top:8px;">
+              💡 <strong>差異主要在周邊元件：</strong>例如官方文件範例使用 <code>nginx Ingress</code>，而 K3s 內建的是 <code>Traefik</code>，設定與註解 (annotations) 寫法會不同；但 <strong>Deployment、Service、HPA 的概念完全相同</strong>。
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title">🛑 什麼時候「不需要」K3s？</div>
+            <p style="font-size:0.9rem; color:var(--text-muted);">
+              <strong>合理推論：</strong>如果是<strong>單一主機、單一服務、流量穩定、不需要自動擴展</strong>的情況（例如公司內部只有 20 人使用的簡單小工具），<strong>Docker Compose 已經非常足夠</strong>！
+            </p>
+            <p style="font-size:0.86rem; color:var(--accent-amber); margin-top:8px;">
+              ⚖️ 硬上容器編排反而會增加維運負擔。<strong>是否要用編排工具，要看的是實際需求，而不是工具本身是否流行。</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE LAB 6: Architecture Decision Wizard -->
+        <div class="lab-box" id="lab-decision">
+          <div class="lab-header">
+            <div class="lab-title">🧭 互動實驗室 6：架構選型決策幫手（Docker Compose vs K3s vs 雲端 AKS/GKE）</div>
+          </div>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:14px;">
+            點選下列常見的實務情境，看看資深架構師會怎麼選擇，這也能幫你準備第八節的課堂討論題！
+          </p>
+          <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+            <button class="btn btn-secondary" onclick="showDecisionCase(1)">情境 A：1 台主機、20 人內部小工具、流量固定</button>
+            <button class="btn btn-secondary" onclick="showDecisionCase(2)">情境 B：工廠現場邊緣主機、無專職 IT、需跑本地 AI 且壞掉要自癒</button>
+            <button class="btn btn-secondary" onclick="showDecisionCase(3)">情境 C：跨國大型 SaaS 服務、多台雲端 GPU 節點、已有雲端團隊</button>
+          </div>
+          <div class="glass-card" id="decision-result-box" style="border-color:var(--primary);">
+            <strong>👆 點擊上方任一情境按鈕查看推薦架構與理由</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 7: 本週任務與 Kubernetes 物件的對照
+           ========================================== -->
+      <section class="lecture-section" id="sec-7">
+        <div class="section-header">
+          <span class="section-num-badge">07</span>
+          <h2 class="section-title">七、本週任務與 Kubernetes 物件的對照（驗收與排錯指南）</h2>
+        </div>
+        <p class="section-lead">
+          三個驗收指標各自在驗證不同的機制。<strong>先知道「這一項在驗證什麼」，卡關時才知道從哪裡查！</strong>
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>驗收指標</th>
+                <th>背後驗證的 K8s 機制</th>
+                <th>✅ 你應該看到的成功證據</th>
+                <th>🩺 失敗時先查哪裡？（排錯清單）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="pill-tag pill-blue">1. 對外服務正常</span></td>
+                <td><code>Ingress</code> ➔ <code>Service</code> ➔ <code>Pod</code> 的路徑，以及 <code>Pod</code> ➔ 主機 <code>Ollama</code> 的連線</td>
+                <td>瀏覽器開得到網域（如 <code>qN.qqnice.org</code>），選取模型後送出對話有正常回覆</td>
+                <td>
+                  1. Traefik 是否拿得到主機 <code>80/443</code> 埠？<br>
+                  2. 主機 Ollama 監聽位址（<code>OLLAMA_HOST</code>）是否只綁了 127.0.0.1？<br>
+                  3. Open WebUI Pod 的 <code>OLLAMA_BASE_URL</code> 是否指對主機位址？
+                </td>
+              </tr>
+              <tr>
+                <td><span class="pill-tag pill-purple">2. 動態擴展</span></td>
+                <td><code>HPA</code>、<code>Metrics Server</code>、Pod 容器資源 <code>requests</code></td>
+                <td>執行 <code>kubectl get hpa -w</code> 時 <code>TARGETS</code> 百分比上升，<code>REPLICAS</code> 從 1 增加到至少 3；停止壓測後縮回</td>
+                <td>
+                  1. <strong>TARGETS 顯示 <code>&lt;unknown&gt;</code>：</strong>檢查 Deployment 是否漏寫 <code>resources.requests.cpu</code>，以及 <code>kubectl top pods</code> 是否有數據。<br>
+                  2. <strong>為什麼縮減很慢？</strong>縮減比擴展慢是正常的（預設 300 秒穩定視窗）！
+                </td>
+              </tr>
+              <tr>
+                <td><span class="pill-tag pill-green">3. 自動修復</span></td>
+                <td><code>Deployment</code> 與 <code>ReplicaSet</code> 的控制迴圈，搭配 <code>readinessProbe</code></td>
+                <td>手動刪除一個 Pod 後，新 Pod 自動出現並進入 <code>Ready</code> 狀態，且持續請求沒有整體中斷</td>
+                <td>
+                  1. 沒有設定 <code>readinessProbe</code>（新 Pod 還沒載入完就被塞流量導致報錯）。<br>
+                  2. 副本只有 1 個時刪掉那唯一 1 個，當然會造成短暫中斷。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-grid" style="margin-top:20px;">
+          <div class="glass-card" style="border-left:4px solid var(--accent-red);">
+            <div class="card-title">💡 容易誤解的觀念 1：為什麼 HPA 顯示 <code>&lt;unknown&gt;/50%</code>？</div>
+            <p style="font-size:0.9rem; color:var(--text-muted);">
+              HPA 的 CPU 使用率百分比是<strong>相對於 Pod 容器上所指定的資源基準量</strong>來計算的（<a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough" target="_blank" style="color:var(--primary);">HPA Walkthrough</a>），實務上就是容器的 <code>resources.requests.cpu</code>。<br><br>
+              公式：<code>CPU 使用率 (%) = (Metrics Server 測得實際用量 ÷ Pod 設定的 requests.cpu) × 100%</code>。<br>
+              <strong>如果沒設定 <code>requests</code>，分母為無意義，K8s 算不出百分比，TARGETS 就會永遠顯示 <code>&lt;unknown&gt;</code>！</strong>
+            </p>
+          </div>
+
+          <div class="glass-card" style="border-left:4px solid var(--accent-amber);">
+            <div class="card-title">⏱️ 容易誤解的觀念 2：為什麼停止壓測後，Pod 很久都不縮回來？</div>
+            <p style="font-size:0.9rem; color:var(--text-muted);">
+              縮減（Scale Down）比擴展（Scale Up）慢很多，是因為 Kubernetes HPA 縮減預設有 <strong>300 秒（5 分鐘）的穩定視窗（Stabilization Window）</strong>。<br><br>
+              這是為了避免流量只是短暫呼吸波動，副本數就劇烈來回跳動（Thrashing / Flapping）（<a href="https://docs.okd.io/4.15/rest_api/autoscale_apis/horizontalpodautoscaler-autoscaling-v2.html" target="_blank" style="color:var(--primary);">HPA API 參考</a>）。<strong>這是刻意設計的保護機制，不是故障！</strong>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 8: 課堂討論題與名詞表
+           ========================================== -->
+      <section class="lecture-section" id="sec-8">
+        <div class="section-header">
+          <span class="section-num-badge">08</span>
+          <h2 class="section-title">八、課堂討論題與名詞表</h2>
+        </div>
+        <p class="section-lead">
+          以下是課堂討論題，用來檢查自己是否真的理解（點擊題目可展開思考方向與參考解析）。驗收時的口頭問答另有題庫，不在此列。
+        </p>
+
+        <!-- Interactive Discussion Questions -->
+        <div id="quiz-list" style="margin-bottom:36px;">
+          <div class="quiz-card" onclick="this.classList.toggle('open')">
+            <div class="quiz-q">
+              <span>Q1. 如果同時有 100 位同學對同一個 Ollama 送出聊天請求，增加 Open WebUI Pod 會改善什麼？不會改善什麼？</span>
+              <span class="pill-tag pill-blue">點擊展開解析</span>
+            </div>
+            <div class="quiz-a">
+              <strong>✅ 會改善的部分：</strong>網頁前端靜態資源載入、介面回應、HTTP 連線處理能力（由 1~4 個 Open WebUI Pod 分擔前端流量）。<br>
+              <strong>❌ 不會改善的部分：</strong>LLM 模型生成回答的速度與總推論吞吐量！因為後端只有同一個 Ollama 實例，且預設 <code>OLLAMA_NUM_PARALLEL=1</code>，100 個聊天請求依然要在 Ollama 佇列（上限 512）裡面排隊等模型一個一個算。
+            </div>
+          </div>
+
+          <div class="quiz-card" onclick="this.classList.toggle('open')">
+            <div class="quiz-q">
+              <span>Q2. 你的公司只有一台主機、一個內部工具、使用者約 20 人。你會選 Docker Compose 還是 K3s？說明理由。</span>
+              <span class="pill-tag pill-blue">點擊展開解析</span>
+            </div>
+            <div class="quiz-a">
+              <strong>🎯 參考方向：選 Docker Compose。</strong><br>
+              單一主機、單一服務、20 人流量非常穩定且不需要動態水平擴展（HPA）。使用 Docker Compose 設定簡單、起步與維運成本最低；若硬上 K3s 反而要多維護 Deployment/Service/Ingress 等 YAML 與叢集元件，增加不必要的複雜度。工具選擇應看實際需求而非流行度。
+            </div>
+          </div>
+
+          <div class="quiz-card" onclick="this.classList.toggle('open')">
+            <div class="quiz-q">
+              <span>Q3. 畫出一個請求從瀏覽器到 Ollama 回覆的完整路徑，標出每一個經過的元件。</span>
+              <span class="pill-tag pill-blue">點擊展開解析</span>
+            </div>
+            <div class="quiz-a">
+              <strong>🗺️ 完整請求路徑：</strong><br>
+              1. <strong>使用者瀏覽器</strong>輸入網址（如 <code>https://qN.qqnice.org</code>）<br>
+              2. 進入主機的 80/443 埠，由 <strong>Klipper-lb (ServiceLB)</strong> 轉交給 K3s 內建的 <strong>Traefik (Ingress Controller)</strong><br>
+              3. Traefik 根據 <strong>Ingress 規則</strong>比對網域與路徑，轉發給對應的 <strong>Open WebUI Service</strong><br>
+              4. <strong>Service</strong> 透過負載均衡，將請求分發給其中一個狀態為 Ready 的 <strong>Open WebUI Pod</strong><br>
+              5. <strong>Open WebUI Pod</strong> 根據 <code>OLLAMA_BASE_URL</code>，跨出 Pod 網路空間（經由 Flannel CNI 與主機內網介面）連線至主機由 <code>systemd</code> 管理的 <strong>Ollama (Port 11434)</strong><br>
+              6. <strong>Ollama</strong> 排隊推論完成後，將 Token 串流沿原路回傳給使用者瀏覽器。
+            </div>
+          </div>
+
+          <div class="quiz-card" onclick="this.classList.toggle('open')">
+            <div class="quiz-q">
+              <span>Q4. 把 Open WebUI 的資料改放 PostgreSQL 與 Redis 之後，哪些問題會消失？哪些新元件要自己維運？</span>
+              <span class="pill-tag pill-blue">點擊展開解析</span>
+            </div>
+            <div class="quiz-a">
+              <strong>✨ 會消失的問題：</strong><br>
+              1. 不同 Pod 之間對話紀錄與使用者帳號不一致的問題會消失（所有 Pod 讀寫同一個 PostgreSQL）。<br>
+              2. 可以開啟多使用者登入，且透過 Redis 完成跨副本的即時協調與狀態同步。<br>
+              <strong>🛠️ 新增需要自己維運的元件：</strong><br>
+              除了 PostgreSQL（資料庫備份、高可用）與 Redis 之外，若要使用知識庫上傳文件與 RAG 功能，還必須額外維運<strong>外部共享向量資料庫</strong>（取代嵌入式 ChromaDB）以及<strong>共享檔案儲存 / 物件儲存 (如 S3/NFS)</strong>。
+            </div>
+          </div>
+
+          <div class="quiz-card" onclick="this.classList.toggle('open')">
+            <div class="quiz-q">
+              <span>Q5. K3s 預設內建 Traefik。如果公司已經標準化使用 nginx Ingress，你會怎麼處理？</span>
+              <span class="pill-tag pill-blue">點擊展開解析</span>
+            </div>
+            <div class="quiz-a">
+              <strong>🔧 處理方式：</strong><br>
+              K3s 的所有內建元件都是可以停用或替換的！可以在安裝或啟動 K3s Server 時加上參數 <code>--disable=traefik</code> 停用內建的 Traefik，接著再用 Helm 或 YAML 安裝公司標準的 <strong>nginx Ingress Controller</strong>。這正是 K3s 符合標準 Kubernetes 的好處：Deployment、Service、HPA 完全不用改，只需調整 Ingress 的 Controller 與對應 annotations。
+            </div>
+          </div>
+        </div>
+
+        <!-- Searchable Glossary Cards -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <h3 style="font-size:1.3rem;">📖 核心名詞互動字典（共 13 個必備術語）</h3>
+          <input type="text" id="glossary-filter" placeholder="🔍 輸入關鍵字即時過濾名詞 (例如: HPA, Probe, 無狀態)..." 
+                 oninput="filterGlossary(this.value)"
+                 style="background:rgba(15,23,42,0.9); border:1px solid var(--border-color); color:var(--text-main); padding:8px 14px; border-radius:8px; width:340px; font-size:0.88rem;" />
+        </div>
+
+        <div class="glossary-grid" id="glossary-container">
+          <!-- Populated by JS from official lecture table -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SECTION 9: 參考資料
+           ========================================== -->
+      <section class="lecture-section" id="sec-9">
+        <div class="section-header">
+          <span class="section-num-badge">09</span>
+          <h2 class="section-title">九、官方參考資料索引</h2>
+        </div>
+        <p class="section-lead">
+          下列頁面為撰寫本講義時實際開啟或檢視過的官方文件，資料截至 2026-11-18：
+        </p>
+
+        <div class="card-grid">
+          <a href="https://github.com/k3s-io/k3s" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 K3s 官方 README ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">K3s 的定義（輕量 K8s 發行版）、7 大內建元件清單、預設 sqlite3 資料庫與官方適用情境。</p>
+          </a>
+
+          <a href="https://docs.k3s.io/installation/requirements" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 K3s 安裝需求 (Requirements) ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">Server (2 Core / 2GB RAM) 與 Agent (1 Core / 512MB RAM) 最低硬體需求與連接埠說明。</p>
+          </a>
+
+          <a href="https://docs.openwebui.com/getting-started/advanced-topics/scaling.md" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 Scaling Open WebUI ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">Open WebUI 多副本水平擴展的前置條件（PostgreSQL, Redis, Secret Key, 外部向量庫）與嵌入式 SQLite/ChromaDB 限制。</p>
+          </a>
+
+          <a href="https://docs.openwebui.com/enterprise/deployment/kubernetes-helm.md" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 Open WebUI Helm 部署 ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">可部署的 Kubernetes 發行版清單（EKS、AKS、GKE、OpenShift、Rancher）與 Ingress 設定範例。</p>
+          </a>
+
+          <a href="https://docs.ollama.com/faq.md" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 Ollama FAQ ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">預設綁定位址 (127.0.0.1:11434)、並行處理參數 (<code>OLLAMA_NUM_PARALLEL</code>) 與請求佇列上限 (512) 設定。</p>
+          </a>
+
+          <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 Kubernetes Ingress 概念 ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">Ingress 規則與 Ingress Controller 執行元件的架構分工。</p>
+          </a>
+
+          <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 Kubernetes HPA 概念與 Walkthrough ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">HPA 的運作機制與 CPU 使用率百分比的計算基準（以容器 <code>requests</code> 為分母）。</p>
+          </a>
+
+          <a href="https://docs.okd.io/4.15/rest_api/autoscale_apis/horizontalpodautoscaler-autoscaling-v2.html" target="_blank" class="glass-card" style="text-decoration:none;">
+            <div class="card-title" style="color:var(--primary);">🔗 HPA API 參考（OKD） ↗</div>
+            <p style="font-size:0.86rem; color:var(--text-muted);">HPA 縮減穩定視窗（Stabilization Window）預設 300 秒的規格說明。</p>
+          </a>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-top:12px;">
+          註：Kubernetes 官方頁面在擷取時內容被截斷，HPA 與 Ingress 的細節是依搜尋摘要與頁面可見部分整理，教學前建議對照原文。
+        </p>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Command Palette Modal (Ctrl+K / Multi-Index Search) -->
+  <div class="modal-backdrop" id="cmd-modal" onclick="if(event.target===this) closeCmdModal()">
+    <div class="cmd-modal">
+      <div class="cmd-input-header">
+        <span>🔍</span>
+        <input type="text" class="cmd-input" id="cmd-search-input" placeholder="搜尋 K3s 觀念、元件、排錯關鍵字 (如: unknown, 11434, Traefik, HPA)..." oninput="renderCmdResults(this.value)" />
+        <button class="mini-btn" onclick="closeCmdModal()">ESC 關閉</button>
+      </div>
+      <div class="cmd-results" id="cmd-results-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
