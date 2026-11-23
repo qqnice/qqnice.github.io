@@ -1,0 +1,438 @@
+/* =========================================================
+   《全知水晶球與無名之鎮》16-bit Retro Pixel RPG Stylesheet
+   ========================================================= */
+
+:root {
+  --bg-deep: #0b0f1a;
+  --panel-bg: #141b2d;
+  --panel-border: #e2e8f0;
+  --panel-shadow: #060911;
+  --accent-gold: #f5c542;
+  --accent-cyan: #38e8ff;
+  --accent-purple: #b86bff;
+  --accent-green: #4ade80;
+  --accent-red: #fb7185;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --font-pixel: "Cubic 11", "DotGothic16", "Noto Sans Mono CJK TC", "PingFang TC", "Microsoft JhengHei", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top, #18223d 0%, var(--bg-deep) 70%);
+  color: var(--text-main);
+  font-family: var(--font-pixel);
+  overflow: hidden;
+  user-select: none;
+}
+
+#game-shell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+/* 頂部標題與操作提示 */
+.top-bar {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  background: rgba(20, 27, 45, 0.92);
+  border: 2px solid #3b4b70;
+  box-shadow: 0 4px 0 var(--panel-shadow);
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-16bit {
+  background: var(--accent-purple);
+  color: #0b0f1a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  letter-spacing: 0.06em;
+  border: 1px solid #e9d5ff;
+}
+
+.top-bar h1 {
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  color: var(--accent-gold);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.controls-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-main);
+  background: #23304d;
+  border: 1px solid #64748b;
+  border-bottom-width: 2px;
+  border-radius: 2px;
+}
+
+.pixel-btn-sm {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 3px 9px;
+  color: var(--text-main);
+  background: #253456;
+  border: 2px solid #94a3b8;
+  box-shadow: 0 2px 0 #060911;
+  cursor: pointer;
+}
+
+.pixel-btn-sm:hover {
+  background: #334670;
+  border-color: var(--accent-cyan);
+}
+
+.pixel-btn-sm:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+/* 遊戲主視窗 */
+.viewport-frame {
+  position: relative;
+  width: 960px;
+  max-width: 100%;
+  aspect-ratio: 960 / 576;
+  background: #05070d;
+  border: 4px solid #cbd5e1;
+  box-shadow:
+    0 0 0 4px #1e293b,
+    0 14px 40px rgba(0, 0, 0, 0.75);
+  overflow: hidden;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* 左上 HUD */
+.hud-panel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  background: rgba(14, 20, 36, 0.86);
+  border: 2px solid #94a3b8;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+
+.hud-location {
+  font-size: 13px;
+  color: var(--accent-gold);
+  margin-bottom: 5px;
+  letter-spacing: 0.05em;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.hud-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.stat-pill {
+  color: var(--text-main);
+}
+
+.stat-pill.exposed {
+  color: var(--accent-red);
+}
+
+/* 右上 HUD & 指標浮動提示 */
+#hud-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.hud-chip {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-main);
+  background: rgba(14, 20, 36, 0.88);
+  border: 2px solid #64748b;
+  padding: 6px 10px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+}
+
+.hud-chip:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+#metric-toast-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.metric-toast {
+  font-size: 12px;
+  padding: 4px 9px;
+  background: rgba(11, 15, 26, 0.9);
+  border-left: 3px solid var(--accent-cyan);
+  border-top: 1px solid #334155;
+  border-right: 1px solid #334155;
+  border-bottom: 1px solid #334155;
+  color: var(--text-main);
+  animation: toastSlide 2.6s ease forwards;
+}
+
+.metric-toast.positive { border-left-color: var(--accent-green); color: #bbf7d0; }
+.metric-toast.negative { border-left-color: var(--accent-red); color: #fecdd3; }
+.metric-toast.info { border-left-color: var(--accent-purple); color: #e9d5ff; }
+
+@keyframes toastSlide {
+  0% { opacity: 0; transform: translateX(12px); }
+  12% { opacity: 1; transform: translateX(0); }
+  80% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+/* 通用 16-bit JRPG 視窗 */
+.pixel-window {
+  background: linear-gradient(180deg, #16203a 0%, #0d1324 100%);
+  border: 3px solid var(--panel-border);
+  box-shadow:
+    inset 0 0 0 3px #334155,
+    0 6px 0 rgba(0, 0, 0, 0.75);
+}
+
+/* 底部對話框 */
+#dialogue-box {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 18px;
+  min-height: 132px;
+  padding: 14px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+.dialogue-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.speaker-tag {
+  background: var(--accent-gold);
+  color: #0b0f1a;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 2px 10px;
+  border: 2px solid #fef08a;
+}
+
+.speaker-role {
+  font-size: 12px;
+  color: var(--accent-cyan);
+}
+
+.dialogue-text {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #f8fafc;
+  letter-spacing: 0.04em;
+  min-height: 52px;
+  white-space: pre-wrap;
+}
+
+.dialogue-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.blink-arrow {
+  font-size: 12px;
+  color: var(--accent-gold);
+  animation: blink 0.9s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+/* 審計日誌彈窗 */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 18, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90%;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 10px;
+}
+
+.modal-header h2 {
+  font-size: 16px;
+  color: var(--accent-cyan);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.metric-card {
+  background: rgba(9, 13, 25, 0.8);
+  border: 2px solid #334155;
+  padding: 10px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.metric-bar {
+  width: 100%;
+  height: 10px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.metric-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.fill-utility { background: var(--accent-gold); }
+.fill-privacy { background: var(--accent-cyan); }
+.fill-security { background: var(--accent-purple); }
+
+.metric-val {
+  font-size: 13px;
+  text-align: right;
+  color: var(--text-main);
+}
+
+.audit-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flag-badge {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.flag-badge.warn {
+  border-color: var(--accent-red);
+  background: rgba(251, 113, 133, 0.16);
+  color: #fecdd3;
+}
+
+.flag-badge.safe {
+  border-color: var(--accent-green);
+  background: rgba(74, 222, 128, 0.14);
+  color: #bbf7d0;
+}
+
+.log-list-title {
+  font-size: 12px;
+  color: var(--accent-gold);
+}
+
+.log-list {
+  list-style: none;
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.log-list li {
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 6px 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border-left: 3px solid #475569;
+  color: #e2e8f0;
+}
+
+.hidden {
+  display: none !important;
+}

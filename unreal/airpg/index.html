@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>全知水晶球與無名之鎮 | The Omniscient Orb &amp; The Nameless Town</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="game-shell">
+    <!-- 頂部復古標題列 -->
+    <header class="top-bar">
+      <div class="title-group">
+        <span class="badge-16bit">16-BIT MVP</span>
+        <h1>全知水晶球與無名之鎮</h1>
+      </div>
+      <div class="controls-legend">
+        <span><kbd>WASD</kbd>/<kbd>↑↓←→</kbd> 移動</span>
+        <span><kbd>Space</kbd>/<kbd>E</kbd> 互動</span>
+        <span><kbd>Tab</kbd> 審計日誌</span>
+        <span><kbd>V</kbd> 審計之眼</span>
+        <button id="btn-mute" class="pixel-btn-sm" title="切換 8-bit 音效">🔊 音效</button>
+      </div>
+    </header>
+
+    <!-- 遊戲主視窗 -->
+    <main class="viewport-frame">
+      <canvas id="gameCanvas" width="960" height="576"></canvas>
+
+      <!-- 左上 HUD：地點與基本狀態 -->
+      <div id="hud-left" class="hud-panel">
+        <div class="hud-location" id="hud-location">無名之鎮・南門廣場</div>
+        <div class="hud-stats">
+          <span class="stat-pill">💰 <strong id="hud-gold">0</strong> G</span>
+          <span class="stat-pill" id="hud-status-badge">🛡️ 隱私完整</span>
+        </div>
+      </div>
+
+      <!-- 右上 HUD：微幅指標變動提示 & 審計日誌快捷 -->
+      <div id="hud-right">
+        <button id="btn-audit-log" class="hud-chip" title="開啟審計日誌 (Tab)">
+          📋 審計日誌 <kbd>Tab</kbd>
+        </button>
+        <div id="metric-toast-stack" aria-live="polite"></div>
+      </div>
+
+      <!-- 底部復古 JRPG 對話框 -->
+      <section id="dialogue-box" class="pixel-window hidden" role="dialog" aria-label="角色對話">
+        <div class="dialogue-header">
+          <span id="dialogue-speaker" class="speaker-tag">系統</span>
+          <span id="dialogue-role" class="speaker-role"></span>
+        </div>
+        <p id="dialogue-text" class="dialogue-text"></p>
+        <div class="dialogue-footer">
+          <span id="dialogue-hint" class="blink-arrow">▼ 按 Space / E 繼續</span>
+        </div>
+      </section>
+
+      <!-- 審計日誌彈窗 (Tab) -->
+      <section id="audit-log-modal" class="modal-backdrop hidden" role="dialog" aria-label="迴路審計日誌">
+        <div class="pixel-window modal-card">
+          <div class="modal-header">
+            <h2>📋 迴路審計日誌 (Auditor Log)</h2>
+            <button id="btn-close-log" class="pixel-btn-sm">✕ 關閉 [Tab]</button>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">⚙️ 系統效能 Utility</div>
+              <div class="metric-bar"><div id="bar-utility" class="metric-fill fill-utility" style="width: 50%"></div></div>
+              <div class="metric-val" id="val-utility">50</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">🔒 隱私保護 Privacy</div>
+              <div class="metric-bar"><div id="bar-privacy" class="metric-fill fill-privacy" style="width: 80%"></div></div>
+              <div class="metric-val" id="val-privacy">80</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">🛡️ 資安防禦 Security</div>
+              <div class="metric-bar"><div id="bar-security" class="metric-fill fill-security" style="width: 50%"></div></div>
+              <div class="metric-val" id="val-security">50</div>
+            </div>
+          </div>
+          <div class="audit-flags" id="audit-flags"></div>
+          <div class="log-list-title">近期事件紀錄</div>
+          <ul id="audit-log-list" class="log-list"></ul>
+        </div>
+      </section>
+
+      <!-- Step 2 預留掛載點：服務條款彈窗 -->
+      <div id="tos-modal-root" class="hidden"></div>
+
+      <!-- Step 4 預留掛載點：言靈攻防戰介面 -->
+      <div id="battle-modal-root" class="hidden"></div>
+    </main>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
