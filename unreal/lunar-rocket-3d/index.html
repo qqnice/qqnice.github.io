@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>登月計畫 3D — 火箭升空返航挑戰</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Fullscreen atmospheric & damage overlays -->
+    <div id="damage-flash" class="overlay-fx"></div>
+    <div id="cloud-veil-fx" class="overlay-fx"></div>
+    <div id="reentry-fx" class="overlay-fx"></div>
+
+    <!-- Top HUD -->
+    <header id="hud" class="hidden">
+      <div class="hud-top">
+        <div class="hud-card score-card">
+          <div class="hud-label">SCORE 分數</div>
+          <div class="hud-value" id="score-val">0</div>
+          <div class="hud-sub" id="combo-val">x1.0</div>
+        </div>
+
+        <div class="hud-center">
+          <div class="phase-badge" id="phase-badge">準備發射</div>
+          <div class="mission-track">
+            <span class="track-icon" title="地球">🌍</span>
+            <div class="track-bar">
+              <div class="track-fill" id="progress-fill"></div>
+              <div class="track-marker moon-marker" title="月球折返點">🌕</div>
+              <div class="track-rocket" id="track-rocket">🚀</div>
+            </div>
+            <span class="track-icon" title="安全返航">🌍</span>
+          </div>
+          <div class="altitude-row">
+            <span id="altitude-val">0 km</span>
+            <span id="speed-val">0 km/s</span>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <button id="btn-sound" class="icon-btn" aria-label="音效開關" title="音效開關">🔊</button>
+          <button id="btn-pause" class="icon-btn" aria-label="暫停" title="暫停">⏸</button>
+        </div>
+      </div>
+
+      <!-- Phase announcement banner -->
+      <div id="banner" class="banner hidden">
+        <div class="banner-sub" id="banner-sub">PHASE 1</div>
+        <div class="banner-title" id="banner-title">點火升空</div>
+      </div>
+
+      <!-- Interactive Stage Separation button -->
+      <button id="btn-separate" class="action-prompt hidden">
+        <span class="pulse-ring"></span>
+        <span>🔥 點擊或按空白鍵：火箭分離！ (+500)</span>
+      </button>
+
+      <!-- Floating score popups container -->
+      <div id="popup-layer"></div>
+
+      <!-- Subtle touch hint for mobile -->
+      <div id="touch-hint" class="touch-hint hidden">👆 滑動螢幕任意位置閃躲隕石</div>
+    </header>
+
+    <!-- Start Menu Screen -->
+    <section id="screen-start" class="modal-screen">
+      <div class="modal-card start-card">
+        <div class="badge-pill">3D SPACE RUNNER</div>
+        <h1 class="game-title">登月計畫 <span class="accent">3D</span></h1>
+        <p class="game-subtitle">火箭發射 · 突破大氣層 · 火箭分離 · 登陸月球 · 重返地球</p>
+
+        <div class="mission-steps">
+          <div class="step-chip">🚀 發射升空</div>
+          <div class="step-chip">☁️ 通過大氣層</div>
+          <div class="step-chip">💥 火箭分離</div>
+          <div class="step-chip">🌕 抵達月球</div>
+          <div class="step-chip">🔥 重返地球</div>
+        </div>
+
+        <div class="controls-box">
+          <div class="control-item">
+            <span class="ctrl-icon">💻</span>
+            <span>電腦：方向鍵 / WASD 或滑鼠拖曳閃躲</span>
+          </div>
+          <div class="control-item">
+            <span class="ctrl-icon">📱</span>
+            <span>手機：手指在螢幕滑動操控火箭</span>
+          </div>
+          <div class="control-item warn">
+            <span class="ctrl-icon">☄️</span>
+            <span>注意：被隕石擊中將直接墜毀！收集能量星可加分</span>
+          </div>
+        </div>
+
+        <div class="best-score-row">
+          最高紀錄：<strong id="start-best-score">0</strong>
+        </div>
+
+        <button id="btn-start" class="primary-btn">
+          🚀 啟動發射程序
+        </button>
+      </div>
+    </section>
+
+    <!-- Pause Screen -->
+    <section id="screen-pause" class="modal-screen hidden">
+      <div class="modal-card compact-card">
+        <h2>任務暫停</h2>
+        <p class="muted">火箭已進入自動巡航待命狀態</p>
+        <div class="btn-group">
+          <button id="btn-resume" class="primary-btn">繼續任務</button>
+          <button id="btn-restart-pause" class="secondary-btn">重新發射</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Over Screen -->
+    <section id="screen-gameover" class="modal-screen hidden">
+      <div class="modal-card result-card danger-border">
+        <div class="result-icon">💥</div>
+        <h2 class="danger-text">任務失敗</h2>
+        <p id="gameover-reason" class="muted">火箭遭到隕石猛烈撞擊而解體</p>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">最終分數</div>
+            <div class="stat-val" id="go-score">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">最高紀錄</div>
+            <div class="stat-val accent" id="go-best">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">抵達階段</div>
+            <div class="stat-val" id="go-phase">-</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">閃過隕石</div>
+            <div class="stat-val" id="go-dodged">0</div>
+          </div>
+        </div>
+
+        <button id="btn-retry" class="primary-btn">🔄 再次挑戰</button>
+      </div>
+    </section>
+
+    <!-- Victory Screen -->
+    <section id="screen-victory" class="modal-screen hidden">
+      <div class="modal-card result-card success-border">
+        <div class="result-icon">🏆</div>
+        <div class="rank-badge" id="vic-rank">RANK S</div>
+        <h2 class="success-text">任務圓滿完成！</h2>
+        <p class="muted">成功登陸月球並突破大氣層安全返回地球！</p>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">總分</div>
+            <div class="stat-val" id="vic-score">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">最高紀錄</div>
+            <div class="stat-val accent" id="vic-best">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">閃過隕石</div>
+            <div class="stat-val" id="vic-dodged">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">極限閃避</div>
+            <div class="stat-val" id="vic-nearmiss">0</div>
+          </div>
+        </div>
+
+        <button id="btn-play-again" class="primary-btn">🚀 再次出航</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
