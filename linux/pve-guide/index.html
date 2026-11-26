@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proxmox VE 9.3 互動式學習導覽｜一看就懂的企業級開源虛擬化</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            pve: {
+              50: '#FFF7ED',
+              100: '#FFEDD5',
+              200: '#FED7AA',
+              400: '#FB923C',
+              500: '#E57000',
+              600: '#C85E00',
+              700: '#9A4400',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      70% { transform: scale(1.06); opacity: 0; }
+      100% { transform: scale(1.06); opacity: 0; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pop-in {
+      animation: popIn 0.25s ease-out forwards;
+    }
+    input[type="range"] {
+      accent-color: #E57000;
+    }
+    details > summary {
+      list-style: none;
+    }
+    details > summary::-webkit-details-marker {
+      display: none;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-pve-100 selection:text-pve-700">
+  <!-- Reading Progress Bar -->
+  <div class="fixed top-0 left-0 right-0 h-1 z-50 bg-slate-200/60">
+    <div id="scroll-progress" class="h-full bg-pve-500 transition-all duration-150" style="width: 0%;"></div>
+  </div>
+
+  <!-- Sticky Navigation -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-slate-200/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="../" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="返回 Linux 教學專區">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Linux 專區</span>
+        </a>
+        <a href="#top" class="flex items-center gap-2.5 group">
+          <div class="w-9 h-9 rounded-xl bg-pve-500 text-white flex items-center justify-center shadow-sm shadow-pve-500/30 group-hover:scale-105 transition">
+            <i data-lucide="server" class="w-5 h-5"></i>
+          </div>
+          <div class="leading-tight">
+            <div class="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Proxmox VE <span class="text-pve-500">9.3</span></div>
+            <div class="text-[11px] text-slate-500 hidden sm:block">互動式虛擬化學習導覽</div>
+          </div>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600">
+        <a href="#why" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">為什麼學</a>
+        <a href="#lab-compute" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">雙軌引擎</a>
+        <a href="#lab-ha" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">HA 斷電模擬</a>
+        <a href="#lab-enterprise" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">成本與實戰</a>
+        <a href="#roadmap" class="px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition">學習地圖</a>
+        <a href="#quiz" class="px-3 py-1.5 rounded-lg hover:bg-pve-50 hover:text-pve-600 transition">隨堂挑戰</a>
+      </nav>
+
+      <a href="#lab-ha" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl bg-slate-900 text-white hover:bg-pve-500 transition shadow-sm">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>直接玩模擬器</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ==================== 1. HERO SECTION ==================== -->
+    <section id="why" class="relative overflow-hidden bg-gradient-to-b from-white via-pve-50/30 to-slate-50 pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-200/80">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-pve-100 text-pve-700 border border-pve-200">
+            <span class="w-2 h-2 rounded-full bg-pve-500 animate-pulse"></span>
+            最新基準：PVE 9.3（2026/11/25 發布 · Debian 13.8 · Kernel 7.0）
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+            PVE 8.x 已於 2026/08/31 停止支援（EOL），請直接從 9.x 學起
+          </span>
+        </div>
+
+        <div class="max-w-3xl">
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 leading-[1.18] mb-5">
+            一套免費開源系統，<br />
+            用筆電就能練出<span class="text-pve-500">企業級雲端機房</span>實力
+          </h1>
+          <p class="text-base sm:text-lg text-slate-600 leading-relaxed mb-8">
+            <strong class="text-slate-900">Proxmox VE（PVE）</strong>把虛擬機、輕量容器、分散式儲存、軟體定義網路與高可用叢集，全部濃縮進一個瀏覽器介面。不用買天價授權，學生今天就能在家搭出業界搶著要的私有雲技能。
+          </p>
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="#lab-compute" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-pve-500 hover:bg-pve-600 text-white font-bold shadow-md shadow-pve-500/25 transition">
+              <i data-lucide="play-circle" class="w-5 h-5"></i>
+              開始互動體驗
+            </a>
+            <a href="#roadmap" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold border border-slate-300 transition">
+              <i data-lucide="map" class="w-5 h-5 text-pve-500"></i>
+              查看 5 階段學習地圖
+            </a>
+          </div>
+        </div>
+
+        <!-- 3 Core Student Benefits -->
+        <div class="grid md:grid-cols-3 gap-5 mt-12">
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-pve-200 transition">
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+              <i data-lucide="unlock" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 mb-2">100% 開源免費，零功能閹割</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              不像商業軟體限制功能，PVE 所有企業級特性全部開源。只要電腦支援 VT-x / AMD-V、最低 2GB RAM，甚至用筆電開巢狀虛擬化就能開始練。
+            </p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-pve-200 transition">
+            <div class="w-11 h-11 rounded-xl bg-pve-50 text-pve-600 flex items-center justify-center mb-4">
+              <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 mb-2">VMware 漲價潮下的熱門履歷技能</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Broadcom 調整 VMware 授權模式後，全球企業積極評估替代方案。PVE 內建 ESXi 匯入精靈與原生備份系統，成為 2026 年最受矚目的私有雲平台。
+            </p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md hover:border-pve-200 transition">
+            <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
+              <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900 mb-2">一套 Web 介面統包全端維運</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              同時精通 KVM 虛擬機、LXC 容器、ZFS / Ceph 儲存、SDN 網路與 HA 高可用容錯，並提供完整 REST API 接軌 Terraform / Ansible 自動化。
+            </p>
+          </div>
+        </div>
+
+        <!-- Expandable Version Milestone Timeline -->
+        <div class="mt-10 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-pve-600">版本演進雷達</span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">點選版本，快速掌握 PVE 9.x 關鍵進化</h2>
+            </div>
+            <div id="version-tabs" class="flex flex-wrap gap-1.5">
+              <button data-ver="9.3" class="ver-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pve-500 text-white transition">9.3 最新</button>
+              <button data-ver="9.2" class="ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">9.2</button>
+              <button data-ver="9.1" class="ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">9.1</button>
+              <button data-ver="9.0" class="ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">9.0</button>
+              <button data-ver="8.x" class="ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition">8.x (EOL)</button>
+            </div>
+          </div>
+          <div id="version-detail" class="rounded-xl bg-slate-50 border border-slate-200/80 p-4 text-sm text-slate-700">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. LAB 1: KVM vs LXC ==================== -->
+    <section id="lab-compute" class="py-16 sm:py-24 border-b border-slate-200/80 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="max-w-3xl mb-10">
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pve-600 bg-pve-50 px-3 py-1 rounded-full mb-3">
+            <i data-lucide="cpu" class="w-3.5 h-3.5"></i> 互動實驗室 01
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mb-3">雙軌虛擬化引擎：KVM 虛擬機 vs LXC 容器</h2>
+          <p class="text-slate-600 text-base leading-relaxed">
+            為什麼 PVE 比單純的虛擬機軟體更靈活？因為它在同一台主機上同時給你<strong class="text-slate-900">「獨立完整系統（KVM）」</strong>與<strong class="text-slate-900">「超省資源容器（LXC）」</strong>。試著按下按鈕往主機塞入工作負載，直接看記憶體消耗差多少！
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-6 items-start">
+          <!-- Interactive Host Sandbox -->
+          <div class="lg:col-span-7 bg-slate-50 rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div>
+                <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="hard-drive" class="w-5 h-5 text-pve-500"></i>
+                  模擬單台 PVE 9.3 主機（16 GB RAM）
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">點擊下方按鈕新增客體；點擊已建立的方塊即可移除</p>
+              </div>
+              <button id="btn-reset-host" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 重置主機
+              </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid sm:grid-cols-2 gap-3 mb-5">
+              <button id="btn-add-kvm" class="flex items-center justify-between p-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98]">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="monitor" class="w-4 h-4"></i>
+                  + 新增 KVM 虛擬機
+                </span>
+                <span class="text-xs font-mono bg-sky-800/60 px-2 py-0.5 rounded">+2.0 GB</span>
+              </button>
+              <button id="btn-add-lxc" class="flex items-center justify-between p-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98]">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="box" class="w-4 h-4"></i>
+                  + 新增 LXC / OCI 容器
+                </span>
+                <span class="text-xs font-mono bg-emerald-800/60 px-2 py-0.5 rounded">+0.25 GB</span>
+              </button>
+            </div>
+
+            <!-- RAM Bar -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 mb-4">
+              <div class="flex items-center justify-between text-xs font-semibold mb-2">
+                <span class="text-slate-600">主機記憶體使用率（含 PVE 系統底層 1.0 GB）</span>
+                <span id="ram-text" class="font-mono text-slate-900">1.00 / 16.00 GB (6%)</span>
+              </div>
+              <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80">
+                <div id="ram-bar" class="h-full bg-pve-500 transition-all duration-300 rounded-full" style="width: 6.25%;"></div>
+              </div>
+              <div id="ram-warning" class="hidden mt-2 text-xs font-semibold text-rose-600 flex items-center gap-1">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                <span>記憶體已滿！你可以移除幾台 KVM 虛擬機，或改用更省資源的 LXC 容器。</span>
+              </div>
+            </div>
+
+            <!-- Live Guest Container -->
+            <div class="bg-white rounded-xl p-4 border border-dashed border-slate-300 min-h-[168px]">
+              <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+                <span>正在運行的客體（點擊項目可關機移除）</span>
+                <span id="guest-counts" class="font-mono font-semibold text-slate-700">KVM: 0 ｜ LXC: 0</span>
+              </div>
+              <div id="guest-grid" class="flex flex-wrap gap-2">
+                <div class="w-full text-center py-8 text-sm text-slate-400">
+                  目前尚無工作負載，點擊上方按鈕開始建立！
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side-by-side Concept Cards -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="rounded-2xl border border-sky-200 bg-sky-50/50 p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1.5 font-bold text-sky-900">
+                  <i data-lucide="monitor" class="w-5 h-5 text-sky-600"></i>
+                  KVM 全虛擬化（QEMU 11.1）
+                </span>
+                <span class="text-[11px] font-mono font-semibold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">獨立作業系統核心</span>
+              </div>
+              <p class="text-sm text-slate-700 leading-relaxed mb-3">
+                每台 VM 擁有完全獨立的虛擬硬體與 OS 核心。適合跑 <strong>Windows Server</strong>、異質 Linux 發行版、或需要高度安全隔離的環境。
+              </p>
+              <ul class="text-xs text-slate-600 space-y-1.5">
+                <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-sky-600 mt-0.5 shrink-0"></i> 支援 x86（VT-x/AMD-V）及 Armv9-A 以上 64 位元處理器</li>
+                <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-sky-600 mt-0.5 shrink-0"></i> 支援 PCIe 硬體直通（VT-d / AMD-Vi）與 vTPM qcow2 離線快照</li>
+                <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-sky-600 mt-0.5 shrink-0"></i> PVE 9.1+ 提供精細巢狀虛擬化 vCPU 旗標控制</li>
+              </ul>
+            </div>
+
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1.5 font-bold text-emerald-900">
+                  <i data-lucide="box" class="w-5 h-5 text-emerald-600"></i>
+                  LXC 輕量容器（LXC 7.0 + OCI）
+                </span>
+                <span class="text-[11px] font-mono font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">共享宿主機核心</span>
+              </div>
+              <p class="text-sm text-slate-700 leading-relaxed mb-3">
+                所有容器共享 PVE 宿主機的 Linux 核心，開機只要 1–2 秒、記憶體開銷極低，特別適合高密度 Linux 服務（網頁、資料庫、微服務）。
+              </p>
+              <ul class="text-xs text-slate-600 space-y-1.5">
+                <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0"></i> PVE 9.1 起可直接從遠端 Registry 下載 / 上傳 <strong>OCI 映像檔</strong>建立容器</li>
+                <li class="flex items-start gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0"></i> <span><strong>實務提醒：</strong>官方對 OCI 直接作為 PVE 容器層仍偏技術預覽，企業生產導入前應先驗證穩定性與更新流程。</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. LAB 2: HA FAILOVER SIMULATOR ==================== -->
+    <section id="lab-ha" class="py-16 sm:py-24 border-b border-slate-200/80 bg-slate-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="max-w-3xl mb-10">
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pve-600 bg-pve-100/70 px-3 py-1 rounded-full mb-3">
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i> 互動實驗室 02 · 核心亮點
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mb-3">高可用性（HA）斷電災難模擬器</h2>
+          <p class="text-slate-600 text-base leading-relaxed">
+            主機電源壞掉、主機板燒毀怎麼辦？切換下方的<strong class="text-slate-900">底層儲存模式</strong>，親手按下<strong class="text-rose-600">「拔掉 Node 1 電源」</strong>，馬上見證為什麼實務上約 80% 的 HA 失敗都源自儲存設計不當！
+          </p>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8">
+          <!-- Control Bar -->
+          <div class="grid md:grid-cols-3 gap-4 pb-6 mb-6 border-b border-slate-200">
+            <!-- Topology Toggle -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. 選擇叢集節點架構</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="topo-3node" class="topo-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-pve-500 bg-pve-50 text-pve-700 transition">3 節點標準叢集</button>
+                <button id="topo-2node" class="topo-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">2 節點 + QDevice</button>
+              </div>
+            </div>
+
+            <!-- Storage Toggle -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. 選擇底層儲存設計</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button id="store-shared" class="store-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition">✅ Ceph HCI / SAN</button>
+                <button id="store-local" class="store-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">❌ 本機硬碟 (錯誤)</button>
+              </div>
+            </div>
+
+            <!-- Power Action -->
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">3. 執行故障演練</label>
+              <button id="btn-power-toggle" class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 active:scale-[0.98]">
+                <i data-lucide="power-off" class="w-4 h-4"></i>
+                <span>模擬拔除 Node 1 電源</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cluster Nodes Visual -->
+          <div class="relative">
+            <!-- Corosync Bus Banner -->
+            <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2 rounded-xl bg-slate-900 text-slate-200 text-xs font-mono mb-5">
+              <div class="flex items-center gap-2">
+                <span id="quorum-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span>Corosync 心跳偵測 ＋ pmxcfs 分散式組態即時同步</span>
+              </div>
+              <span id="quorum-status" class="text-emerald-400 font-bold">Quorum 仲裁狀態：正常（3 / 3 票）</span>
+            </div>
+
+            <!-- 3 Cards Grid -->
+            <div class="grid md:grid-cols-3 gap-4 mb-5">
+              <!-- Node 1 -->
+              <div id="card-node1" class="rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-4 transition-all duration-300">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div id="icon-node1" class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <i data-lucide="server" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm text-slate-900">PVE Node 1</div>
+                      <div class="text-[11px] font-mono text-slate-500">10.0.10.11 · 10GbE</div>
+                    </div>
+                  </div>
+                  <span id="badge-node1" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">ONLINE</span>
+                </div>
+                <div id="vms-node1" class="space-y-2 min-h-[92px]">
+                  <!-- VMs rendered here -->
+                </div>
+              </div>
+
+              <!-- Node 2 -->
+              <div id="card-node2" class="rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-4 transition-all duration-300">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <i data-lucide="server" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm text-slate-900">PVE Node 2</div>
+                      <div class="text-[11px] font-mono text-slate-500">10.0.10.12 · 10GbE</div>
+                    </div>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">ONLINE</span>
+                </div>
+                <div id="vms-node2" class="space-y-2 min-h-[92px]">
+                  <!-- VMs rendered here -->
+                </div>
+              </div>
+
+              <!-- Node 3 OR QDevice -->
+              <div id="card-node3" class="rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-4 transition-all duration-300">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div id="icon-node3" class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <i data-lucide="server" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div id="title-node3" class="font-bold text-sm text-slate-900">PVE Node 3</div>
+                      <div id="sub-node3" class="text-[11px] font-mono text-slate-500">10.0.10.13 · 10GbE</div>
+                    </div>
+                  </div>
+                  <span id="badge-node3" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">ONLINE</span>
+                </div>
+                <div id="vms-node3" class="space-y-2 min-h-[92px]">
+                  <!-- VMs or QDevice explanation -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Storage Layer Banner -->
+            <div id="storage-layer" class="rounded-2xl border-2 border-pve-200 bg-pve-50/60 p-4 transition-all duration-300">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <i id="storage-icon" data-lucide="database" class="w-5 h-5 text-pve-600 shrink-0"></i>
+                  <div>
+                    <div id="storage-title" class="font-bold text-sm text-slate-900">分散式 / 共用儲存層：Ceph HCI（Tentacle 20.2）或 PVE 9.3 共用 SAN（LVM 磁碟區鏈快照）</div>
+                    <div id="storage-desc" class="text-xs text-slate-600">所有節點皆可即時存取 VM 磁碟資料，無單點故障。</div>
+                  </div>
+                </div>
+                <span id="storage-badge" class="self-start sm:self-center text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 shrink-0">容錯就緒</span>
+              </div>
+            </div>
+
+            <!-- Live Event Console & Result Explanation -->
+            <div id="ha-console" class="mt-5 rounded-2xl bg-slate-900 text-slate-100 p-4 font-mono text-xs leading-relaxed">
+              <div class="text-slate-400 mb-1 flex items-center justify-between">
+                <span>// HA 叢集事件即時紀錄</span>
+                <span id="ha-status-pill" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">所有服務正常運行</span>
+              </div>
+              <div id="ha-log-lines" class="space-y-1">
+                <div><span class="text-emerald-400">[OK]</span> 叢集健康運作中。點擊右上角「模擬拔除 Node 1 電源」觀察系統反應。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progressive Disclosure Drawer: Enterprise HA & Storage Details -->
+          <details class="mt-6 group rounded-2xl border border-slate-200 bg-slate-50/70">
+            <summary class="flex items-center justify-between px-5 py-3.5 cursor-pointer font-bold text-sm text-slate-800 hover:text-pve-600 transition">
+              <span class="flex items-center gap-2">
+                <i data-lucide="book-open" class="w-4 h-4 text-pve-500"></i>
+                展開進階架構小百科：PVE 9.0–9.3 高可用與儲存三策略
+              </span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition"></i>
+            </summary>
+            <div class="px-5 pb-5 pt-2 text-xs sm:text-sm text-slate-600 grid md:grid-cols-2 gap-4 border-t border-slate-200/70">
+              <div>
+                <h4 class="font-bold text-slate-900 mb-1.5">HA 智慧排程演進（9.0 → 9.3）</h4>
+                <ul class="space-y-1 list-disc pl-4">
+                  <li><strong>PVE 9.0 親和性規則</strong>：可設定相依服務同主機降延遲，或強制冗餘服務分散不同節點。</li>
+                  <li><strong>PVE 9.2 動態負載平衡器</strong>：依資源消耗自動熱遷移；新增維護 Arm/Disarm，維護完自動歸位。</li>
+                  <li><strong>PVE 9.3 GUI 維護模式 &amp; 唯一客體識別碼</strong>：遷移、快照回滾、備份還原皆維持同一個識別碼不混亂。</li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-900 mb-1.5">企業高可用儲存三種策略</h4>
+                <ul class="space-y-1 list-disc pl-4">
+                  <li><strong>3–10 節點超融合（HCI）</strong>：同組伺服器跑 PVE + Ceph，無單點故障，但須留意重平衡頻寬。</li>
+                  <li><strong>外部獨立 Ceph 叢集</strong>：運算與儲存實體分離，避免復原時搶 CPU/網路，還可對外提供 S3。</li>
+                  <li><strong>既有企業 SAN 利舊（9.3 重大突破）</strong>：共用 LVM 磁碟區鏈快照正式投產，加上集中式 <code class="bg-slate-200/80 px-1 rounded">Datacenter &gt; SAN</code> 多路徑設定精靈。</li>
+                </ul>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. LAB 3: COST CALCULATOR + ENTERPRISE REALITY ==================== -->
+    <section id="lab-enterprise" class="py-16 sm:py-24 border-b border-slate-200/80 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="max-w-3xl mb-10">
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pve-600 bg-pve-50 px-3 py-1 rounded-full mb-3">
+            <i data-lucide="calculator" class="w-3.5 h-3.5"></i> 互動實驗室 03
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mb-3">為什麼企業搶著導入 PVE？親手試算授權震撼差</h2>
+          <p class="text-slate-600 text-base leading-relaxed">
+            PVE 最大的商業殺手鐧是<strong class="text-slate-900">「只看實體 CPU 插槽（Socket），不管你有幾顆核心（Core）」</strong>。試著把下方「每顆 CPU 核心數」從 16 拉到 64，看看 PVE 訂閱費會不會變貴！
+          </p>
+        </div>
+
+        <!-- Part A: Interactive Licensing Calculator -->
+        <div class="bg-slate-50 rounded-3xl border border-slate-200 p-5 sm:p-8 mb-12 shadow-sm">
+          <div class="grid lg:grid-cols-12 gap-8 items-center">
+            <!-- Sliders -->
+            <div class="lg:col-span-6 space-y-5">
+              <div>
+                <div class="flex justify-between text-sm font-bold mb-1.5">
+                  <span class="text-slate-700">伺服器主機台數</span>
+                  <span id="val-hosts" class="font-mono text-pve-600">3 台</span>
+                </div>
+                <input id="sl-hosts" type="range" min="1" max="10" value="3" class="w-full cursor-pointer" />
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm font-bold mb-1.5">
+                  <span class="text-slate-700">每台實體 CPU 插槽數（Socket）</span>
+                  <span id="val-sockets" class="font-mono text-pve-600">2 顆 / 台</span>
+                </div>
+                <input id="sl-sockets" type="range" min="1" max="2" value="2" class="w-full cursor-pointer" />
+                <p class="text-[11px] text-slate-500 mt-1">小秘訣：將插槽調成 1 顆、核心數調高，可省下一半訂閱費！</p>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm font-bold mb-1.5">
+                  <span class="text-slate-700">每顆 CPU 核心數（Core）</span>
+                  <span id="val-cores" class="font-mono text-pve-600">32 核心 / 顆</span>
+                </div>
+                <input id="sl-cores" type="range" min="8" max="64" step="8" value="32" class="w-full cursor-pointer" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">選擇 2026/10 原廠企業訂閱等級（未稅牌價）</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button data-tier="community" data-price="120" class="tier-btn p-2.5 rounded-xl border border-slate-200 bg-white text-left hover:border-pve-300 transition">
+                    <div class="text-xs font-bold text-slate-900">Community</div>
+                    <div class="text-xs font-mono text-pve-600 font-bold">€120/年</div>
+                  </button>
+                  <button data-tier="basic" data-price="370" class="tier-btn p-2.5 rounded-xl border border-slate-200 bg-white text-left hover:border-pve-300 transition">
+                    <div class="text-xs font-bold text-slate-900">Basic</div>
+                    <div class="text-xs font-mono text-pve-600 font-bold">€370/年</div>
+                  </button>
+                  <button data-tier="standard" data-price="550" class="tier-btn p-2.5 rounded-xl border-2 border-pve-500 bg-pve-50 text-left transition">
+                    <div class="text-xs font-bold text-pve-800">Standard</div>
+                    <div class="text-xs font-mono text-pve-600 font-bold">€550/年</div>
+                  </button>
+                  <button data-tier="premium" data-price="1100" class="tier-btn p-2.5 rounded-xl border border-slate-200 bg-white text-left hover:border-pve-300 transition">
+                    <div class="text-xs font-bold text-slate-900">Premium</div>
+                    <div class="text-xs font-mono text-pve-600 font-bold">€1,100/年</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Results -->
+            <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                <div>
+                  <div class="text-xs text-slate-500">你的機房總硬體規模</div>
+                  <div id="calc-summary" class="font-mono font-bold text-slate-900 text-base mt-0.5">6 顆 CPU 插槽 ｜ 192 總核心</div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">全功能開源不鎖功能</span>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4 mb-5">
+                <div class="rounded-xl bg-emerald-50/70 border border-emerald-200 p-4">
+                  <div class="text-xs font-bold text-emerald-800">學生自學 / 社群免費版</div>
+                  <div class="text-2xl sm:text-3xl font-black font-mono text-emerald-700 mt-1">€0 <span class="text-xs font-normal">/ 年</span></div>
+                  <div class="text-[11px] text-emerald-700/80 mt-1">完整功能零閹割，直接練企業架構</div>
+                </div>
+
+                <div class="rounded-xl bg-pve-50 border border-pve-200 p-4">
+                  <div id="calc-tier-label" class="text-xs font-bold text-pve-800">PVE Standard 企業訂閱</div>
+                  <div id="calc-pve-total" class="text-2xl sm:text-3xl font-black font-mono text-pve-600 mt-1">€3,300 <span class="text-xs font-normal">/ 年</span></div>
+                  <div id="calc-tier-sla" class="text-[11px] text-pve-800/80 mt-1">10 張工單/年 · Sev 1 四小時回應 · 2026 年底前納 24/7</div>
+                </div>
+              </div>
+
+              <!-- Visual Core Independence Bar -->
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span class="font-semibold text-slate-700">PVE 計費壓力（僅看 Socket，核心數再高都不加價）</span>
+                    <span id="bar-pve-label" class="font-mono font-bold text-pve-600">6 Sockets</span>
+                  </div>
+                  <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="bar-pve" class="h-full bg-pve-500 rounded-full transition-all duration-300" style="width: 30%;"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span class="font-semibold text-slate-700">傳統「按核心數」商業授權壓力（隨核心數線性暴增）</span>
+                    <span id="bar-core-label" class="font-mono font-bold text-rose-600">192 Cores</span>
+                  </div>
+                  <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="bar-core" class="h-full bg-rose-500 rounded-full transition-all duration-300" style="width: 60%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="calc-tip" class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                <span>原廠自 2026/10/19 起擴展為 24/7 支援（Premium 已上線、Standard 預計年底前全面納入）；台灣授權代理商報價通常含稅並附加 5×8 中文電話支援。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part B: Enterprise Decision Tabs -->
+        <div class="mb-12">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-black text-slate-900">企業實戰場景配對</h3>
+              <p class="text-sm text-slate-600 mt-1">切換不同場景，快速掌握備份防勒索、GPU/AI 加速與多叢集自動化</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button data-scene="backup" class="scene-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white transition">備份防勒索</button>
+              <button data-scene="gpu" class="scene-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">GPU / AI 加速</button>
+              <button data-scene="pdm" class="scene-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">多叢集與自動化</button>
+            </div>
+          </div>
+
+          <div id="scene-content" class="bg-slate-50 rounded-2xl border border-slate-200 p-5 sm:p-6">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Part C: 4 Honest Pitfalls -->
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+              <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h3 class="text-xl font-black text-slate-900">誠實避坑清單：進職場絕不能踩的 4 大前提</h3>
+              <p class="text-xs sm:text-sm text-slate-500">懂優勢更要懂限制，這才是專業工程師的思維</p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
+              <div class="text-xs font-mono font-bold text-rose-600 mb-1">坑 01 · 硬體相容</div>
+              <h4 class="font-bold text-slate-900 mb-2">嚴禁硬體 RAID 搭 ZFS / Ceph</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                磁碟控制器必須刷為 <strong>HBA 直通模式</strong>。若本機一定要用硬體 RAID，請搭配 BBU 電池快取並改用 LVM，千萬別疊加 ZFS 或 Ceph。
+              </p>
+            </div>
+
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/40 p-5">
+              <div class="text-xs font-mono font-bold text-amber-700 mb-1">坑 02 · 網路與節點</div>
+              <h4 class="font-bold text-slate-900 mb-2">10GbE 網路 ＋ 仲裁門檻</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                生產級 HA 與 Ceph 需配置 <strong>10 Gbps 以上冗餘網路</strong>，標準由 3–10 節點起步；僅 2 節點時必須加裝外部 QDevice 仲裁主機。
+              </p>
+            </div>
+
+            <div class="rounded-2xl border border-amber-200 bg-amber-50/40 p-5">
+              <div class="text-xs font-mono font-bold text-amber-700 mb-1">坑 03 · 生態系差異</div>
+              <h4 class="font-bold text-slate-900 mb-2">PDM 1.1 尚非完整版 vCenter</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                PDM 1.1 尚缺跨叢集自動 DRS、單一 VM 權限委派與集中備份；Veeam 暫不支援 LXC；NVIDIA vGPU 未涵蓋 AI Enterprise 純運算設定檔。
+              </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-300 bg-slate-100/70 p-5">
+              <div class="text-xs font-mono font-bold text-slate-700 mb-1">坑 04 · 維運能力</div>
+              <h4 class="font-bold text-slate-900 mb-2">需具備 Debian Linux 除錯力</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Web 介面很直覺，但遇到 Ceph 效能調校、Corosync 延遲或 BGP/EVPN SDN 排錯時，仍考驗扎實的 Linux 網路與儲存功底。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. INTERACTIVE 5-STAGE ROADMAP ==================== -->
+    <section id="roadmap" class="py-16 sm:py-24 border-b border-slate-200/80 bg-slate-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pve-600 bg-pve-100/70 px-3 py-1 rounded-full mb-3">
+              <i data-lucide="compass" class="w-3.5 h-3.5"></i> 系統化學習路徑
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mb-3">5 階段實戰地圖：今天就能用筆電起步！</h2>
+            <p class="text-slate-600 text-base">
+              勾選你已經完成的學習階段，系統會自動記錄你的進度並升級你的工程師徽章。
+            </p>
+          </div>
+
+          <!-- Hardware Myth Buster Pill -->
+          <div class="bg-white rounded-2xl border border-emerald-200 p-4 shadow-sm flex items-start gap-3 max-w-md">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <i data-lucide="laptop" class="w-5 h-5"></i>
+            </div>
+            <div class="text-xs leading-relaxed text-slate-600">
+              <div class="font-bold text-slate-900 text-sm mb-0.5">破除硬體迷思：不需要買伺服器！</div>
+              最低只需支援 <strong>VT-x / AMD-V</strong> 的 64 位元 CPU、<strong>2 GB 以上 RAM</strong>（測 ZFS/Ceph 每 TB 另留 1 GB）與單張網卡；直接用個人電腦開<strong>巢狀虛擬化</strong>就能練！
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Progress Dashboard -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div id="rank-icon" class="w-12 h-12 rounded-2xl bg-pve-100 text-pve-600 flex items-center justify-center font-black text-lg">Lv.0</div>
+            <div>
+              <div class="text-xs text-slate-500">目前學習稱號</div>
+              <div id="rank-title" class="font-black text-lg text-slate-900">虛擬化探險新手</div>
+            </div>
+          </div>
+          <div class="flex-1 max-w-md">
+            <div class="flex justify-between text-xs font-bold mb-1.5">
+              <span class="text-slate-600">實戰進度</span>
+              <span id="roadmap-pct" class="font-mono text-pve-600">0 / 5 階段 (0%)</span>
+            </div>
+            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div id="roadmap-bar" class="h-full bg-pve-500 transition-all duration-300 rounded-full" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Checklist Cards -->
+        <div id="roadmap-list" class="space-y-3 mb-10">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Official Training & Certification Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-pve-600">職涯進修參考</span>
+              <h3 class="text-lg font-black text-slate-900">Proxmox 官方培訓課程與完訓證書（2025/04 新制）</h3>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-pve-50 text-pve-700 border border-pve-200 px-3 py-1.5 rounded-xl">
+              <i data-lucide="award" class="w-4 h-4"></i>
+              完訓 2 個月內新購訂閱享 Training Plus 20% 折扣（上限 13 插槽）
+            </span>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <div class="font-mono text-[11px] font-bold text-pve-600 mb-1">14 小時（2–2.5 天）</div>
+              <h4 class="font-bold text-slate-900 mb-1.5">Deployment &amp; Management</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                原 Installation &amp; Administration。涵蓋單機安裝、網路/SDN、KVM/LXC、V2V/P2V 遷移、PBS 備份、防火牆與故障排除。
+              </p>
+            </div>
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+              <div class="font-mono text-[11px] font-bold text-pve-600 mb-1">14 小時（需先修基礎課）</div>
+              <h4 class="font-bold text-slate-900 mb-1.5">Clustering &amp; Shared Storage</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                原 Advanced。深入 pmxcfs、Corosync、Ceph HCI、ZFS 複寫、HA 故障演練、2 節點 QDevice 與 REST API 自動化。
+              </p>
+            </div>
+            <div class="rounded-xl bg-pve-50/50 border border-pve-200 p-4">
+              <div class="font-mono text-[11px] font-bold text-pve-700 mb-1">28 小時完整套裝（23 單元）</div>
+              <h4 class="font-bold text-slate-900 mb-1.5">Proxmox VE Bundle</h4>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                整合上述兩門課，從單機部署一路到高可用叢集與分散式儲存。完訓核發原廠 Official Certificate of Completion（屬完訓證書而非獨立機考）。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 6. QUICK QUIZ ==================== -->
+    <section id="quiz" class="py-16 sm:py-24 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-pve-600 bg-pve-50 px-3 py-1 rounded-full mb-3">
+            <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> 3 題快速觀念挑戰
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">測測看，你抓到 PVE 的核心精髓了嗎？</h2>
+          <p class="text-sm text-slate-600">點擊選項立即顯示解答與解析，全部答對就代表你已經具備 PVE 架構師的第一步觀念！</p>
+        </div>
+
+        <div id="quiz-container" class="space-y-5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-400 py-10 border-t border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+      <div class="flex items-center gap-2 text-slate-200 font-semibold">
+        <i data-lucide="server" class="w-4 h-4 text-pve-500"></i>
+        <span>Proxmox VE 9.3 互動式學習導覽</span>
+      </div>
+      <div>資料基準：2026 年 11 月 Proxmox VE 9.3 / PBS 4.2 / PDM 1.1 深度解析文件</div>
+    </div>
+  </footer>
+
+  <script>
+    // ==================== DATA ====================
+    const VERSION_DATA = {
+      '9.3': {
+        badge: '最新穩定版 · 2026/11/25 發布',
+        stack: 'Debian 13.8 "Trixie" · Kernel 7.0（可選 7.3）· QEMU 11.1 · LXC 7.0 · ZFS 2.4 · Ceph 20.2（預覽 21.2）',
+        highlights: [
+          '共用 LVM 磁碟區鏈（Volume Chains）快照正式轉為生產就緒',
+          '推出集中式 Datacenter > SAN 視圖與多路徑（iSCSI / FC / NVMe-oF）引導精靈',
+          'Web GUI 內建 HA 節點維護模式、唯一客體識別碼（Unique Guest Identity）與 Simple VRF 路由隔離'
+        ]
+      },
+      '9.2': {
+        badge: '2026/05/21 發布',
+        stack: 'Linux Kernel 7.0 基線 · 穩定納入 Ceph Tentacle 20.2',
+        highlights: [
+          '新增動態負載平衡器（Dynamic Load Balancer / CRS），依資源消耗自動熱遷移',
+          'HA 維護支援 Arm / Disarm，計畫維護結束後自動恢復原節點配置',
+          'SDN 支援原生 WireGuard 加密網狀網路與 BGP/EVPN 路由過濾'
+        ]
+      },
+      '9.1': {
+        badge: '2025/11 發布',
+        stack: 'PVE 9.x 持續迭代',
+        highlights: [
+          '支援直接從遠端登錄檔（Registry）下載或上傳 OCI 映像檔建立 LXC 容器',
+          '共用 LVM 磁碟區鏈支援含 vTPM 狀態（qcow2）之 Windows VM 離線快照',
+          '提供專屬 vCPU 旗標精細控制巢狀虛擬化延伸指令'
+        ]
+      },
+      '9.0': {
+        badge: '2025/08 發布 · 9.x 世代起點',
+        stack: 'Debian 13 · Kernel 6.14 · QEMU 10 · ZFS 2.3.3',
+        highlights: [
+          '率先以技術預覽導入共用 LVM 磁碟區鏈快照技術',
+          '導入 HA 節點與客體親和性／反親和性規則',
+          '加入 SDN Fabrics（OSPF / OpenFabric）與新版行動裝置 Web 介面'
+        ]
+      },
+      '8.x': {
+        badge: '已於 2026/08/31 正式 EOL（停止支援）',
+        stack: 'Debian 12 基底（8.2 引入 ESXi 匯入精靈；8.4 新增 NVIDIA vGPU 熱遷移）',
+        highlights: [
+          '已停止接收 Proxmox 層面的核心、QEMU 與叢集安全更新',
+          '新學與生產環境部署基準應直接鎖定 PVE 9.x 系列'
+        ]
+      }
+    };
+
+    const TIER_SLA = {
+      community: '無官方工單（社群論壇協助）· 限非生產 / 實驗室環境',
+      basic: '3 張工單/年 · Sev 1 一個工作日回應 · 不含 24/7',
+      standard: '10 張工單/年 · Sev 1 四小時回應 · 預計 2026 年底前全面納 24/7',
+      premium: '無限工單 · Sev 1 兩小時回應 · 2026/10/19 起提供 24/7 與遠端 SSH'
+    };
+
+    const SCENE_HTML = {
+      backup: `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border border-pve-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">原廠 Proxmox Backup Server (PBS 4.2)</h4>
+              <span class="text-[11px] font-bold bg-pve-100 text-pve-700 px-2 py-0.5 rounded-full">原生最搭</span>
+            </div>
+            <p class="text-xs text-slate-600 mb-3">開源免費（企業訂閱按備份主機計費：Community €560/年、Basic €1,120/年），新版本 PVE 發布即同步支援。</p>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ <strong>完整支援 KVM 虛擬機與 LXC 容器</strong>，Web 介面直接單檔瀏覽還原</li>
+              <li>✅ 固定 4 MiB 跨庫去重、客戶端 AES-256-GCM 零知識加密、原生 LTO 磁帶</li>
+              <li>🛡️ <strong>防勒索策略</strong>：採「異地 Pull Sync（拉取同步）」搭配寫入/刪除權限分離與受保護快照（活動庫不可直接啟用 S3 Object Lock WORM）</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">第三方 Veeam B&amp;R 13.1（+ PVE 外掛）</h4>
+              <span class="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">異質大企業</span>
+            </div>
+            <p class="text-xs text-slate-600 mb-3">適合同時管理 VMware、Hyper-V、Nutanix 與 PVE 的企業，還可直接將 VMware 備份還原至 PVE 協助遷移。</p>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ 支援 AD、SQL、Exchange、Oracle、PostgreSQL 應用感知與<strong>單一物件還原</strong></li>
+              <li>✅ 支援 Hardened Linux 不可變儲存庫與 S3 Object Lock WORM</li>
+              <li>⚠️ <strong>現有限制</strong>：不支援備份 LXC 容器、VM 範本、直通磁碟與 BTRFS，且新版 PVE 須等外掛跟進驗證（2026/10 驗證至 9.2）</li>
+            </ul>
+          </div>
+        </div>
+      `,
+      gpu: `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">PCIe 整卡直通（Passthrough）</h4>
+              <span class="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">免額外授權費</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ 整張顯卡獨佔配發給單一 VM，消費級與專業顯卡皆適用</li>
+              <li>✅ 硬體需支援 IOMMU（VT-d / AMD-Vi）並獨立成組</li>
+              <li>⚠️ <strong>限制</strong>：無法多台 VM 共享，且<strong>無法執行即時熱遷移（Live Migration）</strong></li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-xl border border-pve-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">NVIDIA vGPU 虛擬化（官方支援平台）</h4>
+              <span class="text-[11px] font-bold bg-pve-100 text-pve-700 px-2 py-0.5 rounded-full">單卡切分＋熱遷移</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ 單張專業卡（如 L40S、RTX PRO 6000 Server Edition）切分共享給多台 VDI，PVE 8.4+ 支援即時熱遷移</li>
+              <li>⚠️ 需購 NVIDIA vGPU 授權，且目前僅官方支援圖形設定檔（vWS/vPC/vApps），<strong>AI Enterprise 純運算未獲官方正式支援</strong></li>
+              <li>💡 <strong>生命週期與替代</strong>：選用 vGPU 19/20/21 LTS（18 已 EOL）；無 GPU 授權路徑可關注 UDS Enterprise 4.0 與 Intel Arc Pro B50 SR-IOV 切分</li>
+            </ul>
+          </div>
+        </div>
+      `,
+      pdm: `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">Proxmox Datacenter Manager（PDM 1.1）</h4>
+              <span class="text-[11px] font-bold bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full">多叢集納管</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ 統一納管多座獨立 PVE 叢集，提供全域健康儀表板、OIDC/LDAP 單一登入（SSO）與圖形化跨叢集 VM 遷移精靈</li>
+              <li>⚠️ <strong>與 vCenter 的落差</strong>：尚無跨叢集自動平衡遷移（DRS）、缺乏單一 VM 細粒度 RBAC 委派、無法直接集中觸發 PBS 備份或分發範本庫</li>
+            </ul>
+          </div>
+          <div class="bg-white rounded-xl border border-emerald-200 p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-slate-900">DevOps 自動化與氣隙隔離維運</h4>
+              <span class="text-[11px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">IaC 生態完備</span>
+            </div>
+            <ul class="text-xs text-slate-700 space-y-1.5">
+              <li>✅ 原生完整 REST API，搭配 <strong>Terraform / OpenTofu（bpg/proxmox）</strong>、<strong>Ansible（community.proxmox）</strong> 與 <strong>Packer</strong> 打造 GitOps 流水線</li>
+              <li>✅ 金融／國防等離線機房可搭配 <strong>Proxmox Offline Mirror 0.8</strong> 實現離線套件同步與授權啟用</li>
+            </ul>
+          </div>
+        </div>
+      `
+    };
+
+    const ROADMAP_STAGES = [
+      {
+        id: 1,
+        title: '階段 1：建置單機環境與管理介面操作',
+        desc: '下載官方 PVE 9.3 ISO 安裝（可在筆電巢狀虛擬化進行），練習設定 Bond 與 VLAN、熟悉 Web GUI 與 qm 命令列指令，完成 Linux 與 Windows KVM 虛擬機建置。',
+        tags: ['PVE 9.3 ISO', 'Web GUI', 'qm CLI', 'KVM 虛擬機']
+      },
+      {
+        id: 2,
+        title: '階段 2：掌握本機儲存、網路拓撲與容器技術',
+        desc: '比較 LVM-thin 與 ZFS 2.4 的快照與複製機制，用 Linux Bridge 與 VLAN 切分內部網路；實作 LXC 系統容器與從 Registry 下載 OCI 映像檔建立應用容器。',
+        tags: ['ZFS vs LVM-thin', 'Linux Bridge/VLAN', 'LXC 7.0', 'OCI 容器']
+      },
+      {
+        id: 3,
+        title: '階段 3：建立資料備份與微隔離防火牆',
+        desc: '部署獨立的 Proxmox Backup Server 4.2，演練區塊增量去重、單檔還原，以及寫入／刪除權限分離的異地 Pull-Sync 防勒索架構；同時啟用三層分散式防火牆。',
+        tags: ['PBS 4.2', '4 MiB 去重', 'Pull Sync 防勒索', '三層防火牆']
+      },
+      {
+        id: 4,
+        title: '階段 4：組建多節點叢集與故障容錯演練',
+        desc: '準備 3 台測試節點（或 2 節點 + QDevice）建立 Corosync 叢集，部署 Ceph HCI 或 9.3 共用 LVM 磁碟區鏈快照，親手模擬斷網／斷電驗證 HA 與動態負載平衡。',
+        tags: ['Corosync / pmxcfs', 'QDevice', 'Ceph HCI / SAN', 'HA 斷電演練']
+      },
+      {
+        id: 5,
+        title: '階段 5：導入 SDN 進階組網與自動化維運',
+        desc: '演練 Simple VRF 隔離、EVPN/BGP 路由過濾或 WireGuard 加密通道；透過 REST API 結合 Terraform、Ansible 與 Packer 打造無人值守基礎設施。',
+        tags: ['SDN / VRF / WireGuard', 'REST API', 'Terraform', 'Ansible / Packer']
+      }
+    ];
+
+    const QUIZ_DATA = [
+      {
+        q: 'Q1. 公司買了附帶「傳統硬體 RAID 控制卡」的伺服器，想拿來在 PVE 上建立 ZFS 或 Ceph 儲存池，最正確的做法是？',
+        options: [
+          '直接把硬體 RAID 設成 RAID 5 再疊上 ZFS，雙重保護最安全',
+          '將磁碟控制器更換或刷寫為 HBA 直通模式；若必須用硬體 RAID 則改用 LVM 搭 BBU',
+          'PVE 9.3 已經解除限制，ZFS 可直接跑在硬體 RAID 上'
+        ],
+        correct: 1,
+        explain: 'Proxmox 官方明確規範 ZFS 與 Ceph 嚴禁搭配傳統硬體 RAID 控制卡！必須刷成 HBA 直通模式讓軟體直接掌管磁碟校驗與寫入排程。'
+      },
+      {
+        q: 'Q2. 學校實驗室預算有限，只買了 2 台主機想組 PVE 高可用（HA）叢集，還需要加什麼才能在其中一台故障時正常維持仲裁（Quorum）？',
+        options: [
+          '加裝一台輕量外部仲裁設備（QDevice）作為決斷節點（Tiebreaker）',
+          '不用加任何東西，2 台主機壞 1 台就會自動接手',
+          '把兩台主機都升級到 Premium 訂閱即可解決'
+        ],
+        correct: 0,
+        explain: '雙節點叢集只要壞掉 1 台就會剩下 50% 票數無法過半形成 Quorum。加掛外部 QDevice（連樹莓派或小主機都能當）提供第 3 票即可安全仲裁！'
+      },
+      {
+        q: 'Q3. 同樣 3 台單插槽伺服器，如果把 CPU 從 16 核心升級到 64 核心，PVE 企業訂閱的年費會發生什麼變化？',
+        options: [
+          '暴增為原本的 4 倍',
+          '完全不變！因為 PVE 只依實體 CPU 插槽（Socket）計費，不限核心數',
+          '會被強制升級成 Premium 方案'
+        ],
+        correct: 1,
+        explain: 'PVE 訂閱只算「主機板上實際佔用的實體 CPU 插槽數量」，不管核心數多高都不加價，且所有技術功能皆開源不鎖功能。'
+      }
+    ];
+
+    // ==================== 1. VERSION TABS ====================
+    const verDetail = document.getElementById('version-detail');
+    function renderVersion(ver) {
+      const d = VERSION_DATA[ver];
+      verDetail.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span class="font-bold text-slate-900">Proxmox VE ${ver}</span>
+          <span class="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full ${ver === '8.x' ? 'bg-rose-100 text-rose-700' : 'bg-pve-100 text-pve-700'}">${d.badge}</span>
+        </div>
+        <div class="text-xs font-mono text-slate-500 mb-2.5">${d.stack}</div>
+        <ul class="space-y-1 text-xs sm:text-sm text-slate-700 list-disc pl-4">
+          ${d.highlights.map(h => `<li>${h}</li>`).join('')}
+        </ul>
+      `;
+    }
+    document.querySelectorAll('.ver-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ver-btn').forEach(b => {
+          const isEol = b.dataset.ver === '8.x';
+          b.className = isEol
+            ? 'ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition'
+            : 'ver-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        });
+        btn.className = btn.dataset.ver === '8.x'
+          ? 'ver-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white transition'
+          : 'ver-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pve-500 text-white transition';
+        renderVersion(btn.dataset.ver);
+      });
+    });
+    renderVersion('9.3');
+
+    // ==================== 2. LAB 1: KVM vs LXC ====================
+    const HOST_MAX_RAM = 16;
+    const BASE_RAM = 1;
+    let guests = [];
+    let guestSeq = 100;
+
+    function renderHost() {
+      const usedRam = guests.reduce((sum, g) => sum + g.ram, BASE_RAM);
+      const pct = Math.min(100, (usedRam / HOST_MAX_RAM) * 100);
+      const bar = document.getElementById('ram-bar');
+      const text = document.getElementById('ram-text');
+      const warn = document.getElementById('ram-warning');
+      const grid = document.getElementById('guest-grid');
+      const counts = document.getElementById('guest-counts');
+
+      text.textContent = `${usedRam.toFixed(2)} / ${HOST_MAX_RAM.toFixed(2)} GB (${Math.round(pct)}%)`;
+      bar.style.width = `${pct}%`;
+      bar.className = `h-full transition-all duration-300 rounded-full ${pct >= 90 ? 'bg-rose-500' : pct >= 70 ? 'bg-amber-500' : 'bg-pve-500'}`;
+
+      const kvmCount = guests.filter(g => g.type === 'kvm').length;
+      const lxcCount = guests.filter(g => g.type === 'lxc').length;
+      counts.textContent = `KVM: ${kvmCount} ｜ LXC: ${lxcCount}`;
+
+      if (guests.length === 0) {
+        grid.innerHTML = `<div class="w-full text-center py-8 text-sm text-slate-400">目前尚無工作負載，點擊上方按鈕開始建立！</div>`;
+        warn.classList.add('hidden');
+        return;
+      }
+
+      grid.innerHTML = guests.map(g => `
+        <button data-id="${g.id}" title="點擊移除" class="guest-pill pop-in inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition hover:opacity-75 ${
+          g.type === 'kvm'
+            ? 'bg-sky-50 text-sky-800 border-sky-200'
+            : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+        }">
+          <span>${g.type === 'kvm' ? '🖥️' : '📦'}</span>
+          <span>${g.name}</span>
+          <span class="font-mono text-[10px] opacity-70">${g.ram}G</span>
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.guest-pill').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = Number(el.dataset.id);
+          guests = guests.filter(g => g.id !== id);
+          warn.classList.add('hidden');
+          renderHost();
+        });
+      });
+    }
+
+    document.getElementById('btn-add-kvm').addEventListener('click', () => {
+      const used = guests.reduce((s, g) => s + g.ram, BASE_RAM);
+      if (used + 2.0 > HOST_MAX_RAM) {
+        document.getElementById('ram-warning').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('ram-warning').classList.add('hidden');
+      guestSeq++;
+      const labels = ['WinServer', 'Ubuntu-VM', 'Debian-VM', 'Rocky-VM'];
+      guests.push({ id: guestSeq, type: 'kvm', name: `${labels[guestSeq % labels.length]}-${guestSeq}`, ram: 2.0 });
+      renderHost();
+    });
+
+    document.getElementById('btn-add-lxc').addEventListener('click', () => {
+      const used = guests.reduce((s, g) => s + g.ram, BASE_RAM);
+      if (used + 0.25 > HOST_MAX_RAM) {
+        document.getElementById('ram-warning').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('ram-warning').classList.add('hidden');
+      guestSeq++;
+      const labels = ['Nginx-CT', 'Redis-OCI', 'Postgres-CT', 'API-OCI'];
+      guests.push({ id: guestSeq, type: 'lxc', name: `${labels[guestSeq % labels.length]}-${guestSeq}`, ram: 0.25 });
+      renderHost();
+    });
+
+    document.getElementById('btn-reset-host').addEventListener('click', () => {
+      guests = [];
+      guestSeq = 100;
+      document.getElementById('ram-warning').classList.add('hidden');
+      renderHost();
+    });
+    renderHost();
+
+    // ==================== 3. LAB 2: HA SIMULATOR ====================
+    let haTopo = '3node'; // '3node' | '2node'
+    let haStorage = 'shared'; // 'shared' | 'local'
+    let node1Dead = false;
+
+    function vmPill(name, status, migrated = false) {
+      if (status === 'dead') {
+        return `<div class="pop-in flex items-center justify-between px-3 py-2 rounded-xl bg-rose-100 border border-rose-300 text-rose-800 text-xs font-bold">
+          <span>💀 ${name}</span>
+          <span class="text-[10px] bg-rose-200 px-1.5 py-0.5 rounded">資料鎖死 / 中斷</span>
+        </div>`;
+      }
+      return `<div class="pop-in flex items-center justify-between px-3 py-2 rounded-xl ${migrated ? 'bg-pve-100 border-pve-300 text-pve-900' : 'bg-white border-slate-200 text-slate-800'} border text-xs font-semibold shadow-sm">
+        <span>🟢 ${name}</span>
+        <span class="text-[10px] font-mono ${migrated ? 'bg-pve-500 text-white' : 'bg-emerald-100 text-emerald-700'} px-1.5 py-0.5 rounded">${migrated ? 'HA 自動接手' : 'RUNNING'}</span>
+      </div>`;
+    }
+
+    function renderHA() {
+      const card1 = document.getElementById('card-node1');
+      const icon1 = document.getElementById('icon-node1');
+      const badge1 = document.getElementById('badge-node1');
+      const vms1 = document.getElementById('vms-node1');
+      const vms2 = document.getElementById('vms-node2');
+      const vms3 = document.getElementById('vms-node3');
+
+      const title3 = document.getElementById('title-node3');
+      const sub3 = document.getElementById('sub-node3');
+      const badge3 = document.getElementById('badge-node3');
+      const card3 = document.getElementById('card-node3');
+
+      const storeBox = document.getElementById('storage-layer');
+      const storeTitle = document.getElementById('storage-title');
+      const storeDesc = document.getElementById('storage-desc');
+      const storeBadge = document.getElementById('storage-badge');
+
+      const qDot = document.getElementById('quorum-dot');
+      const qStatus = document.getElementById('quorum-status');
+      const btnPower = document.getElementById('btn-power-toggle');
+      const pill = document.getElementById('ha-status-pill');
+      const logs = document.getElementById('ha-log-lines');
+
+      // Node 3 vs QDevice display
+      if (haTopo === '3node') {
+        title3.textContent = 'PVE Node 3';
+        sub3.textContent = '10.0.10.13 · 10GbE';
+        badge3.textContent = 'ONLINE';
+        card3.className = 'rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-4 transition-all duration-300';
+      } else {
+        title3.textContent = 'QDevice 外部仲裁主機';
+        sub3.textContent = 'Tiebreaker（不跑 VM，僅投票）';
+        badge3.textContent = 'QUORUM +1';
+        card3.className = 'rounded-2xl border-2 border-sky-200 bg-sky-50/40 p-4 transition-all duration-300';
+      }
+
+      // Storage banner
+      if (haStorage === 'shared') {
+        storeBox.className = 'rounded-2xl border-2 border-pve-200 bg-pve-50/60 p-4 transition-all duration-300';
+        storeTitle.textContent = '分散式 / 共用儲存層：Ceph HCI（Tentacle 20.2）或 PVE 9.3 共用 SAN（LVM 磁碟區鏈快照）';
+        storeDesc.textContent = '所有節點皆可即時存取 VM 磁碟資料，無單點故障。';
+        storeBadge.className = 'self-start sm:self-center text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 shrink-0';
+        storeBadge.textContent = '容錯就緒';
+      } else {
+        storeBox.className = 'rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/50 p-4 transition-all duration-300';
+        storeTitle.textContent = '⚠️ 錯誤示範：僅使用各主機「本機硬碟（Local Disk）」';
+        storeDesc.textContent = 'VM 磁碟檔鎖死在 Node 1 本機硬碟內，其他主機無法讀取！';
+        storeBadge.className = 'self-start sm:self-center text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700 shrink-0';
+        storeBadge.textContent = '高風險：單點故障';
+      }
+
+      if (!node1Dead) {
+        // Normal state
+        card1.className = 'rounded-2xl border-2 border-emerald-200 bg-emerald-50/30 p-4 transition-all duration-300';
+        icon1.className = 'w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center';
+        badge1.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+        badge1.textContent = 'ONLINE';
+
+        vms1.innerHTML = vmPill('Web-Server-01', 'ok') + vmPill('DB-Primary', 'ok');
+        vms2.innerHTML = vmPill('App-API-02', 'ok');
+        vms3.innerHTML = haTopo === '3node'
+          ? vmPill('Auth-Service', 'ok')
+          : `<div class="text-xs text-sky-800 bg-white/80 border border-sky-200 rounded-xl p-3 leading-relaxed">提供第 3 票仲裁（Quorum），確保 2 節點叢集在單機斷電時仍能過半決議啟動 HA！</div>`;
+
+        qDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        qStatus.className = 'text-emerald-400 font-bold';
+        qStatus.textContent = 'Quorum 仲裁狀態：正常（3 / 3 票）';
+
+        btnPower.className = 'w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 active:scale-[0.98]';
+        btnPower.innerHTML = `<i data-lucide="power-off" class="w-4 h-4"></i><span>模擬拔除 Node 1 電源</span>`;
+
+        pill.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+        pill.textContent = '所有服務正常運行';
+        logs.innerHTML = `<div><span class="text-emerald-400">[OK]</span> 叢集健康運作中。點擊「模擬拔除 Node 1 電源」觀察系統反應。</div>`;
+      } else {
+        // Node 1 DEAD!
+        card1.className = 'rounded-2xl border-2 border-rose-400 bg-rose-50/70 p-4 transition-all duration-300';
+        icon1.className = 'w-8 h-8 rounded-lg bg-rose-200 text-rose-700 flex items-center justify-center';
+        badge1.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-600 text-white';
+        badge1.textContent = 'POWER OFF';
+
+        qDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        qStatus.className = 'text-amber-300 font-bold';
+        qStatus.textContent = 'Quorum 仲裁狀態：維持過半（2 / 3 票）';
+
+        btnPower.className = 'w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 active:scale-[0.98]';
+        btnPower.innerHTML = `<i data-lucide="plug-zap" class="w-4 h-4"></i><span>恢復 Node 1 電源</span>`;
+
+        if (haStorage === 'shared') {
+          vms1.innerHTML = `<div class="text-xs text-rose-700 bg-rose-100/80 border border-rose-200 rounded-xl p-3 text-center font-semibold">⚡ 主機斷電離線<br/>原運行 VM 已由 HA 接管</div>`;
+          if (haTopo === '3node') {
+            vms2.innerHTML = vmPill('App-API-02', 'ok') + vmPill('Web-Server-01', 'ok', true);
+            vms3.innerHTML = vmPill('Auth-Service', 'ok') + vmPill('DB-Primary', 'ok', true);
+          } else {
+            vms2.innerHTML = vmPill('App-API-02', 'ok') + vmPill('Web-Server-01', 'ok', true) + vmPill('DB-Primary', 'ok', true);
+            vms3.innerHTML = `<div class="text-xs text-sky-800 bg-white/80 border border-sky-200 rounded-xl p-3 leading-relaxed">✅ QDevice 投下關鍵第 2 票（2/3 過半），成功授權 Node 2 接手全部服務！</div>`;
+          }
+          pill.className = 'px-2 py-0.5 rounded bg-pve-500/30 text-pve-200';
+          pill.textContent = 'HA 自動容錯接管成功';
+          logs.innerHTML = `
+            <div><span class="text-rose-400">[ALERT]</span> Corosync 偵測到 Node 1 心跳遺失！</div>
+            <div><span class="text-amber-300">[QUORUM]</span> 剩餘票數 2/3 過半，叢集維持有效仲裁。</div>
+            <div><span class="text-emerald-400">[HA-RECOVERY]</span> 透過共用儲存（Ceph / SAN）自動於健康節點重啟 Web-Server-01 與 DB-Primary，唯一客體識別碼維持不變！</div>
+          `;
+        } else {
+          // Local disk failure!
+          vms1.innerHTML = vmPill('Web-Server-01', 'dead') + vmPill('DB-Primary', 'dead');
+          vms2.innerHTML = vmPill('App-API-02', 'ok');
+          vms3.innerHTML = haTopo === '3node'
+            ? vmPill('Auth-Service', 'ok')
+            : `<div class="text-xs text-sky-800 bg-white/80 border border-sky-200 rounded-xl p-3 leading-relaxed">即使 QDevice 維持仲裁，Node 2 也讀不到 Node 1 的本機硬碟！</div>`;
+          pill.className = 'px-2 py-0.5 rounded bg-rose-500/30 text-rose-200';
+          pill.textContent = 'HA 失敗：服務中斷！';
+          logs.innerHTML = `
+            <div><span class="text-rose-400">[ALERT]</span> Node 1 斷電離線！</div>
+            <div><span class="text-rose-400">[ERROR]</span> HA 嘗試接手失敗：Web-Server-01 與 DB-Primary 的磁碟檔位於 Node 1 本機硬碟，資料已鎖死！</div>
+            <div><span class="text-amber-300">[教訓]</span> 實務經驗估計約 80% 的 Proxmox HA 失敗來自儲存設計不當。請切換成「✅ Ceph HCI / SAN」再試一次！</div>
+          `;
+        }
+      }
+      lucide.createIcons();
+    }
+
+    document.getElementById('topo-3node').addEventListener('click', () => {
+      haTopo = '3node';
+      document.getElementById('topo-3node').className = 'topo-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-pve-500 bg-pve-50 text-pve-700 transition';
+      document.getElementById('topo-2node').className = 'topo-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+      renderHA();
+    });
+    document.getElementById('topo-2node').addEventListener('click', () => {
+      haTopo = '2node';
+      document.getElementById('topo-2node').className = 'topo-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-pve-500 bg-pve-50 text-pve-700 transition';
+      document.getElementById('topo-3node').className = 'topo-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+      renderHA();
+    });
+    document.getElementById('store-shared').addEventListener('click', () => {
+      haStorage = 'shared';
+      document.getElementById('store-shared').className = 'store-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition';
+      document.getElementById('store-local').className = 'store-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+      renderHA();
+    });
+    document.getElementById('store-local').addEventListener('click', () => {
+      haStorage = 'local';
+      document.getElementById('store-local').className = 'store-btn px-3 py-2 rounded-xl text-xs font-bold border-2 border-rose-500 bg-rose-50 text-rose-700 transition';
+      document.getElementById('store-shared').className = 'store-btn px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+      renderHA();
+    });
+    document.getElementById('btn-power-toggle').addEventListener('click', () => {
+      node1Dead = !node1Dead;
+      renderHA();
+    });
+    renderHA();
+
+    // ==================== 4. LAB 3: COST CALCULATOR ====================
+    let selectedTier = 'standard';
+    let tierPrice = 550;
+
+    function updateCalc() {
+      const hosts = Number(document.getElementById('sl-hosts').value);
+      const sockets = Number(document.getElementById('sl-sockets').value);
+      const cores = Number(document.getElementById('sl-cores').value);
+
+      const totalSockets = hosts * sockets;
+      const totalCores = totalSockets * cores;
+      const annualCost = totalSockets * tierPrice;
+
+      document.getElementById('val-hosts').textContent = `${hosts} 台`;
+      document.getElementById('val-sockets').textContent = `${sockets} 顆 / 台`;
+      document.getElementById('val-cores').textContent = `${cores} 核心 / 顆`;
+
+      document.getElementById('calc-summary').textContent = `${totalSockets} 顆 CPU 插槽 ｜ ${totalCores} 總核心`;
+      const tierCap = selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1);
+      document.getElementById('calc-tier-label').textContent = `PVE ${tierCap} 企業訂閱`;
+      document.getElementById('calc-pve-total').innerHTML = `€${annualCost.toLocaleString()} <span class="text-xs font-normal">/ 年</span>`;
+      document.getElementById('calc-tier-sla').textContent = TIER_SLA[selectedTier];
+
+      document.getElementById('bar-pve-label').textContent = `${totalSockets} Sockets`;
+      document.getElementById('bar-core-label').textContent = `${totalCores} Cores`;
+      document.getElementById('bar-pve').style.width = `${Math.min(100, (totalSockets / 20) * 100)}%`;
+      document.getElementById('bar-core').style.width = `${Math.min(100, (totalCores / 640) * 100)}%`;
+    }
+
+    ['sl-hosts', 'sl-sockets', 'sl-cores'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateCalc);
+    });
+    document.querySelectorAll('.tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedTier = btn.dataset.tier;
+        tierPrice = Number(btn.dataset.price);
+        document.querySelectorAll('.tier-btn').forEach(b => {
+          b.className = 'tier-btn p-2.5 rounded-xl border border-slate-200 bg-white text-left hover:border-pve-300 transition';
+        });
+        btn.className = 'tier-btn p-2.5 rounded-xl border-2 border-pve-500 bg-pve-50 text-left transition';
+        updateCalc();
+      });
+    });
+    updateCalc();
+
+    // Enterprise Scene Tabs
+    const sceneContent = document.getElementById('scene-content');
+    function renderScene(key) {
+      sceneContent.innerHTML = SCENE_HTML[key];
+    }
+    document.querySelectorAll('.scene-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.scene-btn').forEach(b => {
+          b.className = 'scene-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        });
+        btn.className = 'scene-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white transition';
+        renderScene(btn.dataset.scene);
+      });
+    });
+    renderScene('backup');
+
+    // ==================== 5. ROADMAP CHECKLIST ====================
+    const RANKS = [
+      '虛擬化探險新手',
+      'PVE 單機玩家',
+      '儲存與容器達人',
+      '資安備份守門員',
+      '高可用叢集建築師',
+      '企業級自動化大師 🏆'
+    ];
+    let completedStages = JSON.parse(localStorage.getItem('pve_roadmap_done') || '[]');
+
+    function renderRoadmap() {
+      const list = document.getElementById('roadmap-list');
+      list.innerHTML = ROADMAP_STAGES.map(s => {
+        const done = completedStages.includes(s.id);
+        return `
+          <label class="flex items-start gap-4 p-5 rounded-2xl border cursor-pointer transition shadow-sm ${
+            done ? 'bg-emerald-50/60 border-emerald-300' : 'bg-white border-slate-200 hover:border-pve-300'
+          }">
+            <input type="checkbox" data-stage="${s.id}" ${done ? 'checked' : ''} class="stage-chk mt-1 w-5 h-5 rounded accent-pve-500 cursor-pointer shrink-0" />
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                <h3 class="font-bold text-base ${done ? 'text-emerald-900 line-through decoration-emerald-400' : 'text-slate-900'}">${s.title}</h3>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${done ? '已完成' : '待挑戰'}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-2.5">${s.desc}</p>
+              <div class="flex flex-wrap gap-1.5">
+                ${s.tags.map(t => `<span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">${t}</span>`).join('')}
+              </div>
+            </div>
+          </label>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.stage-chk').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const id = Number(chk.dataset.stage);
+          if (chk.checked) {
+            if (!completedStages.includes(id)) completedStages.push(id);
+          } else {
+            completedStages = completedStages.filter(x => x !== id);
+          }
+          localStorage.setItem('pve_roadmap_done', JSON.stringify(completedStages));
+          renderRoadmap();
+        });
+      });
+
+      const count = completedStages.length;
+      const pct = Math.round((count / ROADMAP_STAGES.length) * 100);
+      document.getElementById('rank-icon').textContent = `Lv.${count}`;
+      document.getElementById('rank-title').textContent = RANKS[count];
+      document.getElementById('roadmap-pct').textContent = `${count} / 5 階段 (${pct}%)`;
+      document.getElementById('roadmap-bar').style.width = `${pct}%`;
+    }
+    renderRoadmap();
+
+    // ==================== 6. INTERACTIVE QUIZ ====================
+    const quizContainer = document.getElementById('quiz-container');
+    quizContainer.innerHTML = QUIZ_DATA.map((item, qIdx) => `
+      <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6" data-q="${qIdx}">
+        <h3 class="font-bold text-slate-900 text-sm sm:text-base mb-4">${item.q}</h3>
+        <div class="space-y-2">
+          ${item.options.map((opt, oIdx) => `
+            <button data-q="${qIdx}" data-o="${oIdx}" class="quiz-opt w-full text-left px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-pve-400 text-xs sm:text-sm text-slate-700 font-medium transition">
+              ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div id="quiz-fb-${qIdx}" class="hidden mt-3 p-3.5 rounded-xl text-xs sm:text-sm leading-relaxed"></div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.quiz-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qIdx = Number(btn.dataset.q);
+        const oIdx = Number(btn.dataset.o);
+        const item = QUIZ_DATA[qIdx];
+        const isCorrect = oIdx === item.correct;
+        const fb = document.getElementById(`quiz-fb-${qIdx}`);
+
+        document.querySelectorAll(`.quiz-opt[data-q="${qIdx}"]`).forEach((b, idx) => {
+          b.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-900', 'border-rose-400', 'bg-rose-50', 'text-rose-900');
+          if (idx === item.correct) {
+            b.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+          } else if (idx === oIdx && !isCorrect) {
+            b.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-900');
+          }
+        });
+
+        fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-200', 'bg-rose-50', 'text-rose-900', 'border-rose-200');
+        fb.classList.add('border', ...(isCorrect ? ['bg-emerald-50', 'text-emerald-900', 'border-emerald-200'] : ['bg-rose-50', 'text-rose-900', 'border-rose-200']));
+        fb.innerHTML = `<strong>${isCorrect ? '✅ 答對了！' : '❌ 再想一下喔！'}</strong> ${item.explain}`;
+      });
+    });
+
+    // ==================== SCROLL PROGRESS & ICONS ====================
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      document.getElementById('scroll-progress').style.width = `${Math.min(100, Math.max(0, pct))}%`;
+    });
+    lucide.createIcons();
+  </script>
+</body>
+</html>

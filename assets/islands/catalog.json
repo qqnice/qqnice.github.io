@@ -1159,5 +1159,17 @@
     "kind": "download",
     "format": "ZIP",
     "order": 99
+  },
+  {
+    "id": "106",
+    "island": "linux",
+    "topic": "tools",
+    "title": "Proxmox VE 9.3 互動式學習導覽",
+    "description": "KVM vs LXC 雙軌模擬器、HA 斷電故障演練、Socket vs Core 授權試算機與 5 階段實戰學習地圖。",
+    "path": "linux/pve-guide/index.html",
+    "order": 1,
+    "featuredOrder": 1,
+    "featuredTitle": "Proxmox VE 9.3 互動式學習導覽",
+    "featuredDescription": "用筆電練出企業級雲端機房：雙軌虛擬化、HA 斷電模擬與授權試算。"
   }
 ]
